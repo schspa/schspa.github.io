@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Schspa&#39;s Blogs</title>
+    <link>https://schspa.github.io/</link>
+    <description>Recent content on Schspa&#39;s Blogs</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <lastBuildDate>Sun, 22 Sep 2019 18:43:35 +0800</lastBuildDate>
+    
+	<atom:link href="https://schspa.github.io/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Auto Code Complete with Linux Kernel</title>
+      <link>https://schspa.github.io/post/linux-kernel-complete/</link>
+      <pubDate>Sun, 22 Sep 2019 18:43:35 +0800</pubDate>
+      
+      <guid>https://schspa.github.io/post/linux-kernel-complete/</guid>
+      <description>lsp To use lsp mode, we can use a file called compile_commands.json to tell lsp backends about file compile information.
+Generate compile_commands.json Either of following methods can generate compile_commands.json, Select as you like.
+kernel script from scripts directory # after build kernel curl -fsSL https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/plain/scripts/gen_compile_commands.py\?h\=v5.3 | python  make bear  install bear (Build EAR)  https://github.com/rizsotto/Bear  compile you project  use bear to wrapper make command    bear make -C kernel/msm-4.</description>
+    </item>
+    
+  </channel>
+</rss>

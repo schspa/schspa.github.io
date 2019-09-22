@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+<meta charset="utf-8">
+<meta name="description" content="">
+<meta name="author" content="[Schspa]">
+<meta name="generator" content="Hugo 0.58.3" />
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="/css/style.css" type="text/css">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Code+Pro:400,700" type="text/css">
+<link rel="alternate" href="/index.xml" type="application/rss+xml" title="Schspa&#39;s Blogs">
+<title>Auto Code Complete with Linux Kernel - Schspa&#39;s Blogs</title>
+</head>
+<body>
+
+<header>
+  <div class="container clearfix">
+    <a class="path" href="https://schspa.github.io/">[Schspa&#39;s Blogs]</a>
+    <span class="caret"># _</span>
+    <div class="right">
+      
+    </div>
+  </div>
+</header>
+
+<div class="container">
+
+
+<main role="main" class="article">
+  
+<article class="single" itemscope itemtype="http://schema.org/BlogPosting">
+  <div class="meta">
+
+    <span class="key">published on</span>
+    <span class="val"><time itemprop="datePublished" datetime="2019-09-22">September 22, 2019</time></span>
+
+
+
+  </div>
+  <h1 class="headline" itemprop="headline">Auto Code Complete with Linux Kernel</h1>
+  <section class="body" itemprop="articleBody">
+    
+
+<h2 id="lsp">lsp</h2>
+
+<p>To use lsp mode, we can use a file called compile_commands.json to tell lsp backends about file compile information.</p>
+
+<h3 id="generate-compile-commands-dot-json">Generate compile_commands.json</h3>
+
+<p>Either of following methods can generate compile_commands.json, Select as you like.</p>
+
+<h4 id="kernel-script-from-scripts-directory">kernel script from scripts directory</h4>
+
+<pre><code class="language-bash"># after build kernel
+curl -fsSL https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/plain/scripts/gen_compile_commands.py\?h\=v5.3 | python
+</code></pre>
+
+<h4 id="make-bear">make bear</h4>
+
+<ol>
+<li>install bear (Build EAR)
+
+<ul>
+<li><a href="https://github.com/rizsotto/Bear">https://github.com/rizsotto/Bear</a></li>
+</ul></li>
+<li>compile you project
+
+<ul>
+<li>use bear to wrapper make command</li>
+</ul></li>
+</ol>
+
+<!--listend-->
+
+<pre><code class="language-sh">bear make -C kernel/msm-4.9 O=../../out/target/product/grus/obj/kernel/msm-4.9 DTC_EXT=dtc  ARCH=arm64 CROSS_COMPILE=aarch64-linux-android- KCFLAGS=-mno-android grus_debug_defconfig
+sed 's/..\/..\/..\/..\/..\/..\/..\/kernel\/msm-4.9\///g' compile_commands.json &gt; kernel/msm-4.9/compile_commands.json
+</code></pre>
+
+<h3 id="auto-complete-setup-for-emacs">auto complete setup for Emacs</h3>
+
+<h4 id="install-ccls-from">install ccls from</h4>
+
+<ul>
+<li><a href="https://github.com/MaskRay/ccls/wiki/Build">https://github.com/MaskRay/ccls/wiki/Build</a></li>
+</ul>
+
+<h4 id="setup-your-emacs">setup your emacs</h4>
+
+<pre><code class="language-lisp">(use-package lsp-mode
+  :ensure t
+  :commands lsp
+  :init
+  (setq lsp-auto-guess-root t)    ; 我習慣自動選project root
+  ;; (setq lsp-prefer-flymake t)  ; 預設t。flymake替代flycheck
+  :config
+  (require 'lsp-clients)          ; ocaml,css,python,bash,...
+  :hook ((c-mode c++-mode objc-mode) . lsp)
+  )
+
+(use-package ccls
+  :ensure t
+  :hook ((c-mode c++-mode objc-mode) . (lambda () (require 'ccls) (lsp))))
+
+(use-package company-lsp
+  :ensure t
+  :config
+  ;; 设置 company-lsp 为后端
+  (push 'company-lsp company-backends))
+
+</code></pre>
+
+<h2 id="enjoy-codeing-with-emacs">enjoy codeing with emacs</h2>
+
+  </section>
+</article>
+
+</main>
+
+</div>
+
+<footer>
+  <div class="container">
+    <span class="copyright">&copy; 2019 Schspa&#39;s Blogs - <a rel="license" href="http://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a></span>
+  </div>
+</footer>
+
+</body>
+</html>
+
