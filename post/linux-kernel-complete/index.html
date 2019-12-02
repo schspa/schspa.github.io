@@ -23,7 +23,7 @@
 
 
 
-<meta name="generator" content="Hugo 0.58.3 with theme even" />
+<meta name="generator" content="Hugo 0.59.1 with theme even" />
 
 
 <link rel="canonical" href="https://schspa.github.io/post/linux-kernel-complete/" />
@@ -42,14 +42,14 @@
 <meta property="og:description" content="lsp To use lsp mode, we can use a file called compile_commands.json to tell lsp backends about file compile information. Generate compile_commands.json Either of following methods can generate compile_commands.json, Select as you like. kernel script from scripts directory 1 2 # after build kernel curl -fsSL https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/plain/scripts/gen_compile_commands.py\?h\=v5.3 | python make bear install bear (Build EAR) https://github.com/rizsotto/Bear compile you project use bear to wrapper make command 1 2 bear make -C" />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="https://schspa.github.io/post/linux-kernel-complete/" />
-<meta property="article:published_time" content="2019-09-22T18:43:35+08:00" />
-<meta property="article:modified_time" content="2019-09-22T18:43:35+08:00" />
+<meta property="article:published_time" content="2019-12-02T20:09:32+08:00" />
+<meta property="article:modified_time" content="2019-12-02T20:09:32+08:00" />
 <meta itemprop="name" content="Auto Code Complete with Linux Kernel">
 <meta itemprop="description" content="lsp To use lsp mode, we can use a file called compile_commands.json to tell lsp backends about file compile information. Generate compile_commands.json Either of following methods can generate compile_commands.json, Select as you like. kernel script from scripts directory 1 2 # after build kernel curl -fsSL https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/plain/scripts/gen_compile_commands.py\?h\=v5.3 | python make bear install bear (Build EAR) https://github.com/rizsotto/Bear compile you project use bear to wrapper make command 1 2 bear make -C">
 
 
-<meta itemprop="dateModified" content="2019-09-22T18:43:35&#43;08:00" />
-<meta itemprop="wordCount" content="210">
+<meta itemprop="dateModified" content="2019-12-02T20:09:32&#43;08:00" />
+<meta itemprop="wordCount" content="356">
 
 
 
@@ -122,7 +122,7 @@
       <h1 class="post-title">Auto Code Complete with Linux Kernel</h1>
 
       <div class="post-meta">
-        <span class="post-time"> 2019-09-22 </span>
+        <span class="post-time"> 2019-12-02 </span>
         
         
       </div>
@@ -146,6 +146,7 @@
 <ul>
 <li><a href="#install-ccls-from">install ccls from</a></li>
 <li><a href="#setup-your-emacs">setup your emacs</a></li>
+<li><a href="#dir-locals-setting">dir-locals setting</a></li>
 </ul></li>
 </ul></li>
 <li><a href="#enjoy-codeing-with-emacs">enjoy codeing with emacs</a></li>
@@ -211,6 +212,14 @@ sed <span class="s1">&#39;s/..\/..\/..\/..\/..\/..\/..\/kernel\/msm-4.9\///g&#39
 </ul>
 
 <h4 id="setup-your-emacs">setup your emacs</h4>
+
+<ul>
+<li>default c-mode-hook will execute before local-variables loaded.</li>
+<li>In the fellowing settings, we use hack-local-variables-hook to execute lsp-mode setting after local variables setting.</li>
+<li>For some project, like Linux Kernel, we must exclude some args unrecognizable by clang.</li>
+</ul>
+
+<!--listend-->
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
 <pre class="chroma"><code class="language-lisp" data-lang="lisp"><span class="lnt"> 1
@@ -233,28 +242,107 @@ sed <span class="s1">&#39;s/..\/..\/..\/..\/..\/..\/..\/kernel\/msm-4.9\///g&#39
 </span><span class="lnt">18
 </span><span class="lnt">19
 </span><span class="lnt">20
+</span><span class="lnt">21
+</span><span class="lnt">22
+</span><span class="lnt">23
+</span><span class="lnt">24
+</span><span class="lnt">25
+</span><span class="lnt">26
+</span><span class="lnt">27
+</span><span class="lnt">28
+</span><span class="lnt">29
+</span><span class="lnt">30
+</span><span class="lnt">31
+</span><span class="lnt">32
+</span><span class="lnt">33
+</span><span class="lnt">34
+</span><span class="lnt">35
+</span><span class="lnt">36
+</span><span class="lnt">37
+</span><span class="lnt">38
+</span><span class="lnt">39
+</span><span class="lnt">40
+</span><span class="lnt">41
+</span><span class="lnt">42
+</span><span class="lnt">43
+</span><span class="lnt">44
+</span><span class="lnt">45
+</span><span class="lnt">46
 </span></code></pre></td>
 <td class="lntd">
-<pre class="chroma"><code class="language-lisp" data-lang="lisp"><span class="p">(</span><span class="nf">use-package</span> <span class="nv">lsp-mode</span>
+<pre class="chroma"><code class="language-lisp" data-lang="lisp"><span class="p">(</span><span class="nf">use-package</span> <span class="nv">ccls</span>
   <span class="ss">:ensure</span> <span class="no">t</span>
+  <span class="ss">:config</span>
+  <span class="c1">;; https://github.com/maskray/ccls/blob/master/src/config.h</span>
+  <span class="p">(</span><span class="k">setq</span>
+   <span class="nv">ccls-initialization-options</span>
+   <span class="o">`</span><span class="p">(</span><span class="ss">:clang</span>
+	 <span class="p">(</span><span class="ss">:excludeArgs</span>
+	  <span class="c1">;; Linux&#39;s gcc options. See ccls/wiki</span>
+	  <span class="nv">[</span><span class="s">&#34;--param=allow-store-data-races=0&#34;</span> <span class="s">&#34;-W*&#34;</span> <span class="s">&#34;-f*&#34;</span> <span class="s">&#34;-m*&#34;</span><span class="nv">]</span>
+	  <span class="ss">:extraArgs</span> <span class="nv">[</span><span class="s">&#34;--gcc-toolchain=/usr&#34;</span><span class="nv">]</span><span class="p">)</span>
+	 <span class="ss">:completion</span>
+	 <span class="p">(</span><span class="ss">:include</span>
+	  <span class="p">(</span><span class="ss">:blacklist</span>
+	   <span class="nv">[</span><span class="s">&#34;^/usr/(local/)?include/c\\+\\+/[0-9\\.]+/(bits|tr1|tr2|profile|ext|debug)/&#34;</span>
+	   <span class="s">&#34;^/usr/(local/)?include/c\\+\\+/v1/&#34;</span>
+	   <span class="nv">]</span><span class="p">))))</span>
+  <span class="p">)</span>
+
+<span class="p">(</span><span class="nf">use-package</span> <span class="nv">lsp-mode</span>
   <span class="ss">:commands</span> <span class="nv">lsp</span>
   <span class="ss">:init</span>
   <span class="p">(</span><span class="k">setq</span> <span class="nv">lsp-auto-guess-root</span> <span class="no">t</span><span class="p">)</span>    <span class="c1">; 我習慣自動選project root</span>
+  <span class="p">(</span><span class="k">setq</span> <span class="nv">lsp-enable-indentation</span> <span class="no">nil</span><span class="p">)</span>
+  <span class="p">(</span><span class="k">setq</span> <span class="nv">lsp-enable-file-watchers</span> <span class="no">nil</span><span class="p">)</span>
   <span class="c1">;; (setq lsp-prefer-flymake t)  ; 預設t。flymake替代flycheck</span>
   <span class="ss">:config</span>
   <span class="p">(</span><span class="nf">require</span> <span class="ss">&#39;lsp-clients</span><span class="p">)</span>          <span class="c1">; ocaml,css,python,bash,...</span>
-  <span class="ss">:hook</span> <span class="p">((</span><span class="nv">c-mode</span> <span class="nv">c++-mode</span> <span class="nv">objc-mode</span><span class="p">)</span> <span class="o">.</span> <span class="nv">lsp</span><span class="p">)</span>
-  <span class="p">)</span>
-
-<span class="p">(</span><span class="nf">use-package</span> <span class="nv">ccls</span>
+  <span class="ss">:hook</span>
+  <span class="p">(</span><span class="nv">hack-local-variables</span> <span class="o">.</span> <span class="p">(</span><span class="nb">lambda</span> <span class="p">()</span>
+							<span class="p">(</span><span class="nb">cond</span> <span class="p">((</span><span class="nv">derived-mode-p</span> <span class="ss">&#39;c-mode</span> <span class="ss">&#39;c++-mode</span> <span class="ss">&#39;objc-mode</span><span class="p">)</span>
+								   <span class="p">(</span><span class="k">progn</span>
+									 <span class="p">(</span><span class="nf">require</span> <span class="ss">&#39;ccls</span><span class="p">)</span>
+									 <span class="p">(</span><span class="nv">lsp</span><span class="p">)))</span>
+								  <span class="p">))))</span>
+<span class="p">(</span><span class="nf">use-package</span> <span class="nv">lsp-ui</span>
+  <span class="ss">:commands</span> <span class="nv">lsp-ui-mode</span>
   <span class="ss">:ensure</span> <span class="no">t</span>
-  <span class="ss">:hook</span> <span class="p">((</span><span class="nv">c-mode</span> <span class="nv">c++-mode</span> <span class="nv">objc-mode</span><span class="p">)</span> <span class="o">.</span> <span class="p">(</span><span class="nb">lambda</span> <span class="p">()</span> <span class="p">(</span><span class="nf">require</span> <span class="ss">&#39;ccls</span><span class="p">)</span> <span class="p">(</span><span class="nv">lsp</span><span class="p">))))</span>
+  <span class="ss">:config</span>
+  <span class="ss">:hook</span> <span class="p">(</span><span class="nv">lsp-mode</span> <span class="o">.</span> <span class="nv">lsp-ui-mode</span><span class="p">))</span>
 
 <span class="p">(</span><span class="nf">use-package</span> <span class="nv">company-lsp</span>
   <span class="ss">:ensure</span> <span class="no">t</span>
   <span class="ss">:config</span>
   <span class="c1">;; 设置 company-lsp 为后端</span>
   <span class="p">(</span><span class="nb">push</span> <span class="ss">&#39;company-lsp</span> <span class="nv">company-backends</span><span class="p">))</span></code></pre></td></tr></table>
+</div>
+</div>
+<h4 id="dir-locals-setting">dir-locals setting</h4>
+<div class="highlight"><div class="chroma">
+<table class="lntable"><tr><td class="lntd">
+<pre class="chroma"><code class="language-lisp" data-lang="lisp"><span class="lnt"> 1
+</span><span class="lnt"> 2
+</span><span class="lnt"> 3
+</span><span class="lnt"> 4
+</span><span class="lnt"> 5
+</span><span class="lnt"> 6
+</span><span class="lnt"> 7
+</span><span class="lnt"> 8
+</span><span class="lnt"> 9
+</span><span class="lnt">10
+</span></code></pre></td>
+<td class="lntd">
+<pre class="chroma"><code class="language-lisp" data-lang="lisp"><span class="c1">;;; Directory Local Variables</span>
+<span class="c1">;;; For more information see (info &#34;(emacs) Directory Variables&#34;)</span>
+<span class="p">((</span><span class="no">nil</span> <span class="o">.</span>
+	  <span class="p">((</span><span class="nv">ccls-initialization-options</span> <span class="o">.</span> <span class="p">(</span><span class="ss">:clang</span>
+									   <span class="p">(</span><span class="ss">:excludeArgs</span>
+										<span class="c1">;; Linux&#39;s gcc options. See ccls/wiki</span>
+										<span class="nv">[</span><span class="s">&#34;--param=allow-store-data-races=0&#34;</span> <span class="s">&#34;-W*&#34;</span> <span class="s">&#34;-f*&#34;</span> <span class="s">&#34;-m*&#34;</span><span class="nv">]</span><span class="p">)</span>
+									   <span class="ss">:compilationDatabaseDirectory</span> <span class="s">&#34;../out/target/product/qemu/KERNEL_OBJ&#34;</span>
+									   <span class="p">)))</span>
+	  <span class="p">))</span></code></pre></td></tr></table>
 </div>
 </div>
 <h2 id="enjoy-codeing-with-emacs">enjoy codeing with emacs</h2>
@@ -269,7 +357,7 @@ sed <span class="s1">&#39;s/..\/..\/..\/..\/..\/..\/..\/kernel\/msm-4.9\///g&#39
   <p class="copyright-item">
     <span class="item-title">LastMod</span>
     <span class="item-content">
-        2019-09-22
+        2019-12-02
         
     </span>
   </p>
