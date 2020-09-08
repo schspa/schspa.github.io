@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<!-- 2020-09-09 三 01:54 -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>qemu使用踩坑</title>
+<meta name="generator" content="Org mode">
+<meta name="author" content="schspa">
+<meta name="description" content="qemu.org"
+>
+<link rel="shortcut icon" href="/images/rose-red.png"
+type="image/x-icon" /><link rel="stylesheet" href="/css/animate.min.css" /><link rel="stylesheet" href="/css/all.min.css" /><link rel="stylesheet" type="text/css" href="/css/style.css" /><script src="/js/jquery.min.js"></script><script src="/js/darkreader.js"></script><script src="/user.config.js"></script><script src="/js/main.js"></script>
+</head>
+<body>
+<div id="content">
+<h1 class="title">qemu使用踩坑</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#org4957dde">编译qemu</a></li>
+<li><a href="#org62f52a6">运行</a></li>
+<li><a href="#org7bf71c9">文件共享</a>
+<ul>
+<li><a href="#org4482502">9P over virtiofs</a></li>
+</ul>
+</li>
+<li><a href="#orga7171cd">网络设置</a>
+<ul>
+<li><a href="#org34701fd">linux Host</a></li>
+<li><a href="#orgd143889">TODO Macos Host</a></li>
+<li><a href="#org332ebf1">qemu command line</a></li>
+</ul>
+</li>
+<li><a href="#org0a9f43c">参考文档</a></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org4957dde" class="outline-2">
+<h2 id="org4957dde">编译qemu</h2>
+<div class="outline-text-2" id="text-org4957dde">
+<div class="org-src-container">
+<pre class="src src-bash">./configure --target-list=aarch64-softmmu --enable-virtfs
+make -j8
+</pre>
+</div>
+<p>
+<b>Mac OS 不支持9Pfs</b><br>
+</p>
+</div>
+</div>
+
+<div id="outline-container-org62f52a6" class="outline-2">
+<h2 id="org62f52a6">运行</h2>
+<div class="outline-text-2" id="text-org62f52a6">
+<div class="org-src-container">
+<pre class="src src-bash">qemu-system-aarch64 -machine virt -cpu cortex-a57 -machine <span style="color: #dcaeea;">type</span>=virt -nographic -smp 4 -m 2048 --append <span style="color: #98be65;">"console=ttyAMA0"</span> --kernel ~/work/src/linux.git/arch/arm64/boot/Image --initrd ~/work/buildroot-2018.05/output/images/rootfs.cpio.bz2
+
+qemu-system-aarch64 -machine virt -cpu cortex-a57 -machine <span style="color: #dcaeea;">type</span>=virt -nographic -smp 4 -m 2048 --append <span style="color: #98be65;">"console=ttyAMA0"</span> --kernel aarch64-linux-3.16-buildroot-gdb.img -fsdev local,<span style="color: #dcaeea;">id</span>=r,<span style="color: #dcaeea;">path</span>=/home/schspa/work/src/signal-test,<span style="color: #dcaeea;">security_model</span>=none -device virtio-9p-device,<span style="color: #dcaeea;">fsdev</span>=r,<span style="color: #dcaeea;">mount_tag</span>=r -s -S
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org7bf71c9" class="outline-2">
+<h2 id="org7bf71c9">文件共享</h2>
+<div class="outline-text-2" id="text-org7bf71c9">
+</div>
+<div id="outline-container-org4482502" class="outline-3">
+<h3 id="org4482502"><a href="https://wiki.qemu.org/Documentation/9psetup">9P over virtiofs</a></h3>
+<div class="outline-text-3" id="text-org4482502">
+<p>
+9pfs是基于网络的文件共享协议，qemu中的软件可以通过此种方法来访问宿主机中的文件。详见Plan 9 9p remote filesystem protocol<br>
+<b>qemu在Mac OS上不支持virtio，故无法使用以下的方法</b><br>
+参数设置：<br>
+</p>
+<ul class="org-ul">
+<li><p>
+针对宿主机<br>
+</p>
+<blockquote>
+<p>
+-fsdev local,id=shareid,path=/home/schspa/work/src/share,security_model=none<br>
+</p>
+</blockquote>
+<p>
+上述参数告诉QEMU要设置一个文件系统设备，使用本地的文件系统，id设置为shareid<br>
+</p></li>
+<li><p>
+针对客户机<br>
+</p>
+<blockquote>
+<p>
+-device virtio-9p-device,fsdev=shareid,mount_tag=share<br>
+</p>
+</blockquote>
+<p>
+上面的参数告诉向客户机添加一个设备，设备类型是virtio-9p-device，连接到设备shareid, 挂载时的tag为share<br>
+</p></li>
+<li><p>
+挂载共享文件夹<br>
+在客户系统启动时需要挂载共享的文件夹，上面已经显示出来mount_tag是share<br>
+挂载命令<br>
+</p>
+<div class="org-src-container">
+<pre class="src src-bash">mount -t 9p -o <span style="color: #dcaeea;">trans</span>=virtio share /mnt/share
+</pre>
+</div>
+<p>
+mount tag也可以通过sysfs来查看<br>
+</p>
+<div class="org-src-container">
+<pre class="src src-bash">/sys/bus/virtio/drivers/9pnet_virtio/virtio&lt;n&gt;/mount_tag         
+</pre>
+</div></li>
+</ul>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orga7171cd" class="outline-2">
+<h2 id="orga7171cd">网络设置</h2>
+<div class="outline-text-2" id="text-orga7171cd">
+</div>
+<div id="outline-container-org34701fd" class="outline-3">
+<h3 id="org34701fd">linux Host</h3>
+<div class="outline-text-3" id="text-org34701fd">
+<ul class="org-ul">
+<li><p>
+设置网络设备<br>
+</p>
+<div class="org-src-container">
+<pre class="src src-bash"><span style="color: #5B6268;">#</span><span style="color: #5B6268;">!/usr/bin/</span><span style="color: #51afef;">env</span><span style="color: #5B6268;"> bash</span>
+
+sudo ip link add br0 type bridge
+sudo ip link set br0 up
+sudo ip addr add 192.168.123.1/24 broadcast 192.168.123.255 dev br0
+sudo dnsmasq  --strict-order --except-interface=lo --interface=br0 --listen-addr=192.168.123.1 --bind-interfaces --dhcp-range=192.168.123.101,192.168.123.254 --pid-file=/var/run/qemu-dhcp-br0.pid
+
+sudo ip tuntap add tap0 mod tap user $<span style="color: #dcaeea;">UID</span>
+sudo ip link set dev tap0 up
+sudo ip link set dev tap0 master br0
+</pre>
+</div></li>
+<li><p>
+卸载网络设备<br>
+</p>
+<div class="org-src-container">
+<pre class="src src-bash"><span style="color: #5B6268;">#</span><span style="color: #5B6268;">!/usr/bin/</span><span style="color: #51afef;">env</span><span style="color: #5B6268;"> bash</span>
+
+sudo ip link set dev tap0 nomaster
+sudo ip link set tap0 down
+sudo ip tuntap del tap0 mod tap
+
+sudo ip link set br0 down
+sudo ip link delete br0 type bridge
+sudo kill $(cat /var/run/qemu-dhcp-br0.pid)
+</pre>
+</div>
+<p>
+上述脚本添加了一个tap设备<sup><a id="fnr.1" class="footref" href="#fn.1">1</a></sup>，并使用dnsmasq网桥桥开启了dhcp，客户端启动之后即可自动获取ip地址。由于没有将实体网卡加入到br0的网桥之中，目前客户机系统还无法联网。<br>
+</p></li>
+</ul>
+</div>
+</div>
+<div id="outline-container-orgd143889" class="outline-3">
+<h3 id="orgd143889">TODO Macos Host</h3>
+</div>
+<div id="outline-container-org332ebf1" class="outline-3">
+<h3 id="org332ebf1">qemu command line</h3>
+<div class="outline-text-3" id="text-org332ebf1">
+<div class="org-src-container">
+<pre class="src src-bash">-netdev tap,<span style="color: #dcaeea;">ifname</span>=tap0,<span style="color: #dcaeea;">id</span>=net0,<span style="color: #dcaeea;">script</span>=no,<span style="color: #dcaeea;">downscript</span>=no -device virtio-net-device,<span style="color: #dcaeea;">netdev</span>=net0,<span style="color: #dcaeea;">mac</span>=52:55:00:fa:ee:10
+</pre>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org0a9f43c" class="outline-2">
+<h2 id="org0a9f43c">参考文档</h2>
+<div class="outline-text-2" id="text-org0a9f43c">
+<p>
+<a href="http://www.voidcn.com/article/p-xlgkygpv-p.html">http://www.voidcn.com/article/p-xlgkygpv-p.html</a><br>
+<a href="https://kennedy-han.github.io/2015/06/15/QEMU-arm64-guide.html">https://kennedy-han.github.io/2015/06/15/QEMU-arm64-guide.html</a><br>
+</p>
+</div>
+</div>
+<div id="footnotes">
+<h2 class="footnotes">Footnotes: </h2>
+<div id="text-footnotes">
+
+<div class="footdef"><sup><a id="fn.1" class="footnum" href="#fnr.1">1</a></sup> <div class="footpara"><p class="footpara">
+<a href="https://segmentfault.com/a/1190000009249039">Linux虚拟网络设备之tun/tap</a><br>
+</p></div></div>
+
+
+</div>
+</div></div>
+<div id="postamble" class="status">
+<script src="https://utteranc.es/client.js"
+    repo="schspa/schspa.github.io"
+    issue-term="title"
+    label="✨💬✨"
+    theme="github-light"
+    crossorigin="anonymous"
+    async>
+</script>
+<div class="me">
+  <span><b>Contact me via :)</b><span>
+  <div class="contact">
+    <a id="email" href="mailto:schspa@gmail.com" target="_blank"><i class="fab fa-mailchimp animated heartBeat delay-2s slower"></i></a>
+    <a id="github" href="//github.com/schspa" target="_blank"><i class="fab fa-github animated heartBeat delay-2s slower"></i></a>
+  </div>
+</div>
+
+<div id="jinrishici-sentence" style="font-weight: 700;">虚怀乃若谷，水深则流缓。</div>
+<script src="https://sdk.jinrishici.com/v2/browser/jinrishici.js" charset="utf-8"></script>
+</div>
+</body>
+</html>
