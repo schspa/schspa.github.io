@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<!-- 2020-09-10 四 00:43 -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Debug linux kernel boot process</title>
+<meta name="generator" content="Org mode">
+<meta name="author" content="schspa">
+<meta name="description" content="how-to-debugging-linux-booting-code"
+>
+<link rel="shortcut icon" href="/images/rose-red.png"
+type="image/x-icon" /><link rel="stylesheet" href="/css/animate.min.css" /><link rel="stylesheet" href="/css/all.min.css" /><link rel="stylesheet" type="text/css" href="/css/style.css" /><script src="/js/jquery.min.js"></script><script src="/js/darkreader.js"></script><script src="/user.config.js"></script><script src="/js/main.js"></script>
+</head>
+<body>
+<div id="content">
+<h1 class="title">Debug linux kernel boot process</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#org419cd35">目的</a></li>
+<li><a href="#orgab728db">初始化代码（MMU开启之前）</a>
+<ul>
+<li><a href="#org85381cd">获取加载地址</a>
+<ul>
+<li><a href="#orgc6ce2c7">正确加载uboot的symbol到运行位置</a></li>
+<li><a href="#org0477de4">在跳入内核之前打上断点，获取内核运行地址</a></li>
+<li><a href="#org6d2bafd">加载.head.text段，在内核第一条指令处打断点</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#org60a1ddf">初始代码（MMU开启之后)</a></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org419cd35" class="outline-2">
+<h2 id="org419cd35">目的</h2>
+<div class="outline-text-2" id="text-org419cd35">
+<p>
+当linux内核在启动过程中出现bug时，可能需要适用gdb/ulink/ds5 debugger来进行debug，大多数的debug方法时在启动后，再连接上调试器，最后连接上调试器之后再加载symbol，打断点来完成debug。<br>
+对于大多数的情况，以上方法就足以应付，但是部分情况下（在内核初始化早期，可能还来不及连上调试器，内核就已经挂掉了），需要更加复杂的打断点方法。<br>
+这篇文章就针对这种情况进行说明。<br>
+实验环境：qemu + gdb + aarch64<br>
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgab728db" class="outline-2">
+<h2 id="orgab728db">初始化代码（MMU开启之前）</h2>
+<div class="outline-text-2" id="text-orgab728db">
+<p>
+由于Linux内核可以被bootloader加载到任意位置来执行，在mmu开启之前，内核代码运行地址是由bootloader来决定，此时需要在bootloader处打断点来获取加载地址，通过这个地址来调试。<br>
+</p>
+</div>
+
+<div id="outline-container-org85381cd" class="outline-3">
+<h3 id="org85381cd">获取加载地址</h3>
+<div class="outline-text-3" id="text-org85381cd">
+<p>
+由于需要获取bootloader的加载地址，可以在bootloader跳转到内核之前打上断点来获取加载地址，下面以uboot为例：<br>
+</p>
+</div>
+<div id="outline-container-orgc6ce2c7" class="outline-4">
+<h4 id="orgc6ce2c7">正确加载uboot的symbol到运行位置</h4>
+<div class="outline-text-4" id="text-orgc6ce2c7">
+<p>
+在uboot倒计时开始时停止，使用调试器连接上，由于uboot有relocaddr的过程，所以要先获取uboot实际运行的地址，在aarch64平台上x18寄存器保存了gd指针的地址，通过x18和symbol文件就可以获取到relocaddr<br>
+</p>
+<div class="org-src-container">
+<pre class="src src-bash">target remote:1234
+add-symbol-file ~/work/uboot/u-boot
+<span style="color: #c678dd;">set</span> $<span style="color: #dcaeea;">uboot_relocaddr</span> = ((gd_t *)$<span style="color: #dcaeea;">x18</span>)-&gt;relocaddr
+add-symbol-file ~/work/uboot/u-boot $<span style="color: #dcaeea;">uboot_relocaddr</span>
+</pre>
+</div>
+
+<p>
+在正确加载好symbol之后，适用bt命令接可以正确的获取到uboot当前执行位置，如下所示，uboot正在等待串口输入命令<br>
+</p>
+<div class="org-src-container">
+<pre class="src src-bash">(gdb) bt
+<span style="color: #5B6268;">#</span><span style="color: #5B6268;">0  pl01x_serial_pending (dev=&lt;optimized out&gt;, input=true)</span>
+    at drivers/serial/serial_pl01x.c:321
+<span style="color: #5B6268;">#</span><span style="color: #5B6268;">1  0x00000000bff316b8 in console_tstc (file=0) at common/console.c:328</span>
+<span style="color: #5B6268;">#</span><span style="color: #5B6268;">2  fgetc (file=0) at common/console.c:328</span>
+<span style="color: #5B6268;">#</span><span style="color: #5B6268;">3  0x00000000bff2fd9c in cread_line (timeout=0, len=&lt;synthetic pointer&gt;, </span>
+    <span style="color: #dcaeea;">buf</span>=0xbffd9d50 <span style="color: #98be65;">""</span>, <span style="color: #dcaeea;">prompt</span>=0xbff80a19 <span style="color: #98be65;">"Hobot# "</span>) at common/cli_readline.c:274
+<span style="color: #5B6268;">#</span><span style="color: #5B6268;">4  cli_readline_into_buffer (prompt=0xbff80a19 "Hobot# ", buffer=0xbffd9d50 "", </span>
+    <span style="color: #dcaeea;">timeout</span>=0) at common/cli_readline.c:549
+<span style="color: #5B6268;">#</span><span style="color: #5B6268;">5  0x00000000bff2b130 in uboot_cli_readline (i=0xbbe93e60)</span>
+    at common/cli_hush.c:1029
+<span style="color: #5B6268;">#</span><span style="color: #5B6268;">6  get_user_input (i=0xbbe93e60) at common/cli_hush.c:1029</span>
+<span style="color: #5B6268;">#</span><span style="color: #5B6268;">7  file_get (i=0xbbe93e60) at common/cli_hush.c:1108</span>
+
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-org0477de4" class="outline-4">
+<h4 id="org0477de4">在跳入内核之前打上断点，获取内核运行地址</h4>
+<div class="outline-text-4" id="text-org0477de4">
+<div class="org-src-container">
+<pre class="src src-text">(gdb) tb boot_jump_linux
+Temporary breakpoint 1 at 0x880024e0: boot_jump_linux. (4 locations)
+(gdb) c
+Continuing.
+
+Thread 1 hit Temporary breakpoint 1, boot_jump_linux (images=0xbffd9b20, flag=1024)
+    at arch/arm/lib/bootm.c:323
+323 {
+(gdb) p images 
+$3 = (bootm_headers_t *) 0xbffd9b20
+(gdb) set print pretty 
+(gdb) p /x *images 
+$6 = {
+  legacy_hdr_os = 0x0,
+  legacy_hdr_os_copy = {
+    ih_magic = 0x0,
+    ih_hcrc = 0x0,
+    ih_time = 0x0,
+    ih_size = 0x0,
+    ih_load = 0x0,
+    ih_ep = 0x0,
+    ih_dcrc = 0x0,
+    ih_os = 0x0,
+    ih_arch = 0x0,
+    ih_type = 0x0,
+    ih_comp = 0x0,
+    ih_name = {0x0 &lt;repeats 32 times&gt;}
+  },
+  legacy_hdr_valid = 0x0,
+  os = {
+    start = 0x83000000,
+    end = 0x8390b000,
+    image_start = 0x83000800,
+    image_len = 0x8e9865,
+    load = 0x89080000,
+    comp = 0x1,
+    type = 0x2,
+    os = 0x5,
+    arch = 0x0
+  },
+  ep = 0x89080000,
+  rd_start = 0x0,
+  rd_end = 0x0,
+  ft_addr = 0x82000000,
+  ft_len = 0x6ede,
+  initrd_start = 0x0,
+  initrd_end = 0x0,
+  cmdline_start = 0x0,
+  cmdline_end = 0x0,
+  kbd = 0x0,
+  verify = 0xffffffff,
+  state = 0x1,
+  lmb = {
+    memory = {
+      cnt = 0x1,
+      size = 0x0,
+--Type &lt;RET&gt; for more, q to quit, c to continue without paging--
+      region = {{
+          base = 0x80000000,
+          size = 0x40000000
+        }, {
+          base = 0x0,
+          size = 0x0
+        }, {
+          base = 0x0,
+          size = 0x0
+        }, {
+          base = 0x0,
+          size = 0x0
+        }, {
+          base = 0x0,
+          size = 0x0
+        }, {
+          base = 0x0,
+          size = 0x0
+        }, {
+          base = 0x0,
+          size = 0x0
+        }, {
+          base = 0x0,
+          size = 0x0
+        }, {
+          base = 0x0,
+          size = 0x0
+        }}
+    },
+    reserved = {
+      cnt = 0x4,
+      size = 0x0,
+      region = {{
+          base = 0x80000000,
+          size = 0x770000
+        }, {
+          base = 0x82000000,
+          size = 0x2000
+        }, {
+          base = 0x89080000,
+          size = 0x100c200
+        }, {
+          base = 0xbbe922c0,
+          size = 0x416dd40
+--Type &lt;RET&gt; for more, q to quit, c to continue without paging--
+        }, {
+          base = 0x0,
+          size = 0x0
+        }, {
+          base = 0x0,
+          size = 0x0
+        }, {
+          base = 0x0,
+          size = 0x0
+        }, {
+          base = 0x0,
+          size = 0x0
+        }, {
+          base = 0x0,
+          size = 0x0
+        }}
+    }
+  }
+}
+</pre>
+</div>
+<p>
+hootm_headers_t中有几个变量需要注意一下，之后获取运行地址时会适用到<br>
+</p>
+<dl class="org-dl">
+<dt>images-&gt;ep</dt><dd>内核启动地址<br></dd>
+<dt>images-&gt;os.load</dt><dd>内核启动地址<br></dd>
+<dt>images-&gt;os.start</dt><dd>内核加载地址<br></dd>
+</dl>
+</div>
+</div>
+<div id="outline-container-org6d2bafd" class="outline-4">
+<h4 id="org6d2bafd">加载.head.text段，在内核第一条指令处打断点</h4>
+<div class="outline-text-4" id="text-org6d2bafd">
+<p>
+由于symbol在加载时需要加载到物理地址上，所以可以通过下面的python脚本来辅助加载<br>
+</p>
+<div class="org-src-container">
+<pre class="src src-text">source  ~/src/gdb-script/load-linux-init.py
+load-linux-init ~/work/kernel/vmlinux images-&gt;ep
+</pre>
+</div>
+<div class="org-src-container">
+<pre class="src src-text">(gdb) source  ~/src/gdb-script/load-linux-init.py 
+(gdb) load-linux-init ~/work/kernel/vmlinux images-&gt;ep 
+Loading linux init head to 0x0000000083080000
+Original linux text address at 0xffffff8008080000
+generate command
+add-symbol-file ~/work/kernel/vmlinux 0x83081000 -s .head.text 0x83080000 -s .init.text 0x83a00000
+load linux image to physical address with command add-symbol-file ~/work/kernel/vmlinux 0x83081000 -s .head.t0
+add symbol table from file "/home/schspa/work/kernel/vmlinux" at
+    .text_addr = 0x83081000
+    .head.text_addr = 0x83080000
+    .init.text_addr = 0x83a00000
+(gdb) b * 0x83080000
+Breakpoint 2 at 0x83080000: file arch/arm64/kernel/head.S, line 82.
+(gdb) c
+Continuing.
+
+Thread 1 hit Breakpoint 2, _text () at arch/arm64/kernel/head.S:82
+82      add x13, x18, #0x16
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org60a1ddf" class="outline-2">
+<h2 id="org60a1ddf">初始代码（MMU开启之后)</h2>
+<div class="outline-text-2" id="text-org60a1ddf">
+<p>
+MMU开启之后就不需要计算加载地址，可以直接打断点来调试<br>
+</p>
+<div class="org-src-container">
+<pre class="src src-text">add-symbol-file ~/work/kernel/vmlinux
+tb start_kernel
+# do whatever you want
+</pre>
+</div>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<script src="https://utteranc.es/client.js"
+    repo="schspa/schspa.github.io"
+    issue-term="title"
+    label="✨💬✨"
+    theme="github-light"
+    crossorigin="anonymous"
+    async>
+</script>
+<div class="me">
+  <span><b>Contact me via :)</b><span>
+  <div class="contact">
+    <a id="email" href="mailto:schspa@gmail.com" target="_blank"><i class="fab fa-mailchimp animated heartBeat delay-2s slower"></i></a>
+    <a id="github" href="//github.com/schspa" target="_blank"><i class="fab fa-github animated heartBeat delay-2s slower"></i></a>
+  </div>
+</div>
+
+<div id="jinrishici-sentence" style="font-weight: 700;">虚怀乃若谷，水深则流缓。</div>
+<script src="https://sdk.jinrishici.com/v2/browser/jinrishici.js" charset="utf-8"></script>
+</div>
+</body>
+</html>

