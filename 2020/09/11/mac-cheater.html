@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<!-- 2020-09-12 六 00:44 -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Cheate MAC address</title>
+<meta name="generator" content="Org mode">
+<meta name="author" content="Schspa">
+<meta name="description" content="Cheate MAC address"
+>
+<link rel="shortcut icon" href="/images/rose-red.png"
+type="image/x-icon" /><link rel="stylesheet" href="/css/animate.min.css" /><link rel="stylesheet" href="/css/all.min.css" /><link rel="stylesheet" type="text/css" href="/css/style.css" /><script src="/js/jquery.min.js"></script><script src="/js/darkreader.js"></script><script src="/user.config.js"></script><script src="/js/main.js"></script>
+</head>
+<body>
+<div id="content">
+<h1 class="title">Cheate MAC address</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#org44db7d0">背景</a></li>
+<li><a href="#org7169919">使用命令修改IP地址</a></li>
+<li><a href="#org4235663">使用HOOK来完成mac地址欺骗</a>
+<ul>
+<li><a href="#org96f2c21">找出受害者获取MAC地址的方法</a>
+<ul>
+<li><a href="#org75b8fc3">受害人信息</a></li>
+<li><a href="#orgba53398">使用LD_PRELOAD来完成hook</a></li>
+<li><a href="#orgbb8038b">测试：</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org44db7d0" class="outline-2">
+<h2 id="org44db7d0">背景</h2>
+<div class="outline-text-2" id="text-org44db7d0">
+<p>
+由于一些原因，很多软件会绑定网卡MAC地址，这样就导致换了网卡之后，软件就无法使用了。<br>
+一般的解决方案是通过命令修改MAC地址，但是这样不够优雅，并且还有导致mac地址重复的风险。<br>
+</p>
+</div>
+</div>
+
+<div id="outline-container-org7169919" class="outline-2">
+<h2 id="org7169919">使用命令修改IP地址</h2>
+<div class="outline-text-2" id="text-org7169919">
+<div class="org-src-container">
+<pre class="src src-bash">ifconfig eth0 hw ether xx:xx:xx:xx:xx:xx
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-org4235663" class="outline-2">
+<h2 id="org4235663">使用HOOK来完成mac地址欺骗</h2>
+<div class="outline-text-2" id="text-org4235663">
+</div>
+<div id="outline-container-org96f2c21" class="outline-3">
+<h3 id="org96f2c21">找出受害者获取MAC地址的方法</h3>
+<div class="outline-text-3" id="text-org96f2c21">
+</div>
+<div id="outline-container-org75b8fc3" class="outline-4">
+<h4 id="org75b8fc3">受害人信息</h4>
+<div class="outline-text-4" id="text-org75b8fc3">
+<table>
+
+
+<colgroup>
+<col  class="org-left">
+
+<col  class="org-left">
+</colgroup>
+<tbody>
+<tr>
+<td class="org-left">OS</td>
+<td class="org-left">Ubuntu 16.04 xenial</td>
+</tr>
+
+<tr>
+<td class="org-left">网卡</td>
+<td class="org-left">a8:83:3b:53:eb:35</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div id="outline-container-orgba53398" class="outline-4">
+<h4 id="orgba53398">使用LD_PRELOAD来完成hook</h4>
+<div class="outline-text-4" id="text-orgba53398">
+<ul class="org-ul">
+<li>代码<br></li>
+</ul>
+<div class="org-src-container">
+<pre class="src src-c"><span style="color: #5B6268;">/*</span>
+<span style="color: #5B6268;"> * ifhwaddr hook - a hook SIOCGIFHWADDR ioctl to give a fake MAC address for apps</span>
+<span style="color: #5B6268;"> * LD_PRELOAD="hook.so" command</span>
+<span style="color: #5B6268;"> *</span>
+<span style="color: #5B6268;"> */</span>
+
+<span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;stdarg.h&gt;</span>
+<span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;stdlib.h&gt;</span>
+<span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;string.h&gt;</span>
+<span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;fcntl.h&gt;</span>
+<span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;stdio.h&gt;</span>
+<span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;dlfcn.h&gt;</span>
+<span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;sys/types.h&gt;</span>
+<span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;sys/stat.h&gt;</span>
+<span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;stdlib.h&gt;</span>
+<span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;signal.h&gt;</span>
+<span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;errno.h&gt;</span>
+<span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;sys/ioctl.h&gt;</span>
+<span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;net/if.h&gt;</span>
+<span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;net/if_arp.h&gt;</span>
+
+<span style="color: #51afef; font-weight: bold;">#if</span><span style="color: #51afef; font-weight: bold;">n</span><span style="color: #51afef; font-weight: bold;">def</span> RTLD_NEXT
+<span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #dcaeea;">RTLD_NEXT</span> ((<span style="color: #ECBE7B;">void</span> *) -1l)
+<span style="color: #51afef; font-weight: bold;">#endif</span>
+
+<span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #dcaeea;">REAL_LIBC</span> RTLD_NEXT
+
+<span style="color: #ECBE7B;">int</span> <span style="color: #c678dd;">ioctl</span> (<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">__fd</span>, <span style="color: #ECBE7B;">unsigned</span> <span style="color: #ECBE7B;">long</span> <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">__request</span>, ...) {
+    <span style="color: #51afef;">static</span> <span style="color: #ECBE7B;">int</span> (*<span style="color: #c678dd;">func_ioctl</span>) (<span style="color: #ECBE7B;">int</span>, <span style="color: #ECBE7B;">unsigned</span> <span style="color: #ECBE7B;">long</span> <span style="color: #ECBE7B;">int</span>, <span style="color: #ECBE7B;">void</span> *) = <span style="color: #a9a1e1;">NULL</span>;
+    <span style="color: #ECBE7B;">va_list</span> <span style="color: #dcaeea;">args</span>;
+    <span style="color: #ECBE7B;">void</span> *<span style="color: #dcaeea;">argp</span>;
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">retval</span>;
+
+    <span style="color: #51afef;">if</span> (<span style="color: #51afef; font-weight: bold;">!</span> func_ioctl) {
+        func_ioctl = (<span style="color: #ECBE7B;">int</span> (*) (<span style="color: #ECBE7B;">int</span>, <span style="color: #ECBE7B;">unsigned</span> <span style="color: #ECBE7B;">long</span> <span style="color: #ECBE7B;">int</span>, <span style="color: #ECBE7B;">void</span> *)) dlsym (REAL_LIBC, <span style="color: #98be65;">"ioctl"</span>);
+    }
+    va_start (args, __request);
+    argp = va_arg (args, <span style="color: #ECBE7B;">void</span> *);
+    va_end (args);
+    <span style="color: #51afef;">struct</span> <span style="color: #ECBE7B;">ifreq</span> *<span style="color: #dcaeea;">ifr</span> = argp;
+
+    retval = func_ioctl (__fd, __request, argp);
+
+    <span style="color: #51afef;">if</span> (SIOCGIFHWADDR == __request &amp;&amp; retval == 0) {
+
+        <span style="color: #ECBE7B;">unsigned</span> <span style="color: #ECBE7B;">char</span>* <span style="color: #dcaeea;">mac</span>=(<span style="color: #ECBE7B;">unsigned</span> <span style="color: #ECBE7B;">char</span>*)ifr-&gt;ifr_hwaddr.sa_data;
+        <span style="color: #5B6268;">// </span><span style="color: #5B6268;">set to b3:26:83:2c:73:ec</span>
+        mac[0] = 0xb3;
+        mac[1] = 0x26;
+        mac[2] = 0x83;
+        mac[3] = 0x2c;
+        mac[4] = 0x73;
+        mac[5] = 0xec;
+    }
+
+    <span style="color: #51afef;">return</span> retval;
+}
+</pre>
+</div>
+<ul class="org-ul">
+<li><p>
+编译:<br>
+</p>
+<div class="org-src-container">
+<pre class="src src-bash">gcc -shared -o hook.so hook.c
+</pre>
+</div></li>
+</ul>
+</div>
+</div>
+<div id="outline-container-orgbb8038b" class="outline-4">
+<h4 id="orgbb8038b">测试：</h4>
+<div class="outline-text-4" id="text-orgbb8038b">
+<p>
+hook前：<br>
+</p>
+<div class="org-src-container">
+<pre class="src src-bash">./lmhostid
+lmhostid - Copyright (c) 1989-2017 Flexera Software LLC. All Rights Reserved.
+The FlexNet host ID of this machine is <span style="color: #98be65;">"a8833b53eb35"</span>
+</pre>
+</div>
+<p>
+hook后<br>
+</p>
+<div class="org-src-container">
+<pre class="src src-bash"><span style="color: #dcaeea;">LD_PRELOAD</span>=./hook.so ./lmhostid
+lmhostid - Copyright (c) 1989-2017 Flexera Software LLC. All Rights Reserved.
+The FlexNet host ID of this machine is <span style="color: #98be65;">"b326832c73ec"</span>
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<script src="https://utteranc.es/client.js"
+    repo="schspa/schspa.github.io"
+    issue-term="title"
+    label="✨💬✨"
+    theme="github-light"
+    crossorigin="anonymous"
+    async>
+</script>
+<div class="me">
+  <span><b>Contact me via :)</b><span>
+  <div class="contact">
+    <a id="email" href="mailto:schspa@gmail.com" target="_blank"><i class="fab fa-mailchimp animated heartBeat delay-2s slower"></i></a>
+    <a id="github" href="//github.com/schspa" target="_blank"><i class="fab fa-github animated heartBeat delay-2s slower"></i></a>
+  </div>
+</div>
+
+<div id="jinrishici-sentence" style="font-weight: 700;">虚怀乃若谷，水深则流缓。</div>
+<script src="https://sdk.jinrishici.com/v2/browser/jinrishici.js" charset="utf-8"></script>
+</div>
+</body>
+</html>
