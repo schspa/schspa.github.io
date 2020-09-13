@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2020-09-10 四 00:36 -->
+<!-- 2020-09-13 日 18:21 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Linux Signal Handle</title>
@@ -10,10 +10,52 @@
 <meta name="description" content="security.org"
 >
 <meta name="keywords" content="Security">
-<link rel="shortcut icon" href="/images/rose-red.png"
-type="image/x-icon" /><link rel="stylesheet" href="/css/animate.min.css" /><link rel="stylesheet" href="/css/all.min.css" /><link rel="stylesheet" type="text/css" href="/css/style.css" /><script src="/js/jquery.min.js"></script><script src="/js/darkreader.js"></script><script src="/user.config.js"></script><script src="/js/main.js"></script>
+<link rel="shortcut icon" href="/images/rose-red.png" type="image/x-icon" />
+<link rel="stylesheet" href="/css/animate.min.css" />
+<link rel="stylesheet" href="/css/all.min.css" />
+<link rel="stylesheet" type="text/css" href="/css/style.css" />
+<link rel="stylesheet" type="text/css" href="/css/navbar.css" />
+<script src="/js/jquery.min.js"></script>
+<script src="/js/darkreader.js"></script>
+<script src="/user.config.js"></script>
+<script src="/js/main.js"></script>
 </head>
 <body>
+<div id="preamble" class="status">
+<div class="mobile-container">
+  <!-- Top Navigation Menu -->
+  <div class="topnav">
+    <div id="header">
+      <a href="/" class="logo">Schspa's Blog</a>
+      <a href="javascript:void(0);" class="icon" onclick="toggleheader()">
+        <i class="fa fa-bars"></i>
+      </a>
+    </div>
+    <div id="nav_headers">
+      <a href="/tags.html" class="menu-item">Tags</a>
+      <a href="/archive.html" class="menu-item">Archive</a>
+    </div>
+  </div>
+  <!-- End smartphone / tablet look -->
+</div>
+
+<header id="header" class="header">
+  <div class="logo-wrapper">
+    <a href="/" class="logo">Schspa's Blogs</a>
+  </div>
+
+  <nav class="site-navbar">
+    <ul id="menu" class="menu">
+      <li class="menu-item">
+        <a class="menu-item-link" href="/">Home</a>
+      </li>
+      <li class="menu-item">
+        <a class="menu-item-link" href="/sitemap.html">Categories</a>
+      </li>
+    </ul>
+  </nav>
+</header>
+</div>
 <div id="content">
 <h1 class="title">Linux Signal Handle</h1>
 <div id="table-of-contents">
@@ -54,13 +96,13 @@ type="image/x-icon" /><link rel="stylesheet" href="/css/animate.min.css" /><link
 </div>
 </div>
 
-<div id="outline-container-org69ebd6b" class="outline-2">
+<div id="outline-container-org890b1dd" class="outline-2">
 <h2 id="linux-signal-handle"><span class="section-number-2">1</span> Linux signal handle</h2>
 <div class="outline-text-2" id="text-linux-signal-handle">
 </div>
 </div>
 
-<div id="outline-container-org7fd56f4" class="outline-2">
+<div id="outline-container-orgd7e5434" class="outline-2">
 <h2 id="提纲"><span class="section-number-2">2</span> 提纲：</h2>
 <div class="outline-text-2" id="text-提纲">
 <ul class="org-ul">
@@ -73,19 +115,19 @@ type="image/x-icon" /><link rel="stylesheet" href="/css/animate.min.css" /><link
 </ul>
 </div>
 
-<div id="outline-container-org6452dd2" class="outline-3">
+<div id="outline-container-org756f12a" class="outline-3">
 <h3 id="man-pages"><span class="section-number-3">2.1</span> <a href="http://man7.org/linux/man-pages/man7/signal.7.html">man pages</a></h3>
 <div class="outline-text-3" id="text-man-pages">
 </div>
 </div>
 </div>
 
-<div id="outline-container-org3852eb0" class="outline-2">
+<div id="outline-container-org03058d6" class="outline-2">
 <h2 id="信号基本概念以及定义"><span class="section-number-2">3</span> 信号基本概念以及定义</h2>
 <div class="outline-text-2" id="text-信号基本概念以及定义">
 </div>
 
-<div id="outline-container-orgad6ad15" class="outline-3">
+<div id="outline-container-org3217345" class="outline-3">
 <h3 id="signal设计目的"><span class="section-number-3">3.1</span> Signal设计目的</h3>
 <div class="outline-text-3" id="text-signal设计目的">
 <ul class="org-ul">
@@ -98,7 +140,7 @@ type="image/x-icon" /><link rel="stylesheet" href="/css/animate.min.css" /><link
 </div>
 </div>
 
-<div id="outline-container-orge790667" class="outline-3">
+<div id="outline-container-orgf779d51" class="outline-3">
 <h3 id="linux-信号定义"><span class="section-number-3">3.2</span> 1. Linux 信号定义</h3>
 <div class="outline-text-3" id="text-linux-信号定义">
 <p>
@@ -226,7 +268,7 @@ Signal 内部数据结构<br>
 </div>
 </div>
 
-<div id="outline-container-org758b6e2" class="outline-2">
+<div id="outline-container-orga8c48f2" class="outline-2">
 <h2 id="信号发送"><span class="section-number-2">4</span> 信号发送</h2>
 <div class="outline-text-2" id="text-信号发送">
 <ol class="org-ol">
@@ -251,7 +293,7 @@ Signal 内部数据结构<br>
 </ol>
 </div>
 
-<div id="outline-container-org9d63e32" class="outline-3">
+<div id="outline-container-org82bcda3" class="outline-3">
 <h3 id="内核中信号发送流程"><span class="section-number-3">4.1</span> 内核中信号发送流程</h3>
 <div class="outline-text-3" id="text-内核中信号发送流程">
 
@@ -265,7 +307,7 @@ Signal 内部数据结构<br>
 </p>
 </div>
 
-<div id="outline-container-orge9769e4" class="outline-4">
+<div id="outline-container-org523cccd" class="outline-4">
 <h4 id="alloc-sigqueue-结构题"><span class="section-number-4">4.1.1</span> alloc sigqueue 结构题</h4>
 <div class="outline-text-4" id="text-alloc-sigqueue-结构题">
 <p>
@@ -277,7 +319,7 @@ complete_signal函数 1. 优先给主线程 2. 在所有线程中查找可以
 </div>
 </div>
 
-<div id="outline-container-orgb188d0c" class="outline-3">
+<div id="outline-container-org3eacd11" class="outline-3">
 <h3 id="信号接收"><span class="section-number-3">4.2</span> 信号接收</h3>
 <div class="outline-text-3" id="text-信号接收">
 <ol class="org-ol">
@@ -290,7 +332,7 @@ complete_signal函数 1. 优先给主线程 2. 在所有线程中查找可以
 </ol>
 </div>
 
-<div id="outline-container-org6f67187" class="outline-4">
+<div id="outline-container-org72755d2" class="outline-4">
 <h4 id="信号处理途径"><span class="section-number-4">4.2.1</span> 信号处理途径</h4>
 <div class="outline-text-4" id="text-信号处理途径">
 <ul class="org-ul">
@@ -395,7 +437,7 @@ developer's reference manual。" iBooks.<br>
 </ul>
 </div>
 
-<div id="outline-container-orgef94ee5" class="outline-4">
+<div id="outline-container-org84bb160" class="outline-4">
 <h4 id="do_signal_stop流程-sigstop"><span class="section-number-4">4.2.2</span> do_signal_stop流程 (SIGSTOP)</h4>
 <div class="outline-text-4" id="text-do_signal_stop流程-sigstop">
 <p>
@@ -419,7 +461,7 @@ signal<br>
 </div>
 </div>
 
-<div id="outline-container-org20ad21c" class="outline-4">
+<div id="outline-container-org2ea7476" class="outline-4">
 <h4 id="kill流程-sigkill"><span class="section-number-4">4.2.3</span> kill流程 (SIGKILL)</h4>
 <div class="outline-text-4" id="text-kill流程-sigkill">
 
@@ -430,7 +472,7 @@ signal<br>
 </div>
 </div>
 
-<div id="outline-container-org9a20775" class="outline-4">
+<div id="outline-container-org7ff232f" class="outline-4">
 <h4 id="segv流程"><span class="section-number-4">4.2.4</span> SEGV流程</h4>
 <div class="outline-text-4" id="text-segv流程">
 </div>
@@ -671,7 +713,7 @@ CLONE_CHILD_CLEARTID;<br>
 </ul>
 </div>
 
-<div id="outline-container-org3c1fb5d" class="outline-4">
+<div id="outline-container-org486f12d" class="outline-4">
 <h4 id="signal调试"><span class="section-number-4">4.2.5</span> Signal调试</h4>
 <div class="outline-text-4" id="text-signal调试">
 </div>

@@ -568,3 +568,12 @@ function isCurPage(args) {
         if(_res > 0) return true
     }
 }
+
+function toggleheader() {
+	var x = document.getElementById("nav_headers");
+	if (x.style.display === "block") {
+		x.style.display = "none";
+	} else {
+		x.style.display = "block";
+	}
+}

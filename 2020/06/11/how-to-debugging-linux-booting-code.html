@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2020-09-10 四 00:43 -->
+<!-- 2020-09-13 日 18:21 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Debug linux kernel boot process</title>
@@ -9,36 +9,78 @@
 <meta name="author" content="schspa">
 <meta name="description" content="how-to-debugging-linux-booting-code"
 >
-<link rel="shortcut icon" href="/images/rose-red.png"
-type="image/x-icon" /><link rel="stylesheet" href="/css/animate.min.css" /><link rel="stylesheet" href="/css/all.min.css" /><link rel="stylesheet" type="text/css" href="/css/style.css" /><script src="/js/jquery.min.js"></script><script src="/js/darkreader.js"></script><script src="/user.config.js"></script><script src="/js/main.js"></script>
+<link rel="shortcut icon" href="/images/rose-red.png" type="image/x-icon" />
+<link rel="stylesheet" href="/css/animate.min.css" />
+<link rel="stylesheet" href="/css/all.min.css" />
+<link rel="stylesheet" type="text/css" href="/css/style.css" />
+<link rel="stylesheet" type="text/css" href="/css/navbar.css" />
+<script src="/js/jquery.min.js"></script>
+<script src="/js/darkreader.js"></script>
+<script src="/user.config.js"></script>
+<script src="/js/main.js"></script>
 </head>
 <body>
+<div id="preamble" class="status">
+<div class="mobile-container">
+  <!-- Top Navigation Menu -->
+  <div class="topnav">
+    <div id="header">
+      <a href="/" class="logo">Schspa's Blog</a>
+      <a href="javascript:void(0);" class="icon" onclick="toggleheader()">
+        <i class="fa fa-bars"></i>
+      </a>
+    </div>
+    <div id="nav_headers">
+      <a href="/tags.html" class="menu-item">Tags</a>
+      <a href="/archive.html" class="menu-item">Archive</a>
+    </div>
+  </div>
+  <!-- End smartphone / tablet look -->
+</div>
+
+<header id="header" class="header">
+  <div class="logo-wrapper">
+    <a href="/" class="logo">Schspa's Blogs</a>
+  </div>
+
+  <nav class="site-navbar">
+    <ul id="menu" class="menu">
+      <li class="menu-item">
+        <a class="menu-item-link" href="/">Home</a>
+      </li>
+      <li class="menu-item">
+        <a class="menu-item-link" href="/sitemap.html">Categories</a>
+      </li>
+    </ul>
+  </nav>
+</header>
+</div>
 <div id="content">
 <h1 class="title">Debug linux kernel boot process</h1>
 <div id="table-of-contents">
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#org419cd35">目的</a></li>
-<li><a href="#orgab728db">初始化代码（MMU开启之前）</a>
+<li><a href="#org994981c">目的</a></li>
+<li><a href="#org086819d">初始化代码（MMU开启之前）</a>
 <ul>
-<li><a href="#org85381cd">获取加载地址</a>
+<li><a href="#orgd95fe34">获取加载地址</a>
 <ul>
-<li><a href="#orgc6ce2c7">正确加载uboot的symbol到运行位置</a></li>
-<li><a href="#org0477de4">在跳入内核之前打上断点，获取内核运行地址</a></li>
-<li><a href="#org6d2bafd">加载.head.text段，在内核第一条指令处打断点</a></li>
+<li><a href="#org5ecba14">正确加载uboot的symbol到运行位置</a></li>
+<li><a href="#org6d7085f">在跳入内核之前打上断点，获取内核运行地址</a></li>
+<li><a href="#org332b3aa">加载.head.text段，在内核第一条指令处打断点</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li><a href="#org60a1ddf">初始代码（MMU开启之后)</a></li>
+<li><a href="#org93f4d72">初始代码（MMU开启之后)</a></li>
 </ul>
 </div>
 </div>
 
-<div id="outline-container-org419cd35" class="outline-2">
-<h2 id="org419cd35">目的</h2>
-<div class="outline-text-2" id="text-org419cd35">
+<div id="outline-container-org994981c" class="outline-2">
+<h2 id="org994981c">目的</h2>
+<div class="outline-text-2" id="text-org994981c">
 <p>
 当linux内核在启动过程中出现bug时，可能需要适用gdb/ulink/ds5 debugger来进行debug，大多数的debug方法时在启动后，再连接上调试器，最后连接上调试器之后再加载symbol，打断点来完成debug。<br>
 对于大多数的情况，以上方法就足以应付，但是部分情况下（在内核初始化早期，可能还来不及连上调试器，内核就已经挂掉了），需要更加复杂的打断点方法。<br>
@@ -48,24 +90,24 @@ type="image/x-icon" /><link rel="stylesheet" href="/css/animate.min.css" /><link
 </div>
 </div>
 
-<div id="outline-container-orgab728db" class="outline-2">
-<h2 id="orgab728db">初始化代码（MMU开启之前）</h2>
-<div class="outline-text-2" id="text-orgab728db">
+<div id="outline-container-org086819d" class="outline-2">
+<h2 id="org086819d">初始化代码（MMU开启之前）</h2>
+<div class="outline-text-2" id="text-org086819d">
 <p>
 由于Linux内核可以被bootloader加载到任意位置来执行，在mmu开启之前，内核代码运行地址是由bootloader来决定，此时需要在bootloader处打断点来获取加载地址，通过这个地址来调试。<br>
 </p>
 </div>
 
-<div id="outline-container-org85381cd" class="outline-3">
-<h3 id="org85381cd">获取加载地址</h3>
-<div class="outline-text-3" id="text-org85381cd">
+<div id="outline-container-orgd95fe34" class="outline-3">
+<h3 id="orgd95fe34">获取加载地址</h3>
+<div class="outline-text-3" id="text-orgd95fe34">
 <p>
 由于需要获取bootloader的加载地址，可以在bootloader跳转到内核之前打上断点来获取加载地址，下面以uboot为例：<br>
 </p>
 </div>
-<div id="outline-container-orgc6ce2c7" class="outline-4">
-<h4 id="orgc6ce2c7">正确加载uboot的symbol到运行位置</h4>
-<div class="outline-text-4" id="text-orgc6ce2c7">
+<div id="outline-container-org5ecba14" class="outline-4">
+<h4 id="org5ecba14">正确加载uboot的symbol到运行位置</h4>
+<div class="outline-text-4" id="text-org5ecba14">
 <p>
 在uboot倒计时开始时停止，使用调试器连接上，由于uboot有relocaddr的过程，所以要先获取uboot实际运行的地址，在aarch64平台上x18寄存器保存了gd指针的地址，通过x18和symbol文件就可以获取到relocaddr<br>
 </p>
@@ -99,9 +141,9 @@ add-symbol-file ~/work/uboot/u-boot $<span style="color: #dcaeea;">uboot_relocad
 </div>
 </div>
 </div>
-<div id="outline-container-org0477de4" class="outline-4">
-<h4 id="org0477de4">在跳入内核之前打上断点，获取内核运行地址</h4>
-<div class="outline-text-4" id="text-org0477de4">
+<div id="outline-container-org6d7085f" class="outline-4">
+<h4 id="org6d7085f">在跳入内核之前打上断点，获取内核运行地址</h4>
+<div class="outline-text-4" id="text-org6d7085f">
 <div class="org-src-container">
 <pre class="src src-text">(gdb) tb boot_jump_linux
 Temporary breakpoint 1 at 0x880024e0: boot_jump_linux. (4 locations)
@@ -236,9 +278,9 @@ hootm_headers_t中有几个变量需要注意一下，之后获取运行地址�
 </dl>
 </div>
 </div>
-<div id="outline-container-org6d2bafd" class="outline-4">
-<h4 id="org6d2bafd">加载.head.text段，在内核第一条指令处打断点</h4>
-<div class="outline-text-4" id="text-org6d2bafd">
+<div id="outline-container-org332b3aa" class="outline-4">
+<h4 id="org332b3aa">加载.head.text段，在内核第一条指令处打断点</h4>
+<div class="outline-text-4" id="text-org332b3aa">
 <p>
 由于symbol在加载时需要加载到物理地址上，所以可以通过下面的python脚本来辅助加载<br>
 </p>
@@ -273,9 +315,9 @@ Thread 1 hit Breakpoint 2, _text () at arch/arm64/kernel/head.S:82
 </div>
 </div>
 
-<div id="outline-container-org60a1ddf" class="outline-2">
-<h2 id="org60a1ddf">初始代码（MMU开启之后)</h2>
-<div class="outline-text-2" id="text-org60a1ddf">
+<div id="outline-container-org93f4d72" class="outline-2">
+<h2 id="org93f4d72">初始代码（MMU开启之后)</h2>
+<div class="outline-text-2" id="text-org93f4d72">
 <p>
 MMU开启之后就不需要计算加载地址，可以直接打断点来调试<br>
 </p>

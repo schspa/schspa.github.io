@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2020-09-09 三 01:54 -->
+<!-- 2020-09-13 日 18:21 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Test Blog</title>
@@ -10,84 +10,126 @@
 <meta name="description" content="Test Blog"
 >
 <meta name="keywords" content="BLOG TEST">
-<link rel="shortcut icon" href="/images/rose-red.png"
-type="image/x-icon" /><link rel="stylesheet" href="/css/animate.min.css" /><link rel="stylesheet" href="/css/all.min.css" /><link rel="stylesheet" type="text/css" href="/css/style.css" /><script src="/js/jquery.min.js"></script><script src="/js/darkreader.js"></script><script src="/user.config.js"></script><script src="/js/main.js"></script>
+<link rel="shortcut icon" href="/images/rose-red.png" type="image/x-icon" />
+<link rel="stylesheet" href="/css/animate.min.css" />
+<link rel="stylesheet" href="/css/all.min.css" />
+<link rel="stylesheet" type="text/css" href="/css/style.css" />
+<link rel="stylesheet" type="text/css" href="/css/navbar.css" />
+<script src="/js/jquery.min.js"></script>
+<script src="/js/darkreader.js"></script>
+<script src="/user.config.js"></script>
+<script src="/js/main.js"></script>
 </head>
 <body>
+<div id="preamble" class="status">
+<div class="mobile-container">
+  <!-- Top Navigation Menu -->
+  <div class="topnav">
+    <div id="header">
+      <a href="/" class="logo">Schspa's Blog</a>
+      <a href="javascript:void(0);" class="icon" onclick="toggleheader()">
+        <i class="fa fa-bars"></i>
+      </a>
+    </div>
+    <div id="nav_headers">
+      <a href="/tags.html" class="menu-item">Tags</a>
+      <a href="/archive.html" class="menu-item">Archive</a>
+    </div>
+  </div>
+  <!-- End smartphone / tablet look -->
+</div>
+
+<header id="header" class="header">
+  <div class="logo-wrapper">
+    <a href="/" class="logo">Schspa's Blogs</a>
+  </div>
+
+  <nav class="site-navbar">
+    <ul id="menu" class="menu">
+      <li class="menu-item">
+        <a class="menu-item-link" href="/">Home</a>
+      </li>
+      <li class="menu-item">
+        <a class="menu-item-link" href="/sitemap.html">Categories</a>
+      </li>
+    </ul>
+  </nav>
+</header>
+</div>
 <div id="content">
 <h1 class="title">Test Blog</h1>
 <div id="table-of-contents">
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#orgb3014d4">Heading Test</a>
+<li><a href="#org6f210f1">Heading Test</a>
 <ul>
-<li><a href="#org87cd354">Heading 2</a></li>
-<li><a href="#org7480858">Heading 2</a>
+<li><a href="#orgcac75df">Heading 2</a></li>
+<li><a href="#org9e77ee3">Heading 2</a>
 <ul>
-<li><a href="#orgf0d8600">Heading 3</a></li>
+<li><a href="#orge05a083">Heading 3</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li><a href="#org6720e8a">Paragraph Test</a></li>
-<li><a href="#org6a85af4">Hyperlink</a>
+<li><a href="#org8240e09">Paragraph Test</a></li>
+<li><a href="#org0498622">Hyperlink</a>
 <ul>
-<li><a href="#orgc14e974">基本链接</a></li>
+<li><a href="#org58a1be9">基本链接</a></li>
 </ul>
 </li>
-<li><a href="#orgb0d6e5f">footnoot</a></li>
-<li><a href="#org145bb48">tables</a>
+<li><a href="#org8af8ee0">footnoot</a></li>
+<li><a href="#org1a4228d">tables</a>
 <ul>
-<li><a href="#org1ed19fe">basic table</a></li>
-<li><a href="#orgcaffc96">alignment</a></li>
-<li><a href="#org6e7deb6">Column Width and Alignment</a></li>
+<li><a href="#orgce71699">basic table</a></li>
+<li><a href="#org59809b4">alignment</a></li>
+<li><a href="#org0023acd">Column Width and Alignment</a></li>
 </ul>
 </li>
-<li><a href="#orgf1cff67">Code hightlight</a>
+<li><a href="#org19703c9">Code hightlight</a>
 <ul>
-<li><a href="#org36c9ce7">C/C++</a></li>
-<li><a href="#orge6f68d0">elisp</a></li>
-<li><a href="#org2a93fe3">python</a></li>
+<li><a href="#org6875bdb">C/C++</a></li>
+<li><a href="#orgdfe58f3">elisp</a></li>
+<li><a href="#orgfa2d7da">python</a></li>
 </ul>
 </li>
-<li><a href="#org36796ac">Figure Test</a>
+<li><a href="#org75539bb">Figure Test</a>
 <ul>
-<li><a href="#org927b18c">plantuml sequence diagram</a></li>
+<li><a href="#orgf1d394a">plantuml sequence diagram</a></li>
 </ul>
 </li>
-<li><a href="#org99398b5">Quote</a></li>
-<li><a href="#org9b8d535">comments</a></li>
-<li><a href="#org3f8a342">table-of-contents</a>
+<li><a href="#org39ff600">Quote</a></li>
+<li><a href="#orgd7ab696">comments</a></li>
+<li><a href="#org26cd140">table-of-contents</a>
 <ul>
-<li><a href="#orgacd66ff">table-of-contents format</a></li>
+<li><a href="#orga1ade0b">table-of-contents format</a></li>
 </ul>
 </li>
 </ul>
 </div>
 </div>
 
-<div id="outline-container-orgb3014d4" class="outline-2">
-<h2 id="orgb3014d4">Heading Test</h2>
-<div class="outline-text-2" id="text-orgb3014d4">
+<div id="outline-container-org6f210f1" class="outline-2">
+<h2 id="org6f210f1">Heading Test</h2>
+<div class="outline-text-2" id="text-org6f210f1">
 </div>
-<div id="outline-container-org87cd354" class="outline-3">
-<h3 id="org87cd354">Heading 2</h3>
+<div id="outline-container-orgcac75df" class="outline-3">
+<h3 id="orgcac75df">Heading 2</h3>
 </div>
-<div id="outline-container-org7480858" class="outline-3">
-<h3 id="org7480858">Heading 2</h3>
-<div class="outline-text-3" id="text-org7480858">
+<div id="outline-container-org9e77ee3" class="outline-3">
+<h3 id="org9e77ee3">Heading 2</h3>
+<div class="outline-text-3" id="text-org9e77ee3">
 </div>
-<div id="outline-container-orgf0d8600" class="outline-4">
-<h4 id="orgf0d8600">Heading 3</h4>
-<div class="outline-text-4" id="text-orgf0d8600">
+<div id="outline-container-orge05a083" class="outline-4">
+<h4 id="orge05a083">Heading 3</h4>
+<div class="outline-text-4" id="text-orge05a083">
 </div>
 <ul class="org-ul">
-<li><a id="orgb51579a"></a>Heading 4<br>
+<li><a id="orga3ff082"></a>Heading 4<br>
 <ul class="org-ul">
-<li><a id="org8674365"></a>Heading 5<br>
+<li><a id="orge43298c"></a>Heading 5<br>
 <ul class="org-ul">
-<li><a id="org1c67c36"></a>Heading 6<br></li>
+<li><a id="org4d11e04"></a>Heading 6<br></li>
 </ul>
 </li>
 </ul>
@@ -96,21 +138,21 @@ type="image/x-icon" /><link rel="stylesheet" href="/css/animate.min.css" /><link
 </div>
 </div>
 </div>
-<div id="outline-container-org6720e8a" class="outline-2">
-<h2 id="org6720e8a">Paragraph Test</h2>
-<div class="outline-text-2" id="text-org6720e8a">
+<div id="outline-container-org8240e09" class="outline-2">
+<h2 id="org8240e09">Paragraph Test</h2>
+<div class="outline-text-2" id="text-org8240e09">
 <p>
 Test paragraph<br>
 </p>
 </div>
 </div>
-<div id="outline-container-org6a85af4" class="outline-2">
-<h2 id="org6a85af4">Hyperlink</h2>
-<div class="outline-text-2" id="text-org6a85af4">
+<div id="outline-container-org0498622" class="outline-2">
+<h2 id="org0498622">Hyperlink</h2>
+<div class="outline-text-2" id="text-org0498622">
 </div>
-<div id="outline-container-orgc14e974" class="outline-3">
-<h3 id="orgc14e974">基本链接</h3>
-<div class="outline-text-3" id="text-orgc14e974">
+<div id="outline-container-org58a1be9" class="outline-3">
+<h3 id="org58a1be9">基本链接</h3>
+<div class="outline-text-3" id="text-org58a1be9">
 <p>
 <a href="https://wikipedia.org">Wikipedia</a><br>
 <a href="https://wikipedia.org">https://wikipedia.org</a><br>
@@ -119,22 +161,22 @@ Test paragraph<br>
 </div>
 </div>
 
-<div id="outline-container-orgb0d6e5f" class="outline-2">
-<h2 id="orgb0d6e5f">footnoot</h2>
-<div class="outline-text-2" id="text-orgb0d6e5f">
+<div id="outline-container-org8af8ee0" class="outline-2">
+<h2 id="org8af8ee0">footnoot</h2>
+<div class="outline-text-2" id="text-org8af8ee0">
 <p>
 Please refer to wikipedia<sup><a id="fnr.1" class="footref" href="#fn.1">1</a></sup><br>
 </p>
 </div>
 </div>
 
-<div id="outline-container-org145bb48" class="outline-2">
-<h2 id="org145bb48">tables</h2>
-<div class="outline-text-2" id="text-org145bb48">
+<div id="outline-container-org1a4228d" class="outline-2">
+<h2 id="org1a4228d">tables</h2>
+<div class="outline-text-2" id="text-org1a4228d">
 </div>
-<div id="outline-container-org1ed19fe" class="outline-3">
-<h3 id="org1ed19fe">basic table</h3>
-<div class="outline-text-3" id="text-org1ed19fe">
+<div id="outline-container-orgce71699" class="outline-3">
+<h3 id="orgce71699">basic table</h3>
+<div class="outline-text-3" id="text-orgce71699">
 <table>
 
 
@@ -171,9 +213,9 @@ Please refer to wikipedia<sup><a id="fnr.1" class="footref" href="#fn.1">1</a></
 </div>
 </div>
 
-<div id="outline-container-orgcaffc96" class="outline-3">
-<h3 id="orgcaffc96">alignment</h3>
-<div class="outline-text-3" id="text-orgcaffc96">
+<div id="outline-container-org59809b4" class="outline-3">
+<h3 id="org59809b4">alignment</h3>
+<div class="outline-text-3" id="text-org59809b4">
 <table>
 
 
@@ -236,9 +278,9 @@ Please refer to wikipedia<sup><a id="fnr.1" class="footref" href="#fn.1">1</a></
 </div>
 </div>
 
-<div id="outline-container-org6e7deb6" class="outline-3">
-<h3 id="org6e7deb6">Column Width and Alignment</h3>
-<div class="outline-text-3" id="text-org6e7deb6">
+<div id="outline-container-org0023acd" class="outline-3">
+<h3 id="org0023acd">Column Width and Alignment</h3>
+<div class="outline-text-3" id="text-org0023acd">
 <table>
 
 
@@ -273,13 +315,13 @@ Please refer to wikipedia<sup><a id="fnr.1" class="footref" href="#fn.1">1</a></
 </div>
 </div>
 
-<div id="outline-container-orgf1cff67" class="outline-2">
-<h2 id="orgf1cff67">Code hightlight</h2>
-<div class="outline-text-2" id="text-orgf1cff67">
+<div id="outline-container-org19703c9" class="outline-2">
+<h2 id="org19703c9">Code hightlight</h2>
+<div class="outline-text-2" id="text-org19703c9">
 </div>
-<div id="outline-container-org36c9ce7" class="outline-3">
-<h3 id="org36c9ce7">C/C++</h3>
-<div class="outline-text-3" id="text-org36c9ce7">
+<div id="outline-container-org6875bdb" class="outline-3">
+<h3 id="org6875bdb">C/C++</h3>
+<div class="outline-text-3" id="text-org6875bdb">
 <div class="org-src-container">
 <pre class="src src-c"><span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;stdio.h&gt;</span>
 
@@ -293,9 +335,9 @@ Please refer to wikipedia<sup><a id="fnr.1" class="footref" href="#fn.1">1</a></
 </div>
 </div>
 </div>
-<div id="outline-container-orge6f68d0" class="outline-3">
-<h3 id="orge6f68d0">elisp</h3>
-<div class="outline-text-3" id="text-orge6f68d0">
+<div id="outline-container-orgdfe58f3" class="outline-3">
+<h3 id="orgdfe58f3">elisp</h3>
+<div class="outline-text-3" id="text-orgdfe58f3">
 <div class="org-src-container">
 <pre class="src src-emacs-lisp">(<span style="color: #51afef;">defun</span> <span style="color: #c678dd;">schspa/getposts</span> (filePath)
   <span style="color: #83898d;">"Return posts file name"</span>
@@ -308,9 +350,9 @@ Please refer to wikipedia<sup><a id="fnr.1" class="footref" href="#fn.1">1</a></
 </div>
 </div>
 </div>
-<div id="outline-container-org2a93fe3" class="outline-3">
-<h3 id="org2a93fe3">python</h3>
-<div class="outline-text-3" id="text-org2a93fe3">
+<div id="outline-container-orgfa2d7da" class="outline-3">
+<h3 id="orgfa2d7da">python</h3>
+<div class="outline-text-3" id="text-orgfa2d7da">
 <div class="org-src-container">
 <pre class="src src-python"><span style="color: #51afef;">import</span> os
 
@@ -322,13 +364,13 @@ Please refer to wikipedia<sup><a id="fnr.1" class="footref" href="#fn.1">1</a></
 </div>
 </div>
 
-<div id="outline-container-org36796ac" class="outline-2">
-<h2 id="org36796ac">Figure Test</h2>
-<div class="outline-text-2" id="text-org36796ac">
+<div id="outline-container-org75539bb" class="outline-2">
+<h2 id="org75539bb">Figure Test</h2>
+<div class="outline-text-2" id="text-org75539bb">
 </div>
-<div id="outline-container-org927b18c" class="outline-3">
-<h3 id="org927b18c">plantuml sequence diagram</h3>
-<div class="outline-text-3" id="text-org927b18c">
+<div id="outline-container-orgf1d394a" class="outline-3">
+<h3 id="orgf1d394a">plantuml sequence diagram</h3>
+<div class="outline-text-3" id="text-orgf1d394a">
 
 <div class="figure">
 <p><img src="asserts/plantuml-test.png" alt="plantuml-test.png"><br>
@@ -338,9 +380,9 @@ Please refer to wikipedia<sup><a id="fnr.1" class="footref" href="#fn.1">1</a></
 </div>
 </div>
 </div>
-<div id="outline-container-org99398b5" class="outline-2">
-<h2 id="org99398b5">Quote</h2>
-<div class="outline-text-2" id="text-org99398b5">
+<div id="outline-container-org39ff600" class="outline-2">
+<h2 id="org39ff600">Quote</h2>
+<div class="outline-text-2" id="text-org39ff600">
 <blockquote>
 <p>
 老夫聊发少年狂，左牵黄，右擎苍，锦帽貂裘，千骑卷平冈。为报倾城随太守，亲射虎，看孙郎。<br>
@@ -351,25 +393,25 @@ Please refer to wikipedia<sup><a id="fnr.1" class="footref" href="#fn.1">1</a></
 </div>
 
 
-<div id="outline-container-org9b8d535" class="outline-2">
-<h2 id="org9b8d535">comments</h2>
-<div class="outline-text-2" id="text-org9b8d535">
+<div id="outline-container-orgd7ab696" class="outline-2">
+<h2 id="orgd7ab696">comments</h2>
+<div class="outline-text-2" id="text-orgd7ab696">
 <p>
 Comments system is using utteranc, thanks to <a href="https://utteranc.es/">utterances</a><br>
 </p>
 </div>
 </div>
 
-<div id="outline-container-org3f8a342" class="outline-2">
-<h2 id="org3f8a342">table-of-contents</h2>
-<div class="outline-text-2" id="text-org3f8a342">
+<div id="outline-container-org26cd140" class="outline-2">
+<h2 id="org26cd140">table-of-contents</h2>
+<div class="outline-text-2" id="text-org26cd140">
 <p>
 orgmode can generate toc.<br>
 </p>
 </div>
-<div id="outline-container-orgacd66ff" class="outline-3">
-<h3 id="orgacd66ff">table-of-contents format</h3>
-<div class="outline-text-3" id="text-orgacd66ff">
+<div id="outline-container-orga1ade0b" class="outline-3">
+<h3 id="orga1ade0b">table-of-contents format</h3>
+<div class="outline-text-3" id="text-orga1ade0b">
 <div class="org-src-container">
 <pre class="src src-html">   &lt;<span style="color: #c678dd;">nav</span> <span style="color: #dcaeea;">id</span>=<span style="color: #98be65;">"table-of-contents"</span>&gt;
 &lt;<span style="color: #c678dd;">h2</span>&gt;<span style="font-weight: bold; font-style: italic; text-decoration: underline;">Table of Contents</span>&lt;/<span style="color: #c678dd;">h2</span>&gt;

@@ -1,50 +1,92 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2020-09-09 三 01:54 -->
+<!-- 2020-09-13 日 18:21 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Linux Kernel Source Auto Complete</title>
 <meta name="generator" content="Org mode">
 <meta name="author" content="schspa">
-<link rel="shortcut icon" href="/images/rose-red.png"
-type="image/x-icon" /><link rel="stylesheet" href="/css/animate.min.css" /><link rel="stylesheet" href="/css/all.min.css" /><link rel="stylesheet" type="text/css" href="/css/style.css" /><script src="/js/jquery.min.js"></script><script src="/js/darkreader.js"></script><script src="/user.config.js"></script><script src="/js/main.js"></script>
+<link rel="shortcut icon" href="/images/rose-red.png" type="image/x-icon" />
+<link rel="stylesheet" href="/css/animate.min.css" />
+<link rel="stylesheet" href="/css/all.min.css" />
+<link rel="stylesheet" type="text/css" href="/css/style.css" />
+<link rel="stylesheet" type="text/css" href="/css/navbar.css" />
+<script src="/js/jquery.min.js"></script>
+<script src="/js/darkreader.js"></script>
+<script src="/user.config.js"></script>
+<script src="/js/main.js"></script>
 </head>
 <body>
+<div id="preamble" class="status">
+<div class="mobile-container">
+  <!-- Top Navigation Menu -->
+  <div class="topnav">
+    <div id="header">
+      <a href="/" class="logo">Schspa's Blog</a>
+      <a href="javascript:void(0);" class="icon" onclick="toggleheader()">
+        <i class="fa fa-bars"></i>
+      </a>
+    </div>
+    <div id="nav_headers">
+      <a href="/tags.html" class="menu-item">Tags</a>
+      <a href="/archive.html" class="menu-item">Archive</a>
+    </div>
+  </div>
+  <!-- End smartphone / tablet look -->
+</div>
+
+<header id="header" class="header">
+  <div class="logo-wrapper">
+    <a href="/" class="logo">Schspa's Blogs</a>
+  </div>
+
+  <nav class="site-navbar">
+    <ul id="menu" class="menu">
+      <li class="menu-item">
+        <a class="menu-item-link" href="/">Home</a>
+      </li>
+      <li class="menu-item">
+        <a class="menu-item-link" href="/sitemap.html">Categories</a>
+      </li>
+    </ul>
+  </nav>
+</header>
+</div>
 <div id="content">
 <h1 class="title">Linux Kernel Source Auto Complete</h1>
 <div id="table-of-contents">
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#orgd1bbb6f">lsp</a>
+<li><a href="#orgd695a09">lsp</a>
 <ul>
-<li><a href="#org0013b52">Generate compile_commands.json</a></li>
-<li><a href="#org0abf369">auto complete setup for Emacs</a></li>
+<li><a href="#org1813c85">Generate compile_commands.json</a></li>
+<li><a href="#org09990c2">auto complete setup for Emacs</a></li>
 </ul>
 </li>
-<li><a href="#org64f5bc4">enjoy codeing with emacs</a></li>
+<li><a href="#org0b24433">enjoy codeing with emacs</a></li>
 </ul>
 </div>
 </div>
-<div id="outline-container-orgd1bbb6f" class="outline-2">
-<h2 id="orgd1bbb6f">lsp</h2>
-<div class="outline-text-2" id="text-orgd1bbb6f">
+<div id="outline-container-orgd695a09" class="outline-2">
+<h2 id="orgd695a09">lsp</h2>
+<div class="outline-text-2" id="text-orgd695a09">
 <p>
 To use lsp mode, we can use a file called compile_commands.json to tell lsp backends about file compile information.<br>
 </p>
 </div>
 
-<div id="outline-container-org0013b52" class="outline-3">
-<h3 id="org0013b52">Generate compile_commands.json</h3>
-<div class="outline-text-3" id="text-org0013b52">
+<div id="outline-container-org1813c85" class="outline-3">
+<h3 id="org1813c85">Generate compile_commands.json</h3>
+<div class="outline-text-3" id="text-org1813c85">
 <p>
 Either of following methods can generate compile_commands.json, Select as you like.<br>
 </p>
 </div>
 <ul class="org-ul">
-<li><a id="orge1f21e1"></a>kernel script from scripts directory<br>
-<div class="outline-text-4" id="text-orge1f21e1">
+<li><a id="orgf44cae3"></a>kernel script from scripts directory<br>
+<div class="outline-text-4" id="text-orgf44cae3">
 <div class="org-src-container">
 <pre class="src src-bash"><span style="color: #5B6268;"># </span><span style="color: #5B6268;">after build kernel</span>
 curl -fsSL https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/plain/scripts/gen_compile_commands.py<span style="color: #98be65;">\?</span>h<span style="color: #98be65;">\=</span>v5.3 | python
@@ -52,8 +94,8 @@ curl -fsSL https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/pl
 </div>
 </div>
 </li>
-<li><a id="org262360d"></a>make bear<br>
-<div class="outline-text-4" id="text-org262360d">
+<li><a id="orgb799aa2"></a>make bear<br>
+<div class="outline-text-4" id="text-orgb799aa2">
 <ol class="org-ol">
 <li>install bear (Build EAR)<br>
 <ul class="org-ul">
@@ -73,20 +115,20 @@ sed <span style="color: #98be65;">'s/..\/..\/..\/..\/..\/..\/..\/kernel\/msm-4.9
 </li>
 </ul>
 </div>
-<div id="outline-container-org0abf369" class="outline-3">
-<h3 id="org0abf369">auto complete setup for Emacs</h3>
-<div class="outline-text-3" id="text-org0abf369">
+<div id="outline-container-org09990c2" class="outline-3">
+<h3 id="org09990c2">auto complete setup for Emacs</h3>
+<div class="outline-text-3" id="text-org09990c2">
 </div>
 <ul class="org-ul">
-<li><a id="org828ae43"></a>install ccls from<br>
-<div class="outline-text-4" id="text-org828ae43">
+<li><a id="org9c59e21"></a>install ccls from<br>
+<div class="outline-text-4" id="text-org9c59e21">
 <ul class="org-ul">
 <li><a href="https://github.com/MaskRay/ccls/wiki/Build">https://github.com/MaskRay/ccls/wiki/Build</a><br></li>
 </ul>
 </div>
 </li>
-<li><a id="orga9f86ad"></a>setup your emacs<br>
-<div class="outline-text-4" id="text-orga9f86ad">
+<li><a id="org0f090d6"></a>setup your emacs<br>
+<div class="outline-text-4" id="text-org0f090d6">
 <ul class="org-ul">
 <li>default c-mode-hook will execute before local-variables loaded.<br></li>
 <li>In the fellowing settings, we use hack-local-variables-hook to execute lsp-mode setting after local variables setting.<br></li>
@@ -146,8 +188,8 @@ sed <span style="color: #98be65;">'s/..\/..\/..\/..\/..\/..\/..\/kernel\/msm-4.9
 </div>
 </li>
 
-<li><a id="org6a6d18e"></a>dir-locals setting<br>
-<div class="outline-text-4" id="text-org6a6d18e">
+<li><a id="org166baef"></a>dir-locals setting<br>
+<div class="outline-text-4" id="text-org166baef">
 <div class="org-src-container">
 <pre class="src src-lisp"><span style="color: #5B6268;">;;; </span><span style="color: #5B6268;">Directory Local Variables</span>
 <span style="color: #5B6268;">;;; </span><span style="color: #5B6268;">For more information see (info "(emacs) Directory Variables")</span>
@@ -167,9 +209,9 @@ sed <span style="color: #98be65;">'s/..\/..\/..\/..\/..\/..\/..\/kernel\/msm-4.9
 </ul>
 </div>
 </div>
-<div id="outline-container-org64f5bc4" class="outline-2">
-<h2 id="org64f5bc4">enjoy codeing with emacs</h2>
-<div class="outline-text-2" id="text-org64f5bc4">
+<div id="outline-container-org0b24433" class="outline-2">
+<h2 id="org0b24433">enjoy codeing with emacs</h2>
+<div class="outline-text-2" id="text-org0b24433">
 </div>
 </div>
 </div>

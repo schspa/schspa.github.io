@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2020-09-12 六 00:44 -->
+<!-- 2020-09-13 日 18:21 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Cheate MAC address</title>
@@ -9,25 +9,67 @@
 <meta name="author" content="Schspa">
 <meta name="description" content="Cheate MAC address"
 >
-<link rel="shortcut icon" href="/images/rose-red.png"
-type="image/x-icon" /><link rel="stylesheet" href="/css/animate.min.css" /><link rel="stylesheet" href="/css/all.min.css" /><link rel="stylesheet" type="text/css" href="/css/style.css" /><script src="/js/jquery.min.js"></script><script src="/js/darkreader.js"></script><script src="/user.config.js"></script><script src="/js/main.js"></script>
+<link rel="shortcut icon" href="/images/rose-red.png" type="image/x-icon" />
+<link rel="stylesheet" href="/css/animate.min.css" />
+<link rel="stylesheet" href="/css/all.min.css" />
+<link rel="stylesheet" type="text/css" href="/css/style.css" />
+<link rel="stylesheet" type="text/css" href="/css/navbar.css" />
+<script src="/js/jquery.min.js"></script>
+<script src="/js/darkreader.js"></script>
+<script src="/user.config.js"></script>
+<script src="/js/main.js"></script>
 </head>
 <body>
+<div id="preamble" class="status">
+<div class="mobile-container">
+  <!-- Top Navigation Menu -->
+  <div class="topnav">
+    <div id="header">
+      <a href="/" class="logo">Schspa's Blog</a>
+      <a href="javascript:void(0);" class="icon" onclick="toggleheader()">
+        <i class="fa fa-bars"></i>
+      </a>
+    </div>
+    <div id="nav_headers">
+      <a href="/tags.html" class="menu-item">Tags</a>
+      <a href="/archive.html" class="menu-item">Archive</a>
+    </div>
+  </div>
+  <!-- End smartphone / tablet look -->
+</div>
+
+<header id="header" class="header">
+  <div class="logo-wrapper">
+    <a href="/" class="logo">Schspa's Blogs</a>
+  </div>
+
+  <nav class="site-navbar">
+    <ul id="menu" class="menu">
+      <li class="menu-item">
+        <a class="menu-item-link" href="/">Home</a>
+      </li>
+      <li class="menu-item">
+        <a class="menu-item-link" href="/sitemap.html">Categories</a>
+      </li>
+    </ul>
+  </nav>
+</header>
+</div>
 <div id="content">
 <h1 class="title">Cheate MAC address</h1>
 <div id="table-of-contents">
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#org44db7d0">背景</a></li>
-<li><a href="#org7169919">使用命令修改IP地址</a></li>
-<li><a href="#org4235663">使用HOOK来完成mac地址欺骗</a>
+<li><a href="#org4e5a2eb">背景</a></li>
+<li><a href="#orgb671245">使用命令修改IP地址</a></li>
+<li><a href="#org3f75604">使用HOOK来完成mac地址欺骗</a>
 <ul>
-<li><a href="#org96f2c21">找出受害者获取MAC地址的方法</a>
+<li><a href="#org0a053c1">找出受害者获取MAC地址的方法</a>
 <ul>
-<li><a href="#org75b8fc3">受害人信息</a></li>
-<li><a href="#orgba53398">使用LD_PRELOAD来完成hook</a></li>
-<li><a href="#orgbb8038b">测试：</a></li>
+<li><a href="#orgdaee562">受害人信息</a></li>
+<li><a href="#org1d3ffa8">使用LD_PRELOAD来完成hook</a></li>
+<li><a href="#org9f731ac">测试：</a></li>
 </ul>
 </li>
 </ul>
@@ -36,9 +78,9 @@ type="image/x-icon" /><link rel="stylesheet" href="/css/animate.min.css" /><link
 </div>
 </div>
 
-<div id="outline-container-org44db7d0" class="outline-2">
-<h2 id="org44db7d0">背景</h2>
-<div class="outline-text-2" id="text-org44db7d0">
+<div id="outline-container-org4e5a2eb" class="outline-2">
+<h2 id="org4e5a2eb">背景</h2>
+<div class="outline-text-2" id="text-org4e5a2eb">
 <p>
 由于一些原因，很多软件会绑定网卡MAC地址，这样就导致换了网卡之后，软件就无法使用了。<br>
 一般的解决方案是通过命令修改MAC地址，但是这样不够优雅，并且还有导致mac地址重复的风险。<br>
@@ -46,26 +88,26 @@ type="image/x-icon" /><link rel="stylesheet" href="/css/animate.min.css" /><link
 </div>
 </div>
 
-<div id="outline-container-org7169919" class="outline-2">
-<h2 id="org7169919">使用命令修改IP地址</h2>
-<div class="outline-text-2" id="text-org7169919">
+<div id="outline-container-orgb671245" class="outline-2">
+<h2 id="orgb671245">使用命令修改IP地址</h2>
+<div class="outline-text-2" id="text-orgb671245">
 <div class="org-src-container">
 <pre class="src src-bash">ifconfig eth0 hw ether xx:xx:xx:xx:xx:xx
 </pre>
 </div>
 </div>
 </div>
-<div id="outline-container-org4235663" class="outline-2">
-<h2 id="org4235663">使用HOOK来完成mac地址欺骗</h2>
-<div class="outline-text-2" id="text-org4235663">
+<div id="outline-container-org3f75604" class="outline-2">
+<h2 id="org3f75604">使用HOOK来完成mac地址欺骗</h2>
+<div class="outline-text-2" id="text-org3f75604">
 </div>
-<div id="outline-container-org96f2c21" class="outline-3">
-<h3 id="org96f2c21">找出受害者获取MAC地址的方法</h3>
-<div class="outline-text-3" id="text-org96f2c21">
+<div id="outline-container-org0a053c1" class="outline-3">
+<h3 id="org0a053c1">找出受害者获取MAC地址的方法</h3>
+<div class="outline-text-3" id="text-org0a053c1">
 </div>
-<div id="outline-container-org75b8fc3" class="outline-4">
-<h4 id="org75b8fc3">受害人信息</h4>
-<div class="outline-text-4" id="text-org75b8fc3">
+<div id="outline-container-orgdaee562" class="outline-4">
+<h4 id="orgdaee562">受害人信息</h4>
+<div class="outline-text-4" id="text-orgdaee562">
 <table>
 
 
@@ -88,9 +130,9 @@ type="image/x-icon" /><link rel="stylesheet" href="/css/animate.min.css" /><link
 </table>
 </div>
 </div>
-<div id="outline-container-orgba53398" class="outline-4">
-<h4 id="orgba53398">使用LD_PRELOAD来完成hook</h4>
-<div class="outline-text-4" id="text-orgba53398">
+<div id="outline-container-org1d3ffa8" class="outline-4">
+<h4 id="org1d3ffa8">使用LD_PRELOAD来完成hook</h4>
+<div class="outline-text-4" id="text-org1d3ffa8">
 <ul class="org-ul">
 <li>代码<br></li>
 </ul>
@@ -165,9 +207,9 @@ type="image/x-icon" /><link rel="stylesheet" href="/css/animate.min.css" /><link
 </ul>
 </div>
 </div>
-<div id="outline-container-orgbb8038b" class="outline-4">
-<h4 id="orgbb8038b">测试：</h4>
-<div class="outline-text-4" id="text-orgbb8038b">
+<div id="outline-container-org9f731ac" class="outline-4">
+<h4 id="org9f731ac">测试：</h4>
+<div class="outline-text-4" id="text-org9f731ac">
 <p>
 hook前：<br>
 </p>
