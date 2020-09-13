@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2020-09-13 日 18:21 -->
+<!-- 2020-09-13 日 18:52 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Cheate MAC address</title>
@@ -31,8 +31,7 @@
       </a>
     </div>
     <div id="nav_headers">
-      <a href="/tags.html" class="menu-item">Tags</a>
-      <a href="/archive.html" class="menu-item">Archive</a>
+      <a href="/sitemap.html" class="menu-item">Categories</a>
     </div>
   </div>
   <!-- End smartphone / tablet look -->
@@ -61,15 +60,15 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#org4e5a2eb">背景</a></li>
-<li><a href="#orgb671245">使用命令修改IP地址</a></li>
-<li><a href="#org3f75604">使用HOOK来完成mac地址欺骗</a>
+<li><a href="#org772a804">背景</a></li>
+<li><a href="#org08b81b9">使用命令修改IP地址</a></li>
+<li><a href="#org3721f1f">使用HOOK来完成mac地址欺骗</a>
 <ul>
-<li><a href="#org0a053c1">找出受害者获取MAC地址的方法</a>
+<li><a href="#org7f1e4da">找出受害者获取MAC地址的方法</a>
 <ul>
-<li><a href="#orgdaee562">受害人信息</a></li>
-<li><a href="#org1d3ffa8">使用LD_PRELOAD来完成hook</a></li>
-<li><a href="#org9f731ac">测试：</a></li>
+<li><a href="#org1e9c5d6">受害人信息</a></li>
+<li><a href="#orgdca7df0">使用LD_PRELOAD来完成hook</a></li>
+<li><a href="#orge34f694">测试：</a></li>
 </ul>
 </li>
 </ul>
@@ -78,9 +77,9 @@
 </div>
 </div>
 
-<div id="outline-container-org4e5a2eb" class="outline-2">
-<h2 id="org4e5a2eb">背景</h2>
-<div class="outline-text-2" id="text-org4e5a2eb">
+<div id="outline-container-org772a804" class="outline-2">
+<h2 id="org772a804">背景</h2>
+<div class="outline-text-2" id="text-org772a804">
 <p>
 由于一些原因，很多软件会绑定网卡MAC地址，这样就导致换了网卡之后，软件就无法使用了。<br>
 一般的解决方案是通过命令修改MAC地址，但是这样不够优雅，并且还有导致mac地址重复的风险。<br>
@@ -88,26 +87,26 @@
 </div>
 </div>
 
-<div id="outline-container-orgb671245" class="outline-2">
-<h2 id="orgb671245">使用命令修改IP地址</h2>
-<div class="outline-text-2" id="text-orgb671245">
+<div id="outline-container-org08b81b9" class="outline-2">
+<h2 id="org08b81b9">使用命令修改IP地址</h2>
+<div class="outline-text-2" id="text-org08b81b9">
 <div class="org-src-container">
 <pre class="src src-bash">ifconfig eth0 hw ether xx:xx:xx:xx:xx:xx
 </pre>
 </div>
 </div>
 </div>
-<div id="outline-container-org3f75604" class="outline-2">
-<h2 id="org3f75604">使用HOOK来完成mac地址欺骗</h2>
-<div class="outline-text-2" id="text-org3f75604">
+<div id="outline-container-org3721f1f" class="outline-2">
+<h2 id="org3721f1f">使用HOOK来完成mac地址欺骗</h2>
+<div class="outline-text-2" id="text-org3721f1f">
 </div>
-<div id="outline-container-org0a053c1" class="outline-3">
-<h3 id="org0a053c1">找出受害者获取MAC地址的方法</h3>
-<div class="outline-text-3" id="text-org0a053c1">
+<div id="outline-container-org7f1e4da" class="outline-3">
+<h3 id="org7f1e4da">找出受害者获取MAC地址的方法</h3>
+<div class="outline-text-3" id="text-org7f1e4da">
 </div>
-<div id="outline-container-orgdaee562" class="outline-4">
-<h4 id="orgdaee562">受害人信息</h4>
-<div class="outline-text-4" id="text-orgdaee562">
+<div id="outline-container-org1e9c5d6" class="outline-4">
+<h4 id="org1e9c5d6">受害人信息</h4>
+<div class="outline-text-4" id="text-org1e9c5d6">
 <table>
 
 
@@ -130,9 +129,9 @@
 </table>
 </div>
 </div>
-<div id="outline-container-org1d3ffa8" class="outline-4">
-<h4 id="org1d3ffa8">使用LD_PRELOAD来完成hook</h4>
-<div class="outline-text-4" id="text-org1d3ffa8">
+<div id="outline-container-orgdca7df0" class="outline-4">
+<h4 id="orgdca7df0">使用LD_PRELOAD来完成hook</h4>
+<div class="outline-text-4" id="text-orgdca7df0">
 <ul class="org-ul">
 <li>代码<br></li>
 </ul>
@@ -207,9 +206,9 @@
 </ul>
 </div>
 </div>
-<div id="outline-container-org9f731ac" class="outline-4">
-<h4 id="org9f731ac">测试：</h4>
-<div class="outline-text-4" id="text-org9f731ac">
+<div id="outline-container-orge34f694" class="outline-4">
+<h4 id="orge34f694">测试：</h4>
+<div class="outline-text-4" id="text-orge34f694">
 <p>
 hook前：<br>
 </p>

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2020-09-13 日 18:21 -->
+<!-- 2020-09-13 日 18:51 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Linux Kernel Source Auto Complete</title>
@@ -29,8 +29,7 @@
       </a>
     </div>
     <div id="nav_headers">
-      <a href="/tags.html" class="menu-item">Tags</a>
-      <a href="/archive.html" class="menu-item">Archive</a>
+      <a href="/sitemap.html" class="menu-item">Categories</a>
     </div>
   </div>
   <!-- End smartphone / tablet look -->
@@ -59,34 +58,34 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#orgd695a09">lsp</a>
+<li><a href="#org21e24eb">lsp</a>
 <ul>
-<li><a href="#org1813c85">Generate compile_commands.json</a></li>
-<li><a href="#org09990c2">auto complete setup for Emacs</a></li>
+<li><a href="#org9d83ffb">Generate compile_commands.json</a></li>
+<li><a href="#org9041dc2">auto complete setup for Emacs</a></li>
 </ul>
 </li>
-<li><a href="#org0b24433">enjoy codeing with emacs</a></li>
+<li><a href="#orgce580b0">enjoy codeing with emacs</a></li>
 </ul>
 </div>
 </div>
-<div id="outline-container-orgd695a09" class="outline-2">
-<h2 id="orgd695a09">lsp</h2>
-<div class="outline-text-2" id="text-orgd695a09">
+<div id="outline-container-org21e24eb" class="outline-2">
+<h2 id="org21e24eb">lsp</h2>
+<div class="outline-text-2" id="text-org21e24eb">
 <p>
 To use lsp mode, we can use a file called compile_commands.json to tell lsp backends about file compile information.<br>
 </p>
 </div>
 
-<div id="outline-container-org1813c85" class="outline-3">
-<h3 id="org1813c85">Generate compile_commands.json</h3>
-<div class="outline-text-3" id="text-org1813c85">
+<div id="outline-container-org9d83ffb" class="outline-3">
+<h3 id="org9d83ffb">Generate compile_commands.json</h3>
+<div class="outline-text-3" id="text-org9d83ffb">
 <p>
 Either of following methods can generate compile_commands.json, Select as you like.<br>
 </p>
 </div>
 <ul class="org-ul">
-<li><a id="orgf44cae3"></a>kernel script from scripts directory<br>
-<div class="outline-text-4" id="text-orgf44cae3">
+<li><a id="orgcf2c251"></a>kernel script from scripts directory<br>
+<div class="outline-text-4" id="text-orgcf2c251">
 <div class="org-src-container">
 <pre class="src src-bash"><span style="color: #5B6268;"># </span><span style="color: #5B6268;">after build kernel</span>
 curl -fsSL https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/plain/scripts/gen_compile_commands.py<span style="color: #98be65;">\?</span>h<span style="color: #98be65;">\=</span>v5.3 | python
@@ -94,8 +93,8 @@ curl -fsSL https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/pl
 </div>
 </div>
 </li>
-<li><a id="orgb799aa2"></a>make bear<br>
-<div class="outline-text-4" id="text-orgb799aa2">
+<li><a id="orgdb3d228"></a>make bear<br>
+<div class="outline-text-4" id="text-orgdb3d228">
 <ol class="org-ol">
 <li>install bear (Build EAR)<br>
 <ul class="org-ul">
@@ -115,20 +114,20 @@ sed <span style="color: #98be65;">'s/..\/..\/..\/..\/..\/..\/..\/kernel\/msm-4.9
 </li>
 </ul>
 </div>
-<div id="outline-container-org09990c2" class="outline-3">
-<h3 id="org09990c2">auto complete setup for Emacs</h3>
-<div class="outline-text-3" id="text-org09990c2">
+<div id="outline-container-org9041dc2" class="outline-3">
+<h3 id="org9041dc2">auto complete setup for Emacs</h3>
+<div class="outline-text-3" id="text-org9041dc2">
 </div>
 <ul class="org-ul">
-<li><a id="org9c59e21"></a>install ccls from<br>
-<div class="outline-text-4" id="text-org9c59e21">
+<li><a id="org0fa7e59"></a>install ccls from<br>
+<div class="outline-text-4" id="text-org0fa7e59">
 <ul class="org-ul">
 <li><a href="https://github.com/MaskRay/ccls/wiki/Build">https://github.com/MaskRay/ccls/wiki/Build</a><br></li>
 </ul>
 </div>
 </li>
-<li><a id="org0f090d6"></a>setup your emacs<br>
-<div class="outline-text-4" id="text-org0f090d6">
+<li><a id="orgfa3e10c"></a>setup your emacs<br>
+<div class="outline-text-4" id="text-orgfa3e10c">
 <ul class="org-ul">
 <li>default c-mode-hook will execute before local-variables loaded.<br></li>
 <li>In the fellowing settings, we use hack-local-variables-hook to execute lsp-mode setting after local variables setting.<br></li>
@@ -188,8 +187,8 @@ sed <span style="color: #98be65;">'s/..\/..\/..\/..\/..\/..\/..\/kernel\/msm-4.9
 </div>
 </li>
 
-<li><a id="org166baef"></a>dir-locals setting<br>
-<div class="outline-text-4" id="text-org166baef">
+<li><a id="org89fafa8"></a>dir-locals setting<br>
+<div class="outline-text-4" id="text-org89fafa8">
 <div class="org-src-container">
 <pre class="src src-lisp"><span style="color: #5B6268;">;;; </span><span style="color: #5B6268;">Directory Local Variables</span>
 <span style="color: #5B6268;">;;; </span><span style="color: #5B6268;">For more information see (info "(emacs) Directory Variables")</span>
@@ -209,9 +208,9 @@ sed <span style="color: #98be65;">'s/..\/..\/..\/..\/..\/..\/..\/kernel\/msm-4.9
 </ul>
 </div>
 </div>
-<div id="outline-container-org0b24433" class="outline-2">
-<h2 id="org0b24433">enjoy codeing with emacs</h2>
-<div class="outline-text-2" id="text-org0b24433">
+<div id="outline-container-orgce580b0" class="outline-2">
+<h2 id="orgce580b0">enjoy codeing with emacs</h2>
+<div class="outline-text-2" id="text-orgce580b0">
 </div>
 </div>
 </div>
