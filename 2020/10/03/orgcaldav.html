@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<!-- 2020-10-07 Wed 23:36 -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Use org-caldav to sync calendars</title>
+<meta name="generator" content="Org mode">
+<meta name="author" content="Schspa">
+<meta name="description" content="Use org-caldav to sync calendars"
+>
+<link rel="shortcut icon" href="/images/rose-red.png" type="image/x-icon" />
+<link rel="stylesheet" href="/css/animate.min.css" />
+<link rel="stylesheet" href="/css/all.min.css" />
+<link rel="stylesheet" type="text/css" href="/css/style.css" />
+<link rel="stylesheet" type="text/css" href="/css/navbar.css" />
+<script src="/js/jquery.min.js"></script>
+<script src="/js/darkreader.js"></script>
+<script src="/user.config.js"></script>
+<script src="/js/main.js"></script>
+</head>
+<body>
+<div id="preamble" class="status">
+<div class="mobile-container">
+  <!-- Top Navigation Menu -->
+  <div class="topnav">
+    <div id="header">
+      <a href="/" class="logo">Schspa's Blog</a>
+      <a href="javascript:void(0);" class="icon" onclick="toggleheader()">
+        <i class="fa fa-bars"></i>
+      </a>
+    </div>
+    <div id="nav_headers">
+      <a href="/sitemap.html" class="menu-item">Categories</a>
+    </div>
+  </div>
+  <!-- End smartphone / tablet look -->
+</div>
+
+<header id="header" class="header">
+  <div class="logo-wrapper">
+    <a href="/" class="logo">Schspa's Blogs</a>
+  </div>
+
+  <nav class="site-navbar">
+    <ul id="menu" class="menu">
+      <li class="menu-item">
+        <a class="menu-item-link" href="/">Home</a>
+      </li>
+      <li class="menu-item">
+        <a class="menu-item-link" href="/sitemap.html">Categories</a>
+      </li>
+    </ul>
+  </nav>
+</header>
+</div>
+<div id="content">
+<h1 class="title">Use org-caldav to sync calendars</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#orgc9d5f3b">获取caldav链接</a></li>
+<li><a href="#org6e2d215">添加org-caldav设置</a>
+<ul>
+<li><a href="#orga67f070">配置</a></li>
+<li><a href="#org76def25">更新日历</a></li>
+<li><a href="#org349d333">密码认证</a>
+<ul>
+<li><a href="#orgada3b86">使用gpg + authinfo来进行认证</a></li>
+</ul>
+</li>
+<li><a href="#org2d32bd7">参考资料：</a></li>
+</ul>
+</li>
+<li><a href="#org40401ed">进阶</a>
+<ul>
+<li><a href="#orgacbdaee">测试</a></li>
+<li><a href="#org5173115"><span class="done DONE">DONE</span> 自动生成org-protocol链接</a>
+<ul>
+<li><a href="#orgde3ae72">在导出时icalendar时自动生成打开对应task element的链接</a></li>
+<li><a href="#org34d984d">添加org-protocol协议处理函数，自动跳转到对应的task节点</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orgc9d5f3b" class="outline-2">
+<h2 id="orgc9d5f3b">获取caldav链接</h2>
+<div class="outline-text-2" id="text-orgc9d5f3b">
+<p>
+以nextcloud为例，打开网页，并进入倒日历选项卡<br>
+</p>
+<p>
+<img src="asserts/2020-10-03_13-41-44_screenshot.png" alt="2020-10-03_13-41-44_screenshot.png"><br>
+点击上图中的personal日历的link选项，既可获得链接<br>
+下面这个这个就是我自己获取到的链接了（敏感信息已经使用尖括号替换掉了）<br>
+<a href="https://">https://</a>&lt;SERVER-DOMAIN.com&gt;/remote.php/dav/calendars/&lt;PERSONAL-UUID&gt;/personal/<br>
+</p>
+</div>
+</div>
+
+<div id="outline-container-org6e2d215" class="outline-2">
+<h2 id="org6e2d215">添加org-caldav设置</h2>
+<div class="outline-text-2" id="text-org6e2d215">
+</div>
+<div id="outline-container-orga67f070" class="outline-3">
+<h3 id="orga67f070">配置</h3>
+<div class="outline-text-3" id="text-orga67f070">
+<div class="org-src-container">
+<pre class="src src-emacs-lisp"><span style="color: #5B6268;">;; </span><span style="color: #5B6268;">org-caldav</span>
+(<span style="color: #51afef;">use-package</span> <span style="color: #a9a1e1;">org-caldav</span>
+  <span style="color: #c678dd;">:ensure</span> t
+  <span style="color: #c678dd;">:config</span>
+  (<span style="color: #51afef;">unless</span> (file-exists-p (concat my-cache-dir <span style="color: #98be65;">"/org-caldav/"</span>))
+    (make-directory (concat my-cache-dir <span style="color: #98be65;">"/org-caldav/"</span>)))
+
+  (<span style="color: #51afef;">setq</span> org-caldav-url <span style="color: #98be65;">"https://&lt;SERVER-DOMAIN.com&gt;/remote.php/dav/calendars/&lt;PERSONAL-UUID&gt;"</span>)
+  (<span style="color: #51afef;">setq</span> org-caldav-calendar-id <span style="color: #98be65;">"personal"</span>)
+  (<span style="color: #51afef;">setq</span>
+   org-caldav-save-directory (concat my-cache-dir <span style="color: #98be65;">"/org-caldav/"</span>)
+   org-caldav-backup-file (concat my-cache-dir <span style="color: #98be65;">"/org-caldav-backup.org"</span>)
+   org-caldav-show-sync-results 'nil
+   org-caldav-files (mapcar (<span style="color: #51afef;">lambda</span> (x)
+                              (concat org-directory x))
+                            '(<span style="color: #98be65;">"gtd/homework.org"</span> <span style="color: #98be65;">"gtd/tasks.org"</span>)))
+  (<span style="color: #51afef;">setq</span> org-caldav-inbox (concat org-directory <span style="color: #98be65;">"gtd/inbox.org"</span>)))
+</pre>
+</div>
+<p>
+需要注意，上面填写的org-caldav-canlendar-id是personal，同一个账户可以有多个日历，选择其中一个与orgmode做同步<br>
+</p>
+</div>
+</div>
+<div id="outline-container-org76def25" class="outline-3">
+<h3 id="org76def25">更新日历</h3>
+<div class="outline-text-3" id="text-org76def25">
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">M-x org-caldav-sync
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org349d333" class="outline-3">
+<h3 id="org349d333">密码认证</h3>
+<div class="outline-text-3" id="text-org349d333">
+<p>
+在同步时，每次需要认证，都要输入密码, 通过emacs自带的auth source，可以完成自动登录<br>
+</p>
+</div>
+<div id="outline-container-orgada3b86" class="outline-4">
+<h4 id="orgada3b86">使用gpg + authinfo来进行认证</h4>
+<div class="outline-text-4" id="text-orgada3b86">
+</div>
+<ul class="org-ul">
+<li><a id="orgfacb6d8"></a>创建gpg key<br>
+<div class="outline-text-5" id="text-orgfacb6d8">
+<div class="org-src-container">
+<pre class="src src-bash">gpg --gen-key
+<span style="color: #5B6268;"># </span><span style="color: #5B6268;">&#25353;&#29031;&#25552;&#31034;&#36755;&#20837;&#21517;&#31216;&#65292;&#37038;&#31665;&#65292;&#21475;&#20196;&#31561;&#20449;&#24687;</span>
+</pre>
+</div>
+</div>
+</li>
+<li><a id="orgd10ce24"></a>生成~/.authinfo<br>
+<div class="outline-text-5" id="text-orgd10ce24">
+<div class="org-src-container">
+<pre class="src src-bash">touch ~/.authinfo
+gpg -e ~/.authinfo
+rm ~/.authinfo
+</pre>
+</div>
+</div>
+</li>
+<li><a id="org9fbccab"></a>打开 ~/.authinfo.gpg<br>
+<div class="outline-text-5" id="text-org9fbccab">
+<div class="org-src-container">
+<pre class="src src-authinfo">machine &lt;SERVER-DOMAIN&gt;.com:443 port https login &lt;USER-NAME&gt; password &lt;PASSWORD&gt;
+</pre>
+</div>
+</div>
+</li>
+<li><a id="org14dd7a9"></a>运行org-caldav-sync<br>
+<div class="outline-text-5" id="text-org14dd7a9">
+<p>
+这下应该不会再提示输入密码了（注：可能需要输入gpg key的口令）<br>
+</p>
+</div>
+</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-org2d32bd7" class="outline-3">
+<h3 id="org2d32bd7">参考资料：</h3>
+<div class="outline-text-3" id="text-org2d32bd7">
+<p>
+<a href="https://www.gnu.org/software/emacs/manual/html_mono/auth.html">Emacs auth-source</a><br>
+<a href="https://bretthutley.com/2018/09/01/emacs-gpg-and-pinentry-on-mac/">Emacs, gpg and pinentry on Mac</a><br>
+<a href="https://www.masteringemacs.org/article/keeping-secrets-in-emacs-gnupg-auth-sources">Keeping Secrets in Emacs with GnuPG and Auth Sources</a><br>
+</p>
+</div>
+</div>
+</div>
+<div id="outline-container-org40401ed" class="outline-2">
+<h2 id="org40401ed">进阶</h2>
+<div class="outline-text-2" id="text-org40401ed">
+</div>
+<div id="outline-container-orgacbdaee" class="outline-3">
+<h3 id="orgacbdaee">测试</h3>
+<div class="outline-text-3" id="text-orgacbdaee">
+<p>
+emacs-mac主分支上的代码还有BUG，无法通过open-source来打开文件，详见<a href="https://emacs-china.org/t/org-protocol-open-source/14692">org-protocol://open-source无法打开文件</a><br>
+</p>
+<div class="org-src-container">
+<pre class="src src-bash"><span style="color: #5B6268;"># </span><span style="color: #5B6268;">emacs-mac use apple script for url handle.</span>
+open  <span style="color: #98be65;">'org-protocol://open-source?url=gtd%2Finbox.org'</span>
+
+<span style="color: #5B6268;"># </span><span style="color: #5B6268;">others use emacsclient for url handle</span>
+emacsclient  <span style="color: #98be65;">'org-protocol://open-source?url=gtd%2Finbox.org'</span>
+Waiting for Emacs...
+</pre>
+</div>
+<p>
+正常情况下，当在shell中执行以上命令时，系统会自动打开对应的文件。如果不能打开，则需要检查org-protocal配置<br>
+</p>
+</div>
+</div>
+<div id="outline-container-org5173115" class="outline-3">
+<h3 id="org5173115"><span class="done DONE">DONE</span> 自动生成org-protocol链接</h3>
+<div class="outline-text-3" id="text-org5173115">
+</div>
+<div id="outline-container-orgde3ae72" class="outline-4">
+<h4 id="orgde3ae72">在导出时icalendar时自动生成打开对应task element的链接</h4>
+<div class="outline-text-4" id="text-orgde3ae72">
+<p>
+通过org-protocol，自定义gdt的子协议，并且通过org文件节点的ID，可以轻松完成这个操作，由于icalendar的接口没有提供自定义entry的方法，这里对org-icalendar&#x2013;valarm进行了hook，在添加valarm属性之前，加上<a href="https://tools.ietf.org/html/rfc5545#section-3.8.4.6">rfc5545 URL property</a> URL属性<br>
+</p>
+<div class="org-src-container">
+<pre class="src src-emacs-lisp"><span style="color: #5B6268;">;; </span><span style="color: #5B6268;">setup icalendar</span>
+<span style="color: #5B6268;">;; </span><span style="color: #5B6268;">advice to org-icalendar--valarm</span>
+<span style="color: #5B6268;">;; </span><span style="color: #5B6268;">we need entry argument, so this function is a goog choice.</span>
+(<span style="color: #51afef;">defun</span> <span style="color: #c678dd;">org-gdt-icalendar--valarm</span> (orig-fun <span style="color: #ECBE7B;">&amp;rest</span> args)
+  <span style="color: #83898d;">"Add needed URL entry for icalendar"</span>
+  (format <span style="color: #98be65;">"%s\n%s"</span>
+          (concat <span style="color: #98be65;">"URL:org-protocol://gdt?id="</span> (org-element-property <span style="color: #c678dd;">:ID</span> (car args)) <span style="color: #98be65;">"\n"</span>)
+          (apply orig-fun args)))
+
+(eval-after-load 'ox-icalendar
+  (<span style="color: #51afef;">progn</span>
+    (<span style="color: #51afef;">setq</span> org-icalendar-include-todo t
+          org-icalendar-use-deadline '(event-if-todo event-if-not-todo todo-due event-if-todo-not-done)
+          org-icalendar-use-scheduled '(event-if-todo event-if-not-todo todo-start event-if-todo-not-done)
+          org-icalendar-with-timestamps t)
+    (advice-add 'org-icalendar--valarm <span style="color: #c678dd;">:around</span> #'org-gdt-icalendar--valarm)))
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-org34d984d" class="outline-4">
+<h4 id="org34d984d">添加org-protocol协议处理函数，自动跳转到对应的task节点</h4>
+<div class="outline-text-4" id="text-org34d984d">
+<div class="org-src-container">
+<pre class="src src-emacs-lisp">(<span style="color: #51afef;">require</span> '<span style="color: #a9a1e1;">org-protocol</span>)
+
+(<span style="color: #51afef;">defun</span> <span style="color: #c678dd;">org-gdt-protocol-open</span> (info)
+  <span style="color: #83898d;">"This handler simply opens the file with emacsclient.</span>
+<span style="color: #83898d;">INFO is an alist containing additional information passed by the protocol URL.</span>
+<span style="color: #83898d;">It should contain the id key, pointing to the ID property for a org file to open.</span>
+<span style="color: #83898d;">  Example protocol string:</span>
+<span style="color: #83898d;">org-protocol://gdt?id=CBEC8DD1-7814-44A7-AA3D-97AEC35B6DB7"</span>
+  (<span style="color: #51afef;">when-let</span> ((id (plist-get info <span style="color: #c678dd;">:id</span>)))
+    (raise-frame)
+    (org-open-link-from-string (format <span style="color: #98be65;">"id:%s"</span> id)))
+  nil)
+
+(<span style="color: #51afef;">push</span> '(<span style="color: #98be65;">"org-gdt-ref"</span>  <span style="color: #c678dd;">:protocol</span> <span style="color: #98be65;">"gdt"</span>   <span style="color: #c678dd;">:function</span> org-gdt-protocol-open)
+      org-protocol-protocol-alist)
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<script src="https://utteranc.es/client.js"
+    repo="schspa/schspa.github.io"
+    issue-term="title"
+    label="✨💬✨"
+    theme="github-light"
+    crossorigin="anonymous"
+    async>
+</script>
+<div class="me">
+  <span><b>Contact me via :)</b><span>
+  <div class="contact">
+    <a id="email" href="mailto:schspa@gmail.com" target="_blank"><i class="fab fa-mailchimp animated heartBeat delay-2s slower"></i></a>
+    <a id="github" href="//github.com/schspa" target="_blank"><i class="fab fa-github animated heartBeat delay-2s slower"></i></a>
+  </div>
+</div>
+
+<div id="jinrishici-sentence" style="font-weight: 700;">虚怀乃若谷，水深则流缓。</div>
+<script src="https://sdk.jinrishici.com/v2/browser/jinrishici.js" charset="utf-8"></script>
+</div>
+</body>
+</html>

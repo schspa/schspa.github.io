@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2020-09-15 二 12:21 -->
+<!-- 2020-10-07 Wed 23:36 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Linux Signal Handle</title>
@@ -95,13 +95,13 @@
 </div>
 </div>
 
-<div id="outline-container-orgc762d42" class="outline-2">
+<div id="outline-container-linux-signal-handle" class="outline-2">
 <h2 id="linux-signal-handle"><span class="section-number-2">1</span> Linux signal handle</h2>
 <div class="outline-text-2" id="text-linux-signal-handle">
 </div>
 </div>
 
-<div id="outline-container-orgcd0cc0c" class="outline-2">
+<div id="outline-container-提纲" class="outline-2">
 <h2 id="提纲"><span class="section-number-2">2</span> 提纲：</h2>
 <div class="outline-text-2" id="text-提纲">
 <ul class="org-ul">
@@ -114,19 +114,19 @@
 </ul>
 </div>
 
-<div id="outline-container-org2826d10" class="outline-3">
+<div id="outline-container-man-pages" class="outline-3">
 <h3 id="man-pages"><span class="section-number-3">2.1</span> <a href="http://man7.org/linux/man-pages/man7/signal.7.html">man pages</a></h3>
 <div class="outline-text-3" id="text-man-pages">
 </div>
 </div>
 </div>
 
-<div id="outline-container-org26e1af0" class="outline-2">
+<div id="outline-container-信号基本概念以及定义" class="outline-2">
 <h2 id="信号基本概念以及定义"><span class="section-number-2">3</span> 信号基本概念以及定义</h2>
 <div class="outline-text-2" id="text-信号基本概念以及定义">
 </div>
 
-<div id="outline-container-org2b88b68" class="outline-3">
+<div id="outline-container-signal设计目的" class="outline-3">
 <h3 id="signal设计目的"><span class="section-number-3">3.1</span> Signal设计目的</h3>
 <div class="outline-text-3" id="text-signal设计目的">
 <ul class="org-ul">
@@ -139,7 +139,7 @@
 </div>
 </div>
 
-<div id="outline-container-orgf9d8eaf" class="outline-3">
+<div id="outline-container-linux-信号定义" class="outline-3">
 <h3 id="linux-信号定义"><span class="section-number-3">3.2</span> 1. Linux 信号定义</h3>
 <div class="outline-text-3" id="text-linux-信号定义">
 <p>
@@ -258,7 +258,7 @@ Signal 内部数据结构<br>
 </div>
 
 <p>
-<a href="http://on-img.com/chart_image/5b50a492e4b0be50eab7a65a.png?_=1532930354799">http://on-img.com/chart_image/5b50a492e4b0be50eab7a65a.png?_=1532930354799</a><br>
+<img src="http://on-img.com/chart_image/5b50a492e4b0be50eab7a65a.png?_=1532930354799" alt="5b50a492e4b0be50eab7a65a.png?_=1532930354799"><br>
 &gt; sigset_t: bitmap for signal state<br>
 </p>
 </div>
@@ -267,7 +267,7 @@ Signal 内部数据结构<br>
 </div>
 </div>
 
-<div id="outline-container-org117e14c" class="outline-2">
+<div id="outline-container-信号发送" class="outline-2">
 <h2 id="信号发送"><span class="section-number-2">4</span> 信号发送</h2>
 <div class="outline-text-2" id="text-信号发送">
 <ol class="org-ol">
@@ -292,11 +292,11 @@ Signal 内部数据结构<br>
 </ol>
 </div>
 
-<div id="outline-container-org323e9f0" class="outline-3">
+<div id="outline-container-内核中信号发送流程" class="outline-3">
 <h3 id="内核中信号发送流程"><span class="section-number-3">4.1</span> 内核中信号发送流程</h3>
 <div class="outline-text-3" id="text-内核中信号发送流程">
 
-<div class="figure">
+<div id="orge13eece" class="figure">
 <p><img src="asserts/linux-send-signal-flow.png" alt="linux-send-signal-flow.png"><br>
 </p>
 </div>
@@ -306,7 +306,7 @@ Signal 内部数据结构<br>
 </p>
 </div>
 
-<div id="outline-container-org03070fd" class="outline-4">
+<div id="outline-container-alloc-sigqueue-结构题" class="outline-4">
 <h4 id="alloc-sigqueue-结构题"><span class="section-number-4">4.1.1</span> alloc sigqueue 结构题</h4>
 <div class="outline-text-4" id="text-alloc-sigqueue-结构题">
 <p>
@@ -318,7 +318,7 @@ complete_signal函数 1. 优先给主线程 2. 在所有线程中查找可以
 </div>
 </div>
 
-<div id="outline-container-orgcd50c2f" class="outline-3">
+<div id="outline-container-信号接收" class="outline-3">
 <h3 id="信号接收"><span class="section-number-3">4.2</span> 信号接收</h3>
 <div class="outline-text-3" id="text-信号接收">
 <ol class="org-ol">
@@ -331,7 +331,7 @@ complete_signal函数 1. 优先给主线程 2. 在所有线程中查找可以
 </ol>
 </div>
 
-<div id="outline-container-org1a53975" class="outline-4">
+<div id="outline-container-信号处理途径" class="outline-4">
 <h4 id="信号处理途径"><span class="section-number-4">4.2.1</span> 信号处理途径</h4>
 <div class="outline-text-4" id="text-信号处理途径">
 <ul class="org-ul">
@@ -360,7 +360,7 @@ complete_signal函数 1. 优先给主线程 2. 在所有线程中查找可以
 <li>Stop<br></li>
 </ul>
 
-<pre class="example">
+<pre class="example" id="org6202146">
 “ +--------------------+------------------+
  * | POSIX signal     | default action |
  * +------------------+------------------+
@@ -411,7 +411,7 @@ kernel developer's reference manual。" iBooks.<br>
 </blockquote>
 
 
-<div class="figure">
+<div id="orga260245" class="figure">
 <p><img src="asserts/signal-send-process.png" alt="signal-send-process.png"><br>
 </p>
 </div>
@@ -421,7 +421,7 @@ kernel developer's reference manual。" iBooks.<br>
 <li><a id="process-defined-handler"></a>Process defined handler<br>
 <div class="outline-text-5" id="text-process-defined-handler">
 
-<div class="figure">
+<div id="org889dea6" class="figure">
 <p><img src="asserts/2020-09-09_16-27-04_screenshot.png" alt="2020-09-09_16-27-04_screenshot.png"><br>
 </p>
 </div>
@@ -436,7 +436,7 @@ developer's reference manual。" iBooks.<br>
 </ul>
 </div>
 
-<div id="outline-container-org77bdd69" class="outline-4">
+<div id="outline-container-do_signal_stop流程-sigstop" class="outline-4">
 <h4 id="do_signal_stop流程-sigstop"><span class="section-number-4">4.2.2</span> do_signal_stop流程 (SIGSTOP)</h4>
 <div class="outline-text-4" id="text-do_signal_stop流程-sigstop">
 <p>
@@ -447,31 +447,31 @@ signal<br>
 </p>
 
 
-<div class="figure">
+<div id="orgb2204cd" class="figure">
 <p><img src="asserts/do-signal-stop.png" alt="do-signal-stop.png"><br>
 </p>
 </div>
 
 
-<div class="figure">
+<div id="orgfe94072" class="figure">
 <p><img src="asserts/do-signal-d-stop.png" alt="do-signal-d-stop.png"><br>
 </p>
 </div>
 </div>
 </div>
 
-<div id="outline-container-org1b69974" class="outline-4">
+<div id="outline-container-kill流程-sigkill" class="outline-4">
 <h4 id="kill流程-sigkill"><span class="section-number-4">4.2.3</span> kill流程 (SIGKILL)</h4>
 <div class="outline-text-4" id="text-kill流程-sigkill">
 
-<div class="figure">
+<div id="orgd3ad643" class="figure">
 <p><img src="asserts/linux-sigkill-process.png" alt="linux-sigkill-process.png"><br>
 </p>
 </div>
 </div>
 </div>
 
-<div id="outline-container-org8000ccc" class="outline-4">
+<div id="outline-container-segv流程" class="outline-4">
 <h4 id="segv流程"><span class="section-number-4">4.2.4</span> SEGV流程</h4>
 <div class="outline-text-4" id="text-segv流程">
 </div>
@@ -537,7 +537,7 @@ signal<br>
 <a href="http://androidxref.com/8.1.0_r33/xref/system/core/debuggerd/tombstoned/tombstoned.rc#1">system/core/debuggerd/tombstoned/tombstoned.rc</a><br>
 </p>
 
-<pre class="example">
+<pre class="example" id="orgef72a45">
 service tombstoned /system/bin/tombstoned
     user tombstoned
     group system
@@ -712,7 +712,7 @@ CLONE_CHILD_CLEARTID;<br>
 </ul>
 </div>
 
-<div id="outline-container-org3be328f" class="outline-4">
+<div id="outline-container-signal调试" class="outline-4">
 <h4 id="signal调试"><span class="section-number-4">4.2.5</span> Signal调试</h4>
 <div class="outline-text-4" id="text-signal调试">
 </div>
@@ -725,7 +725,7 @@ CLONE_CHILD_CLEARTID;<br>
 /d/tracing/events/signal/signal_deliver<br>
 </p>
 
-<pre class="example">
+<pre class="example" id="orgd62ae87">
 remote_job_disp-24083 [000] d..2  5497.143322: signal_deliver: sig=9 errno=0 code=0 sa_handler=0 sa_flags=0
 ActivityManager-7834  [001] d..2  5497.171845: signal_generate: sig=9 errno=0 code=0 comm=id.printspooler pid=25155 grp=1 res=0
    FileObserver-25196 [000] d..3  5497.176538: signal_generate: sig=17 errno=0 code=262146 comm=main pid=7514 grp=1 res=0
@@ -751,7 +751,7 @@ remote_job_disp-24083 [000] d..3  5497.285461: signal_generate: sig=17 errno=0 c
 cat /proc/xxx/status<br>
 </p>
 
-<pre class="example">
+<pre class="example" id="org6897885">
 mido:/ # cat /proc/7767/status                                                                                                                             
 Name:   system_server
 State:  S (sleeping)
