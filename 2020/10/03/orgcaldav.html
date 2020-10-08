@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2020-10-07 Wed 23:36 -->
+<!-- 2020-10-08 Thu 10:04 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Use org-caldav to sync calendars</title>
@@ -245,9 +245,10 @@ Waiting for Emacs...
 <span style="color: #5B6268;">;; </span><span style="color: #5B6268;">we need entry argument, so this function is a goog choice.</span>
 (<span style="color: #51afef;">defun</span> <span style="color: #c678dd;">org-gdt-icalendar--valarm</span> (orig-fun <span style="color: #ECBE7B;">&amp;rest</span> args)
   <span style="color: #83898d;">"Add needed URL entry for icalendar"</span>
-  (format <span style="color: #98be65;">"%s\n%s"</span>
-          (concat <span style="color: #98be65;">"URL:org-protocol://gdt?id="</span> (org-element-property <span style="color: #c678dd;">:ID</span> (car args)) <span style="color: #98be65;">"\n"</span>)
-          (apply orig-fun args)))
+  (<span style="color: #51afef;">let</span> ((valarms (apply orig-fun args)))
+    (concat
+     <span style="color: #98be65;">"URL:org-protocol://gdt?id="</span> (org-element-property <span style="color: #c678dd;">:ID</span> (car args)) <span style="color: #98be65;">"\n"</span>
+     (<span style="color: #51afef;">if</span> valarms valarms <span style="color: #98be65;">""</span>))))
 
 (eval-after-load 'ox-icalendar
   (<span style="color: #51afef;">progn</span>
