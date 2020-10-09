@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2020-10-07 Wed 23:36 -->
+<!-- 2020-10-09 Fri 23:21 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Linux Signal Handle</title>
@@ -296,7 +296,7 @@ Signal 内部数据结构<br>
 <h3 id="内核中信号发送流程"><span class="section-number-3">4.1</span> 内核中信号发送流程</h3>
 <div class="outline-text-3" id="text-内核中信号发送流程">
 
-<div id="orge13eece" class="figure">
+<div id="orgc005894" class="figure">
 <p><img src="asserts/linux-send-signal-flow.png" alt="linux-send-signal-flow.png"><br>
 </p>
 </div>
@@ -360,7 +360,7 @@ complete_signal函数 1. 优先给主线程 2. 在所有线程中查找可以
 <li>Stop<br></li>
 </ul>
 
-<pre class="example" id="org6202146">
+<pre class="example" id="orga43dd7c">
 “ +--------------------+------------------+
  * | POSIX signal     | default action |
  * +------------------+------------------+
@@ -411,7 +411,7 @@ kernel developer's reference manual。" iBooks.<br>
 </blockquote>
 
 
-<div id="orga260245" class="figure">
+<div id="org89294d7" class="figure">
 <p><img src="asserts/signal-send-process.png" alt="signal-send-process.png"><br>
 </p>
 </div>
@@ -421,7 +421,7 @@ kernel developer's reference manual。" iBooks.<br>
 <li><a id="process-defined-handler"></a>Process defined handler<br>
 <div class="outline-text-5" id="text-process-defined-handler">
 
-<div id="org889dea6" class="figure">
+<div id="org6362c52" class="figure">
 <p><img src="asserts/2020-09-09_16-27-04_screenshot.png" alt="2020-09-09_16-27-04_screenshot.png"><br>
 </p>
 </div>
@@ -447,13 +447,13 @@ signal<br>
 </p>
 
 
-<div id="orgb2204cd" class="figure">
+<div id="orgbe5560d" class="figure">
 <p><img src="asserts/do-signal-stop.png" alt="do-signal-stop.png"><br>
 </p>
 </div>
 
 
-<div id="orgfe94072" class="figure">
+<div id="org2667af9" class="figure">
 <p><img src="asserts/do-signal-d-stop.png" alt="do-signal-d-stop.png"><br>
 </p>
 </div>
@@ -464,7 +464,7 @@ signal<br>
 <h4 id="kill流程-sigkill"><span class="section-number-4">4.2.3</span> kill流程 (SIGKILL)</h4>
 <div class="outline-text-4" id="text-kill流程-sigkill">
 
-<div id="orgd3ad643" class="figure">
+<div id="orgaf79009" class="figure">
 <p><img src="asserts/linux-sigkill-process.png" alt="linux-sigkill-process.png"><br>
 </p>
 </div>
@@ -537,7 +537,7 @@ signal<br>
 <a href="http://androidxref.com/8.1.0_r33/xref/system/core/debuggerd/tombstoned/tombstoned.rc#1">system/core/debuggerd/tombstoned/tombstoned.rc</a><br>
 </p>
 
-<pre class="example" id="orgef72a45">
+<pre class="example" id="org1e73eb5">
 service tombstoned /system/bin/tombstoned
     user tombstoned
     group system
@@ -725,7 +725,7 @@ CLONE_CHILD_CLEARTID;<br>
 /d/tracing/events/signal/signal_deliver<br>
 </p>
 
-<pre class="example" id="orgd62ae87">
+<pre class="example" id="org9338ba1">
 remote_job_disp-24083 [000] d..2  5497.143322: signal_deliver: sig=9 errno=0 code=0 sa_handler=0 sa_flags=0
 ActivityManager-7834  [001] d..2  5497.171845: signal_generate: sig=9 errno=0 code=0 comm=id.printspooler pid=25155 grp=1 res=0
    FileObserver-25196 [000] d..3  5497.176538: signal_generate: sig=17 errno=0 code=262146 comm=main pid=7514 grp=1 res=0
@@ -751,7 +751,7 @@ remote_job_disp-24083 [000] d..3  5497.285461: signal_generate: sig=17 errno=0 c
 cat /proc/xxx/status<br>
 </p>
 
-<pre class="example" id="org6897885">
+<pre class="example" id="org9cf0760">
 mido:/ # cat /proc/7767/status                                                                                                                             
 Name:   system_server
 State:  S (sleeping)

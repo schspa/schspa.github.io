@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2020-10-07 Wed 23:36 -->
+<!-- 2020-10-09 Fri 23:21 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Cheate MAC address</title>
@@ -60,16 +60,16 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#org6d61884">背景</a></li>
-<li><a href="#org64aaf38">使用命令修改IP地址</a></li>
-<li><a href="#orgfd0c1b9">使用HOOK来完成mac地址欺骗</a>
+<li><a href="#org73f8927">背景</a></li>
+<li><a href="#org83a45de">使用命令修改IP地址</a></li>
+<li><a href="#org7f75a49">使用HOOK来完成mac地址欺骗</a>
 <ul>
-<li><a href="#org05549e3">找出受害者获取MAC地址的方法</a>
+<li><a href="#org2407dd3">找出受害者获取MAC地址的方法</a>
 <ul>
-<li><a href="#org77d6f3f">受害人信息 </a></li>
-<li><a href="#org3f2a0a1">找出受害人获取mac地址的方法</a></li>
-<li><a href="#org3632a56">使用LD_PRELOAD来完成hook</a></li>
-<li><a href="#orgd5fc7ac">测试：</a></li>
+<li><a href="#org93c0056">受害人信息 </a></li>
+<li><a href="#org6b00923">找出受害人获取mac地址的方法</a></li>
+<li><a href="#org7178ed4">使用LD_PRELOAD来完成hook</a></li>
+<li><a href="#orgcfa1225">测试：</a></li>
 </ul>
 </li>
 </ul>
@@ -78,9 +78,9 @@
 </div>
 </div>
 
-<div id="outline-container-org6d61884" class="outline-2">
-<h2 id="org6d61884">背景</h2>
-<div class="outline-text-2" id="text-org6d61884">
+<div id="outline-container-org73f8927" class="outline-2">
+<h2 id="org73f8927">背景</h2>
+<div class="outline-text-2" id="text-org73f8927">
 <p>
 由于一些原因，很多软件会绑定网卡MAC地址，这样就导致换了网卡之后，软件就无法使用了。<br>
 一般的解决方案是通过命令修改MAC地址，但是这样不够优雅，并且还有导致mac地址重复的风险。<br>
@@ -88,26 +88,26 @@
 </div>
 </div>
 
-<div id="outline-container-org64aaf38" class="outline-2">
-<h2 id="org64aaf38">使用命令修改IP地址</h2>
-<div class="outline-text-2" id="text-org64aaf38">
+<div id="outline-container-org83a45de" class="outline-2">
+<h2 id="org83a45de">使用命令修改IP地址</h2>
+<div class="outline-text-2" id="text-org83a45de">
 <div class="org-src-container">
 <pre class="src src-bash">ifconfig eth0 hw ether xx:xx:xx:xx:xx:xx
 </pre>
 </div>
 </div>
 </div>
-<div id="outline-container-orgfd0c1b9" class="outline-2">
-<h2 id="orgfd0c1b9">使用HOOK来完成mac地址欺骗</h2>
-<div class="outline-text-2" id="text-orgfd0c1b9">
+<div id="outline-container-org7f75a49" class="outline-2">
+<h2 id="org7f75a49">使用HOOK来完成mac地址欺骗</h2>
+<div class="outline-text-2" id="text-org7f75a49">
 </div>
-<div id="outline-container-org05549e3" class="outline-3">
-<h3 id="org05549e3">找出受害者获取MAC地址的方法</h3>
-<div class="outline-text-3" id="text-org05549e3">
+<div id="outline-container-org2407dd3" class="outline-3">
+<h3 id="org2407dd3">找出受害者获取MAC地址的方法</h3>
+<div class="outline-text-3" id="text-org2407dd3">
 </div>
-<div id="outline-container-org77d6f3f" class="outline-4">
-<h4 id="org77d6f3f">受害人信息 <sup><a id="fnr.1" class="footref" href="#fn.1">1</a></sup></h4>
-<div class="outline-text-4" id="text-org77d6f3f">
+<div id="outline-container-org93c0056" class="outline-4">
+<h4 id="org93c0056">受害人信息 <sup><a id="fnr.1" class="footref" href="#fn.1">1</a></sup></h4>
+<div class="outline-text-4" id="text-org93c0056">
 <table>
 
 
@@ -130,9 +130,9 @@
 </table>
 </div>
 </div>
-<div id="outline-container-org3f2a0a1" class="outline-4">
-<h4 id="org3f2a0a1">找出受害人获取mac地址的方法</h4>
-<div class="outline-text-4" id="text-org3f2a0a1">
+<div id="outline-container-org6b00923" class="outline-4">
+<h4 id="org6b00923">找出受害人获取mac地址的方法</h4>
+<div class="outline-text-4" id="text-org6b00923">
 <p>
 用strace抓一下log<br>
 </p>
@@ -201,9 +201,9 @@
 </p>
 </div>
 </div>
-<div id="outline-container-org3632a56" class="outline-4">
-<h4 id="org3632a56">使用LD_PRELOAD来完成hook</h4>
-<div class="outline-text-4" id="text-org3632a56">
+<div id="outline-container-org7178ed4" class="outline-4">
+<h4 id="org7178ed4">使用LD_PRELOAD来完成hook</h4>
+<div class="outline-text-4" id="text-org7178ed4">
 <ul class="org-ul">
 <li>代码<br></li>
 </ul>
@@ -278,9 +278,9 @@
 </ul>
 </div>
 </div>
-<div id="outline-container-orgd5fc7ac" class="outline-4">
-<h4 id="orgd5fc7ac">测试：</h4>
-<div class="outline-text-4" id="text-orgd5fc7ac">
+<div id="outline-container-orgcfa1225" class="outline-4">
+<h4 id="orgcfa1225">测试：</h4>
+<div class="outline-text-4" id="text-orgcfa1225">
 <p>
 hook前：<br>
 </p>
