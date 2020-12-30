@@ -1,12 +1,14 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh">
 <head>
 <!-- 2020-12-30 Wed 22:49 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Sitemap for project orgfiles</title>
+<title>SSHFS behind NAT</title>
 <meta name="generator" content="Org mode">
 <meta name="author" content="Schspa">
+<meta name="description" content="SSHFS behind NAT"
+>
 <link rel="shortcut icon" href="/images/rose-red.png" type="image/x-icon" />
 <link rel="stylesheet" href="/css/animate.min.css" />
 <link rel="stylesheet" href="/css/all.min.css" />
@@ -53,22 +55,51 @@
 </header>
 </div>
 <div id="content">
-<h1 class="title">Sitemap for project orgfiles</h1>
-<ul class="org-ul">
-<li><a href="theindex.html">Index</a></li>
-<li><a href="index.html">My Blogs based on org mode</a></li>
-<li><a href="2020/09/11/mac-cheater.html">Cheate MAC address</a></li>
-<li><a href="2020/12/30/sshfs.html">SSHFS behind NAT</a></li>
-<li><a href="2020/10/09/blogs-sync.html">Use Github Action to Sync blogs</a></li>
-<li><a href="2019/09/22/linux-kernel-complete.html">Linux Kernel Source Auto Complete</a></li>
-<li><a href="2019/10/08/signal.html">Linux Signal Handle</a></li>
-<li><a href="2020/06/11/how-to-debugging-linux-booting-code.html">Debug linux kernel boot process</a></li>
-<li><a href="2019/11/25/qemu.html">qemu使用踩坑</a></li>
-<li><a href="2020/08/08/nfs-rootsquash.html">利用nfs no<sub>root</sub><sub>squash获取root权限</sub></a></li>
-<li><a href="2019/10/08/security.html">Security Overview</a></li>
-<li><a href="2020/01/26/blog-test.html">Test Blog</a></li>
-<li><a href="2020/10/03/orgcaldav.html">Use org-caldav to sync calendars</a></li>
+<h1 class="title">SSHFS behind NAT</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#org6b57949">system diagram</a>
+<ul>
+<li><a href="#org0627caa">open a portforward when connect via ssh</a></li>
+<li><a href="#orga459208">mount sshfs via unixsocket</a></li>
 </ul>
+</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org6b57949" class="outline-2">
+<h2 id="org6b57949">system diagram</h2>
+<div class="outline-text-2" id="text-org6b57949">
+
+<div class="figure">
+<p><img src="asserts/sshfs-behind-nat.png" alt="sshfs-behind-nat.png"><br>
+</p>
+<p><span class="figure-number">Figure 1: </span>System Diagram</p>
+</div>
+</div>
+
+<div id="outline-container-org0627caa" class="outline-3">
+<h3 id="org0627caa">open a portforward when connect via ssh</h3>
+<div class="outline-text-3" id="text-org0627caa">
+<div class="org-src-container">
+<pre class="src src-bash">ssh -R /tmp/$(id -n -u)_local.socket:localhost:22 schspa@remote.com
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-orga459208" class="outline-3">
+<h3 id="orga459208">mount sshfs via unixsocket</h3>
+<div class="outline-text-3" id="text-orga459208">
+<div class="org-src-container">
+<pre class="src src-bash">sshfs -o <span style="color: #dcaeea;">ProxyCommand</span>=<span style="color: #98be65;">"socat - UNIX-CLIENT:/tmp/%r_local.socket"</span> -o <span style="color: #dcaeea;">idmap</span>=user,<span style="color: #dcaeea;">uid</span>=$(id -u),<span style="color: #dcaeea;">gid</span>=$(id -g) -o auto_unmount  schspa@localhost:/Volumes/work ~/work
+</pre>
+</div>
+</div>
+</div>
+</div>
 </div>
 <div id="postamble" class="status">
 <script src="https://utteranc.es/client.js"
