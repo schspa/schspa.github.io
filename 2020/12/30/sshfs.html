@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2021-01-29 Fri 11:40 -->
+<!-- 2021-01-31 日 22:54 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>SSHFS behind NAT</title>
@@ -60,23 +60,23 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#org7a72180">system diagram</a></li>
-<li><a href="#org28b32f3">Mount local directory to remote server</a>
+<li><a href="#org7b07678">system diagram</a></li>
+<li><a href="#orgfc9ce0e">Mount local directory to remote server</a>
 <ul>
-<li><a href="#org1c15fa3">open a portforward when connect via ssh</a></li>
-<li><a href="#org6bcd953">test ssh connect via unixsocket</a></li>
-<li><a href="#org21bc77c">mount sshfs via unixsocket</a></li>
+<li><a href="#org113e455">open a portforward when connect via ssh</a></li>
+<li><a href="#org0876bf8">test ssh connect via unixsocket</a></li>
+<li><a href="#orgcc49a80">mount sshfs via unixsocket</a></li>
 </ul>
 </li>
 </ul>
 </div>
 </div>
 
-<div id="outline-container-org7a72180" class="outline-2">
-<h2 id="org7a72180">system diagram</h2>
-<div class="outline-text-2" id="text-org7a72180">
+<div id="outline-container-org7b07678" class="outline-2">
+<h2 id="org7b07678">system diagram</h2>
+<div class="outline-text-2" id="text-org7b07678">
 
-<div id="orgb182927" class="figure">
+<div id="org5f278db" class="figure">
 <p><img src="asserts/sshfs-behind-nat.png" alt="sshfs-behind-nat.png"><br>
 </p>
 <p><span class="figure-number">Figure 1: </span>System Diagram</p>
@@ -84,13 +84,13 @@
 </div>
 </div>
 
-<div id="outline-container-org28b32f3" class="outline-2">
-<h2 id="org28b32f3">Mount local directory to remote server</h2>
-<div class="outline-text-2" id="text-org28b32f3">
+<div id="outline-container-orgfc9ce0e" class="outline-2">
+<h2 id="orgfc9ce0e">Mount local directory to remote server</h2>
+<div class="outline-text-2" id="text-orgfc9ce0e">
 </div>
-<div id="outline-container-org1c15fa3" class="outline-3">
-<h3 id="org1c15fa3">open a portforward when connect via ssh</h3>
-<div class="outline-text-3" id="text-org1c15fa3">
+<div id="outline-container-org113e455" class="outline-3">
+<h3 id="org113e455">open a portforward when connect via ssh</h3>
+<div class="outline-text-3" id="text-org113e455">
 <div class="org-src-container">
 <pre class="src src-bash">ssh -R /tmp/$(id -n -u)_local.socket:localhost:22 schspa@remote.com
 </pre>
@@ -98,9 +98,9 @@
 </div>
 </div>
 
-<div id="outline-container-org6bcd953" class="outline-3">
-<h3 id="org6bcd953">test ssh connect via unixsocket</h3>
-<div class="outline-text-3" id="text-org6bcd953">
+<div id="outline-container-org0876bf8" class="outline-3">
+<h3 id="org0876bf8">test ssh connect via unixsocket</h3>
+<div class="outline-text-3" id="text-org0876bf8">
 <div class="org-src-container">
 <pre class="src src-bash">ssh -o <span style="color: #98be65;">"ProxyCommand socat - UNIX-CLIENT:/tmp/$(id -n -u)_local.socket"</span> schspa@remote.com
 </pre>
@@ -108,9 +108,9 @@
 </div>
 </div>
 
-<div id="outline-container-org21bc77c" class="outline-3">
-<h3 id="org21bc77c">mount sshfs via unixsocket</h3>
-<div class="outline-text-3" id="text-org21bc77c">
+<div id="outline-container-orgcc49a80" class="outline-3">
+<h3 id="orgcc49a80">mount sshfs via unixsocket</h3>
+<div class="outline-text-3" id="text-orgcc49a80">
 <div class="org-src-container">
 <pre class="src src-bash">sshfs -o <span style="color: #dcaeea;">ProxyCommand</span>=<span style="color: #98be65;">"socat - UNIX-CLIENT:/tmp/%r_local.socket"</span> -o <span style="color: #dcaeea;">idmap</span>=user,<span style="color: #dcaeea;">uid</span>=$(id -u),<span style="color: #dcaeea;">gid</span>=$(id -g) -o auto_unmount  schspa@localhost:/Volumes/work ~/work
 </pre>

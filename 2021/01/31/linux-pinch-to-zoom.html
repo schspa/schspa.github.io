@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<!-- 2021-01-31 日 23:21 -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pinch to zoom in Linux</title>
+<meta name="generator" content="Org mode">
+<meta name="author" content="Schspa">
+<meta name="description" content="Pinch to zoom in Linux"
+>
+<link rel="shortcut icon" href="/images/rose-red.png" type="image/x-icon" />
+<link rel="stylesheet" href="/css/animate.min.css" />
+<link rel="stylesheet" href="/css/all.min.css" />
+<link rel="stylesheet" type="text/css" href="/css/style.css" />
+<link rel="stylesheet" type="text/css" href="/css/navbar.css" />
+<script src="/js/jquery.min.js"></script>
+<script src="/js/darkreader.js"></script>
+<script src="/user.config.js"></script>
+<script src="/js/main.js"></script>
+</head>
+<body>
+<div id="preamble" class="status">
+<div class="mobile-container">
+  <!-- Top Navigation Menu -->
+  <div class="topnav">
+    <div id="header">
+      <a href="/" class="logo">Schspa's Blog</a>
+      <a href="javascript:void(0);" class="icon" onclick="toggleheader()">
+        <i class="fa fa-bars"></i>
+      </a>
+    </div>
+    <div id="nav_headers">
+      <a href="/sitemap.html" class="menu-item">Categories</a>
+    </div>
+  </div>
+  <!-- End smartphone / tablet look -->
+</div>
+
+<header id="header" class="header">
+  <div class="logo-wrapper">
+    <a href="/" class="logo">Schspa's Blogs</a>
+  </div>
+
+  <nav class="site-navbar">
+    <ul id="menu" class="menu">
+      <li class="menu-item">
+        <a class="menu-item-link" href="/">Home</a>
+      </li>
+      <li class="menu-item">
+        <a class="menu-item-link" href="/sitemap.html">Categories</a>
+      </li>
+    </ul>
+  </nav>
+</header>
+</div>
+<div id="content">
+<h1 class="title">Pinch to zoom in Linux</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#org2e18d72">Pinch to zoom</a></li>
+<li><a href="#org95bbdc7">Firefox</a></li>
+<li><a href="#org10a694e">chrome</a></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org2e18d72" class="outline-2">
+<h2 id="org2e18d72">Pinch to zoom</h2>
+<div class="outline-text-2" id="text-org2e18d72">
+<p>
+先来张图看看这个手势<br>
+<img src="asserts/pinch-to-zoom.gif" alt="pinch-to-zoom.gif"><br>
+</p>
+
+<p>
+对，就是这个手势，macos和windows在多年以前就可以使用了，但是极为先进的linux，在最近才能开始用上这个手势&#x2026;<br>
+</p>
+</div>
+</div>
+
+<div id="outline-container-org95bbdc7" class="outline-2">
+<h2 id="org95bbdc7">Firefox</h2>
+<div class="outline-text-2" id="text-org95bbdc7">
+<p>
+在21世纪，firefox终于在linux上支持了pinch gesture的手势，再也不用傻傻的把pinch手势映射成ctrl+minus ctrl+plus了<br>
+提交如下:<br>
+<a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1581126#c34">https://bugzilla.mozilla.org/show_bug.cgi?id=1581126#c34</a><br>
+测试环境<br>
+</p>
+<table>
+
+
+<colgroup>
+<col  class="org-left">
+
+<col  class="org-left">
+</colgroup>
+<tbody>
+<tr>
+<td class="org-left">项目</td>
+<td class="org-left">版本</td>
+</tr>
+
+<tr>
+<td class="org-left">OS</td>
+<td class="org-left">Arch Linux</td>
+</tr>
+
+<tr>
+<td class="org-left">DE</td>
+<td class="org-left">GNOME 3.38.3</td>
+</tr>
+
+<tr>
+<td class="org-left">XDG_SESSION_TYPE</td>
+<td class="org-left">wayland</td>
+</tr>
+
+<tr>
+<td class="org-left">触摸板</td>
+<td class="org-left">apple magic trackpad 2</td>
+</tr>
+
+<tr>
+<td class="org-left">firefox-nightly</td>
+<td class="org-left">87.0a1 (2021-01-30) (64-bit)</td>
+</tr>
+</tbody>
+</table>
+
+<p>
+使用方法：<br>
+</p>
+<ol class="org-ol">
+<li>切换到wayland环境<br></li>
+<li>gtk &gt;= 3.18<br></li>
+<li>设置好MOZ_ENABLE_WAYLAND=1环境变量 firefox wayland设置 1<br></li>
+<li>在firefox about:config中设置apz.gtk.touchpad_pinch.enabled为true<br></li>
+</ol>
+</div>
+</div>
+
+<div id="outline-container-org10a694e" class="outline-2">
+<h2 id="org10a694e">chrome</h2>
+<div class="outline-text-2" id="text-org10a694e">
+<p>
+据我所知，现在用不了这个手势<br>
+</p>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<script src="https://utteranc.es/client.js"
+    repo="schspa/schspa.github.io"
+    issue-term="title"
+    label="✨💬✨"
+    theme="github-light"
+    crossorigin="anonymous"
+    async>
+</script>
+<div class="me">
+  <span><b>Contact me via :)</b><span>
+  <div class="contact">
+    <a id="email" href="mailto:schspa@gmail.com" target="_blank"><i class="fab fa-mailchimp animated heartBeat delay-2s slower"></i></a>
+    <a id="github" href="//github.com/schspa" target="_blank"><i class="fab fa-github animated heartBeat delay-2s slower"></i></a>
+  </div>
+</div>
+
+<div id="jinrishici-sentence" style="font-weight: 700;">虚怀乃若谷，水深则流缓。</div>
+<script src="https://sdk.jinrishici.com/v2/browser/jinrishici.js" charset="utf-8"></script>
+</div>
+</body>
+</html>

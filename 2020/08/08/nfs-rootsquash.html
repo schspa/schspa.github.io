@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2020-10-09 Fri 23:21 -->
+<!-- 2021-01-31 日 22:54 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>利用nfs no_root_squash获取root权限</title>
@@ -61,28 +61,28 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#org6eb59ef">no_root_squash</a></li>
-<li><a href="#org8477171">系统环境说明</a>
+<li><a href="#org2e69952">no_root_squash</a></li>
+<li><a href="#org254a023">系统环境说明</a>
 <ul>
-<li><a href="#orgae33175">Host NFS配制选项</a></li>
-<li><a href="#orgb71a6d5">Guest OS挂载选项</a></li>
+<li><a href="#org5c450a2">Host NFS配制选项</a></li>
+<li><a href="#org2482af5">Guest OS挂载选项</a></li>
 </ul>
 </li>
-<li><a href="#orge67f6c8">通过no_root_squash来获取root权限</a>
+<li><a href="#org3342b27">通过no_root_squash来获取root权限</a>
 <ul>
-<li><a href="#orga6b3092">准备一个C程序，用来获取root权限</a></li>
-<li><a href="#orgf14dc4b">编译,在Host Computer中给binary添加SUID标志</a></li>
-<li><a href="#org4ef2825">到nfs服务器上以普通用户身份运行</a></li>
-<li><a href="#org26cd72c">成功获取root权限</a></li>
+<li><a href="#org0dedd73">准备一个C程序，用来获取root权限</a></li>
+<li><a href="#org364bc28">编译,在Host Computer中给binary添加SUID标志</a></li>
+<li><a href="#org7a70c1c">到nfs服务器上以普通用户身份运行</a></li>
+<li><a href="#orgd6d16e8">成功获取root权限</a></li>
 </ul>
 </li>
 </ul>
 </div>
 </div>
 
-<div id="outline-container-org6eb59ef" class="outline-2">
-<h2 id="org6eb59ef">no_root_squash</h2>
-<div class="outline-text-2" id="text-org6eb59ef">
+<div id="outline-container-org2e69952" class="outline-2">
+<h2 id="org2e69952">no_root_squash</h2>
+<div class="outline-text-2" id="text-org2e69952">
 <p>
 nfs服务器配置时,很多人并不注意其中的安全选项，直接写上no_root_squash标志。<br>
 需要注意的是，如果写上这个标志，等于直接将系统的root权限分享给了共享者。下面通过一个实例来演示如何通过no_root_squash标志来获取系统的root权限。<br>
@@ -90,9 +90,9 @@ nfs服务器配置时,很多人并不注意其中的安全选项，直接写上n
 </div>
 </div>
 
-<div id="outline-container-org8477171" class="outline-2">
-<h2 id="org8477171">系统环境说明</h2>
-<div class="outline-text-2" id="text-org8477171">
+<div id="outline-container-org254a023" class="outline-2">
+<h2 id="org254a023">系统环境说明</h2>
+<div class="outline-text-2" id="text-org254a023">
 <table>
 
 
@@ -125,18 +125,18 @@ nfs服务器配置时,很多人并不注意其中的安全选项，直接写上n
 </table>
 </div>
 
-<div id="outline-container-orgae33175" class="outline-3">
-<h3 id="orgae33175">Host NFS配制选项</h3>
-<div class="outline-text-3" id="text-orgae33175">
+<div id="outline-container-org5c450a2" class="outline-3">
+<h3 id="org5c450a2">Host NFS配制选项</h3>
+<div class="outline-text-3" id="text-org5c450a2">
 <div class="org-src-container">
 <pre class="src src-bash">/home/xxx/share/nfs *(sync,rw,no_root_squash,no_subtree_check)
 </pre>
 </div>
 </div>
 </div>
-<div id="outline-container-orgb71a6d5" class="outline-3">
-<h3 id="orgb71a6d5">Guest OS挂载选项</h3>
-<div class="outline-text-3" id="text-orgb71a6d5">
+<div id="outline-container-org2482af5" class="outline-3">
+<h3 id="org2482af5">Guest OS挂载选项</h3>
+<div class="outline-text-3" id="text-org2482af5">
 <div class="org-src-container">
 <pre class="src src-bash">sudo mount -t nfs4 10.106.58.18:/home/xxx/share/nfs aaa
 </pre>
@@ -145,13 +145,13 @@ nfs服务器配置时,很多人并不注意其中的安全选项，直接写上n
 </div>
 </div>
 
-<div id="outline-container-orge67f6c8" class="outline-2">
-<h2 id="orge67f6c8">通过no_root_squash来获取root权限</h2>
-<div class="outline-text-2" id="text-orge67f6c8">
+<div id="outline-container-org3342b27" class="outline-2">
+<h2 id="org3342b27">通过no_root_squash来获取root权限</h2>
+<div class="outline-text-2" id="text-org3342b27">
 </div>
-<div id="outline-container-orga6b3092" class="outline-3">
-<h3 id="orga6b3092">准备一个C程序，用来获取root权限</h3>
-<div class="outline-text-3" id="text-orga6b3092">
+<div id="outline-container-org0dedd73" class="outline-3">
+<h3 id="org0dedd73">准备一个C程序，用来获取root权限</h3>
+<div class="outline-text-3" id="text-org0dedd73">
 <p>
 内容如下，直接跑命令进入shell就行<br>
 </p>
@@ -179,9 +179,9 @@ nfs服务器配置时,很多人并不注意其中的安全选项，直接写上n
 </div>
 </div>
 </div>
-<div id="outline-container-orgf14dc4b" class="outline-3">
-<h3 id="orgf14dc4b">编译,在Host Computer中给binary添加SUID标志</h3>
-<div class="outline-text-3" id="text-orgf14dc4b">
+<div id="outline-container-org364bc28" class="outline-3">
+<h3 id="org364bc28">编译,在Host Computer中给binary添加SUID标志</h3>
+<div class="outline-text-3" id="text-org364bc28">
 <div class="org-src-container">
 <pre class="src src-bash"><span style="color: #c678dd;">cd</span> aaa
 gcc test.c -o test.bin
@@ -193,9 +193,9 @@ ls -al test.bin
 </div>
 </div>
 </div>
-<div id="outline-container-org4ef2825" class="outline-3">
-<h3 id="org4ef2825">到nfs服务器上以普通用户身份运行</h3>
-<div class="outline-text-3" id="text-org4ef2825">
+<div id="outline-container-org7a70c1c" class="outline-3">
+<h3 id="org7a70c1c">到nfs服务器上以普通用户身份运行</h3>
+<div class="outline-text-3" id="text-org7a70c1c">
 <div class="org-src-container">
 <pre class="src src-bash">test-user@server-70ubs00702:~$ ls -al /home/xxx/share/nfs/test.bin 
 -rwsr-xr-x 1 root root 16744 Aug  8 16:33 /home/xxx/share/nfs/test.bin
@@ -208,9 +208,9 @@ root@server-70ubs00702:~# id
 </div>
 </div>
 </div>
-<div id="outline-container-org26cd72c" class="outline-3">
-<h3 id="org26cd72c">成功获取root权限</h3>
-<div class="outline-text-3" id="text-org26cd72c">
+<div id="outline-container-orgd6d16e8" class="outline-3">
+<h3 id="orgd6d16e8">成功获取root权限</h3>
+<div class="outline-text-3" id="text-orgd6d16e8">
 <p>
 上面已经成功进入uid=0的shell中<br>
 </p>

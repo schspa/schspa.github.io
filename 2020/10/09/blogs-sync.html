@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2020-10-09 Fri 23:21 -->
+<!-- 2021-01-31 日 22:54 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Use Github Action to Sync blogs</title>
@@ -60,22 +60,22 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#orgd866e8f">环境介绍</a></li>
-<li><a href="#orgbde7553">Runner 配置</a>
+<li><a href="#orgdedc98c">环境介绍</a></li>
+<li><a href="#org2fd4b25">Runner 配置</a>
 <ul>
-<li><a href="#orga854d93">安装github runner</a></li>
-<li><a href="#org3422383">自启动runner</a></li>
-<li><a href="#org4e20f67">runner权限设置</a></li>
+<li><a href="#org86bff60">安装github runner</a></li>
+<li><a href="#orgc91354e">自启动runner</a></li>
+<li><a href="#org32a2825">runner权限设置</a></li>
 </ul>
 </li>
-<li><a href="#org108471c">设置在push操作时自动更新</a></li>
+<li><a href="#org44bc86e">设置在push操作时自动更新</a></li>
 </ul>
 </div>
 </div>
 
-<div id="outline-container-orgd866e8f" class="outline-2">
-<h2 id="orgd866e8f">环境介绍</h2>
-<div class="outline-text-2" id="text-orgd866e8f">
+<div id="outline-container-orgdedc98c" class="outline-2">
+<h2 id="orgdedc98c">环境介绍</h2>
+<div class="outline-text-2" id="text-orgdedc98c">
 <p>
 我自己的Blog是通过<a href="https://orgmode.org/manual/Publishing.html">org-publish</a>来生成的, 生成之后部属在<a href="http://schspa.tk">schspa.tk</a>以及<a href="http://schspa.github.io">github io</a>上，之前每次更新博客之后，我都会向两个服务器上去同步一下博客，<br>
 现在github有了<a href="https://github.com/features/actions">github action</a> 并且可以支持使用自己runner服务，这样我们就可以利用github action来动态在更新github action时自动更新博客了。<br>
@@ -114,22 +114,22 @@
 </div>
 </div>
 
-<div id="outline-container-orgbde7553" class="outline-2">
-<h2 id="orgbde7553">Runner 配置</h2>
-<div class="outline-text-2" id="text-orgbde7553">
+<div id="outline-container-org2fd4b25" class="outline-2">
+<h2 id="org2fd4b25">Runner 配置</h2>
+<div class="outline-text-2" id="text-org2fd4b25">
 </div>
-<div id="outline-container-orga854d93" class="outline-3">
-<h3 id="orga854d93">安装github runner</h3>
-<div class="outline-text-3" id="text-orga854d93">
+<div id="outline-container-org86bff60" class="outline-3">
+<h3 id="org86bff60">安装github runner</h3>
+<div class="outline-text-3" id="text-org86bff60">
 <p>
 按照下面的官方文档可以很容易的部属好runner，部属过程很顺利，没有遇到任何错误<br>
 <a href="https://docs.github.com/en/free-pro-team@latest/actions/hosting-your-own-runners/adding-self-hosted-runners">https://docs.github.com/en/free-pro-team@latest/actions/hosting-your-own-runners/adding-self-hosted-runners</a><br>
 </p>
 </div>
 </div>
-<div id="outline-container-org3422383" class="outline-3">
-<h3 id="org3422383">自启动runner</h3>
-<div class="outline-text-3" id="text-org3422383">
+<div id="outline-container-orgc91354e" class="outline-3">
+<h3 id="orgc91354e">自启动runner</h3>
+<div class="outline-text-3" id="text-orgc91354e">
 <p>
 按照官方的wiki，linux下可以使用官方自己给的systemd服务配置文件就可以配置好开机自启动<br>
 <a href="https://docs.github.com/en/free-pro-team@latest/actions/hosting-your-own-runners/configuring-the-self-hosted-runner-application-as-a-service">https://docs.github.com/en/free-pro-team@latest/actions/hosting-your-own-runners/configuring-the-self-hosted-runner-application-as-a-service</a><br>
@@ -160,9 +160,9 @@ Oct 09 22:54:47 ip-172-31-43-98 runsvc.sh[2032]: .path=/usr/local/sbin:/usr/loca
 </div>
 </div>
 
-<div id="outline-container-org4e20f67" class="outline-3">
-<h3 id="org4e20f67">runner权限设置</h3>
-<div class="outline-text-3" id="text-org4e20f67">
+<div id="outline-container-org32a2825" class="outline-3">
+<h3 id="org32a2825">runner权限设置</h3>
+<div class="outline-text-3" id="text-org32a2825">
 <p>
 由于runner直接安装在了host机上，没有docker等容器的保护，所以权限方面要格外设置好，放置不法分子利用这个runner来攻击服务器。<br>
 </p>
@@ -171,7 +171,7 @@ Oct 09 22:54:47 ip-172-31-43-98 runsvc.sh[2032]: .path=/usr/local/sbin:/usr/loca
 下面是我自己的权限设置，只允许自己使用<br>
 </p>
 
-<div id="org0de0ed0" class="figure">
+<div id="org90d239a" class="figure">
 <p><img src="asserts/github-selfhost-action-setup.jpg" alt="github-selfhost-action-setup.jpg"><br>
 </p>
 <p><span class="figure-number">Figure 1: </span>runner权限设置</p>
@@ -180,27 +180,27 @@ Oct 09 22:54:47 ip-172-31-43-98 runsvc.sh[2032]: .path=/usr/local/sbin:/usr/loca
 </div>
 </div>
 
-<div id="outline-container-org108471c" class="outline-2">
-<h2 id="org108471c">设置在push操作时自动更新</h2>
-<div class="outline-text-2" id="text-org108471c">
+<div id="outline-container-org44bc86e" class="outline-2">
+<h2 id="org44bc86e">设置在push操作时自动更新</h2>
+<div class="outline-text-2" id="text-org44bc86e">
 <p>
 配置文件：<br>
 </p>
 <div class="org-src-container">
-<pre class="src src-yaml"><span style="color: #dcaeea;">name</span>: sync to schspa.tk
+<pre class="src src-yaml">name: sync to schspa.tk
 
-<span style="color: #dcaeea;">on</span>:
-  <span style="color: #dcaeea;">push</span>:
-    <span style="color: #dcaeea;">branches</span>:
+on:
+  push:
+    branches:
     - master
 
-<span style="color: #dcaeea;">jobs</span>:
-  <span style="color: #dcaeea;">sync</span>:
-    <span style="color: #dcaeea;">runs-on</span>: schspa.tk
+jobs:
+  sync:
+    runs-on: schspa.tk
 
-    <span style="color: #dcaeea;">steps</span>:
-    - <span style="color: #dcaeea;">name</span>: Sync blogs
-      <span style="color: #dcaeea;">run</span>: bash -c <span style="color: #98be65;">"cd ~/sites &amp;&amp; git fetch &amp;&amp; git reset --hard origin/master"</span>
+    steps:
+    - name: Sync blogs
+      run: bash -c "cd ~/sites &amp;&amp; git fetch &amp;&amp; git reset --hard origin/master"
 </pre>
 </div>
 <p>

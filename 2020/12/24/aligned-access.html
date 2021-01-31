@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2021-01-01 Fri 23:43 -->
+<!-- 2021-01-31 日 23:16 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Generate Aligned Access Code</title>
@@ -60,22 +60,22 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#orgf8c2a8f">用途</a></li>
-<li><a href="#org688d82b">例子</a>
+<li><a href="#org0876246">用途</a></li>
+<li><a href="#org6734f38">例子</a>
 <ul>
-<li><a href="#orgb4b7a62">源代码</a></li>
-<li><a href="#org3d12cf7">先看一下数据结构</a></li>
-<li><a href="#org55eaf67">Normal Compile</a></li>
-<li><a href="#org254949c">Compile with aligned access</a></li>
+<li><a href="#org350c23d">源代码</a></li>
+<li><a href="#org8b39e9a">先看一下数据结构</a></li>
+<li><a href="#orgd6db834">Normal Compile</a></li>
+<li><a href="#org33f9f5e">Compile with aligned access</a></li>
 </ul>
 </li>
-<li><a href="#org60ef47d">Refs</a></li>
+<li><a href="#org885fc69">Refs</a></li>
 </ul>
 </div>
 </div>
-<div id="outline-container-orgf8c2a8f" class="outline-2">
-<h2 id="orgf8c2a8f">用途</h2>
-<div class="outline-text-2" id="text-orgf8c2a8f">
+<div id="outline-container-org0876246" class="outline-2">
+<h2 id="org0876246">用途</h2>
+<div class="outline-text-2" id="text-org0876246">
 <p>
 当使用C中的bit field时，编译器在编译时会生成按byte，字长等来访问的指令，对于普通的内存空间，这个都是可以正常使用的。<br>
 但是对于ARM平台中的寄存器，由于总线的限制，访问时必须按照32bit来访问, 当使用ldrb访问时，系统会发生异常.<br>
@@ -83,15 +83,15 @@
 </div>
 </div>
 
-<div id="outline-container-org688d82b" class="outline-2">
-<h2 id="org688d82b">例子</h2>
-<div class="outline-text-2" id="text-org688d82b">
+<div id="outline-container-org6734f38" class="outline-2">
+<h2 id="org6734f38">例子</h2>
+<div class="outline-text-2" id="text-org6734f38">
 </div>
-<div id="outline-container-orgb4b7a62" class="outline-3">
-<h3 id="orgb4b7a62">源代码</h3>
-<div class="outline-text-3" id="text-orgb4b7a62">
+<div id="outline-container-org350c23d" class="outline-3">
+<h3 id="org350c23d">源代码</h3>
+<div class="outline-text-3" id="text-org350c23d">
 <div class="org-src-container">
-<pre class="src src-C" id="org3da9346"><span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;stdio.h&gt;</span>
+<pre class="src src-C" id="org3970cfe"><span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;stdio.h&gt;</span>
 <span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;stdint.h&gt;</span>
 
 <span style="color: #51afef;">struct</span> <span style="color: #ECBE7B;">device_status</span> {
@@ -126,9 +126,9 @@
 </div>
 </div>
 
-<div id="outline-container-org3d12cf7" class="outline-3">
-<h3 id="org3d12cf7">先看一下数据结构</h3>
-<div class="outline-text-3" id="text-org3d12cf7">
+<div id="outline-container-org8b39e9a" class="outline-3">
+<h3 id="org8b39e9a">先看一下数据结构</h3>
+<div class="outline-text-3" id="text-org8b39e9a">
 <div class="org-src-container">
 <pre class="src src-c"><span style="color: #5B6268;">/* </span><span style="color: #5B6268;">offset    |  size</span><span style="color: #5B6268;"> */</span>  type = <span style="color: #51afef;">volatile</span> <span style="color: #51afef;">struct</span> device_status {
 <span style="color: #5B6268;">/*    </span><span style="color: #5B6268;">0      |     4</span><span style="color: #5B6268;"> */</span>    <span style="color: #51afef;">union</span> {
@@ -152,44 +152,14 @@
 </div>
 </div>
 
-<div id="outline-container-org55eaf67" class="outline-3">
-<h3 id="org55eaf67">Normal Compile</h3>
-<div class="outline-text-3" id="text-org55eaf67">
+<div id="outline-container-orgd6db834" class="outline-3">
+<h3 id="orgd6db834">Normal Compile</h3>
+<div class="outline-text-3" id="text-orgd6db834">
 <p>
 在编译时通过指定 -mno-strict-align -fno-strict-volatile-bitfields 的编译参数，来防止编译器版本的不同而进行自动优化。<br>
 </p>
 <div class="org-src-container">
-<pre class="src src-asm"><span style="color: #c678dd;">Dump</span> <span style="color: #51afef;">of</span> assembler code for function bitfield_test:
-./test.c:
-<span style="color: #c678dd;">20</span>  {
-<span style="color: #c678dd;">21</span>      <span style="color: #51afef;">printf</span>(<span style="color: #98be65;">"status.value = 0x%08x\n"</span>, g_status.value)<span style="color: #5B6268;">;</span>
-   <span style="color: #51afef;">0x00000000004005e4</span> &lt;+0&gt;: fd 7b bd a9 stp x29, x30, [sp, #-48]!
-   <span style="color: #51afef;">0x00000000004005e8</span> &lt;+4&gt;: fd 03 00 91 mov x29, sp
-   <span style="color: #51afef;">0x00000000004005ec</span> &lt;+8&gt;: f3 53 01 a9 stp x19, x20, [sp, #16]
-   <span style="color: #51afef;">0x00000000004005f0</span> &lt;+12&gt;:    94 00 00 b0 adrp    x20, 0x411000 <a href="mailto:__libc_start_main%40got.plt">&lt;__libc_start_main@got.plt&gt;</a>
-   <span style="color: #51afef;">0x00000000004005f4</span> &lt;+16&gt;:    13 00 00 90 adrp    x19, 0x400000
-   <span style="color: #51afef;">0x00000000004005f8</span> &lt;+20&gt;:    81 32 40 b9 ldr w1, [x20, #48]
-   <span style="color: #51afef;">0x00000000004005fc</span> &lt;+24&gt;:    73 c2 1b 91 add x19, x19, #0x6f0
-   <span style="color: #51afef;">0x0000000000400600</span> &lt;+28&gt;:    f5 13 00 f9 str x21, [sp, #32]
-   <span style="color: #51afef;">0x0000000000400604</span> &lt;+32&gt;:    95 c2 00 91 add x21, x20, #0x30
-   <span style="color: #51afef;">0x0000000000400608</span> &lt;+36&gt;:    e0 03 13 aa mov x0, x19
-   <span style="color: #51afef;">0x000000000040060c</span> &lt;+40&gt;:    a1 ff ff 97 bl  0x400490 <a href="mailto:printf%40plt">&lt;printf@plt&gt;</a>
-
-<span style="color: #c678dd;">22</span>      <span style="color: #51afef;">g</span>_status.idx++<span style="color: #5B6268;">;</span>
-   <span style="color: #51afef;">0x0000000000400610</span> &lt;+44&gt;:    a0 0a 40 39 ldrb    w0, [x21, #2]
-   <span style="color: #51afef;">0x0000000000400614</span> &lt;+48&gt;:    00 1c 00 12 and w0, w0, #0xff
-   <span style="color: #51afef;">0x0000000000400618</span> &lt;+52&gt;:    00 04 00 11 add w0, w0, #0x1
-   <span style="color: #51afef;">0x000000000040061c</span> &lt;+56&gt;:    00 1c 00 12 and w0, w0, #0xff
-   <span style="color: #51afef;">0x0000000000400620</span> &lt;+60&gt;:    a0 0a 00 39 strb    w0, [x21, #2]
-
-<span style="color: #c678dd;">23</span>      <span style="color: #51afef;">printf</span>(<span style="color: #98be65;">"status.value = 0x%08x\n"</span>, g_status.value)<span style="color: #5B6268;">;</span>
-   <span style="color: #51afef;">0x0000000000400624</span> &lt;+64&gt;:    e0 03 13 aa mov x0, x19
-   <span style="color: #51afef;">0x0000000000400628</span> &lt;+68&gt;:    81 32 40 b9 ldr w1, [x20, #48]
-   <span style="color: #51afef;">0x000000000040062c</span> &lt;+72&gt;:    f3 53 41 a9 ldp x19, x20, [sp, #16]
-   <span style="color: #51afef;">0x0000000000400630</span> &lt;+76&gt;:    f5 13 40 f9 ldr x21, [sp, #32]
-   <span style="color: #51afef;">0x0000000000400634</span> &lt;+80&gt;:    fd 7b c3 a8 ldp x29, x30, [sp], #48
-   <span style="color: #51afef;">0x0000000000400638</span> &lt;+84&gt;:    96 ff ff 17 b   0x400490 <a href="mailto:printf%40plt">&lt;printf@plt&gt;</a>
-<span style="color: #c678dd;">End</span> <span style="color: #51afef;">of</span> assembler dump.
+<pre class="src src-asm">
 </pre>
 </div>
 
@@ -210,42 +180,14 @@
 </p>
 </div>
 </div>
-<div id="outline-container-org254949c" class="outline-3">
-<h3 id="org254949c">Compile with aligned access</h3>
-<div class="outline-text-3" id="text-org254949c">
+<div id="outline-container-org33f9f5e" class="outline-3">
+<h3 id="org33f9f5e">Compile with aligned access</h3>
+<div class="outline-text-3" id="text-org33f9f5e">
 <p>
 下面是通过 -mstrict-align -fstrict-volatile-bitfields 参数进行编译的结果:<br>
 </p>
 <div class="org-src-container">
-<pre class="src src-asm"><span style="color: #c678dd;">Dump</span> <span style="color: #51afef;">of</span> assembler code for function bitfield_test:
-./test.c:
-<span style="color: #c678dd;">20</span>  {
-<span style="color: #c678dd;">21</span>      <span style="color: #51afef;">printf</span>(<span style="color: #98be65;">"status.value = 0x%08x\n"</span>, g_status.value)<span style="color: #5B6268;">;</span>
-   <span style="color: #51afef;">0x00000000004005e4</span> &lt;+0&gt;: fd 7b be a9 stp x29, x30, [sp, #-32]!
-   <span style="color: #51afef;">0x00000000004005e8</span> &lt;+4&gt;: fd 03 00 91 mov x29, sp
-   <span style="color: #51afef;">0x00000000004005ec</span> &lt;+8&gt;: f3 53 01 a9 stp x19, x20, [sp, #16]
-   <span style="color: #51afef;">0x00000000004005f0</span> &lt;+12&gt;:    93 00 00 b0 adrp    x19, 0x411000 <a href="mailto:__libc_start_main%40got.plt">&lt;__libc_start_main@got.plt&gt;</a>
-   <span style="color: #51afef;">0x00000000004005f4</span> &lt;+16&gt;:    14 00 00 90 adrp    x20, 0x400000
-   <span style="color: #51afef;">0x00000000004005f8</span> &lt;+20&gt;:    61 32 40 b9 ldr w1, [x19, #48]
-   <span style="color: #51afef;">0x00000000004005fc</span> &lt;+24&gt;:    94 a2 1b 91 add x20, x20, #0x6e8
-   <span style="color: #51afef;">0x0000000000400600</span> &lt;+28&gt;:    e0 03 14 aa mov x0, x20
-   <span style="color: #51afef;">0x0000000000400604</span> &lt;+32&gt;:    a3 ff ff 97 bl  0x400490 <a href="mailto:printf%40plt">&lt;printf@plt&gt;</a>
-
-<span style="color: #c678dd;">22</span>      <span style="color: #51afef;">g</span>_status.idx++<span style="color: #5B6268;">;</span>
-   <span style="color: #51afef;">0x0000000000400608</span> &lt;+36&gt;:    60 32 40 b9 ldr w0, [x19, #48]
-   <span style="color: #51afef;">0x000000000040060c</span> &lt;+40&gt;:    61 32 40 b9 ldr w1, [x19, #48]
-   <span style="color: #51afef;">0x0000000000400610</span> &lt;+44&gt;:    00 5c 50 d3 ubfx    x0, x0, #16, #8
-   <span style="color: #51afef;">0x0000000000400614</span> &lt;+48&gt;:    00 04 00 11 add w0, w0, #0x1
-   <span style="color: #51afef;">0x0000000000400618</span> &lt;+52&gt;:    01 1c 10 33 bfi w1, w0, #16, #8
-   <span style="color: #51afef;">0x000000000040061c</span> &lt;+56&gt;:    61 32 00 b9 str w1, [x19, #48]
-
-<span style="color: #c678dd;">23</span>      <span style="color: #51afef;">printf</span>(<span style="color: #98be65;">"status.value = 0x%08x\n"</span>, g_status.value)<span style="color: #5B6268;">;</span>
-   <span style="color: #51afef;">0x0000000000400620</span> &lt;+60&gt;:    e0 03 14 aa mov x0, x20
-   <span style="color: #51afef;">0x0000000000400624</span> &lt;+64&gt;:    61 32 40 b9 ldr w1, [x19, #48]
-   <span style="color: #51afef;">0x0000000000400628</span> &lt;+68&gt;:    f3 53 41 a9 ldp x19, x20, [sp, #16]
-   <span style="color: #51afef;">0x000000000040062c</span> &lt;+72&gt;:    fd 7b c2 a8 ldp x29, x30, [sp], #32
-   <span style="color: #51afef;">0x0000000000400630</span> &lt;+76&gt;:    98 ff ff 17 b   0x400490 <a href="mailto:printf%40plt">&lt;printf@plt&gt;</a>
-<span style="color: #c678dd;">End</span> <span style="color: #51afef;">of</span> assembler dump.
+<pre class="src src-asm">
 </pre>
 </div>
 <p>
@@ -255,9 +197,9 @@
 </div>
 </div>
 
-<div id="outline-container-org60ef47d" class="outline-2">
-<h2 id="org60ef47d">Refs</h2>
-<div class="outline-text-2" id="text-org60ef47d">
+<div id="outline-container-org885fc69" class="outline-2">
+<h2 id="org885fc69">Refs</h2>
+<div class="outline-text-2" id="text-org885fc69">
 <p>
 <a href="https://gcc.gnu.org/onlinedocs/gcc/Code-Gen-Options.html">https://gcc.gnu.org/onlinedocs/gcc/Code-Gen-Options.html</a><br>
 <a href="https://stackoverflow.com/questions/42171429/force-gcc-to-access-structs-with-words">https://stackoverflow.com/questions/42171429/force-gcc-to-access-structs-with-words</a><br>

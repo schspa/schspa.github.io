@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2020-10-09 Fri 23:21 -->
+<!-- 2021-01-31 日 22:54 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Security Overview</title>
@@ -61,109 +61,109 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#orgf4eb059">1. 基础概念</a>
+<li><a href="#org6052310">1. 基础概念</a>
 <ul>
-<li><a href="#orgd0ec6cb">1.1. Security Goal</a></li>
+<li><a href="#org8c5db55">1.1. Security Goal</a></li>
 </ul>
 </li>
-<li><a href="#orgd50381e">2. 知识大纲</a></li>
-<li><a href="#orge50ecdf">3. Algorithm</a>
+<li><a href="#org114bbdb">2. 知识大纲</a></li>
+<li><a href="#orgb66586a">3. Algorithm</a>
 <ul>
-<li><a href="#orgb566c18">3.1. Symmetric Ciphers</a>
+<li><a href="#org380c21b">3.1. Symmetric Ciphers</a>
 <ul>
-<li><a href="#orgaf66cf3">3.1.1. AES</a></li>
-<li><a href="#orgcebaabb">3.1.2. DES</a></li>
-<li><a href="#org5621a3a">3.1.3. RC4 (Rivest Cipher 4)</a></li>
-<li><a href="#org547c139">3.1.4. ChaCha20</a></li>
+<li><a href="#orgaa7fa53">3.1.1. AES</a></li>
+<li><a href="#org0228974">3.1.2. DES</a></li>
+<li><a href="#org6571bc6">3.1.3. RC4 (Rivest Cipher 4)</a></li>
+<li><a href="#org8ea78b0">3.1.4. ChaCha20</a></li>
 </ul>
 </li>
-<li><a href="#org8c4ab98">3.2. Asymmetric Ciphers</a>
+<li><a href="#org1c14597">3.2. Asymmetric Ciphers</a>
 <ul>
-<li><a href="#orga2c7207">3.2.1. RSA</a></li>
-<li><a href="#org55fba3a">3.2.2. ECC</a></li>
+<li><a href="#org8caba2c">3.2.1. RSA</a></li>
+<li><a href="#orgc8a52c5">3.2.2. ECC</a></li>
 </ul>
 </li>
-<li><a href="#org2525c04">3.3. Padding</a></li>
-<li><a href="#org1c5b62a">3.4. Block Cipher Mode Of Operation</a>
+<li><a href="#org9846c92">3.3. Padding</a></li>
+<li><a href="#orgec9d513">3.4. Block Cipher Mode Of Operation</a>
 <ul>
-<li><a href="#org403c0db">3.4.1. ECB(Electronic CodeBook)</a></li>
-<li><a href="#orgf5aaa12">3.4.2. CBC(Cipher Block Chaining)</a></li>
-<li><a href="#orgbca9ae3">3.4.3. CFB(Cipher Feedback)</a></li>
-<li><a href="#org21c41f9">3.4.4. OFB(Output Feedback)</a></li>
-<li><a href="#orga99fcca">3.4.5. CTR(Counter)</a></li>
-<li><a href="#org48f67c3">3.4.6. XTS</a></li>
+<li><a href="#orgcadb5ce">3.4.1. ECB(Electronic CodeBook)</a></li>
+<li><a href="#org5a89699">3.4.2. CBC(Cipher Block Chaining)</a></li>
+<li><a href="#org400da50">3.4.3. CFB(Cipher Feedback)</a></li>
+<li><a href="#org71f3412">3.4.4. OFB(Output Feedback)</a></li>
+<li><a href="#org9778159">3.4.5. CTR(Counter)</a></li>
+<li><a href="#org64dd9d3">3.4.6. XTS</a></li>
 </ul>
 </li>
-<li><a href="#org7521562">3.5. Digest</a>
+<li><a href="#org3e3a10b">3.5. Digest</a>
 <ul>
-<li><a href="#org3b8ef72">3.5.1. SHA</a></li>
-<li><a href="#org712e88d">3.5.2. MD5</a></li>
+<li><a href="#orgebbf2d0">3.5.1. SHA</a></li>
+<li><a href="#org208f653">3.5.2. MD5</a></li>
 </ul>
 </li>
-<li><a href="#org53b4b7f">3.6. MAC(Message authentication code)</a>
+<li><a href="#org94aa3d9">3.6. MAC(Message authentication code)</a>
 <ul>
-<li><a href="#org20a4b75">3.6.1. CBC-MAC(cipher block chaining message autghentication code)</a></li>
-<li><a href="#org2ea7654">3.6.2. ALG1-6</a></li>
-<li><a href="#orgb1c8010">3.6.3. CMAC(OMAC1)</a></li>
-<li><a href="#orgad11fe1">3.6.4. HMAC</a></li>
-<li><a href="#org64bf43f">3.6.5. GMAC</a></li>
+<li><a href="#org57e1121">3.6.1. CBC-MAC(cipher block chaining message autghentication code)</a></li>
+<li><a href="#orga1caa5d">3.6.2. ALG1-6</a></li>
+<li><a href="#org70d3518">3.6.3. CMAC(OMAC1)</a></li>
+<li><a href="#orgc0504c4">3.6.4. HMAC</a></li>
+<li><a href="#org73148c0">3.6.5. GMAC</a></li>
 </ul>
 </li>
-<li><a href="#org8e038c3">3.7. Digital Signatures</a>
+<li><a href="#org7f62ab2">3.7. Digital Signatures</a>
 <ul>
-<li><a href="#org9528a92">3.7.1. RSA-PSS</a></li>
-<li><a href="#org1126270">3.7.2. EIGamal</a></li>
-<li><a href="#org0a16f48">3.7.3. DSA</a></li>
-<li><a href="#orgc643ada">3.7.4. ECDSA</a></li>
-<li><a href="#orgd2b796e">3.7.5. Rabin</a></li>
+<li><a href="#org787455d">3.7.1. RSA-PSS</a></li>
+<li><a href="#org7a837ea">3.7.2. EIGamal</a></li>
+<li><a href="#org67d41ab">3.7.3. DSA</a></li>
+<li><a href="#org7831d8d">3.7.4. ECDSA</a></li>
+<li><a href="#orga07a5bd">3.7.5. Rabin</a></li>
 </ul>
 </li>
-<li><a href="#org7a9fdf9">3.8. Digital certificate</a></li>
-<li><a href="#orgaf3fcbf">3.9. AE(Authenticated encryption)</a>
+<li><a href="#orgfb78539">3.8. Digital certificate</a></li>
+<li><a href="#org0b854f3">3.9. AE(Authenticated encryption)</a>
 <ul>
-<li><a href="#org0ca6556">3.9.1. EAX</a></li>
+<li><a href="#org2d0807e">3.9.1. EAX</a></li>
 </ul>
 </li>
-<li><a href="#org4581431">3.10. AEAD（authenticated encryption with associated data）</a>
+<li><a href="#org62e9c3b">3.10. AEAD（authenticated encryption with associated data）</a>
 <ul>
-<li><a href="#org2145c9f">3.10.1. GCM (Galois/Counter Mode)</a></li>
-<li><a href="#org597fa6b">3.10.2. CCM (Counter with CBC-MAC)</a></li>
+<li><a href="#org5bb3905">3.10.1. GCM (Galois/Counter Mode)</a></li>
+<li><a href="#org6b28c3a">3.10.2. CCM (Counter with CBC-MAC)</a></li>
 </ul>
 </li>
-<li><a href="#org9084d1f">3.11. Key exchange</a>
+<li><a href="#org7f55921">3.11. Key exchange</a>
 <ul>
-<li><a href="#orgbc9ad4c">3.11.1. Diffie–Hellman key exchange</a></li>
+<li><a href="#org3dc1e70">3.11.1. Diffie–Hellman key exchange</a></li>
 </ul>
 </li>
-<li><a href="#org3223d59">3.12. Key derivation function</a>
+<li><a href="#orgc9afa8b">3.12. Key derivation function</a>
 <ul>
-<li><a href="#orge103997">3.12.1. HKDF</a></li>
-<li><a href="#org828bc10">3.12.2. PBKDF</a></li>
+<li><a href="#orgb290174">3.12.1. HKDF</a></li>
+<li><a href="#org721cf27">3.12.2. PBKDF</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li><a href="#org267a227">4. System arch</a></li>
-<li><a href="#org5c13746">5. FDE</a>
+<li><a href="#org9614134">4. System arch</a></li>
+<li><a href="#org95a5183">5. FDE</a>
 <ul>
-<li><a href="#orgf659b77">5.1. DEK (Disk Encrypt Key) Design</a></li>
+<li><a href="#org5c5187a">5.1. DEK (Disk Encrypt Key) Design</a></li>
 </ul>
 </li>
-<li><a href="#org7242af0">6. Attack</a>
+<li><a href="#org5e2ecbe">6. Attack</a>
 <ul>
-<li><a href="#org0efcc6c">6.1. 哈希长度扩展攻击</a></li>
+<li><a href="#orgf8b0449">6.1. 哈希长度扩展攻击</a></li>
 </ul>
 </li>
 </ul>
 </div>
 </div>
 
-<div id="outline-container-orgf4eb059" class="outline-2">
-<h2 id="orgf4eb059"><span class="section-number-2">1</span> 基础概念</h2>
+<div id="outline-container-org6052310" class="outline-2">
+<h2 id="org6052310"><span class="section-number-2">1</span> 基础概念</h2>
 <div class="outline-text-2" id="text-1">
 </div>
-<div id="outline-container-orgd0ec6cb" class="outline-3">
-<h3 id="orgd0ec6cb"><span class="section-number-3">1.1</span> Security Goal</h3>
+<div id="outline-container-org8c5db55" class="outline-3">
+<h3 id="org8c5db55"><span class="section-number-3">1.1</span> Security Goal</h3>
 <div class="outline-text-3" id="text-1-1">
 <dl class="org-dl">
 <dt>Availability</dt><dd>可用性<br></dd>
@@ -177,11 +177,11 @@
 </div>
 </div>
 
-<div id="outline-container-orgd50381e" class="outline-2">
-<h2 id="orgd50381e"><span class="section-number-2">2</span> 知识大纲</h2>
+<div id="outline-container-org114bbdb" class="outline-2">
+<h2 id="org114bbdb"><span class="section-number-2">2</span> 知识大纲</h2>
 <div class="outline-text-2" id="text-2">
 
-<div id="org8f1baec" class="figure">
+<div id="orgb4a99e3" class="figure">
 <p><img src="asserts/security-mindmap.png" alt="security-mindmap.png"><br>
 </p>
 <p><span class="figure-number">Figure 1: </span>security mindmap</p>
@@ -189,87 +189,87 @@
 </div>
 </div>
 
-<div id="outline-container-orge50ecdf" class="outline-2">
-<h2 id="orge50ecdf"><span class="section-number-2">3</span> Algorithm</h2>
+<div id="outline-container-orgb66586a" class="outline-2">
+<h2 id="orgb66586a"><span class="section-number-2">3</span> Algorithm</h2>
 <div class="outline-text-2" id="text-3">
 </div>
-<div id="outline-container-orgb566c18" class="outline-3">
-<h3 id="orgb566c18"><span class="section-number-3">3.1</span> Symmetric Ciphers</h3>
+<div id="outline-container-org380c21b" class="outline-3">
+<h3 id="org380c21b"><span class="section-number-3">3.1</span> Symmetric Ciphers</h3>
 <div class="outline-text-3" id="text-3-1">
 </div>
-<div id="outline-container-orgaf66cf3" class="outline-4">
-<h4 id="orgaf66cf3"><span class="section-number-4">3.1.1</span> AES</h4>
+<div id="outline-container-orgaa7fa53" class="outline-4">
+<h4 id="orgaa7fa53"><span class="section-number-4">3.1.1</span> AES</h4>
 </div>
-<div id="outline-container-orgcebaabb" class="outline-4">
-<h4 id="orgcebaabb"><span class="section-number-4">3.1.2</span> DES</h4>
+<div id="outline-container-org0228974" class="outline-4">
+<h4 id="org0228974"><span class="section-number-4">3.1.2</span> DES</h4>
 </div>
-<div id="outline-container-org5621a3a" class="outline-4">
-<h4 id="org5621a3a"><span class="section-number-4">3.1.3</span> RC4 (Rivest Cipher 4)</h4>
+<div id="outline-container-org6571bc6" class="outline-4">
+<h4 id="org6571bc6"><span class="section-number-4">3.1.3</span> RC4 (Rivest Cipher 4)</h4>
 </div>
-<div id="outline-container-org547c139" class="outline-4">
-<h4 id="org547c139"><span class="section-number-4">3.1.4</span> ChaCha20</h4>
+<div id="outline-container-org8ea78b0" class="outline-4">
+<h4 id="org8ea78b0"><span class="section-number-4">3.1.4</span> ChaCha20</h4>
 </div>
 </div>
-<div id="outline-container-org8c4ab98" class="outline-3">
-<h3 id="org8c4ab98"><span class="section-number-3">3.2</span> Asymmetric Ciphers</h3>
+<div id="outline-container-org1c14597" class="outline-3">
+<h3 id="org1c14597"><span class="section-number-3">3.2</span> Asymmetric Ciphers</h3>
 <div class="outline-text-3" id="text-3-2">
 </div>
-<div id="outline-container-orga2c7207" class="outline-4">
-<h4 id="orga2c7207"><span class="section-number-4">3.2.1</span> RSA</h4>
+<div id="outline-container-org8caba2c" class="outline-4">
+<h4 id="org8caba2c"><span class="section-number-4">3.2.1</span> RSA</h4>
 </div>
-<div id="outline-container-org55fba3a" class="outline-4">
-<h4 id="org55fba3a"><span class="section-number-4">3.2.2</span> ECC</h4>
+<div id="outline-container-orgc8a52c5" class="outline-4">
+<h4 id="orgc8a52c5"><span class="section-number-4">3.2.2</span> ECC</h4>
 </div>
 </div>
-<div id="outline-container-org2525c04" class="outline-3">
-<h3 id="org2525c04"><span class="section-number-3">3.3</span> Padding</h3>
+<div id="outline-container-org9846c92" class="outline-3">
+<h3 id="org9846c92"><span class="section-number-3">3.3</span> Padding</h3>
 <div class="outline-text-3" id="text-3-3">
 <p>
 由于加密算法基于数据块进行加密，而实际的数据又不一定正好是整倍的数据块大小，因此需要一种规范来对数据进行填充，来使其达到整数倍。Padding是在加密算法中为了支持对任意大小的数据块进行加密而产生的数据填充规范。<br>
 </p>
 </div>
 </div>
-<div id="outline-container-org1c5b62a" class="outline-3">
-<h3 id="org1c5b62a"><span class="section-number-3">3.4</span> <a href="https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation">Block Cipher Mode Of Operation</a></h3>
+<div id="outline-container-orgec9d513" class="outline-3">
+<h3 id="orgec9d513"><span class="section-number-3">3.4</span> <a href="https://en.wikipedia.org/wiki/Block_cipher_mode_of_operation">Block Cipher Mode Of Operation</a></h3>
 <div class="outline-text-3" id="text-3-4">
 <p>
 由于上述的加密手段都需要对特定大小的数据块进行加密，为了支持加密大段数据的加密，必须支持协商好多个加密数据块之间的联系，从而达到安全，高效的加密。<br>
 </p>
 </div>
-<div id="outline-container-org403c0db" class="outline-4">
-<h4 id="org403c0db"><span class="section-number-4">3.4.1</span> ECB(Electronic CodeBook)</h4>
+<div id="outline-container-orgcadb5ce" class="outline-4">
+<h4 id="orgcadb5ce"><span class="section-number-4">3.4.1</span> ECB(Electronic CodeBook)</h4>
 </div>
-<div id="outline-container-orgf5aaa12" class="outline-4">
-<h4 id="orgf5aaa12"><span class="section-number-4">3.4.2</span> CBC(Cipher Block Chaining)</h4>
+<div id="outline-container-org5a89699" class="outline-4">
+<h4 id="org5a89699"><span class="section-number-4">3.4.2</span> CBC(Cipher Block Chaining)</h4>
 </div>
-<div id="outline-container-orgbca9ae3" class="outline-4">
-<h4 id="orgbca9ae3"><span class="section-number-4">3.4.3</span> CFB(Cipher Feedback)</h4>
+<div id="outline-container-org400da50" class="outline-4">
+<h4 id="org400da50"><span class="section-number-4">3.4.3</span> CFB(Cipher Feedback)</h4>
 </div>
-<div id="outline-container-org21c41f9" class="outline-4">
-<h4 id="org21c41f9"><span class="section-number-4">3.4.4</span> OFB(Output Feedback)</h4>
+<div id="outline-container-org71f3412" class="outline-4">
+<h4 id="org71f3412"><span class="section-number-4">3.4.4</span> OFB(Output Feedback)</h4>
 </div>
-<div id="outline-container-orga99fcca" class="outline-4">
-<h4 id="orga99fcca"><span class="section-number-4">3.4.5</span> CTR(Counter)</h4>
+<div id="outline-container-org9778159" class="outline-4">
+<h4 id="org9778159"><span class="section-number-4">3.4.5</span> CTR(Counter)</h4>
 </div>
-<div id="outline-container-org48f67c3" class="outline-4">
-<h4 id="org48f67c3"><span class="section-number-4">3.4.6</span> XTS</h4>
+<div id="outline-container-org64dd9d3" class="outline-4">
+<h4 id="org64dd9d3"><span class="section-number-4">3.4.6</span> XTS</h4>
 </div>
 </div>
 
-<div id="outline-container-org7521562" class="outline-3">
-<h3 id="org7521562"><span class="section-number-3">3.5</span> Digest</h3>
+<div id="outline-container-org3e3a10b" class="outline-3">
+<h3 id="org3e3a10b"><span class="section-number-3">3.5</span> Digest</h3>
 <div class="outline-text-3" id="text-3-5">
 </div>
-<div id="outline-container-org3b8ef72" class="outline-4">
-<h4 id="org3b8ef72"><span class="section-number-4">3.5.1</span> SHA</h4>
+<div id="outline-container-orgebbf2d0" class="outline-4">
+<h4 id="orgebbf2d0"><span class="section-number-4">3.5.1</span> SHA</h4>
 </div>
-<div id="outline-container-org712e88d" class="outline-4">
-<h4 id="org712e88d"><span class="section-number-4">3.5.2</span> MD5</h4>
+<div id="outline-container-org208f653" class="outline-4">
+<h4 id="org208f653"><span class="section-number-4">3.5.2</span> MD5</h4>
 </div>
 </div>
 
-<div id="outline-container-org53b4b7f" class="outline-3">
-<h3 id="org53b4b7f"><span class="section-number-3">3.6</span> MAC(Message authentication code)</h3>
+<div id="outline-container-org94aa3d9" class="outline-3">
+<h3 id="org94aa3d9"><span class="section-number-3">3.6</span> MAC(Message authentication code)</h3>
 <div class="outline-text-3" id="text-3-6">
 <p>
 MAC,消息认证码，用来认证消息完整性。<br>
@@ -281,8 +281,8 @@ MAC,消息认证码，用来认证消息完整性。<br>
 </ul>
 </div>
 
-<div id="outline-container-org20a4b75" class="outline-4">
-<h4 id="org20a4b75"><span class="section-number-4">3.6.1</span> CBC-MAC(cipher block chaining message autghentication code)</h4>
+<div id="outline-container-org57e1121" class="outline-4">
+<h4 id="org57e1121"><span class="section-number-4">3.6.1</span> CBC-MAC(cipher block chaining message autghentication code)</h4>
 <div class="outline-text-4" id="text-3-6-1">
 <p>
 <a href="https://en.wikipedia.org/wiki/CBC-MAC">https://en.wikipedia.org/wiki/CBC-MAC</a><br>
@@ -294,12 +294,12 @@ MAC,消息认证码，用来认证消息完整性。<br>
 </div>
 </div>
 
-<div id="outline-container-org2ea7654" class="outline-4">
-<h4 id="org2ea7654"><span class="section-number-4">3.6.2</span> ALG1-6</h4>
+<div id="outline-container-orga1caa5d" class="outline-4">
+<h4 id="orga1caa5d"><span class="section-number-4">3.6.2</span> ALG1-6</h4>
 </div>
 
-<div id="outline-container-orgb1c8010" class="outline-4">
-<h4 id="orgb1c8010"><span class="section-number-4">3.6.3</span> CMAC(OMAC1)</h4>
+<div id="outline-container-org70d3518" class="outline-4">
+<h4 id="org70d3518"><span class="section-number-4">3.6.3</span> CMAC(OMAC1)</h4>
 <div class="outline-text-4" id="text-3-6-3">
 <p>
 OMAC(One-key MAC)从块加密方法演变而来，与CBC-MAC类似。<br>
@@ -307,8 +307,8 @@ OMAC(One-key MAC)从块加密方法演变而来，与CBC-MAC类似。<br>
 </div>
 </div>
 
-<div id="outline-container-orgad11fe1" class="outline-4">
-<h4 id="orgad11fe1"><span class="section-number-4">3.6.4</span> HMAC</h4>
+<div id="outline-container-orgc0504c4" class="outline-4">
+<h4 id="orgc0504c4"><span class="section-number-4">3.6.4</span> HMAC</h4>
 <div class="outline-text-4" id="text-3-6-4">
 <p>
 由于普通MAC运算无法保证数据真实性，因此诞生了HMAC算法，相比于MAC算法，引入了一个密钥，用来确保消息的真实性。<br>
@@ -317,13 +317,13 @@ HMAC算法可以选择使用的摘要算法类型（MD5,SHA1/SHA2 etc）<br>
 </div>
 </div>
 
-<div id="outline-container-org64bf43f" class="outline-4">
-<h4 id="org64bf43f"><span class="section-number-4">3.6.5</span> GMAC</h4>
+<div id="outline-container-org73148c0" class="outline-4">
+<h4 id="org73148c0"><span class="section-number-4">3.6.5</span> GMAC</h4>
 </div>
 </div>
 
-<div id="outline-container-org8e038c3" class="outline-3">
-<h3 id="org8e038c3"><span class="section-number-3">3.7</span> Digital Signatures</h3>
+<div id="outline-container-org7f62ab2" class="outline-3">
+<h3 id="org7f62ab2"><span class="section-number-3">3.7</span> Digital Signatures</h3>
 <div class="outline-text-3" id="text-3-7">
 <p>
 数字签名依赖于非对称加密算法，从而支持Non-Repudiation特性，这个特性在MAC算法中是无法支持的。<br>
@@ -335,25 +335,25 @@ HMAC算法可以选择使用的摘要算法类型（MD5,SHA1/SHA2 etc）<br>
 </ul>
 </div>
 
-<div id="outline-container-org9528a92" class="outline-4">
-<h4 id="org9528a92"><span class="section-number-4">3.7.1</span> RSA-PSS</h4>
+<div id="outline-container-org787455d" class="outline-4">
+<h4 id="org787455d"><span class="section-number-4">3.7.1</span> RSA-PSS</h4>
 </div>
-<div id="outline-container-org1126270" class="outline-4">
-<h4 id="org1126270"><span class="section-number-4">3.7.2</span> EIGamal</h4>
+<div id="outline-container-org7a837ea" class="outline-4">
+<h4 id="org7a837ea"><span class="section-number-4">3.7.2</span> EIGamal</h4>
 </div>
-<div id="outline-container-org0a16f48" class="outline-4">
-<h4 id="org0a16f48"><span class="section-number-4">3.7.3</span> DSA</h4>
+<div id="outline-container-org67d41ab" class="outline-4">
+<h4 id="org67d41ab"><span class="section-number-4">3.7.3</span> DSA</h4>
 </div>
-<div id="outline-container-orgc643ada" class="outline-4">
-<h4 id="orgc643ada"><span class="section-number-4">3.7.4</span> ECDSA</h4>
+<div id="outline-container-org7831d8d" class="outline-4">
+<h4 id="org7831d8d"><span class="section-number-4">3.7.4</span> ECDSA</h4>
 </div>
-<div id="outline-container-orgd2b796e" class="outline-4">
-<h4 id="orgd2b796e"><span class="section-number-4">3.7.5</span> Rabin</h4>
+<div id="outline-container-orga07a5bd" class="outline-4">
+<h4 id="orga07a5bd"><span class="section-number-4">3.7.5</span> Rabin</h4>
 </div>
 </div>
 
-<div id="outline-container-org7a9fdf9" class="outline-3">
-<h3 id="org7a9fdf9"><span class="section-number-3">3.8</span> Digital certificate</h3>
+<div id="outline-container-orgfb78539" class="outline-3">
+<h3 id="orgfb78539"><span class="section-number-3">3.8</span> Digital certificate</h3>
 <div class="outline-text-3" id="text-3-8">
 <p>
 数字证书是由证书机关颁发的证书，之中包含了由证书机构（CA）签名过的公钥值。<br>
@@ -361,8 +361,8 @@ HMAC算法可以选择使用的摘要算法类型（MD5,SHA1/SHA2 etc）<br>
 </p>
 </div>
 </div>
-<div id="outline-container-orgaf3fcbf" class="outline-3">
-<h3 id="orgaf3fcbf"><span class="section-number-3">3.9</span> AE(Authenticated encryption)</h3>
+<div id="outline-container-org0b854f3" class="outline-3">
+<h3 id="org0b854f3"><span class="section-number-3">3.9</span> AE(Authenticated encryption)</h3>
 <div class="outline-text-3" id="text-3-9">
 <p>
 保证数据保密性、完整性、真实性。<br>
@@ -380,23 +380,23 @@ HMAC算法可以选择使用的摘要算法类型（MD5,SHA1/SHA2 etc）<br>
 </ul>
 </div>
 
-<div id="outline-container-org0ca6556" class="outline-4">
-<h4 id="org0ca6556"><span class="section-number-4">3.9.1</span> EAX</h4>
+<div id="outline-container-org2d0807e" class="outline-4">
+<h4 id="org2d0807e"><span class="section-number-4">3.9.1</span> EAX</h4>
 </div>
 </div>
-<div id="outline-container-org4581431" class="outline-3">
-<h3 id="org4581431"><span class="section-number-3">3.10</span> AEAD（authenticated encryption with associated data）</h3>
+<div id="outline-container-org62e9c3b" class="outline-3">
+<h3 id="org62e9c3b"><span class="section-number-3">3.10</span> AEAD（authenticated encryption with associated data）</h3>
 <div class="outline-text-3" id="text-3-10">
 <p>
 AEAD算法结合了Block Cipher Mode<br>
 </p>
 </div>
-<div id="outline-container-org2145c9f" class="outline-4">
-<h4 id="org2145c9f"><span class="section-number-4">3.10.1</span> GCM (Galois/Counter Mode)</h4>
+<div id="outline-container-org5bb3905" class="outline-4">
+<h4 id="org5bb3905"><span class="section-number-4">3.10.1</span> GCM (Galois/Counter Mode)</h4>
 </div>
 
-<div id="outline-container-org597fa6b" class="outline-4">
-<h4 id="org597fa6b"><span class="section-number-4">3.10.2</span> CCM (Counter with CBC-MAC)</h4>
+<div id="outline-container-org6b28c3a" class="outline-4">
+<h4 id="org6b28c3a"><span class="section-number-4">3.10.2</span> CCM (Counter with CBC-MAC)</h4>
 <div class="outline-text-4" id="text-3-10-2">
 <p>
 <a href="https://en.wikipedia.org/wiki/CCM_mode">https://en.wikipedia.org/wiki/CCM_mode</a><br>
@@ -412,46 +412,46 @@ AEAD算法结合了Block Cipher Mode<br>
 </div>
 </div>
 </div>
-<div id="outline-container-org9084d1f" class="outline-3">
-<h3 id="org9084d1f"><span class="section-number-3">3.11</span> Key exchange</h3>
+<div id="outline-container-org7f55921" class="outline-3">
+<h3 id="org7f55921"><span class="section-number-3">3.11</span> Key exchange</h3>
 <div class="outline-text-3" id="text-3-11">
 </div>
-<div id="outline-container-orgbc9ad4c" class="outline-4">
-<h4 id="orgbc9ad4c"><span class="section-number-4">3.11.1</span> <a href="https://en.wikipedia.org/wiki/Diffie%E2%80%93Hellman_key_exchange">Diffie–Hellman key exchange</a></h4>
+<div id="outline-container-org3dc1e70" class="outline-4">
+<h4 id="org3dc1e70"><span class="section-number-4">3.11.1</span> <a href="https://en.wikipedia.org/wiki/Diffie%E2%80%93Hellman_key_exchange">Diffie–Hellman key exchange</a></h4>
 <div class="outline-text-4" id="text-3-11-1">
 </div>
 <ul class="org-ul">
-<li><a id="org68b110a"></a>ECDH<br></li>
+<li><a id="org63e0c53"></a>ECDH<br></li>
 </ul>
 </div>
 </div>
-<div id="outline-container-org3223d59" class="outline-3">
-<h3 id="org3223d59"><span class="section-number-3">3.12</span> <a href="https://web.archive.org/web/20150228035021/http://di-mgt.com.au/cryptoKDFs.html">Key derivation function</a></h3>
+<div id="outline-container-orgc9afa8b" class="outline-3">
+<h3 id="orgc9afa8b"><span class="section-number-3">3.12</span> <a href="https://web.archive.org/web/20150228035021/http://di-mgt.com.au/cryptoKDFs.html">Key derivation function</a></h3>
 <div class="outline-text-3" id="text-3-12">
 </div>
-<div id="outline-container-orge103997" class="outline-4">
-<h4 id="orge103997"><span class="section-number-4">3.12.1</span> <a href="https://en.wikipedia.org/wiki/HKDF">HKDF</a></h4>
+<div id="outline-container-orgb290174" class="outline-4">
+<h4 id="orgb290174"><span class="section-number-4">3.12.1</span> <a href="https://en.wikipedia.org/wiki/HKDF">HKDF</a></h4>
 </div>
-<div id="outline-container-org828bc10" class="outline-4">
-<h4 id="org828bc10"><span class="section-number-4">3.12.2</span> PBKDF</h4>
+<div id="outline-container-org721cf27" class="outline-4">
+<h4 id="org721cf27"><span class="section-number-4">3.12.2</span> PBKDF</h4>
 </div>
 </div>
 </div>
 
-<div id="outline-container-org267a227" class="outline-2">
-<h2 id="org267a227"><span class="section-number-2">4</span> System arch</h2>
+<div id="outline-container-org9614134" class="outline-2">
+<h2 id="org9614134"><span class="section-number-2">4</span> System arch</h2>
 <div class="outline-text-2" id="text-4">
 <dl class="org-dl">
 <dt>Android Security Internals</dt><dd><a href="https://www.opersys.com/downloads/cc-slides/android-security/slides-main-190514.html#/">https://www.opersys.com/downloads/cc-slides/android-security/slides-main-190514.html#/</a><br></dd>
 </dl>
 </div>
 </div>
-<div id="outline-container-org5c13746" class="outline-2">
-<h2 id="org5c13746"><span class="section-number-2">5</span> FDE</h2>
+<div id="outline-container-org95a5183" class="outline-2">
+<h2 id="org95a5183"><span class="section-number-2">5</span> FDE</h2>
 <div class="outline-text-2" id="text-5">
 </div>
-<div id="outline-container-orgf659b77" class="outline-3">
-<h3 id="orgf659b77"><span class="section-number-3">5.1</span> DEK (Disk Encrypt Key) Design</h3>
+<div id="outline-container-org5c5187a" class="outline-3">
+<h3 id="org5c5187a"><span class="section-number-3">5.1</span> DEK (Disk Encrypt Key) Design</h3>
 <div class="outline-text-3" id="text-5-1">
 <p>
 DEK is use to encrypt block comtent, due to performance issue, its normally a symmetric key<br>
@@ -460,12 +460,12 @@ DEK is use to encrypt block comtent, due to performance issue, its normally a sy
 </div>
 </div>
 
-<div id="outline-container-org7242af0" class="outline-2">
-<h2 id="org7242af0"><span class="section-number-2">6</span> Attack</h2>
+<div id="outline-container-org5e2ecbe" class="outline-2">
+<h2 id="org5e2ecbe"><span class="section-number-2">6</span> Attack</h2>
 <div class="outline-text-2" id="text-6">
 </div>
-<div id="outline-container-org0efcc6c" class="outline-3">
-<h3 id="org0efcc6c"><span class="section-number-3">6.1</span> 哈希长度扩展攻击</h3>
+<div id="outline-container-orgf8b0449" class="outline-3">
+<h3 id="orgf8b0449"><span class="section-number-3">6.1</span> 哈希长度扩展攻击</h3>
 </div>
 </div>
 </div>
