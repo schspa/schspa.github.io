@@ -1,0 +1,698 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<!-- 2021-06-09 Wed 14:01 -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>irq wakeup in linux</title>
+<meta name="generator" content="Org mode">
+<meta name="author" content="schspa">
+<meta name="description" content="irq wakeup in linux"
+>
+<link rel="shortcut icon" href="/images/rose-red.png" type="image/x-icon" />
+<link rel="stylesheet" href="/css/animate.min.css" />
+<link rel="stylesheet" href="/css/all.min.css" />
+<link rel="stylesheet" type="text/css" href="/css/style.css" />
+<link rel="stylesheet" type="text/css" href="/css/navbar.css" />
+<script src="/js/jquery.min.js"></script>
+<script src="/js/darkreader.js"></script>
+<script src="/user.config.js"></script>
+<script src="/js/main.js"></script>
+</head>
+<body>
+<div id="preamble" class="status">
+<div class="mobile-container">
+  <!-- Top Navigation Menu -->
+  <div class="topnav">
+    <div id="header">
+      <a href="/" class="logo">Schspa's Blog</a>
+      <a href="javascript:void(0);" class="icon" onclick="toggleheader()">
+        <i class="fa fa-bars"></i>
+      </a>
+    </div>
+    <div id="nav_headers">
+      <a href="/sitemap.html" class="menu-item">Categories</a>
+    </div>
+  </div>
+  <!-- End smartphone / tablet look -->
+</div>
+
+<header id="header" class="header">
+  <div class="logo-wrapper">
+    <a href="/" class="logo">Schspa's Blogs</a>
+  </div>
+
+  <nav class="site-navbar">
+    <ul id="menu" class="menu">
+      <li class="menu-item">
+        <a class="menu-item-link" href="/">Home</a>
+      </li>
+      <li class="menu-item">
+        <a class="menu-item-link" href="/sitemap.html">Categories</a>
+      </li>
+    </ul>
+  </nav>
+</header>
+</div>
+<div id="content">
+<h1 class="title">irq wakeup in linux</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#org1a56a77">术语</a></li>
+<li><a href="#org17c4685">硬件架构</a>
+<ul>
+<li><a href="#orgb810a84">GIC power down ？</a></li>
+<li><a href="#orgcb8de75">CPU Power Down</a></li>
+<li><a href="#orgd6d8a79">CPU Power Up</a>
+<ul>
+<li><a href="#org525c6b5">RESET的执行地址</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#org517d92f">Suspend In Linux</a></li>
+<li><a href="#org3246239">Linux irq wakeup</a>
+<ul>
+<li><a href="#orge3452f5">gic对唤醒功能的支持</a></li>
+<li><a href="#orgc30e88c">irq flags</a>
+<ul>
+<li><a href="#org13fa0f5">IRQCHIP_MASK_ON_SUSPEND</a></li>
+<li><a href="#orgbf0003c">IRQCHIP_SKIP_SET_WAKE</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#org008752e">ATF软件</a>
+<ul>
+<li><a href="#orgc60aef1">参数：</a></li>
+<li><a href="#org8e3bf9a">平台相关实现</a></li>
+</ul>
+</li>
+<li><a href="#org5f6cdeb">arm-gic</a>
+<ul>
+<li><a href="#orgd36aee0">irq parents</a></li>
+</ul>
+</li>
+<li><a href="#org4b69bf7">linux内核接口</a></li>
+<li><a href="#org2453e56">implement stacked irqchip</a>
+<ul>
+<li><a href="#org5f76df1">used function &amp; macors</a>
+<ul>
+<li><a href="#org370eab8">IRQCHIP_DECLARE</a></li>
+<li><a href="#orgfb2b39f">get map configuration from device tree node.</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#org9d288da">irq domain</a>
+<ul>
+<li><a href="#orgb1462ff">irq initialization</a></li>
+<li><a href="#orge4a33e8">irq domain ops</a></li>
+</ul>
+</li>
+<li><a href="#org2b7ac91">refs</a></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org1a56a77" class="outline-2">
+<h2 id="org1a56a77">术语</h2>
+<div class="outline-text-2" id="text-org1a56a77">
+<table>
+
+
+<colgroup>
+<col  class="org-left">
+
+<col  class="org-left">
+</colgroup>
+<tbody>
+<tr>
+<td class="org-left">简写</td>
+<td class="org-left">全称</td>
+</tr>
+
+<tr>
+<td class="org-left">TRM</td>
+<td class="org-left">Technical Reference Manual</td>
+</tr>
+
+<tr>
+<td class="org-left">GIC</td>
+<td class="org-left">Generic Interrupt Controller</td>
+</tr>
+
+<tr>
+<td class="org-left">smccc</td>
+<td class="org-left">SMC CALLING CONVENTION</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+<div id="outline-container-org17c4685" class="outline-2">
+<h2 id="org17c4685">硬件架构</h2>
+<div class="outline-text-2" id="text-org17c4685">
+<p>
+在本篇文章中基于AARCH64平台，GIC作为中断控制器来进行讨论<br>
+下面是GIC-600的系统框架图：<br>
+</p>
+<p>
+<img src="asserts/2021-03-05_12-47-10_screenshot.png" alt="2021-03-05_12-47-10_screenshot.png"><br>
+看图可知，Wake Request模块就是为了唤醒功能提供的信号输出。<br>
+</p>
+</div>
+
+<div id="outline-container-orgb810a84" class="outline-3">
+<h3 id="orgb810a84">GIC power down ？</h3>
+<div class="outline-text-3" id="text-orgb810a84">
+<p>
+GIC可以被关闭电源，也可以不关闭电源，这个在SOC设计阶段就可以选择。<br>
+对于Arm gic来言，一般具有两种情况<br>
+</p>
+<ol class="org-ol">
+<li>GIC处于always on的power domain之中，这样gic在休眠时由于没有断电，仍旧可以正常工作，任何的中断都可以正常唤醒soc <sup><a id="fnr.1" class="footref" href="#fn.1">1</a></sup><br></li>
+<li>GIC在可以断电的power domain中，这样在休眠时一般都会对gic进行断电，这种状况下，系统需要soc特定的实现来进行唤醒。<br>
+具体实现各家SOC应该都不相同，不可同日而语。<br></li>
+</ol>
+</div>
+</div>
+
+<div id="outline-container-orgcb8de75" class="outline-3">
+<h3 id="orgcb8de75">CPU Power Down</h3>
+<div class="outline-text-3" id="text-orgcb8de75">
+<p>
+下面是ARM Crotext A55 CPU的下电流程，CPU有寄存器CPUPWRCTLR来控制电源控制相关功能，当CPUPWRCTLR.CORE_PWRDN_EN置1时，就是代表CPU在下次执行WFI指令时要进入掉电状态。<sup><a id="fnr.2" class="footref" href="#fn.2">2</a></sup><br>
+</p>
+<blockquote>
+<p>
+The Cortex-A55 core uses the following power down sequence.<br>
+</p>
+
+<p>
+To power down a core, perform the following programming sequence:<br>
+</p>
+
+<ol class="org-ol">
+<li>Save all architectural state.<br></li>
+
+<li>Configure the GIC distributor to disable or reroute interrupts away from this core.<br></li>
+
+<li>Set the CPUPWRCTLR.CORE_PWRDN_EN bit to 1 to indicate to the power controller that a powerdown is requested.<br></li>
+
+<li>Execute an Instruction Synchronization Barrier (ISB) instruction.<br></li>
+
+<li>Execute a WFI instruction.<br></li>
+</ol>
+
+<p>
+After executing WFI and then receiving a powerdown request from the power controller, the hardware performs the following:<br>
+</p>
+
+<p>
+• Disabling and flushing of caches (L1 and L2).<br>
+</p>
+
+<p>
+• Removal of the core from coherency.<br>
+</p>
+</blockquote>
+<p>
+从上面的掉电流程可知，A55在下电时，还需要SOC内部power controller的支持，不同的SOC厂商实现的方式千奇百怪，并且设计泄密在此不做深入。<br>
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgd6d8a79" class="outline-3">
+<h3 id="orgd6d8a79">CPU Power Up</h3>
+<div class="outline-text-3" id="text-orgd6d8a79">
+<p>
+从上边Power Down的流程可知，系统在进入Power Down之后需要进行reset才可以将CPU重新启动，具体的过程也是SOC厂商自己定义的行为，没有太大分析的必要。<br>
+Reset之后，CPU需要从RVBAR寄存器所显示的地址来重新启动。RVBAR寄存器是通过CPU的外部信号线进行输入的。<br>
+</p>
+</div>
+
+<div id="outline-container-org525c6b5" class="outline-4">
+<h4 id="org525c6b5">RESET的执行地址</h4>
+<div class="outline-text-4" id="text-org525c6b5">
+
+<div id="org62e34ba" class="figure">
+<p><img src="asserts/2021-03-05_13-40-42_screenshot.png" alt="2021-03-05_13-40-42_screenshot.png"><br>
+</p>
+</div>
+
+<p>
+由于没有在A55的TRM中找到关于此信号的定义，拿A53的来充个数。<br>
+</p>
+
+
+<div id="org624d85b" class="figure">
+<p><img src="asserts/2021-03-05_13-43-32_screenshot.png" alt="2021-03-05_13-43-32_screenshot.png"><br>
+</p>
+</div>
+
+<p>
+从手册可知，复位执行地址是可以通过配置来修改的，并且4byte对齐(因为bit0,1不可配置)<br>
+</p>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org517d92f" class="outline-2">
+<h2 id="org517d92f">Suspend In Linux</h2>
+<div class="outline-text-2" id="text-org517d92f">
+<p>
+下图是Linux系统中suspend以及resume的流程图，图中以PSCI为例，描写了系统在休眠时的调用流程。<br>
+</p>
+<p>
+<img src="asserts/suspend-to-ram.png" alt="suspend-to-ram.png"><br>
+上面的流程着重描写了系统通过PSCI休眠时的调用流程，包括Linux系统从休眠状态唤醒之后的resume流程。<br>
+Linux唤醒时，运行的Linux内核的第一段指令是cpu_resume，之后再经过arm64 psci相关的一系列调用返回到psci_system_suspend_enter继续执行。<br>
+</p>
+</div>
+</div>
+
+<div id="outline-container-org3246239" class="outline-2">
+<h2 id="org3246239">Linux irq wakeup</h2>
+<div class="outline-text-2" id="text-org3246239">
+<p>
+在Linux系统中，如果想要唤醒已经进入休眠状态中的cpu，就需要通过~enable_irq_wake~来设置开启唤醒功能<sup><a id="fnr.3" class="footref" href="#fn.3">3</a></sup>。<br>
+实际上，芯片支持的唤醒源个数是有限的，并不是每种中断都可以正常的唤醒系统。<br>
+</p>
+</div>
+
+<div id="outline-container-orge3452f5" class="outline-3">
+<h3 id="orge3452f5">gic对唤醒功能的支持</h3>
+<div class="outline-text-3" id="text-orge3452f5">
+<p>
+在<a href="https://developer.arm.com/documentation/101206/0000/signal-descriptions/power-control-signals">gic600的TRM手册</a>中，可以看到gic600有wake_request的输出信号，Power controller可以根据这个信号来将对应的cpu唤醒。<br>
+唤醒信号：<br>
+</p>
+
+<!-- This HTML table template is generated by emacs 27.1.91 -->
+<table border="1">
+  <tr>
+    <td align="left" valign="top">
+      &nbsp;Signal&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    </td>
+    <td align="left" valign="top">
+      &nbsp;Type&nbsp;&nbsp;&nbsp;
+    </td>
+    <td align="left" valign="top">
+      &nbsp;Source&nbsp;or&nbsp;destination&nbsp;
+    </td>
+    <td align="left" valign="top">
+      &nbsp;Description&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    </td>
+  </tr>
+  <tr>
+    <td align="left" valign="top">
+      &nbsp;wake_request[<num_cpus&nbsp;−&nbsp;1:0>]&nbsp;<br />
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br />
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    </td>
+    <td align="left" valign="top">
+      &nbsp;Output&nbsp;<br />
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br />
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    </td>
+    <td align="left" valign="top">
+      &nbsp;Power&nbsp;controller&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br />
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br />
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    </td>
+    <td align="left" valign="top">
+      &nbsp;Wake&nbsp;request&nbsp;signal&nbsp;to&nbsp;power&nbsp;controller&nbsp;indicating&nbsp;that&nbsp;an&nbsp;interrupt&nbsp;is&nbsp;targeting&nbsp;&nbsp;&nbsp;&nbsp;<br />
+      this&nbsp;core&nbsp;and&nbsp;it&nbsp;must&nbsp;be&nbsp;woken.&nbsp;When&nbsp;asserted,&nbsp;the&nbsp;wake_request&nbsp;is&nbsp;sticky&nbsp;unless&nbsp;the&nbsp;&nbsp;<br />
+      Distributor&nbsp;is&nbsp;put&nbsp;into&nbsp;the&nbsp;gated&nbsp;state.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    </td>
+  </tr>
+</table>
+</div>
+</div>
+
+<div id="outline-container-orgc30e88c" class="outline-3">
+<h3 id="orgc30e88c">irq flags</h3>
+<div class="outline-text-3" id="text-orgc30e88c">
+</div>
+<div id="outline-container-org13fa0f5" class="outline-4">
+<h4 id="org13fa0f5">IRQCHIP_MASK_ON_SUSPEND</h4>
+<div class="outline-text-4" id="text-org13fa0f5">
+<p>
+Mask non wake irqs in the suspend path<br>
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgbf0003c" class="outline-4">
+<h4 id="orgbf0003c">IRQCHIP_SKIP_SET_WAKE</h4>
+<div class="outline-text-4" id="text-orgbf0003c">
+<p>
+Skip chip.irq_set_wake(), for this irq chip<br>
+由以下patch引入，提交说明已经很明确<br>
+</p>
+<div class="org-src-container">
+<pre class="src src-diff"><span style="color: #a4aab6;">60f96b41f71d2a13d1c0a457b8b77958f77142d1</span>
+<span style="color: #a4aab6;">Author:</span><span style="color: #3f444a;">     </span><span style="color: #a4aab6;">Santosh</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">Shilimkar</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;"><a href="mailto:santosh.shilimkar%40ti.com">&lt;santosh.shilimkar@ti.com&gt;</a></span>
+<span style="color: #a4aab6;">AuthorDate:</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">Fri</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">Sep</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">9</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">13:59:35</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">2011</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">+0530</span>
+<span style="color: #a4aab6;">Commit:</span><span style="color: #3f444a;">     </span><span style="color: #a4aab6;">Thomas</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">Gleixner</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;"><a href="mailto:tglx%40linutronix.de">&lt;tglx@linutronix.de&gt;</a></span>
+<span style="color: #a4aab6;">CommitDate:</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">Mon</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">Sep</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">12</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">09:52:49</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">2011</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">+0200</span>
+
+<span style="color: #a4aab6;">Parent:</span><span style="color: #3f444a;">     </span><span style="color: #a4aab6;">ed585a651681e</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">genirq:</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">Make</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">irq_shutdown()</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">symmetric</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">vs.</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">irq_startup</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">again</span>
+<span style="color: #a4aab6;">Contained:</span><span style="color: #3f444a;">  </span><span style="color: #a4aab6;">(no</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">branch)</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">master</span>
+<span style="color: #a4aab6;">Follows:</span><span style="color: #3f444a;">    </span><span style="color: #a4aab6;">v3.1-rc5</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">(93)</span>
+<span style="color: #a4aab6;">Precedes:</span><span style="color: #3f444a;">   </span><span style="color: #a4aab6;">v3.2-rc1</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">(11433)</span>
+
+<span style="color: #a4aab6;">genirq:</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">Add</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">IRQCHIP_SKIP_SET_WAKE</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">flag</span>
+
+<span style="color: #a4aab6;">Some</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">irq</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">chips</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">need</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">the</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">irq_set_wake()</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">functionality,</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">but</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">do</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">not</span>
+<span style="color: #a4aab6;">require</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">a</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">irq_set_wake()</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">callback.</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">Instead</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">of</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">forcing</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">an</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">empty</span>
+<span style="color: #a4aab6;">callback</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">to</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">be</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">implemented</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">add</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">a</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">flag</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">which</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">notes</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">this</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">fact.</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">Check</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">for</span>
+<span style="color: #a4aab6;">the</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">flag</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">in</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">set_irq_wake_real()</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">and</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">return</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">success</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">when</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">set.</span>
+
+<span style="color: #a4aab6;">Signed-off-by:</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">Santosh</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">Shilimkar</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;"><a href="mailto:santosh.shilimkar%40ti.com">&lt;santosh.shilimkar@ti.com&gt;</a></span>
+Cc:<span style="color: #3f444a;"> </span>Thomas<span style="color: #3f444a;"> </span>Gleixner<span style="color: #3f444a;"> </span><a href="mailto:tglx%40linutronix.de">&lt;tglx@linutronix.de&gt;</a>
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-org008752e" class="outline-2">
+<h2 id="org008752e">ATF软件</h2>
+<div class="outline-text-2" id="text-org008752e">
+<p>
+arm atf中实现了psci协议，当系统休眠时，可以通过psci来进入休眠。psci方法：PSCI_CPU_SUSPEND_AARCH64，PSCI_CPU_SUSPEND_AARCH32<br>
+suspend的方法原型为：<br>
+</p>
+<div class="org-src-container">
+<pre class="src src-C"><span style="color: #ECBE7B;">int</span> <span style="color: #c678dd;">psci_cpu_suspend</span>(<span style="color: #ECBE7B;">unsigned</span> <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">power_state</span>,
+        <span style="color: #ECBE7B;">uintptr_t</span> <span style="color: #dcaeea;">entrypoint</span>,
+        <span style="color: #ECBE7B;">u_register_t</span> <span style="color: #dcaeea;">context_id</span>);
+</pre>
+</div>
+</div>
+<div id="outline-container-orgc60aef1" class="outline-3">
+<h3 id="orgc60aef1">参数：</h3>
+<div class="outline-text-3" id="text-orgc60aef1">
+<dl class="org-dl">
+<dt>power_state</dt><dd>power_state参数比较复杂，power_state定义了系统要处于的低功耗模式，根据系统的实现，有两种格式可供选择。<br></dd>
+<dt>entrypoint</dt><dd><p>
+resume之后的入口地址，需要提供PA，或者IPA<br>
+</p>
+<blockquote>
+<p>
+The entry_point_address parameter is used by the caller to specify where code execution needs to resume at wakeup time. The parameter must be a Physical Address (PA), or, for a guest OS in a virtualized platform, an Intermediate Physical Address (IPA). In this case, the hypervisor must trap the call. Further details can be found in section<br>
+</p>
+</blockquote></dd>
+<dt>context_id</dt><dd>回传参数，当系统resume之后，psci将这个值放入X0/W0/R0，作为第一个参数传递过去。<br></dd>
+</dl>
+</div>
+</div>
+
+<div id="outline-container-org8e3bf9a" class="outline-3">
+<h3 id="org8e3bf9a">平台相关实现</h3>
+<div class="outline-text-3" id="text-org8e3bf9a">
+<p>
+在平台的实现中，ATF有几个函数是需要SOC平台进行实现的。<br>
+在atf中，psci lib已经实现了平台无关部份的代码，部份代码需要soc平台来根据自己的需要来实现。psci lib中与休眠唤醒关系不大，上述参数中entrypoint以及context_id都时psci代码来处理，SOC平台无需关心此部份代码。<br>
+为了有一个对atf中的休眠唤醒流程有一个直观的影响，使用下面的代码调用时序图来说明<br>
+</p>
+
+<div id="orga6fa63e" class="figure">
+<p><img src="asserts/atf-suspend-resume.png" alt="atf-suspend-resume.png"><br>
+</p>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org5f6cdeb" class="outline-2">
+<h2 id="org5f6cdeb">arm-gic</h2>
+<div class="outline-text-2" id="text-org5f6cdeb">
+<p>
+在arm gic的实现中，既没有提供IRQCHIP_SKIP_SET_WAKE的flag，也没有实现set_irq_wake的实现。这是因为gic认为gic不处理休眠唤醒的问题，这些应该由平台来基于stacked irqchip来实现。<sup><a id="fnr.4" class="footref" href="#fn.4">4</a></sup><br>
+Marc Zyngier在内核的邮件有如下回复<br>
+</p>
+<blockquote>
+<p>
+  I don't have any strong feeling against this series (anything that<br>
+removes hacks from the GIC code has my full and unconditional support),<br>
+but I'd just like to make sure I understand the issue.<br>
+</p>
+
+<p>
+There is (AFAIU) 3 cases when suspending:<br>
+</p>
+
+<ol class="org-ol">
+<li>The GIC is in an always-on domain: SKIP_SET_WAKE is set, because<br></li>
+</ol>
+<p>
+there is nothing to do (we can always wake up). Problem solved.<br>
+</p>
+
+<ol class="org-ol">
+<li>The GIC gets powered off, but we have additional HW that will take<br></li>
+</ol>
+<p>
+care of the wake-up: this is implemented by a stacked irqchip that will<br>
+do the right thing: irq_set_wake only looks at the top level irqchip, so<br>
+the GIC flag isn't observed, and this should work (maybe by luck&#x2026;).<br>
+</p>
+
+<ol class="org-ol">
+<li>The GIC gets powered off and nothing will wake us up. I'd say that in<br></li>
+</ol>
+<p>
+this case, having programmed a wake-up interrupt is a bit silly, and<br>
+doing S2R is equivalent to committing suicide. Do we have any mechanism<br>
+that would avoid getting in that situation?<br>
+</p>
+
+<p>
+Thanks,<br>
+</p>
+
+<p>
+M.<br>
+</p>
+</blockquote>
+<p>
+在Marc Zyngier的回复中，已经提到3种case<br>
+</p>
+<ol class="org-ol">
+<li>GIC处于always on的电源域，这种情况下，通过设置SKIP_SET_WAKE就可以简单的解决我们的问题，因为不需要做任何事，系统总可以通过gic来唤醒。<br></li>
+<li>GIC会被掉电，这种情况下，需要额外的硬件来将系统唤醒（意味着各个SOC厂商都有各不相同的实现），这种情况下，gic的驱动也无法去处理，这就需要通过stacked irqchip来实现，平台的irqchip通过作为顶级的irqchip，gic作为下级irqchip就可以由SOC厂商去具体定制唤醒功能的设置。<br></li>
+<li>GIC会掉电，没有任何办法唤醒系统。这种情况完全是错误的，休眠等于自杀，需要避免进入这个状况。<br></li>
+</ol>
+<p>
+所以当soc据有唤醒能力时，需要通过平台的gic驱动来实现，arm gic驱动作为平台gic的父设备。<br>
+</p>
+</div>
+
+<div id="outline-container-orgd36aee0" class="outline-3">
+<h3 id="orgd36aee0">irq parents</h3>
+</div>
+</div>
+
+<div id="outline-container-org4b69bf7" class="outline-2">
+<h2 id="org4b69bf7">linux内核接口</h2>
+<div class="outline-text-2" id="text-org4b69bf7">
+<ul class="org-ul">
+<li>/sys/power/pm_wakeup_irq<br>
+可以查询倒最近一次休眠的唤醒源<br></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org2453e56" class="outline-2">
+<h2 id="org2453e56">implement stacked irqchip</h2>
+<div class="outline-text-2" id="text-org2453e56">
+</div>
+<div id="outline-container-org5f76df1" class="outline-3">
+<h3 id="org5f76df1">used function &amp; macors</h3>
+<div class="outline-text-3" id="text-org5f76df1">
+</div>
+<div id="outline-container-org370eab8" class="outline-4">
+<h4 id="org370eab8">IRQCHIP_DECLARE</h4>
+<div class="outline-text-4" id="text-org370eab8">
+<p>
+用来声明一个irqchip驱动，包含compatible属性，irqchip的名称，以及初始化函数<br>
+device tree<br>
+dts中配置了sysirq，其parent是gic，<br>
+</p>
+<div class="org-src-container">
+<pre class="src src-dts"><span style="color: #dcaeea;">gic</span>: <span style="color: #ECBE7B;">interrupt-controller</span>@58000000 {
+    <span style="color: #dcaeea;">status</span> = <span style="color: #98be65;">"okay"</span>;
+    <span style="color: #dcaeea;">compatible</span> = <span style="color: #98be65;">"arm,gic-v3"</span>;
+    #<span style="color: #dcaeea;">interrupt-cells</span> = &lt;3&gt;;
+    #<span style="color: #dcaeea;">address-cells</span> = &lt;2&gt;;
+    #<span style="color: #dcaeea;">size-cells</span> = &lt;2&gt;;
+    <span style="color: #dcaeea;">ranges</span>;
+    <span style="color: #dcaeea;">interrupt-controller</span>;
+    <span style="color: #dcaeea;">reg</span> =   &lt;0x0 0x58000000 0x0 0x10000&gt;,       <span style="color: #5B6268;">// GICD</span>
+        &lt;0x0 0x58040000 0x0 0x100000&gt;;      <span style="color: #5B6268;">// GICR0~7</span>
+    <span style="color: #dcaeea;">interrupts</span> = &lt;1 9 4&gt;;
+};
+
+<span style="color: #dcaeea;">sysirq</span>: sysirq@<span style="color: #ECBE7B;">system</span> {
+    <span style="color: #dcaeea;">compatible</span> = <span style="color: #98be65;">"xxx,XX-sysirq"</span>, <span style="color: #98be65;">"syscon"</span>;
+    #<span style="color: #dcaeea;">interrupt-cells</span> = &lt;3&gt;;
+    <span style="color: #dcaeea;">interrupt-parent</span> = &lt;&amp;<span style="color: #dcaeea;">gic</span>&gt;;
+    <span style="color: #dcaeea;">interrupt-controller</span>;
+    <span style="color: #dcaeea;">ranges</span>;
+    <span style="color: #dcaeea;">services</span> = &lt;&amp;<span style="color: #dcaeea;">tee_regmap</span>&gt;;
+    <span style="color: #dcaeea;">irq-map</span> = &lt;48 2 0&gt;, <span style="color: #5B6268;">// GPIO</span>
+    &lt;29 4 1&gt;, <span style="color: #5B6268;">// AON RTC</span>
+    &lt;31 6 0&gt;, <span style="color: #5B6268;">// aon timer1</span>
+    &lt;30 8 0&gt;, <span style="color: #5B6268;">// aon time0</span>
+    &lt;9 10 0&gt;, <span style="color: #5B6268;">// eth0</span>
+    &lt;33 18 0&gt;, <span style="color: #5B6268;">// canfd0</span>
+    &lt;36 14 0&gt;; <span style="color: #5B6268;">// canfd1</span>
+    <span style="color: #dcaeea;">reg</span> = &lt;0x0 0x43060000 0x0 0x634&gt;;
+};
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgfb2b39f" class="outline-4">
+<h4 id="orgfb2b39f">get map configuration from device tree node.</h4>
+<div class="outline-text-4" id="text-orgfb2b39f">
+<div class="org-src-container">
+<pre class="src src-dts"><span style="color: #dcaeea;">irq-map</span> = &lt;irq-number enable-bit polar-bit&gt;;
+#<span style="color: #dcaeea;">address-cells</span> = &lt;2&gt;;
+#<span style="color: #dcaeea;">size-cells</span> = &lt;2&gt;;
+<span style="color: #dcaeea;">reg</span> = &lt;0x0 0x43840000 0x0 0x634&gt;;
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="outline-container-org9d288da" class="outline-2">
+<h2 id="org9d288da">irq domain</h2>
+<div class="outline-text-2" id="text-org9d288da">
+<p>
+关于irq domain可以参考以下文档<br>
+<a href="https://lwn.net/Articles/487684/">https://lwn.net/Articles/487684/</a><br>
+</p>
+</div>
+
+<div id="outline-container-orgb1462ff" class="outline-3">
+<h3 id="orgb1462ff">irq initialization</h3>
+<div class="outline-text-3" id="text-orgb1462ff">
+<div class="org-src-container">
+<pre class="src src-C">(<span style="color: #ECBE7B;">gdb</span>) bt
+<span style="color: #51afef; font-weight: bold;">#0</span>  XX_irq_of_init (node=0xffffffc03efed568, parent=0x0 &lt;bl1_entrypoint&gt;) at ./include/linux/irqdomain.h:298
+<span style="color: #51afef; font-weight: bold;">#1</span>  0xffffff8008856224 in of_irq_init (matches=&lt;optimized out&gt;) <span style="color: #ECBE7B;">at</span> <span style="color: #dcaeea;">drivers</span>/of/irq.c:546
+<span style="color: #51afef; font-weight: bold;">#2</span>  0xffffff8008849240 in irqchip_init () <span style="color: #ECBE7B;">at</span> <span style="color: #dcaeea;">drivers</span>/irqchip/irqchip.c:29
+<span style="color: #51afef; font-weight: bold;">#3</span>  0xffffff800883241c in init_IRQ () <span style="color: #ECBE7B;">at</span> <span style="color: #dcaeea;">arch</span>/arm64/kernel/irq.c:91
+<span style="color: #51afef; font-weight: bold;">#4</span>  0xffffff80088309f8 in start_kernel () <span style="color: #ECBE7B;">at</span> <span style="color: #dcaeea;">init</span>/main.c:611
+<span style="color: #51afef; font-weight: bold;">#5</span>  0x0000000000000000 in ?? ()
+<span style="color: #ECBE7B;">Backtrace</span> <span style="color: #c678dd;">stopped</span>: previous frame identical to this frame (<span style="color: #ECBE7B;">corrupt</span> <span style="color: #dcaeea;">stack</span>?)
+</pre>
+</div>
+<p>
+查找partent的irq, 并添加新的irq_domain<br>
+</p>
+<div class="org-src-container">
+<pre class="src src-C">domain_parent = irq_find_host(parent);
+<span style="color: #51afef;">if</span> (<span style="color: #51afef; font-weight: bold;">!</span>domain_parent) {
+    pr_err(<span style="color: #98be65;">"XX_irq: interrupt-parent not found\n"</span>);
+    <span style="color: #51afef;">return</span> -EINVAL;
+}
+
+domain = irq_domain_add_hierarchy(domain_parent, 0, intpol_num, node,
+                  &amp;sysirq_domain_ops, chip_data);
+<span style="color: #51afef;">if</span> (<span style="color: #51afef; font-weight: bold;">!</span>domain) {
+    ret = -ENOMEM;
+    <span style="color: #51afef;">goto</span> <span style="color: #a9a1e1;">out_unmap</span>;
+}
+</pre>
+</div>
+<p>
+上面是主要内容，分为两步<br>
+</p>
+<ol class="org-ol">
+<li>获取parent的irq domain<br></li>
+<li>添加新的irq_domain来实现需要的操作<br></li>
+</ol>
+</div>
+</div>
+<div id="outline-container-orge4a33e8" class="outline-3">
+<h3 id="orge4a33e8">irq domain ops</h3>
+<div class="outline-text-3" id="text-orge4a33e8">
+<div class="org-src-container">
+<pre class="src src-C"><span style="color: #51afef;">static</span> <span style="color: #51afef;">const</span> <span style="color: #51afef;">struct</span> <span style="color: #ECBE7B;">irq_domain_ops</span> <span style="color: #dcaeea;">sysirq_domain_ops</span> = {
+    .translate  = XX_irq_domain_translate,
+    .alloc              = XX_irq_domain_alloc,
+    .free               = irq_domain_free_irqs_common,
+};
+</pre>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org2b7ac91" class="outline-2">
+<h2 id="org2b7ac91">refs</h2>
+<div class="outline-text-2" id="text-org2b7ac91">
+<p>
+<a href="https://patchwork.kernel.org/patch/9343061/">https://patchwork.kernel.org/patch/9343061/</a><br>
+<a href="https://patchwork.kernel.org/patch/6799191/">https://patchwork.kernel.org/patch/6799191/</a><br>
+</p>
+</div>
+</div>
+<div id="footnotes">
+<h2 class="footnotes">Footnotes: </h2>
+<div id="text-footnotes">
+
+<div class="footdef"><sup><a id="fn.1" class="footnum" href="#fnr.1">1</a></sup> <div class="footpara"><p class="footpara">
+虽然gic可以工作来输出唤醒信号，但是输出的唤醒信号仍需gic之外的控制器来处理<br>
+</p></div></div>
+
+<div class="footdef"><sup><a id="fn.2" class="footnum" href="#fnr.2">2</a></sup> <div class="footpara"><p class="footpara">
+CPU power down还需要SOC内部power controller的支持，具体SOC也有较大区别，在此不做关系<br>
+</p></div></div>
+
+<div class="footdef"><sup><a id="fn.3" class="footnum" href="#fnr.3">3</a></sup> <div class="footpara"><p class="footpara">
+视SOC的实现不同，enable_irq_wake也不是必须调用。<br>
+</p></div></div>
+
+<div class="footdef"><sup><a id="fn.4" class="footnum" href="#fnr.4">4</a></sup> <div class="footpara"><p class="footpara">
+<a href="https://www.mail-archive.com/linux-kernel@vger.kernel.org/msg1598347.html">https://www.mail-archive.com/linux-kernel@vger.kernel.org/msg1598347.html</a> <br>
+</p></div></div>
+
+
+</div>
+</div></div>
+<div id="postamble" class="status">
+<script src="https://utteranc.es/client.js"
+    repo="schspa/schspa.github.io"
+    issue-term="title"
+    label="✨💬✨"
+    theme="github-light"
+    crossorigin="anonymous"
+    async>
+</script>
+<div class="me">
+  <span><b>Contact me via :)</b><span>
+  <div class="contact">
+    <a id="email" href="mailto:schspa@gmail.com" target="_blank"><i class="fab fa-mailchimp animated heartBeat delay-2s slower"></i></a>
+    <a id="github" href="//github.com/schspa" target="_blank"><i class="fab fa-github animated heartBeat delay-2s slower"></i></a>
+  </div>
+</div>
+
+<div id="jinrishici-sentence" style="font-weight: 700;">虚怀乃若谷，水深则流缓。</div>
+<script src="https://sdk.jinrishici.com/v2/browser/jinrishici.js" charset="utf-8"></script>
+</div>
+</body>
+</html>
