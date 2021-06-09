@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<!-- 2021-06-09 Wed 11:26 -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Generate Aligned Access Code</title>
+<meta name="generator" content="Org mode">
+<meta name="author" content="Schspa">
+<meta name="description" content="Generate Aligned Access Code"
+>
+<link rel="shortcut icon" href="/images/rose-red.png" type="image/x-icon" />
+<link rel="stylesheet" href="/css/animate.min.css" />
+<link rel="stylesheet" href="/css/all.min.css" />
+<link rel="stylesheet" type="text/css" href="/css/style.css" />
+<link rel="stylesheet" type="text/css" href="/css/navbar.css" />
+<script src="/js/jquery.min.js"></script>
+<script src="/js/darkreader.js"></script>
+<script src="/user.config.js"></script>
+<script src="/js/main.js"></script>
+</head>
+<body>
+<div id="preamble" class="status">
+<div class="mobile-container">
+  <!-- Top Navigation Menu -->
+  <div class="topnav">
+    <div id="header">
+      <a href="/" class="logo">Schspa's Blog</a>
+      <a href="javascript:void(0);" class="icon" onclick="toggleheader()">
+        <i class="fa fa-bars"></i>
+      </a>
+    </div>
+    <div id="nav_headers">
+      <a href="/sitemap.html" class="menu-item">Categories</a>
+    </div>
+  </div>
+  <!-- End smartphone / tablet look -->
+</div>
+
+<header id="header" class="header">
+  <div class="logo-wrapper">
+    <a href="/" class="logo">Schspa's Blogs</a>
+  </div>
+
+  <nav class="site-navbar">
+    <ul id="menu" class="menu">
+      <li class="menu-item">
+        <a class="menu-item-link" href="/">Home</a>
+      </li>
+      <li class="menu-item">
+        <a class="menu-item-link" href="/sitemap.html">Categories</a>
+      </li>
+    </ul>
+  </nav>
+</header>
+</div>
+<div id="content">
+<h1 class="title">Generate Aligned Access Code</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#org0b7aa89">用途</a></li>
+<li><a href="#orgbaba741">例子</a>
+<ul>
+<li><a href="#org7040b69">源代码</a></li>
+<li><a href="#org994f797">先看一下数据结构</a></li>
+<li><a href="#org13a0d4c">Normal Compile</a></li>
+<li><a href="#org1ce658d">Compile with aligned access</a></li>
+</ul>
+</li>
+<li><a href="#org1fd19b3">Refs</a></li>
+</ul>
+</div>
+</div>
+<div id="outline-container-org0b7aa89" class="outline-2">
+<h2 id="org0b7aa89">用途</h2>
+<div class="outline-text-2" id="text-org0b7aa89">
+<p>
+当使用C中的bit field时，编译器在编译时会生成按byte，字长等来访问的指令，对于普通的内存空间，这个都是可以正常使用的。<br>
+但是对于ARM平台中的寄存器，由于总线的限制，访问时必须按照32bit来访问, 当使用ldrb访问时，系统会发生异常.<br>
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgbaba741" class="outline-2">
+<h2 id="orgbaba741">例子</h2>
+<div class="outline-text-2" id="text-orgbaba741">
+</div>
+<div id="outline-container-org7040b69" class="outline-3">
+<h3 id="org7040b69">源代码</h3>
+<div class="outline-text-3" id="text-org7040b69">
+<div class="org-src-container">
+<pre class="src src-C" id="org0b75cb2"><span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;stdio.h&gt;</span>
+<span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;stdint.h&gt;</span>
+
+<span style="color: #51afef;">struct</span> <span style="color: #ECBE7B;">device_status</span> {
+    <span style="color: #51afef;">union</span> {
+        <span style="color: #51afef;">struct</span> {
+            <span style="color: #ECBE7B;">uint32_t</span> <span style="color: #dcaeea;">length</span> : 12;
+            <span style="color: #ECBE7B;">uint32_t</span> <span style="color: #dcaeea;">is_valid</span> : 4;
+            <span style="color: #ECBE7B;">uint32_t</span> <span style="color: #dcaeea;">idx</span>: 8;
+        };
+        <span style="color: #ECBE7B;">uint32_t</span> <span style="color: #dcaeea;">value</span>;
+    };
+} <span style="color: #51afef;">__attribute__</span>((packed, aligned(4)));
+
+<span style="color: #51afef;">volatile</span> <span style="color: #51afef;">struct</span> <span style="color: #ECBE7B;">device_status</span> <span style="color: #dcaeea;">g_status</span> = {
+    .value = 0x1238,
+};
+
+<span style="color: #ECBE7B;">void</span> <span style="color: #c678dd;">bitfield_test</span>()
+{
+    printf(<span style="color: #98be65;">"status.value = 0x%08x\n"</span>, g_status.value);
+    g_status.idx++;
+    printf(<span style="color: #98be65;">"status.value = 0x%08x\n"</span>, g_status.value);
+}
+
+<span style="color: #ECBE7B;">int</span> <span style="color: #c678dd;">main</span>(<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">argc</span>, <span style="color: #ECBE7B;">char</span> *<span style="color: #dcaeea;">argv</span>[])
+{
+    bitfield_test();
+    <span style="color: #51afef;">return</span> 0;
+}
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org994f797" class="outline-3">
+<h3 id="org994f797">先看一下数据结构</h3>
+<div class="outline-text-3" id="text-org994f797">
+<div class="org-src-container">
+<pre class="src src-c">
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org13a0d4c" class="outline-3">
+<h3 id="org13a0d4c">Normal Compile</h3>
+<div class="outline-text-3" id="text-org13a0d4c">
+<p>
+在编译时通过指定 -mno-strict-align -fno-strict-volatile-bitfields 的编译参数，来防止编译器版本的不同而进行自动优化。<br>
+</p>
+<div class="org-src-container">
+<pre class="src src-asm">
+</pre>
+</div>
+
+<p>
+从上边的汇编代码可以看到，在生成的代码中，系统调用了 ldur指令，这个指令是不带对齐的.<br>
+</p>
+<div class="org-src-container">
+<pre class="src src-asm"><span style="color: #c678dd;">0x0000000000400610</span> &lt;+44&gt;:   a0 0a 40 39 ldrb    w0, [x21, #2]
+<span style="color: #c678dd;">0x0000000000400614</span> &lt;+48&gt;:   00 1c 00 12 and w0, w0, #0xff
+<span style="color: #c678dd;">0x0000000000400618</span> &lt;+52&gt;:   00 04 00 11 add w0, w0, #0x1
+<span style="color: #c678dd;">0x000000000040061c</span> &lt;+56&gt;:   00 1c 00 12 and w0, w0, #0xff
+<span style="color: #c678dd;">0x0000000000400620</span> &lt;+60&gt;:   a0 0a 00 39 strb    w0, [x21, #2]
+</pre>
+</div>
+<p>
+上面这个片段就是从内存中读取g_status.idx 并对其加1操作，最后存入内存中.<br>
+上述代码片段中使用了ldrb的指令，在访问AHB接口寄存器的时候，会出现问题。<br>
+</p>
+</div>
+</div>
+<div id="outline-container-org1ce658d" class="outline-3">
+<h3 id="org1ce658d">Compile with aligned access</h3>
+<div class="outline-text-3" id="text-org1ce658d">
+<p>
+下面是通过 -mstrict-align -fstrict-volatile-bitfields 参数进行编译的结果:<br>
+</p>
+<div class="org-src-container">
+<pre class="src src-asm">
+</pre>
+</div>
+<p>
+同样的操作，g_status.idx++;在这里就变成了使用ldr指令的对齐的访问:<br>
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org1fd19b3" class="outline-2">
+<h2 id="org1fd19b3">Refs</h2>
+<div class="outline-text-2" id="text-org1fd19b3">
+<p>
+<a href="https://gcc.gnu.org/onlinedocs/gcc/Code-Gen-Options.html">https://gcc.gnu.org/onlinedocs/gcc/Code-Gen-Options.html</a><br>
+<a href="https://stackoverflow.com/questions/42171429/force-gcc-to-access-structs-with-words">https://stackoverflow.com/questions/42171429/force-gcc-to-access-structs-with-words</a><br>
+</p>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<script src="https://utteranc.es/client.js"
+    repo="schspa/schspa.github.io"
+    issue-term="title"
+    label="✨💬✨"
+    theme="github-light"
+    crossorigin="anonymous"
+    async>
+</script>
+<div class="me">
+  <span><b>Contact me via :)</b><span>
+  <div class="contact">
+    <a id="email" href="mailto:schspa@gmail.com" target="_blank"><i class="fab fa-mailchimp animated heartBeat delay-2s slower"></i></a>
+    <a id="github" href="//github.com/schspa" target="_blank"><i class="fab fa-github animated heartBeat delay-2s slower"></i></a>
+  </div>
+</div>
+
+<div id="jinrishici-sentence" style="font-weight: 700;">虚怀乃若谷，水深则流缓。</div>
+<script src="https://sdk.jinrishici.com/v2/browser/jinrishici.js" charset="utf-8"></script>
+</div>
+</body>
+</html>
