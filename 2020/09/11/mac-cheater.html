@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2021-01-31 日 22:54 -->
+<!-- 2021-10-12 二 19:35 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Cheate MAC address</title>
@@ -10,10 +10,12 @@
 <meta name="description" content="Cheate MAC address"
 >
 <link rel="shortcut icon" href="/images/rose-red.png" type="image/x-icon" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" integrity="sha256-sAcc18zvMnaJZrNT4v8J0T4HqzEUiUTlVFgDIywjQek=" crossorigin="anonymous">
 <link rel="stylesheet" href="/css/animate.min.css" />
 <link rel="stylesheet" href="/css/all.min.css" />
 <link rel="stylesheet" type="text/css" href="/css/style.css" />
 <link rel="stylesheet" type="text/css" href="/css/navbar.css" />
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/js/bootstrap.min.js" integrity="sha256-/hGxZHGQ57fXLp+NDusFZsZo/PG21Bp2+hXYV5a6w+g=" crossorigin="anonymous"></script>
 <script src="/js/jquery.min.js"></script>
 <script src="/js/darkreader.js"></script>
 <script src="/user.config.js"></script>
@@ -60,16 +62,16 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#orgb28dff4">背景</a></li>
-<li><a href="#org429d3af">使用命令修改IP地址</a></li>
-<li><a href="#org12a26bb">使用HOOK来完成mac地址欺骗</a>
+<li><a href="#org9d13c80">背景</a></li>
+<li><a href="#org02d7ae3">使用命令修改IP地址</a></li>
+<li><a href="#orga5d7a18">使用HOOK来完成mac地址欺骗</a>
 <ul>
-<li><a href="#orgec09719">找出受害者获取MAC地址的方法</a>
+<li><a href="#orgfd429d8">找出受害者获取MAC地址的方法</a>
 <ul>
-<li><a href="#org1aa7b67">受害人信息 </a></li>
-<li><a href="#orgd73a580">找出受害人获取mac地址的方法</a></li>
-<li><a href="#org908524e">使用LD_PRELOAD来完成hook</a></li>
-<li><a href="#orga97ce9e">测试：</a></li>
+<li><a href="#orgea97d90">受害人信息 </a></li>
+<li><a href="#org032f874">找出受害人获取mac地址的方法</a></li>
+<li><a href="#org34f3147">使用LD_PRELOAD来完成hook</a></li>
+<li><a href="#org731c750">测试：</a></li>
 </ul>
 </li>
 </ul>
@@ -78,9 +80,9 @@
 </div>
 </div>
 
-<div id="outline-container-orgb28dff4" class="outline-2">
-<h2 id="orgb28dff4">背景</h2>
-<div class="outline-text-2" id="text-orgb28dff4">
+<div id="outline-container-org9d13c80" class="outline-2">
+<h2 id="org9d13c80">背景</h2>
+<div class="outline-text-2" id="text-org9d13c80">
 <p>
 由于一些原因，很多软件会绑定网卡MAC地址，这样就导致换了网卡之后，软件就无法使用了。<br>
 一般的解决方案是通过命令修改MAC地址，但是这样不够优雅，并且还有导致mac地址重复的风险。<br>
@@ -88,26 +90,26 @@
 </div>
 </div>
 
-<div id="outline-container-org429d3af" class="outline-2">
-<h2 id="org429d3af">使用命令修改IP地址</h2>
-<div class="outline-text-2" id="text-org429d3af">
+<div id="outline-container-org02d7ae3" class="outline-2">
+<h2 id="org02d7ae3">使用命令修改IP地址</h2>
+<div class="outline-text-2" id="text-org02d7ae3">
 <div class="org-src-container">
 <pre class="src src-bash">ifconfig eth0 hw ether xx:xx:xx:xx:xx:xx
 </pre>
 </div>
 </div>
 </div>
-<div id="outline-container-org12a26bb" class="outline-2">
-<h2 id="org12a26bb">使用HOOK来完成mac地址欺骗</h2>
-<div class="outline-text-2" id="text-org12a26bb">
+<div id="outline-container-orga5d7a18" class="outline-2">
+<h2 id="orga5d7a18">使用HOOK来完成mac地址欺骗</h2>
+<div class="outline-text-2" id="text-orga5d7a18">
 </div>
-<div id="outline-container-orgec09719" class="outline-3">
-<h3 id="orgec09719">找出受害者获取MAC地址的方法</h3>
-<div class="outline-text-3" id="text-orgec09719">
+<div id="outline-container-orgfd429d8" class="outline-3">
+<h3 id="orgfd429d8">找出受害者获取MAC地址的方法</h3>
+<div class="outline-text-3" id="text-orgfd429d8">
 </div>
-<div id="outline-container-org1aa7b67" class="outline-4">
-<h4 id="org1aa7b67">受害人信息 <sup><a id="fnr.1" class="footref" href="#fn.1">1</a></sup></h4>
-<div class="outline-text-4" id="text-org1aa7b67">
+<div id="outline-container-orgea97d90" class="outline-4">
+<h4 id="orgea97d90">受害人信息 <sup><a id="fnr.1" class="footref" href="#fn.1">1</a></sup></h4>
+<div class="outline-text-4" id="text-orgea97d90">
 <table>
 
 
@@ -130,9 +132,9 @@
 </table>
 </div>
 </div>
-<div id="outline-container-orgd73a580" class="outline-4">
-<h4 id="orgd73a580">找出受害人获取mac地址的方法</h4>
-<div class="outline-text-4" id="text-orgd73a580">
+<div id="outline-container-org032f874" class="outline-4">
+<h4 id="org032f874">找出受害人获取mac地址的方法</h4>
+<div class="outline-text-4" id="text-org032f874">
 <p>
 用strace抓一下log<br>
 </p>
@@ -201,9 +203,9 @@
 </p>
 </div>
 </div>
-<div id="outline-container-org908524e" class="outline-4">
-<h4 id="org908524e">使用LD_PRELOAD来完成hook</h4>
-<div class="outline-text-4" id="text-org908524e">
+<div id="outline-container-org34f3147" class="outline-4">
+<h4 id="org34f3147">使用LD_PRELOAD来完成hook</h4>
+<div class="outline-text-4" id="text-org34f3147">
 <ul class="org-ul">
 <li>代码<br></li>
 </ul>
@@ -278,9 +280,9 @@
 </ul>
 </div>
 </div>
-<div id="outline-container-orga97ce9e" class="outline-4">
-<h4 id="orga97ce9e">测试：</h4>
-<div class="outline-text-4" id="text-orga97ce9e">
+<div id="outline-container-org731c750" class="outline-4">
+<h4 id="org731c750">测试：</h4>
+<div class="outline-text-4" id="text-org731c750">
 <p>
 hook前：<br>
 </p>

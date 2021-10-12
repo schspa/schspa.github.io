@@ -1,0 +1,420 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<!-- 2021-10-12 二 19:35 -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Boot process for optee</title>
+<meta name="generator" content="Org mode">
+<meta name="author" content="Schspa">
+<meta name="description" content="Boot process for optee"
+>
+<link rel="shortcut icon" href="/images/rose-red.png" type="image/x-icon" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" integrity="sha256-sAcc18zvMnaJZrNT4v8J0T4HqzEUiUTlVFgDIywjQek=" crossorigin="anonymous">
+<link rel="stylesheet" href="/css/animate.min.css" />
+<link rel="stylesheet" href="/css/all.min.css" />
+<link rel="stylesheet" type="text/css" href="/css/style.css" />
+<link rel="stylesheet" type="text/css" href="/css/navbar.css" />
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/js/bootstrap.min.js" integrity="sha256-/hGxZHGQ57fXLp+NDusFZsZo/PG21Bp2+hXYV5a6w+g=" crossorigin="anonymous"></script>
+<script src="/js/jquery.min.js"></script>
+<script src="/js/darkreader.js"></script>
+<script src="/user.config.js"></script>
+<script src="/js/main.js"></script>
+</head>
+<body>
+<div id="preamble" class="status">
+<div class="mobile-container">
+  <!-- Top Navigation Menu -->
+  <div class="topnav">
+    <div id="header">
+      <a href="/" class="logo">Schspa's Blog</a>
+      <a href="javascript:void(0);" class="icon" onclick="toggleheader()">
+        <i class="fa fa-bars"></i>
+      </a>
+    </div>
+    <div id="nav_headers">
+      <a href="/sitemap.html" class="menu-item">Categories</a>
+    </div>
+  </div>
+  <!-- End smartphone / tablet look -->
+</div>
+
+<header id="header" class="header">
+  <div class="logo-wrapper">
+    <a href="/" class="logo">Schspa's Blogs</a>
+  </div>
+
+  <nav class="site-navbar">
+    <ul id="menu" class="menu">
+      <li class="menu-item">
+        <a class="menu-item-link" href="/">Home</a>
+      </li>
+      <li class="menu-item">
+        <a class="menu-item-link" href="/sitemap.html">Categories</a>
+      </li>
+    </ul>
+  </nav>
+</header>
+</div>
+<div id="content">
+<h1 class="title">Boot process for optee</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#orge9f1a8e">QEMU Platform Boot architecture</a></li>
+<li><a href="#org15ae5c0">BOOT analyze</a>
+<ul>
+<li><a href="#org746ad43">ATF Part</a>
+<ul>
+<li><a href="#org6b0332c">arguments pass between different boot stages.</a>
+<ul>
+<li><a href="#orgec4b58c">BL1</a></li>
+<li><a href="#orgf9b730e">BL2</a></li>
+<li><a href="#org248c264">BL31</a></li>
+<li><a href="#orgfa95923">SPD</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#orgf6c7b63">OPTEE Part</a>
+<ul>
+<li><a href="#orgc8e5a89">Services in secure monitor</a>
+<ul>
+<li><a href="#org79427e7">FAST CALL</a></li>
+<li><a href="#org29b4365">YIELD CALL</a></li>
+</ul>
+</li>
+<li><a href="#org1d1df6b">OPTEE code</a>
+<ul>
+<li><a href="#org97d5193">optee image type</a></li>
+<li><a href="#orgf6f1740">entry point</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#org1e24370">Conclusions</a></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orge9f1a8e" class="outline-2">
+<h2 id="orge9f1a8e">QEMU Platform Boot architecture</h2>
+<div class="outline-text-2" id="text-orge9f1a8e">
+<p>
+from official atf code at 34efb683 @ m/master Merge pull request #1724 from jbech-linaro/emmc_enumeration<br>
+build command:<br>
+</p>
+<div class="org-src-container">
+<pre class="src src-bash">make <span style="color: #dcaeea;">BL32</span>=tee-header_v2.bin <span style="color: #dcaeea;">BL32_EXTRA1</span>=bl32_extra1.bin <span style="color: #dcaeea;">BL32_EXTRA2</span>=bl32_extra2.bin <span style="color: #dcaeea;">BL33</span>=bl33.bin <span style="color: #dcaeea;">PLAT</span>=qemu <span style="color: #dcaeea;">ARM_TSP_RAM_LOCATION</span>=tdram <span style="color: #dcaeea;">BL32_RAM_LOCATION</span>=tdram <span style="color: #dcaeea;">SPD</span>=opteed <span style="color: #dcaeea;">DEBUG</span>=0 <span style="color: #dcaeea;">LOG_LEVEL</span>=30
+</pre>
+</div>
+
+<p>
+qemu optee boot architecture:<br>
+</p>
+
+<div id="org0d7db0e" class="figure">
+<p><img src="assets/optee-qemu-boot-arch.png" alt="optee-qemu-boot-arch.png"><br>
+</p>
+</div>
+
+<p>
+In qemu aarch64 platform, system will load &amp; boot trust os before Nonsecure world os start.<br>
+</p>
+</div>
+</div>
+<div id="outline-container-org15ae5c0" class="outline-2">
+<h2 id="org15ae5c0">BOOT analyze</h2>
+<div class="outline-text-2" id="text-org15ae5c0">
+</div>
+<div id="outline-container-org746ad43" class="outline-3">
+<h3 id="org746ad43">ATF Part</h3>
+<div class="outline-text-3" id="text-org746ad43">
+</div>
+<div id="outline-container-org6b0332c" class="outline-4">
+<h4 id="org6b0332c">arguments pass between different boot stages.</h4>
+<div class="outline-text-4" id="text-org6b0332c">
+</div>
+<div id="outline-container-orgec4b58c" class="outline-5">
+<h5 id="orgec4b58c">BL1</h5>
+<div class="outline-text-5" id="text-orgec4b58c">
+<p>
+BL1 usually be used as bootrom and will pass one argument to Next stage bootloader.<br>
+</p>
+<div class="org-src-container">
+<pre class="src src-C"><span style="color: #5B6268;">/*******************************************************************************</span>
+<span style="color: #5B6268;"> * Structure used for telling the next BL how much of a particular type of</span>
+<span style="color: #5B6268;"> * memory is available for its use and how much is already used.</span>
+<span style="color: #5B6268;"> *****************************************************************************</span><span style="color: #5B6268;">*/</span>
+<span style="color: #51afef;">typedef</span> <span style="color: #51afef;">struct</span> <span style="color: #ECBE7B;">meminfo</span> {
+    <span style="color: #ECBE7B;">uintptr_t</span> <span style="color: #dcaeea;">total_base</span>;
+    <span style="color: #ECBE7B;">size_t</span> <span style="color: #dcaeea;">total_size</span>;
+} <span style="color: #ECBE7B;">meminfo_t</span>;
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-orgf9b730e" class="outline-5">
+<h5 id="orgf9b730e">BL2</h5>
+<div class="outline-text-5" id="text-orgf9b730e">
+<p>
+BL2 usually be used to load extra images, including BL31, BL32, BL33 etc.<br>
+When go to next stage image, it will pass image load information to next stage bootloaders.<br>
+</p>
+
+<p>
+Fellowing definition defined the struct format to pass.<br>
+</p>
+<div class="org-src-container">
+<pre class="src src-C"><span style="color: #5B6268;">/* </span><span style="color: #5B6268;">BL image node in the BL image execution sequence</span><span style="color: #5B6268;"> */</span>
+<span style="color: #51afef;">typedef</span> <span style="color: #51afef;">struct</span> <span style="color: #ECBE7B;">bl_params_node</span> {
+    <span style="color: #ECBE7B;">unsigned</span> <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">image_id</span>;
+    <span style="color: #ECBE7B;">image_info_t</span> *<span style="color: #dcaeea;">image_info</span>;
+    <span style="color: #ECBE7B;">entry_point_info_t</span> *<span style="color: #dcaeea;">ep_info</span>;
+    <span style="color: #51afef;">struct</span> <span style="color: #ECBE7B;">bl_params_node</span> *<span style="color: #dcaeea;">next_params_info</span>;
+} <span style="color: #ECBE7B;">bl_params_node_t</span>;
+
+<span style="color: #5B6268;">/*</span>
+<span style="color: #5B6268;"> * BL image head node in the BL image execution sequence</span>
+<span style="color: #5B6268;"> * It is also used to pass information to next BL image.</span>
+<span style="color: #5B6268;"> */</span>
+<span style="color: #51afef;">typedef</span> <span style="color: #51afef;">struct</span> <span style="color: #ECBE7B;">bl_params</span> {
+    <span style="color: #ECBE7B;">param_header_t</span> <span style="color: #dcaeea;">h</span>;
+    <span style="color: #ECBE7B;">bl_params_node_t</span> *<span style="color: #dcaeea;">head</span>;
+} <span style="color: #ECBE7B;">bl_params_t</span>;
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org248c264" class="outline-5">
+<h5 id="org248c264">BL31</h5>
+<div class="outline-text-5" id="text-org248c264">
+<p>
+BL31 usually be used as secure monitor, it will be running on the whold system life cycle.<br>
+BL31 will pass different arguments from <b>bl_params</b> to next stage images<br>
+In BL31 case, It just bypass arguments from bl2 to bl31 in our case.<br>
+</p>
+</div>
+</div>
+<div id="outline-container-orgfa95923" class="outline-5">
+<h5 id="orgfa95923">SPD</h5>
+<div class="outline-text-5" id="text-orgfa95923">
+<p>
+BL31 initial all runtime service registered using the <b>DECLARE_RT_SVC()</b><br>
+for OPTEE, it will be <b>opteed_setup()</b><br>
+opteed_setup will do:<br>
+</p>
+<ol class="org-ol">
+<li>Get secure image ep_info (BL2 will pass it to bl31 via x0).<br></li>
+<li>arguments for opteed including:<br>
+<dl class="org-dl">
+<dt>opteed_rw</dt><dd>OPTEE execution state information i.e. aarch32 or aarch64<br></dd>
+<dt>opteed_pageable_part</dt><dd><a target="_blank" href="https://github.com/ARM-software/arm-trusted-firmware/blob/a04808c16cfc126d9fe572ae7c4b5a3d39de5796/plat/qemu/qemu_bl2_setup.c#L156">atf</a><br></dd>
+<dt>opteed_mem_limit</dt><dd><a target="_blank" href="https://github.com/ARM-software/arm-trusted-firmware/blob/a04808c16cfc126d9fe572ae7c4b5a3d39de5796/plat/qemu/qemu_bl2_setup.c#L159">atf</a><br></dd>
+<dt>dt_addr</dt><dd><a target="_blank" href="https://github.com/ARM-software/arm-trusted-firmware/blob/a04808c16cfc126d9fe572ae7c4b5a3d39de5796/plat/qemu/qemu_bl2_setup.c#L174">atf</a><br></dd>
+</dl></li>
+</ol>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgf6c7b63" class="outline-3">
+<h3 id="orgf6c7b63">OPTEE Part</h3>
+<div class="outline-text-3" id="text-orgf6c7b63">
+<p>
+we have learn about how bootloader pass arguments to optee os, next we will going to optee part.<br>
+</p>
+
+<ul class="org-ul">
+<li><p>
+process state<br>
+</p>
+
+<p>
+In our case, it's OPTEE_AARCH64, secure world will be at <a target="_blank" href="https://github.com/ARM-software/arm-trusted-firmware/blob/a04808c16cfc126d9fe572ae7c4b5a3d39de5796/services/spd/opteed/opteed_common.c#L48">atf</a>.<br>
+Please notice, there is no secure EL2 at aarch64, only secure EL1.<br>
+</p></li>
+<li>arguments:<br>
+<dl class="org-dl">
+<dt>x0</dt><dd>opteed_pageable_part<br></dd>
+<dt>x1</dt><dd>opteed_mem_limit<br></dd>
+<dt>x2</dt><dd>dt_addr<br></dd>
+</dl></li>
+</ul>
+</div>
+
+<div id="outline-container-orgc8e5a89" class="outline-4">
+<h4 id="orgc8e5a89">Services in secure monitor</h4>
+<div class="outline-text-4" id="text-orgc8e5a89">
+<p>
+Owning entity number<br>
+arm smccc defined SMC function call number, and OEM [50, 63] is for Trusted OS.<br>
+</p>
+</div>
+
+<div id="outline-container-org79427e7" class="outline-5">
+<h5 id="org79427e7">FAST CALL</h5>
+<div class="outline-text-5" id="text-org79427e7">
+<p>
+opteed register fellowing fastcall, and it's usage is shown as fellowing.<br>
+</p>
+<table>
+
+
+<colgroup>
+<col  class="org-left">
+
+<col  class="org-left">
+</colgroup>
+<tbody>
+<tr>
+<td class="org-left">SMC function ID</td>
+<td class="org-left">Usage</td>
+</tr>
+
+<tr>
+<td class="org-left">TEESMC_OPTEED_RETURN_ENTRY_DONE</td>
+<td class="org-left">Called by OPTEE when optee os initial done</td>
+</tr>
+
+<tr>
+<td class="org-left">TEESMC_OPTEED_RETURN_ON_DONE</td>
+<td class="org-left">psci stub</td>
+</tr>
+
+<tr>
+<td class="org-left">TEESMC_OPTEED_RETURN_RESUME_DONE</td>
+<td class="org-left">psci stub</td>
+</tr>
+
+<tr>
+<td class="org-left">TEESMC_OPTEED_RETURN_OFF_DONE</td>
+<td class="org-left">psci stub</td>
+</tr>
+
+<tr>
+<td class="org-left">TEESMC_OPTEED_RETURN_SUSPEND_DONE</td>
+<td class="org-left">psci stub</td>
+</tr>
+
+<tr>
+<td class="org-left">TEESMC_OPTEED_RETURN_SYSTEM_OFF_DONE</td>
+<td class="org-left">psci stub</td>
+</tr>
+
+<tr>
+<td class="org-left">TEESMC_OPTEED_RETURN_SYSTEM_RESET_DONE</td>
+<td class="org-left">psci stub</td>
+</tr>
+
+<tr>
+<td class="org-left">TEESMC_OPTEED_RETURN_CALL_DONE</td>
+<td class="org-left">Return to NON Secure World from function call</td>
+</tr>
+
+<tr>
+<td class="org-left">TEESMC_OPTEED_RETURN_FIQ_DONE</td>
+<td class="org-left">Return to NON Secure World when S-EL1 FIQ done</td>
+</tr>
+</tbody>
+</table>
+<p>
+calling optee_vector_table-&gt;fast_smc_entry<br>
+</p>
+</div>
+</div>
+<div id="outline-container-org29b4365" class="outline-5">
+<h5 id="org29b4365">YIELD CALL</h5>
+<div class="outline-text-5" id="text-org29b4365">
+<p>
+There is no handler in bl31 to handle yield call, bl31 only bypass this request to S-EL1.<br>
+calling optee_vector_table-&gt;yield_smc_entry<br>
+</p>
+</div>
+</div>
+</div>
+<div id="outline-container-org1d1df6b" class="outline-4">
+<h4 id="org1d1df6b">OPTEE code</h4>
+<div class="outline-text-4" id="text-org1d1df6b">
+</div>
+<div id="outline-container-org97d5193" class="outline-5">
+<h5 id="org97d5193">optee image type</h5>
+<div class="outline-text-5" id="text-org97d5193">
+<p>
+For information about optee image<br>
+<a href="https://optee.readthedocs.io/en/latest/architecture/core.html#pager">https://optee.readthedocs.io/en/latest/architecture/core.html#pager</a><br>
+in our case, qemu aarch64 don't use pager, and only use paged image.<br>
+optee os main images: optee_os/out/arm/core/tee-pager_v2.bin<br>
+</p>
+</div>
+</div>
+<div id="outline-container-orgf6f1740" class="outline-5">
+<h5 id="orgf6f1740">entry point</h5>
+<div class="outline-text-5" id="text-orgf6f1740">
+<p>
+<a target="_blank" href="https://github.com/OP-TEE/optee_os//blob/1c832d7c41cdb2f617bffa74c3d70f7c4a5667fc/core/arch/arm/kernel/generic_entry_a64.S#L57">optee-os</a><br>
+</p>
+
+<ol class="org-ol">
+<li>init exception vector table.<br></li>
+<li>clear bss section<br></li>
+<li>setup stack pointer.<br></li>
+<li>dcache invalidation<br></li>
+<li>console initialize<br></li>
+<li>mmu initialize<br></li>
+<li><a target="_blank" href="https://github.com/OP-TEE/optee_os//blob/1c832d7c41cdb2f617bffa74c3d70f7c4a5667fc/core/arch/arm/kernel/generic_boot.c#L1152">optee-os</a><br></li>
+<li>setup nonsec memory<br></li>
+<li>add optee service node to device-tree<br></li>
+<li>config console driver according to device-tree<br></li>
+<li>init gic<br></li>
+<li>dcache clean &amp; invalidation<br></li>
+<li>Call smc return to Secure Monitor<br></li>
+</ol>
+
+<p>
+Finally, system will return a <a target="_blank" href="https://github.com/OP-TEE/optee_os//blob/1c832d7c41cdb2f617bffa74c3d70f7c4a5667fc/core/arch/arm/kernel/thread_optee_smc_a64.S#L148">optee-os</a> to secure monitor.<br>
+From now, optee os boot complete.<br>
+</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org1e24370" class="outline-2">
+<h2 id="org1e24370">Conclusions</h2>
+<div class="outline-text-2" id="text-org1e24370">
+<ol class="org-ol">
+<li>optee boot process is very light, and should consumes a very short time to boot.<br></li>
+<li>optee will register callbacks to secure monitor &amp; add service node to device tree.<br></li>
+</ol>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<script src="https://utteranc.es/client.js"
+    repo="schspa/schspa.github.io"
+    issue-term="title"
+    label="✨💬✨"
+    theme="github-light"
+    crossorigin="anonymous"
+    async>
+</script>
+<div class="me">
+  <span><b>Contact me via :)</b><span>
+  <div class="contact">
+    <a id="email" href="mailto:schspa@gmail.com" target="_blank"><i class="fab fa-mailchimp animated heartBeat delay-2s slower"></i></a>
+    <a id="github" href="//github.com/schspa" target="_blank"><i class="fab fa-github animated heartBeat delay-2s slower"></i></a>
+  </div>
+</div>
+
+<div id="jinrishici-sentence" style="font-weight: 700;">虚怀乃若谷，水深则流缓。</div>
+<script src="https://sdk.jinrishici.com/v2/browser/jinrishici.js" charset="utf-8"></script>
+</div>
+</body>
+</html>

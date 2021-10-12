@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<!-- 2021-10-12 二 19:52 -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OPTEE persistent-object</title>
+<meta name="generator" content="Org mode">
+<meta name="description" content="persistent-object.org"
+>
+<link rel="shortcut icon" href="/images/rose-red.png" type="image/x-icon" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" integrity="sha256-sAcc18zvMnaJZrNT4v8J0T4HqzEUiUTlVFgDIywjQek=" crossorigin="anonymous">
+<link rel="stylesheet" href="/css/animate.min.css" />
+<link rel="stylesheet" href="/css/all.min.css" />
+<link rel="stylesheet" type="text/css" href="/css/style.css" />
+<link rel="stylesheet" type="text/css" href="/css/navbar.css" />
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/js/bootstrap.min.js" integrity="sha256-/hGxZHGQ57fXLp+NDusFZsZo/PG21Bp2+hXYV5a6w+g=" crossorigin="anonymous"></script>
+<script src="/js/jquery.min.js"></script>
+<script src="/js/darkreader.js"></script>
+<script src="/user.config.js"></script>
+<script src="/js/main.js"></script>
+</head>
+<body>
+<div id="preamble" class="status">
+<div class="mobile-container">
+  <!-- Top Navigation Menu -->
+  <div class="topnav">
+    <div id="header">
+      <a href="/" class="logo">Schspa's Blog</a>
+      <a href="javascript:void(0);" class="icon" onclick="toggleheader()">
+        <i class="fa fa-bars"></i>
+      </a>
+    </div>
+    <div id="nav_headers">
+      <a href="/sitemap.html" class="menu-item">Categories</a>
+    </div>
+  </div>
+  <!-- End smartphone / tablet look -->
+</div>
+
+<header id="header" class="header">
+  <div class="logo-wrapper">
+    <a href="/" class="logo">Schspa's Blogs</a>
+  </div>
+
+  <nav class="site-navbar">
+    <ul id="menu" class="menu">
+      <li class="menu-item">
+        <a class="menu-item-link" href="/">Home</a>
+      </li>
+      <li class="menu-item">
+        <a class="menu-item-link" href="/sitemap.html">Categories</a>
+      </li>
+    </ul>
+  </nav>
+</header>
+</div>
+<div id="content">
+<h1 class="title">OPTEE persistent-object</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#org1701085">Description</a></li>
+<li><a href="#org2ca2b69">Usage (secure storage)</a>
+<ul>
+<li><a href="#org66deff0">userspace</a></li>
+<li><a href="#org7a0e1ae">ta</a></li>
+</ul>
+</li>
+<li><a href="#org8535753">TEE PersistentObject</a>
+<ul>
+<li><a href="#org7ea31b7">API optee_os/lib/libutee/include/ltee_api.h</a></li>
+<li><a href="#org86681e5">TEE_CreatePersistentObject</a></li>
+<li><a href="#org69d88b0">ree_fs_ops</a></li>
+</ul>
+</li>
+<li><a href="#org31697e6">All Operation flow</a></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org1701085" class="outline-2">
+<h2 id="org1701085">Description</h2>
+<div class="outline-text-2" id="text-org1701085">
+<p>
+PersistentObject顾名思议，是可以持久化保存的对象，下面简单分析一下实现的原理。<br>
+<a href="https://optee.readthedocs.io/en/latest/architecture/secure_storage.html#ree-fs-secure-storage">https://optee.readthedocs.io/en/latest/architecture/secure_storage.html#ree-fs-secure-storage</a><br>
+</p>
+</div>
+</div>
+
+<div id="outline-container-org2ca2b69" class="outline-2">
+<h2 id="org2ca2b69">Usage (secure storage)</h2>
+<div class="outline-text-2" id="text-org2ca2b69">
+</div>
+<div id="outline-container-org66deff0" class="outline-3">
+<h3 id="org66deff0">userspace</h3>
+<div class="outline-text-3" id="text-org66deff0">
+<ol class="org-ol">
+<li>create session<br></li>
+<li><p>
+write secure object<br>
+</p>
+<div class="org-src-container">
+<pre class="src src-c"><span style="color: #ECBE7B;">TEEC_Result</span> <span style="color: #c678dd;">write_secure_object</span>(<span style="color: #51afef;">struct</span> <span style="color: #ECBE7B;">test_ctx</span> *<span style="color: #dcaeea;">ctx</span>, <span style="color: #ECBE7B;">char</span> *<span style="color: #dcaeea;">id</span>,
+            <span style="color: #ECBE7B;">char</span> *<span style="color: #dcaeea;">data</span>, <span style="color: #ECBE7B;">size_t</span> <span style="color: #dcaeea;">data_len</span>)
+{
+    <span style="color: #ECBE7B;">TEEC_Operation</span> <span style="color: #dcaeea;">op</span>;
+    <span style="color: #ECBE7B;">uint32_t</span> <span style="color: #dcaeea;">origin</span>;
+    <span style="color: #ECBE7B;">TEEC_Result</span> <span style="color: #dcaeea;">res</span>;
+    <span style="color: #ECBE7B;">size_t</span> <span style="color: #dcaeea;">id_len</span> = strlen(id);
+
+    memset(&amp;op, 0, <span style="color: #51afef;">sizeof</span>(op));
+    op.paramTypes = TEEC_PARAM_TYPES(TEEC_MEMREF_TEMP_INPUT,
+                     TEEC_MEMREF_TEMP_INPUT,
+                     TEEC_NONE, TEEC_NONE);
+
+    op.params[0].tmpref.buffer = id;
+    op.params[0].tmpref.size = id_len;
+
+    op.params[1].tmpref.buffer = data;
+    op.params[1].tmpref.size = data_len;
+
+    res = TEEC_InvokeCommand(&amp;ctx-&gt;sess,
+                 TA_SECURE_STORAGE_CMD_WRITE_RAW,
+                 &amp;op, &amp;origin);
+    <span style="color: #51afef;">if</span> (res != TEEC_SUCCESS)
+        printf(<span style="color: #98be65;">"Command WRITE_RAW failed: 0x%x / %u\n"</span>, res, origin);
+
+    <span style="color: #51afef;">switch</span> (res) {
+    <span style="color: #51afef;">case</span> TEEC_SUCCESS:
+        <span style="color: #51afef;">break</span>;
+    <span style="color: #51afef;">default</span>:
+        printf(<span style="color: #98be65;">"Command WRITE_RAW failed: 0x%x / %u\n"</span>, res, origin);
+    }
+
+    <span style="color: #51afef;">return</span> res;
+}
+
+</pre>
+</div>
+<p>
+这里传递了两个参数<br>
+</p>
+<ul class="org-ul">
+<li>object id<br>
+字符串类型id<br></li>
+<li>data<br>
+要写入的数据<br></li>
+</ul>
+<p>
+使用invoke调用TA_SECURE_STORAGE_CMD_WRITE_RAW命令<br>
+</p></li>
+<li><p>
+delete_secure_object<br>
+</p>
+<div class="org-src-container">
+<pre class="src src-c"><span style="color: #ECBE7B;">TEEC_Result</span> <span style="color: #c678dd;">delete_secure_object</span>(<span style="color: #51afef;">struct</span> <span style="color: #ECBE7B;">test_ctx</span> *<span style="color: #dcaeea;">ctx</span>, <span style="color: #ECBE7B;">char</span> *<span style="color: #dcaeea;">id</span>)
+{
+    <span style="color: #ECBE7B;">TEEC_Operation</span> <span style="color: #dcaeea;">op</span>;
+    <span style="color: #ECBE7B;">uint32_t</span> <span style="color: #dcaeea;">origin</span>;
+    <span style="color: #ECBE7B;">TEEC_Result</span> <span style="color: #dcaeea;">res</span>;
+    <span style="color: #ECBE7B;">size_t</span> <span style="color: #dcaeea;">id_len</span> = strlen(id);
+
+    memset(&amp;op, 0, <span style="color: #51afef;">sizeof</span>(op));
+    op.paramTypes = TEEC_PARAM_TYPES(TEEC_MEMREF_TEMP_INPUT,
+                                     TEEC_NONE, TEEC_NONE, TEEC_NONE);
+
+    op.params[0].tmpref.buffer = id;
+    op.params[0].tmpref.size = id_len;
+
+    res = TEEC_InvokeCommand(&amp;ctx-&gt;sess,
+                             TA_SECURE_STORAGE_CMD_DELETE,
+                             &amp;op, &amp;origin);
+
+    <span style="color: #51afef;">switch</span> (res) {
+    <span style="color: #51afef;">case</span> TEEC_SUCCESS:
+    <span style="color: #51afef;">case</span> TEEC_ERROR_ITEM_NOT_FOUND:
+        <span style="color: #51afef;">break</span>;
+    <span style="color: #51afef;">default</span>:
+        printf(<span style="color: #98be65;">"Command DELETE failed: 0x%x / %u\n"</span>, res, origin);
+    }
+
+    <span style="color: #51afef;">return</span> res;
+}
+
+</pre>
+</div>
+
+<p>
+删除操作传入了object id<br>
+</p></li>
+</ol>
+</div>
+</div>
+<div id="outline-container-org7a0e1ae" class="outline-3">
+<h3 id="org7a0e1ae">ta</h3>
+<div class="outline-text-3" id="text-org7a0e1ae">
+<ul class="org-ul">
+<li><p>
+TA_SECURE_STORAGE_CMD_WRITE_RAW<br>
+</p>
+<div class="org-src-container">
+<pre class="src src-c"><span style="color: #51afef;">static</span> <span style="color: #ECBE7B;">TEE_Result</span> <span style="color: #c678dd;">create_raw_object</span>(<span style="color: #ECBE7B;">uint32_t</span> <span style="color: #dcaeea;">param_types</span>, <span style="color: #ECBE7B;">TEE_Param</span> <span style="color: #dcaeea;">params</span>[4])
+{
+    ...
+    <span style="color: #5B6268;">/*</span>
+<span style="color: #5B6268;">     * Create object in secure storage and fill with data</span>
+<span style="color: #5B6268;">     */</span>
+    obj_data_flag = TEE_DATA_FLAG_ACCESS_READ |         <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">we can later read the oject</span><span style="color: #5B6268;"> */</span>
+            TEE_DATA_FLAG_ACCESS_WRITE |                <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">we can later write into the object</span><span style="color: #5B6268;"> */</span>
+            TEE_DATA_FLAG_ACCESS_WRITE_META |   <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">we can later destroy or rename the object</span><span style="color: #5B6268;"> */</span>
+            TEE_DATA_FLAG_OVERWRITE;            <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">destroy existing object of same ID</span><span style="color: #5B6268;"> */</span>
+
+    res = TEE_CreatePersistentObject(TEE_STORAGE_PRIVATE,
+                    obj_id, obj_id_sz,
+                    obj_data_flag,
+                    TEE_HANDLE_NULL,
+                    <span style="color: #a9a1e1;">NULL</span>, 0,            <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">we may not fill it right now</span><span style="color: #5B6268;"> */</span>
+                    &amp;object);
+    <span style="color: #51afef;">if</span> (res != TEE_SUCCESS) {
+        EMSG(<span style="color: #98be65;">"TEE_CreatePersistentObject failed 0x%08x"</span>, res);
+        TEE_Free(obj_id);
+        <span style="color: #51afef;">return</span> res;
+    }
+
+    res = TEE_WriteObjectData(object, data, data_sz);
+    <span style="color: #51afef;">if</span> (res != TEE_SUCCESS) {
+        EMSG(<span style="color: #98be65;">"TEE_WriteObjectData failed 0x%08x"</span>, res);
+        TEE_CloseAndDeletePersistentObject1(object);
+    } <span style="color: #51afef;">else</span> {
+        TEE_CloseObject(object);
+    }
+    ...
+}
+
+</pre>
+</div>
+<ol class="org-ol">
+<li>TEE_CreatePersistentObject<br></li>
+<li>TEE_WriteObjectData<br></li>
+</ol></li>
+<li><p>
+TA_SECURE_STORAGE_CMD_DELETE<br>
+</p>
+<div class="org-src-container">
+<pre class="src src-c"><span style="color: #51afef;">static</span> <span style="color: #ECBE7B;">TEE_Result</span> <span style="color: #c678dd;">delete_object</span>(<span style="color: #ECBE7B;">uint32_t</span> <span style="color: #dcaeea;">param_types</span>, <span style="color: #ECBE7B;">TEE_Param</span> <span style="color: #dcaeea;">params</span>[4])
+{
+    <span style="color: #51afef;">const</span> <span style="color: #ECBE7B;">uint32_t</span> <span style="color: #dcaeea;">exp_param_types</span> =
+        TEE_PARAM_TYPES(TEE_PARAM_TYPE_MEMREF_INPUT,
+                TEE_PARAM_TYPE_NONE,
+                TEE_PARAM_TYPE_NONE,
+                TEE_PARAM_TYPE_NONE);
+    <span style="color: #ECBE7B;">TEE_ObjectHandle</span> <span style="color: #dcaeea;">object</span>;
+    <span style="color: #ECBE7B;">TEE_Result</span> <span style="color: #dcaeea;">res</span>;
+    <span style="color: #ECBE7B;">char</span> *<span style="color: #dcaeea;">obj_id</span>;
+    <span style="color: #ECBE7B;">size_t</span> <span style="color: #dcaeea;">obj_id_sz</span>;
+
+    <span style="color: #5B6268;">/*</span>
+<span style="color: #5B6268;">     * Safely get the invocation parameters</span>
+<span style="color: #5B6268;">     */</span>
+    <span style="color: #51afef;">if</span> (param_types != exp_param_types)
+        <span style="color: #51afef;">return</span> TEE_ERROR_BAD_PARAMETERS;
+
+    obj_id_sz = params[0].memref.size;
+    obj_id = TEE_Malloc(obj_id_sz, 0);
+    <span style="color: #51afef;">if</span> (<span style="color: #51afef; font-weight: bold;">!</span>obj_id)
+        <span style="color: #51afef;">return</span> TEE_ERROR_OUT_OF_MEMORY;
+
+    TEE_MemMove(obj_id, params[0].memref.buffer, obj_id_sz);
+
+    <span style="color: #5B6268;">/*</span>
+<span style="color: #5B6268;">     * Check object exists and delete it</span>
+<span style="color: #5B6268;">     */</span>
+    res = TEE_OpenPersistentObject(TEE_STORAGE_PRIVATE,
+                    obj_id, obj_id_sz,
+                    TEE_DATA_FLAG_ACCESS_READ |
+                    TEE_DATA_FLAG_ACCESS_WRITE_META, <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">we must be allowed to delete it</span><span style="color: #5B6268;"> */</span>
+                    &amp;object);
+    <span style="color: #51afef;">if</span> (res != TEE_SUCCESS) {
+        EMSG(<span style="color: #98be65;">"Failed to open persistent object, res=0x%08x"</span>, res);
+        TEE_Free(obj_id);
+        <span style="color: #51afef;">return</span> res;
+    }
+
+    TEE_CloseAndDeletePersistentObject1(object);
+    TEE_Free(obj_id);
+
+    <span style="color: #51afef;">return</span> res;
+}
+
+</pre>
+</div>
+<ol class="org-ol">
+<li>打开对象<br>
+TEE_OpenPersistentObject<br></li>
+<li>删除对象<br></li>
+</ol>
+<p>
+TEE_CloseAndDeletePersistentObject1<br>
+</p></li>
+</ul>
+
+<p>
+从ta可以看到tee中使用了TEE_*PersistentObject的api<br>
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org8535753" class="outline-2">
+<h2 id="org8535753">TEE PersistentObject</h2>
+<div class="outline-text-2" id="text-org8535753">
+</div>
+<div id="outline-container-org7ea31b7" class="outline-3">
+<h3 id="org7ea31b7">API optee_os/lib/libutee/include/ltee_api.h</h3>
+<div class="outline-text-3" id="text-org7ea31b7">
+<div class="org-src-container">
+<pre class="src src-c"><span style="color: #5B6268;">/* </span><span style="color: #5B6268;">Data and Key Storage API  - Persistent Object Functions</span><span style="color: #5B6268;"> */</span>
+
+<span style="color: #ECBE7B;">TEE_Result</span> <span style="color: #c678dd;">TEE_OpenPersistentObject</span>(<span style="color: #ECBE7B;">uint32_t</span> <span style="color: #dcaeea;">storageID</span>, <span style="color: #51afef;">const</span> <span style="color: #ECBE7B;">void</span> *<span style="color: #dcaeea;">objectID</span>,
+                    <span style="color: #ECBE7B;">uint32_t</span> <span style="color: #dcaeea;">objectIDLen</span>, <span style="color: #ECBE7B;">uint32_t</span> <span style="color: #dcaeea;">flags</span>,
+                    <span style="color: #ECBE7B;">TEE_ObjectHandle</span> *<span style="color: #dcaeea;">object</span>);
+
+<span style="color: #ECBE7B;">TEE_Result</span> <span style="color: #c678dd;">TEE_CreatePersistentObject</span>(<span style="color: #ECBE7B;">uint32_t</span> <span style="color: #dcaeea;">storageID</span>, <span style="color: #51afef;">const</span> <span style="color: #ECBE7B;">void</span> *<span style="color: #dcaeea;">objectID</span>,
+                      <span style="color: #ECBE7B;">uint32_t</span> <span style="color: #dcaeea;">objectIDLen</span>, <span style="color: #ECBE7B;">uint32_t</span> <span style="color: #dcaeea;">flags</span>,
+                      <span style="color: #ECBE7B;">TEE_ObjectHandle</span> <span style="color: #dcaeea;">attributes</span>,
+                      <span style="color: #51afef;">const</span> <span style="color: #ECBE7B;">void</span> *<span style="color: #dcaeea;">initialData</span>,
+                      <span style="color: #ECBE7B;">uint32_t</span> <span style="color: #dcaeea;">initialDataLen</span>,
+                      <span style="color: #ECBE7B;">TEE_ObjectHandle</span> *<span style="color: #dcaeea;">object</span>);
+
+<span style="color: #ECBE7B;">void</span> <span style="color: #c678dd;">TEE_CloseAndDeletePersistentObject</span>(<span style="color: #ECBE7B;">TEE_ObjectHandle</span> <span style="color: #dcaeea;">object</span>);
+
+<span style="color: #ECBE7B;">TEE_Result</span> <span style="color: #c678dd;">TEE_CloseAndDeletePersistentObject1</span>(<span style="color: #ECBE7B;">TEE_ObjectHandle</span> <span style="color: #dcaeea;">object</span>);
+
+<span style="color: #ECBE7B;">TEE_Result</span> <span style="color: #c678dd;">TEE_RenamePersistentObject</span>(<span style="color: #ECBE7B;">TEE_ObjectHandle</span> <span style="color: #dcaeea;">object</span>,
+                      <span style="color: #51afef;">const</span> <span style="color: #ECBE7B;">void</span> *<span style="color: #dcaeea;">newObjectID</span>,
+                      <span style="color: #ECBE7B;">uint32_t</span> <span style="color: #dcaeea;">newObjectIDLen</span>);
+
+<span style="color: #ECBE7B;">TEE_Result</span> <span style="color: #c678dd;">TEE_AllocatePersistentObjectEnumerator</span>(<span style="color: #ECBE7B;">TEE_ObjectEnumHandle</span> *
+                          <span style="color: #dcaeea;">objectEnumerator</span>);
+
+<span style="color: #ECBE7B;">void</span> <span style="color: #c678dd;">TEE_FreePersistentObjectEnumerator</span>(<span style="color: #ECBE7B;">TEE_ObjectEnumHandle</span> <span style="color: #dcaeea;">objectEnumerator</span>);
+
+<span style="color: #ECBE7B;">void</span> <span style="color: #c678dd;">TEE_ResetPersistentObjectEnumerator</span>(<span style="color: #ECBE7B;">TEE_ObjectEnumHandle</span> <span style="color: #dcaeea;">objectEnumerator</span>);
+
+<span style="color: #ECBE7B;">TEE_Result</span> <span style="color: #c678dd;">TEE_StartPersistentObjectEnumerator</span>(<span style="color: #ECBE7B;">TEE_ObjectEnumHandle</span>
+                           <span style="color: #dcaeea;">objectEnumerator</span>,
+                           <span style="color: #ECBE7B;">uint32_t</span> <span style="color: #dcaeea;">storageID</span>);
+
+<span style="color: #ECBE7B;">TEE_Result</span> <span style="color: #c678dd;">TEE_GetNextPersistentObject</span>(<span style="color: #ECBE7B;">TEE_ObjectEnumHandle</span> <span style="color: #dcaeea;">objectEnumerator</span>,
+                       <span style="color: #ECBE7B;">TEE_ObjectInfo</span> *<span style="color: #dcaeea;">objectInfo</span>,
+                       <span style="color: #ECBE7B;">void</span> *<span style="color: #dcaeea;">objectID</span>, <span style="color: #ECBE7B;">uint32_t</span> *<span style="color: #dcaeea;">objectIDLen</span>);
+
+</pre>
+</div>
+<p>
+这里共有10个api提供了open，new，enum，rename的功能<br>
+</p>
+
+
+<div id="org51310b1" class="figure">
+<p><img src="assets/persistentobject-api-map.png" alt="persistentobject-api-map.png"><br>
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org86681e5" class="outline-3">
+<h3 id="org86681e5">TEE_CreatePersistentObject</h3>
+<div class="outline-text-3" id="text-org86681e5">
+<p>
+这个函数是对optee_os中系统调用的封装<br>
+从上个章节可知最终调用了optee_os中的syscall_storage_obj_create<br>
+</p>
+<ol class="org-ol">
+<li>根据storage_id获取文件系统接口 `struct tee_file_operations`<br></li>
+<li>根据object_id获取tee_pobj<br></li>
+<li>生成新的tee_obj并将其与tee_pobj绑定<br></li>
+<li>调用tee_svc_storage_init_file初始化文件<br></li>
+<li>将tee_obj返回给用户空间程序（TA）<br></li>
+</ol>
+<p>
+重点内容：<br>
+</p>
+</div>
+<ul class="org-ul">
+<li><a id="orgfc9d5c7"></a><span class="todo TODO">TODO</span> pobj<br></li>
+
+<li><a id="org721d5b4"></a>tee_svc_storage_init_file<br>
+<div class="outline-text-4" id="text-org721d5b4">
+<ol class="org-ol">
+<li>将tee_obj_attr保存在文件中<br></li>
+</ol>
+<pre class="example">
+    ...
+    if (attr_o) {
+    res = tee_obj_set_type(o, attr_o-&gt;info.objectType,
+                   attr_o-&gt;info.maxKeySize);
+    if (res)
+        return res;
+    res = tee_obj_attr_copy_from(o, attr_o);
+    if (res)
+        return res;
+    o-&gt;have_attrs = attr_o-&gt;have_attrs;
+    o-&gt;info.objectUsage = attr_o-&gt;info.objectUsage;
+    o-&gt;info.keySize = attr_o-&gt;info.keySize;
+    res = tee_obj_attr_to_binary(o, NULL, &amp;attr_size);
+    if (res)
+        return res;
+    if (attr_size) {
+        attr = malloc(attr_size);
+        if (!attr)
+            return TEE_ERROR_OUT_OF_MEMORY;
+        res = tee_obj_attr_to_binary(o, attr, &amp;attr_size);
+        if (res != TEE_SUCCESS)
+            goto exit;
+    }
+} else {
+    res = tee_obj_set_type(o, TEE_TYPE_DATA, 0);
+    if (res != TEE_SUCCESS)
+        goto exit;
+}
+...
+o-&gt;ds_pos = sizeof(struct tee_svc_storage_head) + attr_size;
+
+/* write head */
+head.attr_size = attr_size;
+head.keySize = o-&gt;info.keySize;
+head.maxKeySize = o-&gt;info.maxKeySize;
+head.objectUsage = o-&gt;info.objectUsage;
+head.objectType = o-&gt;info.objectType;
+head.have_attrs = o-&gt;have_attrs;
+
+res = fops-&gt;create(o-&gt;pobj, !!(o-&gt;flags &amp; TEE_DATA_FLAG_OVERWRITE),
+           &amp;head, sizeof(head), attr, attr_size, data, len,
+           &amp;o-&gt;fh);
+
+if (!res)
+    o-&gt;info.dataSize = len;
+
+</pre>
+<p>
+代码中调用了两次tee_obj_attr_to_binary，第一次为了获取大小，第二次保存<br>
+</p>
+<ol class="org-ol">
+<li><p>
+调用fops-&gt;create创建对象<br>
+fops table: tee_svc_storage_file_ops<br>
+</p>
+<table>
+
+
+<colgroup>
+<col  class="org-left">
+
+<col  class="org-left">
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">storage_id</th>
+<th scope="col" class="org-left">fops</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left">TEE_STORAGE_PRIVATE</td>
+<td class="org-left">ree_fs_ops/rpmb_fs_ops</td>
+</tr>
+
+<tr>
+<td class="org-left">TEE_STORAGE_PRIVATE_REE</td>
+<td class="org-left">ree_fs_ops</td>
+</tr>
+
+<tr>
+<td class="org-left">CFG_RPMB_FS</td>
+<td class="org-left">rpmb_fs_ops</td>
+</tr>
+</tbody>
+</table></li>
+</ol>
+</div>
+</li>
+</ul>
+</div>
+
+<div id="outline-container-org69d88b0" class="outline-3">
+<h3 id="org69d88b0">ree_fs_ops</h3>
+<div class="outline-text-3" id="text-org69d88b0">
+</div>
+<ul class="org-ul">
+<li><a id="orge52e266"></a>ree_fs_create<br>
+<div class="outline-text-4" id="text-orge52e266">
+
+<div id="org47afbdd" class="figure">
+<p><img src="assets/ree_fs_create.png" alt="ree_fs_create.png"><br>
+</p>
+</div>
+
+<ol class="org-ol">
+<li>get_dirh 打开文件夹（全局唯一的文件夹）<br></li>
+<li>获取一个临时文件句柄（TEE中数据结构）<br></li>
+<li>创建文件（调用rpc来创建真正的文件）,创建htree校验数据<br></li>
+<li>写入header， attr，data<br></li>
+<li>更新hash<br></li>
+</ol>
+</div>
+</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-org31697e6" class="outline-2">
+<h2 id="org31697e6">All Operation flow</h2>
+<div class="outline-text-2" id="text-org31697e6">
+
+<div id="org9ee7105" class="figure">
+<p><img src="assets/secure-storage-flow.png" alt="secure-storage-flow.png"><br>
+</p>
+</div>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<script src="https://utteranc.es/client.js"
+    repo="schspa/schspa.github.io"
+    issue-term="title"
+    label="✨💬✨"
+    theme="github-light"
+    crossorigin="anonymous"
+    async>
+</script>
+<div class="me">
+  <span><b>Contact me via :)</b><span>
+  <div class="contact">
+    <a id="email" href="mailto:schspa@gmail.com" target="_blank"><i class="fab fa-mailchimp animated heartBeat delay-2s slower"></i></a>
+    <a id="github" href="//github.com/schspa" target="_blank"><i class="fab fa-github animated heartBeat delay-2s slower"></i></a>
+  </div>
+</div>
+
+<div id="jinrishici-sentence" style="font-weight: 700;">虚怀乃若谷，水深则流缓。</div>
+<script src="https://sdk.jinrishici.com/v2/browser/jinrishici.js" charset="utf-8"></script>
+</div>
+</body>
+</html>

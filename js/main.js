@@ -1,4 +1,5 @@
 'use strict'
+var blogs_map = new Object();
 
 // Init global variables
 // ------------------------------------------------------------------
@@ -124,6 +125,39 @@ $(document).ready(() => {
         // $('a').each(function() {
         //     $(this).attr('target', '_blank')
         // })
+        $.getJSON( "blogs.json", (data) => {
+            blogs_map["MISC"] = new Array(0);
+            const markup = data
+                  .map((item) => {
+                      if (item["CATEGORY"]) {
+                          if (!blogs_map[item["CATEGORY"]]) {
+                              blogs_map[item["CATEGORY"]] = new Array(0);
+                          }
+                          blogs_map[item["CATEGORY"]].push(item);
+                      } else {
+                          blogs_map["MISC"].push(item);
+                      }
+                      return '<a class="list-group-item list-group-item-action" href="' +
+                          item["URL"] + '">' +
+                          '<div class="d-flex w-100 justify-content-between">' +
+                          '<h4 class="mb-1">' + item["TITLE"] + '</h4>' +
+                          '<small class="text-muted">' + item["DATE"] +'</small>' +
+                          '</div>' + item["FILETAGS"].map((filetag) => { return '<small class="tag">' + filetag + '</small>' }).join('') +
+                          '</a>';
+                  })
+                  .join('');
+            for(var key in blogs_map) {
+                var value = blogs_map[key];
+                console.log(key, value);
+                // $('#blog-list').append('<ul><li>Report1</li><li>Report2</li><li>Report3</li></ul>');
+                const category_list = value.map((item) => {
+                    return '<li><a href=' + item["URL"] + '>' +item["TITLE"] +'</a></li>';
+                }).join('');
+                $('#blog-list').append('<ul class="category"><li>' + key + '<ul>' + category_list + '</ul></li></ul>');
+            }
+
+            $('#blog-post').append(markup);
+        });
     }
 
     // Customize annotations

@@ -1,0 +1,3542 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<!-- 2021-10-12 二 19:35 -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AARCH64 native problem debug.</title>
+<meta name="generator" content="Org mode">
+<meta name="author" content="Zhaohui Shi">
+<meta name="description" content="AARCH64 native proble debugging."
+>
+<link rel="shortcut icon" href="/images/rose-red.png" type="image/x-icon" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" integrity="sha256-sAcc18zvMnaJZrNT4v8J0T4HqzEUiUTlVFgDIywjQek=" crossorigin="anonymous">
+<link rel="stylesheet" href="/css/animate.min.css" />
+<link rel="stylesheet" href="/css/all.min.css" />
+<link rel="stylesheet" type="text/css" href="/css/style.css" />
+<link rel="stylesheet" type="text/css" href="/css/navbar.css" />
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/js/bootstrap.min.js" integrity="sha256-/hGxZHGQ57fXLp+NDusFZsZo/PG21Bp2+hXYV5a6w+g=" crossorigin="anonymous"></script>
+<script src="/js/jquery.min.js"></script>
+<script src="/js/darkreader.js"></script>
+<script src="/user.config.js"></script>
+<script src="/js/main.js"></script>
+</head>
+<body>
+<div id="preamble" class="status">
+<div class="mobile-container">
+  <!-- Top Navigation Menu -->
+  <div class="topnav">
+    <div id="header">
+      <a href="/" class="logo">Schspa's Blog</a>
+      <a href="javascript:void(0);" class="icon" onclick="toggleheader()">
+        <i class="fa fa-bars"></i>
+      </a>
+    </div>
+    <div id="nav_headers">
+      <a href="/sitemap.html" class="menu-item">Categories</a>
+    </div>
+  </div>
+  <!-- End smartphone / tablet look -->
+</div>
+
+<header id="header" class="header">
+  <div class="logo-wrapper">
+    <a href="/" class="logo">Schspa's Blogs</a>
+  </div>
+
+  <nav class="site-navbar">
+    <ul id="menu" class="menu">
+      <li class="menu-item">
+        <a class="menu-item-link" href="/">Home</a>
+      </li>
+      <li class="menu-item">
+        <a class="menu-item-link" href="/sitemap.html">Categories</a>
+      </li>
+    </ul>
+  </nav>
+</header>
+</div>
+<div id="content">
+<h1 class="title">AARCH64 native problem debug.</h1>
+
+<div id="outline-container-org3d4f101" class="outline-2">
+<h2 id="org3d4f101">Agenda</h2>
+<div class="outline-text-2" id="text-org3d4f101">
+<ul class="org-ul">
+<li><a href="#org76d0744">AARCH64 Native Debug Knowledge</a><br>
+<ul class="org-ul">
+<li><a href="#org079fbe0">ARMv8-A A64 ISA Overview</a><br></li>
+<li><a href="#orgb0bfa92">Programmer’s Guide for ARMv8-A</a><br></li>
+<li><a href="#orgd536c02">Procedure Call Standard</a><br></li>
+</ul></li>
+</ul>
+<ul class="org-ul">
+<li><a href="#org274eb6f">Debugger</a><br>
+<ul class="org-ul">
+<li><a href="#org1b37da8">GDB</a><br></li>
+<li><a href="#org29850a4">Trace32</a><br></li>
+<li><a href="#org332cbda">DS5</a><br></li>
+</ul></li>
+<li><a href="#org26eb2ca">OS Debug</a><br>
+<ul class="org-ul">
+<li><a href="#org39f1678">U-Boot</a><br></li>
+<li><a href="#orgdcf9ed1">Linux</a><br></li>
+</ul></li>
+</ul>
+<ul class="org-ul">
+<li><a href="#org1c0e60e">Native Crash Examples</a><br>
+<ul class="org-ul">
+<li><a href="#orgf3f74af">StackFrame Analysis</a><br>
+<ul class="org-ul">
+<li><a href="#org9cefee7">Stack Frame</a><br></li>
+<li><a href="#org5319b5f">Regulator Function</a><br></li>
+<li><a href="#org8a8eb8b">Variadic functions</a><br></li>
+</ul></li>
+<li><a href="#org18e8fd8">Crash Analysis</a><br>
+<ul class="org-ul">
+<li><a href="#orgb58d3f0">U-Boot Crash Due to firewall</a><br></li>
+</ul></li>
+</ul></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org76d0744" class="outline-2">
+<h2 id="org76d0744">AARCH64 Native Debug Knowledge</h2>
+<div class="outline-text-2" id="text-org76d0744">
+</div>
+<div id="outline-container-org079fbe0" class="outline-3">
+<h3 id="org079fbe0">ARMv8-A A64 ISA Overview</h3>
+<div class="outline-text-3" id="text-org079fbe0">
+<p>
+<a href="https://developer.arm.com/-/media/Files/pdf/graphics-and-multimedia/ARMv8_InstructionSetOverview.pdf">ARMv8-A A64 ISA Overview</a><br>
+</p>
+</div>
+<div id="outline-container-orgb9e099f" class="outline-4">
+<h4 id="orgb9e099f">Generic Registers</h4>
+<div class="outline-text-4" id="text-orgb9e099f">
+
+<div id="org69be99f" class="figure">
+<p><img src="assets/2021-04-27_15-27-27_screenshot.png" alt="2021-04-27_15-27-27_screenshot.png"><br>
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org9bd98f4" class="outline-4">
+<h4 id="org9bd98f4">Addressing modes</h4>
+<div class="outline-text-4" id="text-org9bd98f4">
+<table>
+
+
+<colgroup>
+<col  class="org-left">
+
+<col  class="org-left">
+
+<col  class="org-left">
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">Address Mode</th>
+<th scope="col" class="org-left">example</th>
+<th scope="col" class="org-left">Explanation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left">Simple</td>
+<td class="org-left">LDR W0, [X1]</td>
+<td class="org-left">X1 is not changed</td>
+</tr>
+
+<tr>
+<td class="org-left">offset</td>
+<td class="org-left">LDR W0, [X1, #4]</td>
+<td class="org-left">X1 is not changed</td>
+</tr>
+
+<tr>
+<td class="org-left">Pre-indexed</td>
+<td class="org-left">LDR W0, [X1, #4]!</td>
+<td class="org-left">X1 is changed before load</td>
+</tr>
+
+<tr>
+<td class="org-left">Post-indexed</td>
+<td class="org-left">LDR W0, [X1], #4</td>
+<td class="org-left">X1 is changed after load</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgb0bfa92" class="outline-3">
+<h3 id="orgb0bfa92">Programmer’s Guide for ARMv8-A</h3>
+<div class="outline-text-3" id="text-orgb0bfa92">
+</div>
+<div id="outline-container-org83cc537" class="outline-4">
+<h4 id="org83cc537">Exception Types</h4>
+<div class="outline-text-4" id="text-org83cc537">
+<dl class="org-dl">
+<dt>Interrupts</dt><dd>Happend when FIQ &amp; IRQ physical signal send to the CPU Core.<br></dd>
+<dt>Aborts</dt><dd>Generated by failed instruction fetches (instruction aborts) or failed data accesses (Data Aborts).<br></dd>
+<dt>Reset</dt><dd>For Reset Signal<br></dd>
+<dt>Exception</dt><dd>generating instructions SVC, HVC, SMC etc.<br></dd>
+</dl>
+</div>
+</div>
+
+<div id="outline-container-org46f4779" class="outline-4">
+<h4 id="org46f4779">Exception Flow</h4>
+<div class="outline-text-4" id="text-org46f4779">
+
+<div id="org82795bc" class="figure">
+<p><img src="assets/2021-04-27_15-19-54_screenshot.png" alt="2021-04-27_15-19-54_screenshot.png" width="600px"><br>
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgcab2ccb" class="outline-4">
+<h4 id="orgcab2ccb">Exception Register</h4>
+<div class="outline-text-4" id="text-orgcab2ccb">
+<dl class="org-dl">
+<dt>ELR_ELx</dt><dd>Entrypoint to execute when Exception Handled<br></dd>
+<dt>SPSR_ELx</dt><dd>PSTATE backup<br></dd>
+<dt>FAR_ELx</dt><dd>Fault Address Register<br></dd>
+<dt>ESR_ELx</dt><dd>Exception Syndrome Register<br></dd>
+</dl>
+
+<div id="orge8153ce" class="figure">
+<p><img src="assets/2021-04-27_15-22-24_screenshot.png" alt="2021-04-27_15-22-24_screenshot.png" height="500px"><br>
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org914c11d" class="outline-4">
+<h4 id="org914c11d">Synchronous and and asynchronous exceptions</h4>
+<div class="outline-text-4" id="text-org914c11d">
+<dl class="org-dl">
+<dt>Synchronous</dt><dd>It is generated as a result of execution or attempted execution of the instruction stream, and where the return address provides details of the instruction that caused it.<br></dd>
+<dt>Asynchronous</dt><dd>It is not generated by executing instructions, while the return address might not always provide details of what caused the exception.<br></dd>
+</dl>
+</div>
+
+<div id="outline-container-org15ba7e2" class="outline-5">
+<h5 id="org15ba7e2">examples</h5>
+<div class="outline-text-5" id="text-org15ba7e2">
+<ul class="org-ul">
+<li>IRQ, FIQ, SError<br>
+All trigger by external physical signals, All of this should be asynchronous abort.<br></li>
+
+<li>MMU dataabort, System Calls, Secure Mointor Calls, Undefined Instruction, Debug exception etc.<br></li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgd536c02" class="outline-3">
+<h3 id="orgd536c02">Procedure Call Standard</h3>
+<div class="outline-text-3" id="text-orgd536c02">
+<table>
+
+
+<colgroup>
+<col  class="org-left">
+
+<col  class="org-left">
+</colgroup>
+<tbody>
+<tr>
+<td class="org-left">Arch</td>
+<td class="org-left">documentation</td>
+</tr>
+
+<tr>
+<td class="org-left">ARM</td>
+<td class="org-left"><a href="https://developer.arm.com/documentation/ihi0042/j">Procedure Call Standard for the Arm® Architecture</a></td>
+</tr>
+
+<tr>
+<td class="org-left">ARM64</td>
+<td class="org-left"><a href="https://developer.arm.com/documentation/ihi0055/latest/">Procedure Call Standard for the Arm® 64-bit Architecture</a></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org274eb6f" class="outline-2">
+<h2 id="org274eb6f">Debugger</h2>
+<div class="outline-text-2" id="text-org274eb6f">
+</div>
+<div id="outline-container-org1b37da8" class="outline-3">
+<h3 id="org1b37da8">GDB</h3>
+<div class="outline-text-3" id="text-org1b37da8">
+<ul class="org-ul">
+<li>Symbols<br></li>
+<li>Control<br></li>
+<li>Thread, frame, signal<br></li>
+<li>viewing, showing<br></li>
+</ul>
+<p>
+<a href="https://users.ece.utexas.edu/~adnan/gdb-refcard.pdf">GDB QUICK REFERENCE</a><br>
+</p>
+
+<table>
+
+
+<colgroup>
+<col  class="org-left">
+
+<col  class="org-left">
+</colgroup>
+<tbody>
+<tr>
+<td class="org-left">Comamnd</td>
+<td class="org-left">Usage</td>
+</tr>
+
+<tr>
+<td class="org-left">add-symbol-file</td>
+<td class="org-left">To add symbols to gdb</td>
+</tr>
+
+<tr>
+<td class="org-left">set solib-search-path</td>
+<td class="org-left">Set the search path for loading non-absolute shared library symbol files.</td>
+</tr>
+
+<tr>
+<td class="org-left">set sysroot</td>
+<td class="org-left">Set an alternate system root.</td>
+</tr>
+</tbody>
+</table>
+<table>
+
+
+<colgroup>
+<col  class="org-left">
+
+<col  class="org-left">
+</colgroup>
+<tbody>
+<tr>
+<td class="org-left">Comamnd</td>
+<td class="org-left">Usage</td>
+</tr>
+
+<tr>
+<td class="org-left">b</td>
+<td class="org-left">Set breakpoint at specified location.</td>
+</tr>
+
+<tr>
+<td class="org-left">hb</td>
+<td class="org-left">Set a hardware assisted breakpoint.</td>
+</tr>
+
+<tr>
+<td class="org-left">finish</td>
+<td class="org-left">run until selected stack frame returns</td>
+</tr>
+
+<tr>
+<td class="org-left">return</td>
+<td class="org-left">pop selected stack frame without executing</td>
+</tr>
+</tbody>
+</table>
+
+<table>
+
+
+<colgroup>
+<col  class="org-left">
+
+<col  class="org-left">
+</colgroup>
+<tbody>
+<tr>
+<td class="org-left">Comamnd</td>
+<td class="org-left">Usage</td>
+</tr>
+
+<tr>
+<td class="org-left">info threads</td>
+<td class="org-left">Display currently known threads.</td>
+</tr>
+
+<tr>
+<td class="org-left">thread</td>
+<td class="org-left">Use this command to switch between threads.</td>
+</tr>
+
+<tr>
+<td class="org-left">info frame</td>
+<td class="org-left">All about the selected stack frame.</td>
+</tr>
+
+<tr>
+<td class="org-left">frame</td>
+<td class="org-left">Select and print a stack frame.</td>
+</tr>
+
+<tr>
+<td class="org-left">signal</td>
+<td class="org-left">ontinue program with the specified signal.</td>
+</tr>
+
+<tr>
+<td class="org-left">command</td>
+<td class="org-left">execute GDB command-list every time breakpoint n is reached.</td>
+</tr>
+</tbody>
+</table>
+
+<table>
+
+
+<colgroup>
+<col  class="org-left">
+
+<col  class="org-left">
+</colgroup>
+<tbody>
+<tr>
+<td class="org-left">Comamnd</td>
+<td class="org-left">Usage</td>
+</tr>
+
+<tr>
+<td class="org-left">set pagination</td>
+<td class="org-left">Set state of GDB output pagination.</td>
+</tr>
+
+<tr>
+<td class="org-left">set substitute-path</td>
+<td class="org-left">Add a substitution rule to rewrite the source directories.</td>
+</tr>
+
+<tr>
+<td class="org-left">whatis</td>
+<td class="org-left">show data type of expr [or $] without evaluating</td>
+</tr>
+
+<tr>
+<td class="org-left">ptype</td>
+<td class="org-left">describe type, struct, union, or enum</td>
+</tr>
+</tbody>
+</table>
+
+<p>
+<a href="https://github.com/schspa/gdb-script/blob/master/load-linux-init.py">GDB Script</a><br>
+</p>
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #5B6268;">#</span><span style="color: #5B6268;">!/usr/bin/env python</span>
+<span style="color: #5B6268;"># </span><span style="color: #5B6268;">-*- coding: utf-8 -*-</span>
+<span style="color: #5B6268;">#</span>
+<span style="color: #5B6268;">#   </span><span style="color: #5B6268;">load-linux-init.py --- Load linux kernel init section</span>
+<span style="color: #5B6268;">#</span>
+<span style="color: #5B6268;">#   </span><span style="color: #5B6268;">Copyright (C) 2020, schspa, all rights reserved.</span>
+<span style="color: #5B6268;">#</span>
+<span style="color: #5B6268;">#   </span><span style="color: #5B6268;">This program is free software; you can redistribute it and/or modify</span>
+<span style="color: #5B6268;">#   </span><span style="color: #5B6268;">it under the terms of the GNU General Public License as published by</span>
+<span style="color: #5B6268;">#   </span><span style="color: #5B6268;">the Free Software Foundation; either version 2 of the License, or</span>
+<span style="color: #5B6268;">#   </span><span style="color: #5B6268;">(at your option) any later version.</span>
+<span style="color: #5B6268;">#</span>
+<span style="color: #5B6268;">#   </span><span style="color: #5B6268;">This program is distributed in the hope that it will be useful,</span>
+<span style="color: #5B6268;">#   </span><span style="color: #5B6268;">but WITHOUT ANY WARRANTY; without even the implied warranty of</span>
+<span style="color: #5B6268;">#   </span><span style="color: #5B6268;">MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span>
+<span style="color: #5B6268;">#   </span><span style="color: #5B6268;">GNU General Public License for more details.</span>
+<span style="color: #5B6268;">#</span>
+<span style="color: #5B6268;">#   </span><span style="color: #5B6268;">You should have received a copy of the GNU General Public License</span>
+<span style="color: #5B6268;">#   </span><span style="color: #5B6268;">along with this program.  If not, see <a href="http://www.gnu.org/licenses/&gt;.
+#
+import re
+import gdb
+from subprocess import check_output, CalledProcessError
+
+
+class LoadLinuxKernelInitCommand(gdb.Command):
+    &quot;Load Linux Kernel init text from vmlinux&quot;
+
+    def __init__(self):
+        super(LoadLinuxKernelInitCommand,
+              self).__init__(&quot;load-linux-init&quot;, gdb.COMMAND_SUPPORT,
+                             gdb.COMPLETE_EXPRESSION, True)
+
+    def get_load_address(self, path, section):
+        '''
+        [Nr] Name              Type            Address          Off    Size   ES Flg Lk Inf Al
+        [ 0]                   NULL            0000000000000000 000000 000000 00      0   0  0
+        [ 1] .head.text        PROGBITS        ffffff8008080000 010000 001000 00  AX  0   0 4096
+        [ 2] .text             PROGBITS        ffffff8008081000 011000 5ee1b0 00  AX  0   0 2048
+    '''
+
+        ELF_PATTERN = re.compile(r&quot;^[\s]*\[(?P&lt;NUM&gt;[0-9 ]+)\]&quot; +
+                                 r&quot;[\s]+(?P&lt;NAME&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Type&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Address&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Off&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Size&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;ES&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Flg">&lt;http://www.gnu.org/licenses/&gt;.</a></span><a href="http://www.gnu.org/licenses/&gt;.
+#
+import re
+import gdb
+from subprocess import check_output, CalledProcessError
+
+
+class LoadLinuxKernelInitCommand(gdb.Command):
+    &quot;Load Linux Kernel init text from vmlinux&quot;
+
+    def __init__(self):
+        super(LoadLinuxKernelInitCommand,
+              self).__init__(&quot;load-linux-init&quot;, gdb.COMMAND_SUPPORT,
+                             gdb.COMPLETE_EXPRESSION, True)
+
+    def get_load_address(self, path, section):
+        '''
+        [Nr] Name              Type            Address          Off    Size   ES Flg Lk Inf Al
+        [ 0]                   NULL            0000000000000000 000000 000000 00      0   0  0
+        [ 1] .head.text        PROGBITS        ffffff8008080000 010000 001000 00  AX  0   0 4096
+        [ 2] .text             PROGBITS        ffffff8008081000 011000 5ee1b0 00  AX  0   0 2048
+    '''
+
+        ELF_PATTERN = re.compile(r&quot;^[\s]*\[(?P&lt;NUM&gt;[0-9 ]+)\]&quot; +
+                                 r&quot;[\s]+(?P&lt;NAME&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Type&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Address&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Off&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Size&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;ES&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Flg">
+</a><span style="color: #5B6268;"><a href="http://www.gnu.org/licenses/&gt;.
+#
+import re
+import gdb
+from subprocess import check_output, CalledProcessError
+
+
+class LoadLinuxKernelInitCommand(gdb.Command):
+    &quot;Load Linux Kernel init text from vmlinux&quot;
+
+    def __init__(self):
+        super(LoadLinuxKernelInitCommand,
+              self).__init__(&quot;load-linux-init&quot;, gdb.COMMAND_SUPPORT,
+                             gdb.COMPLETE_EXPRESSION, True)
+
+    def get_load_address(self, path, section):
+        '''
+        [Nr] Name              Type            Address          Off    Size   ES Flg Lk Inf Al
+        [ 0]                   NULL            0000000000000000 000000 000000 00      0   0  0
+        [ 1] .head.text        PROGBITS        ffffff8008080000 010000 001000 00  AX  0   0 4096
+        [ 2] .text             PROGBITS        ffffff8008081000 011000 5ee1b0 00  AX  0   0 2048
+    '''
+
+        ELF_PATTERN = re.compile(r&quot;^[\s]*\[(?P&lt;NUM&gt;[0-9 ]+)\]&quot; +
+                                 r&quot;[\s]+(?P&lt;NAME&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Type&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Address&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Off&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Size&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;ES&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Flg">#</a></span><a href="http://www.gnu.org/licenses/&gt;.
+#
+import re
+import gdb
+from subprocess import check_output, CalledProcessError
+
+
+class LoadLinuxKernelInitCommand(gdb.Command):
+    &quot;Load Linux Kernel init text from vmlinux&quot;
+
+    def __init__(self):
+        super(LoadLinuxKernelInitCommand,
+              self).__init__(&quot;load-linux-init&quot;, gdb.COMMAND_SUPPORT,
+                             gdb.COMPLETE_EXPRESSION, True)
+
+    def get_load_address(self, path, section):
+        '''
+        [Nr] Name              Type            Address          Off    Size   ES Flg Lk Inf Al
+        [ 0]                   NULL            0000000000000000 000000 000000 00      0   0  0
+        [ 1] .head.text        PROGBITS        ffffff8008080000 010000 001000 00  AX  0   0 4096
+        [ 2] .text             PROGBITS        ffffff8008081000 011000 5ee1b0 00  AX  0   0 2048
+    '''
+
+        ELF_PATTERN = re.compile(r&quot;^[\s]*\[(?P&lt;NUM&gt;[0-9 ]+)\]&quot; +
+                                 r&quot;[\s]+(?P&lt;NAME&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Type&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Address&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Off&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Size&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;ES&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Flg">
+</a><span style="color: #51afef;"><a href="http://www.gnu.org/licenses/&gt;.
+#
+import re
+import gdb
+from subprocess import check_output, CalledProcessError
+
+
+class LoadLinuxKernelInitCommand(gdb.Command):
+    &quot;Load Linux Kernel init text from vmlinux&quot;
+
+    def __init__(self):
+        super(LoadLinuxKernelInitCommand,
+              self).__init__(&quot;load-linux-init&quot;, gdb.COMMAND_SUPPORT,
+                             gdb.COMPLETE_EXPRESSION, True)
+
+    def get_load_address(self, path, section):
+        '''
+        [Nr] Name              Type            Address          Off    Size   ES Flg Lk Inf Al
+        [ 0]                   NULL            0000000000000000 000000 000000 00      0   0  0
+        [ 1] .head.text        PROGBITS        ffffff8008080000 010000 001000 00  AX  0   0 4096
+        [ 2] .text             PROGBITS        ffffff8008081000 011000 5ee1b0 00  AX  0   0 2048
+    '''
+
+        ELF_PATTERN = re.compile(r&quot;^[\s]*\[(?P&lt;NUM&gt;[0-9 ]+)\]&quot; +
+                                 r&quot;[\s]+(?P&lt;NAME&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Type&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Address&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Off&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Size&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;ES&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Flg">import</a></span><a href="http://www.gnu.org/licenses/&gt;.
+#
+import re
+import gdb
+from subprocess import check_output, CalledProcessError
+
+
+class LoadLinuxKernelInitCommand(gdb.Command):
+    &quot;Load Linux Kernel init text from vmlinux&quot;
+
+    def __init__(self):
+        super(LoadLinuxKernelInitCommand,
+              self).__init__(&quot;load-linux-init&quot;, gdb.COMMAND_SUPPORT,
+                             gdb.COMPLETE_EXPRESSION, True)
+
+    def get_load_address(self, path, section):
+        '''
+        [Nr] Name              Type            Address          Off    Size   ES Flg Lk Inf Al
+        [ 0]                   NULL            0000000000000000 000000 000000 00      0   0  0
+        [ 1] .head.text        PROGBITS        ffffff8008080000 010000 001000 00  AX  0   0 4096
+        [ 2] .text             PROGBITS        ffffff8008081000 011000 5ee1b0 00  AX  0   0 2048
+    '''
+
+        ELF_PATTERN = re.compile(r&quot;^[\s]*\[(?P&lt;NUM&gt;[0-9 ]+)\]&quot; +
+                                 r&quot;[\s]+(?P&lt;NAME&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Type&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Address&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Off&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Size&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;ES&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Flg"> re
+</a><span style="color: #51afef;"><a href="http://www.gnu.org/licenses/&gt;.
+#
+import re
+import gdb
+from subprocess import check_output, CalledProcessError
+
+
+class LoadLinuxKernelInitCommand(gdb.Command):
+    &quot;Load Linux Kernel init text from vmlinux&quot;
+
+    def __init__(self):
+        super(LoadLinuxKernelInitCommand,
+              self).__init__(&quot;load-linux-init&quot;, gdb.COMMAND_SUPPORT,
+                             gdb.COMPLETE_EXPRESSION, True)
+
+    def get_load_address(self, path, section):
+        '''
+        [Nr] Name              Type            Address          Off    Size   ES Flg Lk Inf Al
+        [ 0]                   NULL            0000000000000000 000000 000000 00      0   0  0
+        [ 1] .head.text        PROGBITS        ffffff8008080000 010000 001000 00  AX  0   0 4096
+        [ 2] .text             PROGBITS        ffffff8008081000 011000 5ee1b0 00  AX  0   0 2048
+    '''
+
+        ELF_PATTERN = re.compile(r&quot;^[\s]*\[(?P&lt;NUM&gt;[0-9 ]+)\]&quot; +
+                                 r&quot;[\s]+(?P&lt;NAME&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Type&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Address&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Off&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Size&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;ES&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Flg">import</a></span><a href="http://www.gnu.org/licenses/&gt;.
+#
+import re
+import gdb
+from subprocess import check_output, CalledProcessError
+
+
+class LoadLinuxKernelInitCommand(gdb.Command):
+    &quot;Load Linux Kernel init text from vmlinux&quot;
+
+    def __init__(self):
+        super(LoadLinuxKernelInitCommand,
+              self).__init__(&quot;load-linux-init&quot;, gdb.COMMAND_SUPPORT,
+                             gdb.COMPLETE_EXPRESSION, True)
+
+    def get_load_address(self, path, section):
+        '''
+        [Nr] Name              Type            Address          Off    Size   ES Flg Lk Inf Al
+        [ 0]                   NULL            0000000000000000 000000 000000 00      0   0  0
+        [ 1] .head.text        PROGBITS        ffffff8008080000 010000 001000 00  AX  0   0 4096
+        [ 2] .text             PROGBITS        ffffff8008081000 011000 5ee1b0 00  AX  0   0 2048
+    '''
+
+        ELF_PATTERN = re.compile(r&quot;^[\s]*\[(?P&lt;NUM&gt;[0-9 ]+)\]&quot; +
+                                 r&quot;[\s]+(?P&lt;NAME&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Type&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Address&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Off&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Size&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;ES&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Flg"> gdb
+</a><span style="color: #51afef;"><a href="http://www.gnu.org/licenses/&gt;.
+#
+import re
+import gdb
+from subprocess import check_output, CalledProcessError
+
+
+class LoadLinuxKernelInitCommand(gdb.Command):
+    &quot;Load Linux Kernel init text from vmlinux&quot;
+
+    def __init__(self):
+        super(LoadLinuxKernelInitCommand,
+              self).__init__(&quot;load-linux-init&quot;, gdb.COMMAND_SUPPORT,
+                             gdb.COMPLETE_EXPRESSION, True)
+
+    def get_load_address(self, path, section):
+        '''
+        [Nr] Name              Type            Address          Off    Size   ES Flg Lk Inf Al
+        [ 0]                   NULL            0000000000000000 000000 000000 00      0   0  0
+        [ 1] .head.text        PROGBITS        ffffff8008080000 010000 001000 00  AX  0   0 4096
+        [ 2] .text             PROGBITS        ffffff8008081000 011000 5ee1b0 00  AX  0   0 2048
+    '''
+
+        ELF_PATTERN = re.compile(r&quot;^[\s]*\[(?P&lt;NUM&gt;[0-9 ]+)\]&quot; +
+                                 r&quot;[\s]+(?P&lt;NAME&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Type&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Address&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Off&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Size&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;ES&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Flg">from</a></span><a href="http://www.gnu.org/licenses/&gt;.
+#
+import re
+import gdb
+from subprocess import check_output, CalledProcessError
+
+
+class LoadLinuxKernelInitCommand(gdb.Command):
+    &quot;Load Linux Kernel init text from vmlinux&quot;
+
+    def __init__(self):
+        super(LoadLinuxKernelInitCommand,
+              self).__init__(&quot;load-linux-init&quot;, gdb.COMMAND_SUPPORT,
+                             gdb.COMPLETE_EXPRESSION, True)
+
+    def get_load_address(self, path, section):
+        '''
+        [Nr] Name              Type            Address          Off    Size   ES Flg Lk Inf Al
+        [ 0]                   NULL            0000000000000000 000000 000000 00      0   0  0
+        [ 1] .head.text        PROGBITS        ffffff8008080000 010000 001000 00  AX  0   0 4096
+        [ 2] .text             PROGBITS        ffffff8008081000 011000 5ee1b0 00  AX  0   0 2048
+    '''
+
+        ELF_PATTERN = re.compile(r&quot;^[\s]*\[(?P&lt;NUM&gt;[0-9 ]+)\]&quot; +
+                                 r&quot;[\s]+(?P&lt;NAME&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Type&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Address&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Off&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Size&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;ES&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Flg"> subprocess </a><span style="color: #51afef;"><a href="http://www.gnu.org/licenses/&gt;.
+#
+import re
+import gdb
+from subprocess import check_output, CalledProcessError
+
+
+class LoadLinuxKernelInitCommand(gdb.Command):
+    &quot;Load Linux Kernel init text from vmlinux&quot;
+
+    def __init__(self):
+        super(LoadLinuxKernelInitCommand,
+              self).__init__(&quot;load-linux-init&quot;, gdb.COMMAND_SUPPORT,
+                             gdb.COMPLETE_EXPRESSION, True)
+
+    def get_load_address(self, path, section):
+        '''
+        [Nr] Name              Type            Address          Off    Size   ES Flg Lk Inf Al
+        [ 0]                   NULL            0000000000000000 000000 000000 00      0   0  0
+        [ 1] .head.text        PROGBITS        ffffff8008080000 010000 001000 00  AX  0   0 4096
+        [ 2] .text             PROGBITS        ffffff8008081000 011000 5ee1b0 00  AX  0   0 2048
+    '''
+
+        ELF_PATTERN = re.compile(r&quot;^[\s]*\[(?P&lt;NUM&gt;[0-9 ]+)\]&quot; +
+                                 r&quot;[\s]+(?P&lt;NAME&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Type&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Address&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Off&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Size&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;ES&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Flg">import</a></span><a href="http://www.gnu.org/licenses/&gt;.
+#
+import re
+import gdb
+from subprocess import check_output, CalledProcessError
+
+
+class LoadLinuxKernelInitCommand(gdb.Command):
+    &quot;Load Linux Kernel init text from vmlinux&quot;
+
+    def __init__(self):
+        super(LoadLinuxKernelInitCommand,
+              self).__init__(&quot;load-linux-init&quot;, gdb.COMMAND_SUPPORT,
+                             gdb.COMPLETE_EXPRESSION, True)
+
+    def get_load_address(self, path, section):
+        '''
+        [Nr] Name              Type            Address          Off    Size   ES Flg Lk Inf Al
+        [ 0]                   NULL            0000000000000000 000000 000000 00      0   0  0
+        [ 1] .head.text        PROGBITS        ffffff8008080000 010000 001000 00  AX  0   0 4096
+        [ 2] .text             PROGBITS        ffffff8008081000 011000 5ee1b0 00  AX  0   0 2048
+    '''
+
+        ELF_PATTERN = re.compile(r&quot;^[\s]*\[(?P&lt;NUM&gt;[0-9 ]+)\]&quot; +
+                                 r&quot;[\s]+(?P&lt;NAME&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Type&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Address&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Off&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Size&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;ES&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Flg"> check_output, CalledProcessError
+
+
+</a><span style="color: #51afef;"><a href="http://www.gnu.org/licenses/&gt;.
+#
+import re
+import gdb
+from subprocess import check_output, CalledProcessError
+
+
+class LoadLinuxKernelInitCommand(gdb.Command):
+    &quot;Load Linux Kernel init text from vmlinux&quot;
+
+    def __init__(self):
+        super(LoadLinuxKernelInitCommand,
+              self).__init__(&quot;load-linux-init&quot;, gdb.COMMAND_SUPPORT,
+                             gdb.COMPLETE_EXPRESSION, True)
+
+    def get_load_address(self, path, section):
+        '''
+        [Nr] Name              Type            Address          Off    Size   ES Flg Lk Inf Al
+        [ 0]                   NULL            0000000000000000 000000 000000 00      0   0  0
+        [ 1] .head.text        PROGBITS        ffffff8008080000 010000 001000 00  AX  0   0 4096
+        [ 2] .text             PROGBITS        ffffff8008081000 011000 5ee1b0 00  AX  0   0 2048
+    '''
+
+        ELF_PATTERN = re.compile(r&quot;^[\s]*\[(?P&lt;NUM&gt;[0-9 ]+)\]&quot; +
+                                 r&quot;[\s]+(?P&lt;NAME&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Type&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Address&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Off&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Size&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;ES&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Flg">class</a></span><a href="http://www.gnu.org/licenses/&gt;.
+#
+import re
+import gdb
+from subprocess import check_output, CalledProcessError
+
+
+class LoadLinuxKernelInitCommand(gdb.Command):
+    &quot;Load Linux Kernel init text from vmlinux&quot;
+
+    def __init__(self):
+        super(LoadLinuxKernelInitCommand,
+              self).__init__(&quot;load-linux-init&quot;, gdb.COMMAND_SUPPORT,
+                             gdb.COMPLETE_EXPRESSION, True)
+
+    def get_load_address(self, path, section):
+        '''
+        [Nr] Name              Type            Address          Off    Size   ES Flg Lk Inf Al
+        [ 0]                   NULL            0000000000000000 000000 000000 00      0   0  0
+        [ 1] .head.text        PROGBITS        ffffff8008080000 010000 001000 00  AX  0   0 4096
+        [ 2] .text             PROGBITS        ffffff8008081000 011000 5ee1b0 00  AX  0   0 2048
+    '''
+
+        ELF_PATTERN = re.compile(r&quot;^[\s]*\[(?P&lt;NUM&gt;[0-9 ]+)\]&quot; +
+                                 r&quot;[\s]+(?P&lt;NAME&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Type&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Address&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Off&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Size&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;ES&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Flg"> </a><span style="color: #ECBE7B;"><a href="http://www.gnu.org/licenses/&gt;.
+#
+import re
+import gdb
+from subprocess import check_output, CalledProcessError
+
+
+class LoadLinuxKernelInitCommand(gdb.Command):
+    &quot;Load Linux Kernel init text from vmlinux&quot;
+
+    def __init__(self):
+        super(LoadLinuxKernelInitCommand,
+              self).__init__(&quot;load-linux-init&quot;, gdb.COMMAND_SUPPORT,
+                             gdb.COMPLETE_EXPRESSION, True)
+
+    def get_load_address(self, path, section):
+        '''
+        [Nr] Name              Type            Address          Off    Size   ES Flg Lk Inf Al
+        [ 0]                   NULL            0000000000000000 000000 000000 00      0   0  0
+        [ 1] .head.text        PROGBITS        ffffff8008080000 010000 001000 00  AX  0   0 4096
+        [ 2] .text             PROGBITS        ffffff8008081000 011000 5ee1b0 00  AX  0   0 2048
+    '''
+
+        ELF_PATTERN = re.compile(r&quot;^[\s]*\[(?P&lt;NUM&gt;[0-9 ]+)\]&quot; +
+                                 r&quot;[\s]+(?P&lt;NAME&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Type&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Address&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Off&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Size&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;ES&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Flg">LoadLinuxKernelInitCommand</a></span><a href="http://www.gnu.org/licenses/&gt;.
+#
+import re
+import gdb
+from subprocess import check_output, CalledProcessError
+
+
+class LoadLinuxKernelInitCommand(gdb.Command):
+    &quot;Load Linux Kernel init text from vmlinux&quot;
+
+    def __init__(self):
+        super(LoadLinuxKernelInitCommand,
+              self).__init__(&quot;load-linux-init&quot;, gdb.COMMAND_SUPPORT,
+                             gdb.COMPLETE_EXPRESSION, True)
+
+    def get_load_address(self, path, section):
+        '''
+        [Nr] Name              Type            Address          Off    Size   ES Flg Lk Inf Al
+        [ 0]                   NULL            0000000000000000 000000 000000 00      0   0  0
+        [ 1] .head.text        PROGBITS        ffffff8008080000 010000 001000 00  AX  0   0 4096
+        [ 2] .text             PROGBITS        ffffff8008081000 011000 5ee1b0 00  AX  0   0 2048
+    '''
+
+        ELF_PATTERN = re.compile(r&quot;^[\s]*\[(?P&lt;NUM&gt;[0-9 ]+)\]&quot; +
+                                 r&quot;[\s]+(?P&lt;NAME&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Type&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Address&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Off&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Size&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;ES&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Flg">(gdb.Command):
+    </a><span style="color: #83898d;"><a href="http://www.gnu.org/licenses/&gt;.
+#
+import re
+import gdb
+from subprocess import check_output, CalledProcessError
+
+
+class LoadLinuxKernelInitCommand(gdb.Command):
+    &quot;Load Linux Kernel init text from vmlinux&quot;
+
+    def __init__(self):
+        super(LoadLinuxKernelInitCommand,
+              self).__init__(&quot;load-linux-init&quot;, gdb.COMMAND_SUPPORT,
+                             gdb.COMPLETE_EXPRESSION, True)
+
+    def get_load_address(self, path, section):
+        '''
+        [Nr] Name              Type            Address          Off    Size   ES Flg Lk Inf Al
+        [ 0]                   NULL            0000000000000000 000000 000000 00      0   0  0
+        [ 1] .head.text        PROGBITS        ffffff8008080000 010000 001000 00  AX  0   0 4096
+        [ 2] .text             PROGBITS        ffffff8008081000 011000 5ee1b0 00  AX  0   0 2048
+    '''
+
+        ELF_PATTERN = re.compile(r&quot;^[\s]*\[(?P&lt;NUM&gt;[0-9 ]+)\]&quot; +
+                                 r&quot;[\s]+(?P&lt;NAME&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Type&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Address&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Off&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Size&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;ES&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Flg">"Load Linux Kernel init text from vmlinux"</a></span><a href="http://www.gnu.org/licenses/&gt;.
+#
+import re
+import gdb
+from subprocess import check_output, CalledProcessError
+
+
+class LoadLinuxKernelInitCommand(gdb.Command):
+    &quot;Load Linux Kernel init text from vmlinux&quot;
+
+    def __init__(self):
+        super(LoadLinuxKernelInitCommand,
+              self).__init__(&quot;load-linux-init&quot;, gdb.COMMAND_SUPPORT,
+                             gdb.COMPLETE_EXPRESSION, True)
+
+    def get_load_address(self, path, section):
+        '''
+        [Nr] Name              Type            Address          Off    Size   ES Flg Lk Inf Al
+        [ 0]                   NULL            0000000000000000 000000 000000 00      0   0  0
+        [ 1] .head.text        PROGBITS        ffffff8008080000 010000 001000 00  AX  0   0 4096
+        [ 2] .text             PROGBITS        ffffff8008081000 011000 5ee1b0 00  AX  0   0 2048
+    '''
+
+        ELF_PATTERN = re.compile(r&quot;^[\s]*\[(?P&lt;NUM&gt;[0-9 ]+)\]&quot; +
+                                 r&quot;[\s]+(?P&lt;NAME&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Type&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Address&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Off&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Size&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;ES&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Flg">
+
+    </a><span style="color: #51afef;"><a href="http://www.gnu.org/licenses/&gt;.
+#
+import re
+import gdb
+from subprocess import check_output, CalledProcessError
+
+
+class LoadLinuxKernelInitCommand(gdb.Command):
+    &quot;Load Linux Kernel init text from vmlinux&quot;
+
+    def __init__(self):
+        super(LoadLinuxKernelInitCommand,
+              self).__init__(&quot;load-linux-init&quot;, gdb.COMMAND_SUPPORT,
+                             gdb.COMPLETE_EXPRESSION, True)
+
+    def get_load_address(self, path, section):
+        '''
+        [Nr] Name              Type            Address          Off    Size   ES Flg Lk Inf Al
+        [ 0]                   NULL            0000000000000000 000000 000000 00      0   0  0
+        [ 1] .head.text        PROGBITS        ffffff8008080000 010000 001000 00  AX  0   0 4096
+        [ 2] .text             PROGBITS        ffffff8008081000 011000 5ee1b0 00  AX  0   0 2048
+    '''
+
+        ELF_PATTERN = re.compile(r&quot;^[\s]*\[(?P&lt;NUM&gt;[0-9 ]+)\]&quot; +
+                                 r&quot;[\s]+(?P&lt;NAME&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Type&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Address&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Off&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Size&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;ES&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Flg">def</a></span><a href="http://www.gnu.org/licenses/&gt;.
+#
+import re
+import gdb
+from subprocess import check_output, CalledProcessError
+
+
+class LoadLinuxKernelInitCommand(gdb.Command):
+    &quot;Load Linux Kernel init text from vmlinux&quot;
+
+    def __init__(self):
+        super(LoadLinuxKernelInitCommand,
+              self).__init__(&quot;load-linux-init&quot;, gdb.COMMAND_SUPPORT,
+                             gdb.COMPLETE_EXPRESSION, True)
+
+    def get_load_address(self, path, section):
+        '''
+        [Nr] Name              Type            Address          Off    Size   ES Flg Lk Inf Al
+        [ 0]                   NULL            0000000000000000 000000 000000 00      0   0  0
+        [ 1] .head.text        PROGBITS        ffffff8008080000 010000 001000 00  AX  0   0 4096
+        [ 2] .text             PROGBITS        ffffff8008081000 011000 5ee1b0 00  AX  0   0 2048
+    '''
+
+        ELF_PATTERN = re.compile(r&quot;^[\s]*\[(?P&lt;NUM&gt;[0-9 ]+)\]&quot; +
+                                 r&quot;[\s]+(?P&lt;NAME&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Type&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Address&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Off&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Size&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;ES&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Flg"> </a><span style="color: #c678dd;"><a href="http://www.gnu.org/licenses/&gt;.
+#
+import re
+import gdb
+from subprocess import check_output, CalledProcessError
+
+
+class LoadLinuxKernelInitCommand(gdb.Command):
+    &quot;Load Linux Kernel init text from vmlinux&quot;
+
+    def __init__(self):
+        super(LoadLinuxKernelInitCommand,
+              self).__init__(&quot;load-linux-init&quot;, gdb.COMMAND_SUPPORT,
+                             gdb.COMPLETE_EXPRESSION, True)
+
+    def get_load_address(self, path, section):
+        '''
+        [Nr] Name              Type            Address          Off    Size   ES Flg Lk Inf Al
+        [ 0]                   NULL            0000000000000000 000000 000000 00      0   0  0
+        [ 1] .head.text        PROGBITS        ffffff8008080000 010000 001000 00  AX  0   0 4096
+        [ 2] .text             PROGBITS        ffffff8008081000 011000 5ee1b0 00  AX  0   0 2048
+    '''
+
+        ELF_PATTERN = re.compile(r&quot;^[\s]*\[(?P&lt;NUM&gt;[0-9 ]+)\]&quot; +
+                                 r&quot;[\s]+(?P&lt;NAME&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Type&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Address&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Off&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Size&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;ES&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Flg">__init__</a></span><a href="http://www.gnu.org/licenses/&gt;.
+#
+import re
+import gdb
+from subprocess import check_output, CalledProcessError
+
+
+class LoadLinuxKernelInitCommand(gdb.Command):
+    &quot;Load Linux Kernel init text from vmlinux&quot;
+
+    def __init__(self):
+        super(LoadLinuxKernelInitCommand,
+              self).__init__(&quot;load-linux-init&quot;, gdb.COMMAND_SUPPORT,
+                             gdb.COMPLETE_EXPRESSION, True)
+
+    def get_load_address(self, path, section):
+        '''
+        [Nr] Name              Type            Address          Off    Size   ES Flg Lk Inf Al
+        [ 0]                   NULL            0000000000000000 000000 000000 00      0   0  0
+        [ 1] .head.text        PROGBITS        ffffff8008080000 010000 001000 00  AX  0   0 4096
+        [ 2] .text             PROGBITS        ffffff8008081000 011000 5ee1b0 00  AX  0   0 2048
+    '''
+
+        ELF_PATTERN = re.compile(r&quot;^[\s]*\[(?P&lt;NUM&gt;[0-9 ]+)\]&quot; +
+                                 r&quot;[\s]+(?P&lt;NAME&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Type&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Address&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Off&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Size&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;ES&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Flg">(</a><span style="color: #51afef;"><a href="http://www.gnu.org/licenses/&gt;.
+#
+import re
+import gdb
+from subprocess import check_output, CalledProcessError
+
+
+class LoadLinuxKernelInitCommand(gdb.Command):
+    &quot;Load Linux Kernel init text from vmlinux&quot;
+
+    def __init__(self):
+        super(LoadLinuxKernelInitCommand,
+              self).__init__(&quot;load-linux-init&quot;, gdb.COMMAND_SUPPORT,
+                             gdb.COMPLETE_EXPRESSION, True)
+
+    def get_load_address(self, path, section):
+        '''
+        [Nr] Name              Type            Address          Off    Size   ES Flg Lk Inf Al
+        [ 0]                   NULL            0000000000000000 000000 000000 00      0   0  0
+        [ 1] .head.text        PROGBITS        ffffff8008080000 010000 001000 00  AX  0   0 4096
+        [ 2] .text             PROGBITS        ffffff8008081000 011000 5ee1b0 00  AX  0   0 2048
+    '''
+
+        ELF_PATTERN = re.compile(r&quot;^[\s]*\[(?P&lt;NUM&gt;[0-9 ]+)\]&quot; +
+                                 r&quot;[\s]+(?P&lt;NAME&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Type&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Address&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Off&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Size&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;ES&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Flg">self</a></span><a href="http://www.gnu.org/licenses/&gt;.
+#
+import re
+import gdb
+from subprocess import check_output, CalledProcessError
+
+
+class LoadLinuxKernelInitCommand(gdb.Command):
+    &quot;Load Linux Kernel init text from vmlinux&quot;
+
+    def __init__(self):
+        super(LoadLinuxKernelInitCommand,
+              self).__init__(&quot;load-linux-init&quot;, gdb.COMMAND_SUPPORT,
+                             gdb.COMPLETE_EXPRESSION, True)
+
+    def get_load_address(self, path, section):
+        '''
+        [Nr] Name              Type            Address          Off    Size   ES Flg Lk Inf Al
+        [ 0]                   NULL            0000000000000000 000000 000000 00      0   0  0
+        [ 1] .head.text        PROGBITS        ffffff8008080000 010000 001000 00  AX  0   0 4096
+        [ 2] .text             PROGBITS        ffffff8008081000 011000 5ee1b0 00  AX  0   0 2048
+    '''
+
+        ELF_PATTERN = re.compile(r&quot;^[\s]*\[(?P&lt;NUM&gt;[0-9 ]+)\]&quot; +
+                                 r&quot;[\s]+(?P&lt;NAME&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Type&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Address&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Off&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Size&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;ES&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Flg">):
+        </a><span style="color: #c678dd;"><a href="http://www.gnu.org/licenses/&gt;.
+#
+import re
+import gdb
+from subprocess import check_output, CalledProcessError
+
+
+class LoadLinuxKernelInitCommand(gdb.Command):
+    &quot;Load Linux Kernel init text from vmlinux&quot;
+
+    def __init__(self):
+        super(LoadLinuxKernelInitCommand,
+              self).__init__(&quot;load-linux-init&quot;, gdb.COMMAND_SUPPORT,
+                             gdb.COMPLETE_EXPRESSION, True)
+
+    def get_load_address(self, path, section):
+        '''
+        [Nr] Name              Type            Address          Off    Size   ES Flg Lk Inf Al
+        [ 0]                   NULL            0000000000000000 000000 000000 00      0   0  0
+        [ 1] .head.text        PROGBITS        ffffff8008080000 010000 001000 00  AX  0   0 4096
+        [ 2] .text             PROGBITS        ffffff8008081000 011000 5ee1b0 00  AX  0   0 2048
+    '''
+
+        ELF_PATTERN = re.compile(r&quot;^[\s]*\[(?P&lt;NUM&gt;[0-9 ]+)\]&quot; +
+                                 r&quot;[\s]+(?P&lt;NAME&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Type&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Address&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Off&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Size&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;ES&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Flg">super</a></span><a href="http://www.gnu.org/licenses/&gt;.
+#
+import re
+import gdb
+from subprocess import check_output, CalledProcessError
+
+
+class LoadLinuxKernelInitCommand(gdb.Command):
+    &quot;Load Linux Kernel init text from vmlinux&quot;
+
+    def __init__(self):
+        super(LoadLinuxKernelInitCommand,
+              self).__init__(&quot;load-linux-init&quot;, gdb.COMMAND_SUPPORT,
+                             gdb.COMPLETE_EXPRESSION, True)
+
+    def get_load_address(self, path, section):
+        '''
+        [Nr] Name              Type            Address          Off    Size   ES Flg Lk Inf Al
+        [ 0]                   NULL            0000000000000000 000000 000000 00      0   0  0
+        [ 1] .head.text        PROGBITS        ffffff8008080000 010000 001000 00  AX  0   0 4096
+        [ 2] .text             PROGBITS        ffffff8008081000 011000 5ee1b0 00  AX  0   0 2048
+    '''
+
+        ELF_PATTERN = re.compile(r&quot;^[\s]*\[(?P&lt;NUM&gt;[0-9 ]+)\]&quot; +
+                                 r&quot;[\s]+(?P&lt;NAME&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Type&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Address&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Off&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Size&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;ES&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Flg">(LoadLinuxKernelInitCommand,
+              </a><span style="color: #51afef;"><a href="http://www.gnu.org/licenses/&gt;.
+#
+import re
+import gdb
+from subprocess import check_output, CalledProcessError
+
+
+class LoadLinuxKernelInitCommand(gdb.Command):
+    &quot;Load Linux Kernel init text from vmlinux&quot;
+
+    def __init__(self):
+        super(LoadLinuxKernelInitCommand,
+              self).__init__(&quot;load-linux-init&quot;, gdb.COMMAND_SUPPORT,
+                             gdb.COMPLETE_EXPRESSION, True)
+
+    def get_load_address(self, path, section):
+        '''
+        [Nr] Name              Type            Address          Off    Size   ES Flg Lk Inf Al
+        [ 0]                   NULL            0000000000000000 000000 000000 00      0   0  0
+        [ 1] .head.text        PROGBITS        ffffff8008080000 010000 001000 00  AX  0   0 4096
+        [ 2] .text             PROGBITS        ffffff8008081000 011000 5ee1b0 00  AX  0   0 2048
+    '''
+
+        ELF_PATTERN = re.compile(r&quot;^[\s]*\[(?P&lt;NUM&gt;[0-9 ]+)\]&quot; +
+                                 r&quot;[\s]+(?P&lt;NAME&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Type&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Address&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Off&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Size&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;ES&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Flg">self</a></span><a href="http://www.gnu.org/licenses/&gt;.
+#
+import re
+import gdb
+from subprocess import check_output, CalledProcessError
+
+
+class LoadLinuxKernelInitCommand(gdb.Command):
+    &quot;Load Linux Kernel init text from vmlinux&quot;
+
+    def __init__(self):
+        super(LoadLinuxKernelInitCommand,
+              self).__init__(&quot;load-linux-init&quot;, gdb.COMMAND_SUPPORT,
+                             gdb.COMPLETE_EXPRESSION, True)
+
+    def get_load_address(self, path, section):
+        '''
+        [Nr] Name              Type            Address          Off    Size   ES Flg Lk Inf Al
+        [ 0]                   NULL            0000000000000000 000000 000000 00      0   0  0
+        [ 1] .head.text        PROGBITS        ffffff8008080000 010000 001000 00  AX  0   0 4096
+        [ 2] .text             PROGBITS        ffffff8008081000 011000 5ee1b0 00  AX  0   0 2048
+    '''
+
+        ELF_PATTERN = re.compile(r&quot;^[\s]*\[(?P&lt;NUM&gt;[0-9 ]+)\]&quot; +
+                                 r&quot;[\s]+(?P&lt;NAME&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Type&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Address&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Off&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Size&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;ES&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Flg">).__init__(</a><span style="color: #98be65;"><a href="http://www.gnu.org/licenses/&gt;.
+#
+import re
+import gdb
+from subprocess import check_output, CalledProcessError
+
+
+class LoadLinuxKernelInitCommand(gdb.Command):
+    &quot;Load Linux Kernel init text from vmlinux&quot;
+
+    def __init__(self):
+        super(LoadLinuxKernelInitCommand,
+              self).__init__(&quot;load-linux-init&quot;, gdb.COMMAND_SUPPORT,
+                             gdb.COMPLETE_EXPRESSION, True)
+
+    def get_load_address(self, path, section):
+        '''
+        [Nr] Name              Type            Address          Off    Size   ES Flg Lk Inf Al
+        [ 0]                   NULL            0000000000000000 000000 000000 00      0   0  0
+        [ 1] .head.text        PROGBITS        ffffff8008080000 010000 001000 00  AX  0   0 4096
+        [ 2] .text             PROGBITS        ffffff8008081000 011000 5ee1b0 00  AX  0   0 2048
+    '''
+
+        ELF_PATTERN = re.compile(r&quot;^[\s]*\[(?P&lt;NUM&gt;[0-9 ]+)\]&quot; +
+                                 r&quot;[\s]+(?P&lt;NAME&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Type&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Address&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Off&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Size&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;ES&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Flg">"load-linux-init"</a></span><a href="http://www.gnu.org/licenses/&gt;.
+#
+import re
+import gdb
+from subprocess import check_output, CalledProcessError
+
+
+class LoadLinuxKernelInitCommand(gdb.Command):
+    &quot;Load Linux Kernel init text from vmlinux&quot;
+
+    def __init__(self):
+        super(LoadLinuxKernelInitCommand,
+              self).__init__(&quot;load-linux-init&quot;, gdb.COMMAND_SUPPORT,
+                             gdb.COMPLETE_EXPRESSION, True)
+
+    def get_load_address(self, path, section):
+        '''
+        [Nr] Name              Type            Address          Off    Size   ES Flg Lk Inf Al
+        [ 0]                   NULL            0000000000000000 000000 000000 00      0   0  0
+        [ 1] .head.text        PROGBITS        ffffff8008080000 010000 001000 00  AX  0   0 4096
+        [ 2] .text             PROGBITS        ffffff8008081000 011000 5ee1b0 00  AX  0   0 2048
+    '''
+
+        ELF_PATTERN = re.compile(r&quot;^[\s]*\[(?P&lt;NUM&gt;[0-9 ]+)\]&quot; +
+                                 r&quot;[\s]+(?P&lt;NAME&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Type&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Address&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Off&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Size&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;ES&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Flg">, gdb.COMMAND_SUPPORT,
+                             gdb.COMPLETE_EXPRESSION, </a><span style="color: #a9a1e1;"><a href="http://www.gnu.org/licenses/&gt;.
+#
+import re
+import gdb
+from subprocess import check_output, CalledProcessError
+
+
+class LoadLinuxKernelInitCommand(gdb.Command):
+    &quot;Load Linux Kernel init text from vmlinux&quot;
+
+    def __init__(self):
+        super(LoadLinuxKernelInitCommand,
+              self).__init__(&quot;load-linux-init&quot;, gdb.COMMAND_SUPPORT,
+                             gdb.COMPLETE_EXPRESSION, True)
+
+    def get_load_address(self, path, section):
+        '''
+        [Nr] Name              Type            Address          Off    Size   ES Flg Lk Inf Al
+        [ 0]                   NULL            0000000000000000 000000 000000 00      0   0  0
+        [ 1] .head.text        PROGBITS        ffffff8008080000 010000 001000 00  AX  0   0 4096
+        [ 2] .text             PROGBITS        ffffff8008081000 011000 5ee1b0 00  AX  0   0 2048
+    '''
+
+        ELF_PATTERN = re.compile(r&quot;^[\s]*\[(?P&lt;NUM&gt;[0-9 ]+)\]&quot; +
+                                 r&quot;[\s]+(?P&lt;NAME&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Type&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Address&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Off&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Size&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;ES&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Flg">True</a></span><a href="http://www.gnu.org/licenses/&gt;.
+#
+import re
+import gdb
+from subprocess import check_output, CalledProcessError
+
+
+class LoadLinuxKernelInitCommand(gdb.Command):
+    &quot;Load Linux Kernel init text from vmlinux&quot;
+
+    def __init__(self):
+        super(LoadLinuxKernelInitCommand,
+              self).__init__(&quot;load-linux-init&quot;, gdb.COMMAND_SUPPORT,
+                             gdb.COMPLETE_EXPRESSION, True)
+
+    def get_load_address(self, path, section):
+        '''
+        [Nr] Name              Type            Address          Off    Size   ES Flg Lk Inf Al
+        [ 0]                   NULL            0000000000000000 000000 000000 00      0   0  0
+        [ 1] .head.text        PROGBITS        ffffff8008080000 010000 001000 00  AX  0   0 4096
+        [ 2] .text             PROGBITS        ffffff8008081000 011000 5ee1b0 00  AX  0   0 2048
+    '''
+
+        ELF_PATTERN = re.compile(r&quot;^[\s]*\[(?P&lt;NUM&gt;[0-9 ]+)\]&quot; +
+                                 r&quot;[\s]+(?P&lt;NAME&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Type&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Address&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Off&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Size&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;ES&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Flg">)
+
+    </a><span style="color: #51afef;"><a href="http://www.gnu.org/licenses/&gt;.
+#
+import re
+import gdb
+from subprocess import check_output, CalledProcessError
+
+
+class LoadLinuxKernelInitCommand(gdb.Command):
+    &quot;Load Linux Kernel init text from vmlinux&quot;
+
+    def __init__(self):
+        super(LoadLinuxKernelInitCommand,
+              self).__init__(&quot;load-linux-init&quot;, gdb.COMMAND_SUPPORT,
+                             gdb.COMPLETE_EXPRESSION, True)
+
+    def get_load_address(self, path, section):
+        '''
+        [Nr] Name              Type            Address          Off    Size   ES Flg Lk Inf Al
+        [ 0]                   NULL            0000000000000000 000000 000000 00      0   0  0
+        [ 1] .head.text        PROGBITS        ffffff8008080000 010000 001000 00  AX  0   0 4096
+        [ 2] .text             PROGBITS        ffffff8008081000 011000 5ee1b0 00  AX  0   0 2048
+    '''
+
+        ELF_PATTERN = re.compile(r&quot;^[\s]*\[(?P&lt;NUM&gt;[0-9 ]+)\]&quot; +
+                                 r&quot;[\s]+(?P&lt;NAME&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Type&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Address&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Off&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Size&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;ES&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Flg">def</a></span><a href="http://www.gnu.org/licenses/&gt;.
+#
+import re
+import gdb
+from subprocess import check_output, CalledProcessError
+
+
+class LoadLinuxKernelInitCommand(gdb.Command):
+    &quot;Load Linux Kernel init text from vmlinux&quot;
+
+    def __init__(self):
+        super(LoadLinuxKernelInitCommand,
+              self).__init__(&quot;load-linux-init&quot;, gdb.COMMAND_SUPPORT,
+                             gdb.COMPLETE_EXPRESSION, True)
+
+    def get_load_address(self, path, section):
+        '''
+        [Nr] Name              Type            Address          Off    Size   ES Flg Lk Inf Al
+        [ 0]                   NULL            0000000000000000 000000 000000 00      0   0  0
+        [ 1] .head.text        PROGBITS        ffffff8008080000 010000 001000 00  AX  0   0 4096
+        [ 2] .text             PROGBITS        ffffff8008081000 011000 5ee1b0 00  AX  0   0 2048
+    '''
+
+        ELF_PATTERN = re.compile(r&quot;^[\s]*\[(?P&lt;NUM&gt;[0-9 ]+)\]&quot; +
+                                 r&quot;[\s]+(?P&lt;NAME&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Type&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Address&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Off&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Size&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;ES&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Flg"> </a><span style="color: #c678dd;"><a href="http://www.gnu.org/licenses/&gt;.
+#
+import re
+import gdb
+from subprocess import check_output, CalledProcessError
+
+
+class LoadLinuxKernelInitCommand(gdb.Command):
+    &quot;Load Linux Kernel init text from vmlinux&quot;
+
+    def __init__(self):
+        super(LoadLinuxKernelInitCommand,
+              self).__init__(&quot;load-linux-init&quot;, gdb.COMMAND_SUPPORT,
+                             gdb.COMPLETE_EXPRESSION, True)
+
+    def get_load_address(self, path, section):
+        '''
+        [Nr] Name              Type            Address          Off    Size   ES Flg Lk Inf Al
+        [ 0]                   NULL            0000000000000000 000000 000000 00      0   0  0
+        [ 1] .head.text        PROGBITS        ffffff8008080000 010000 001000 00  AX  0   0 4096
+        [ 2] .text             PROGBITS        ffffff8008081000 011000 5ee1b0 00  AX  0   0 2048
+    '''
+
+        ELF_PATTERN = re.compile(r&quot;^[\s]*\[(?P&lt;NUM&gt;[0-9 ]+)\]&quot; +
+                                 r&quot;[\s]+(?P&lt;NAME&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Type&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Address&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Off&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Size&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;ES&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Flg">get_load_address</a></span><a href="http://www.gnu.org/licenses/&gt;.
+#
+import re
+import gdb
+from subprocess import check_output, CalledProcessError
+
+
+class LoadLinuxKernelInitCommand(gdb.Command):
+    &quot;Load Linux Kernel init text from vmlinux&quot;
+
+    def __init__(self):
+        super(LoadLinuxKernelInitCommand,
+              self).__init__(&quot;load-linux-init&quot;, gdb.COMMAND_SUPPORT,
+                             gdb.COMPLETE_EXPRESSION, True)
+
+    def get_load_address(self, path, section):
+        '''
+        [Nr] Name              Type            Address          Off    Size   ES Flg Lk Inf Al
+        [ 0]                   NULL            0000000000000000 000000 000000 00      0   0  0
+        [ 1] .head.text        PROGBITS        ffffff8008080000 010000 001000 00  AX  0   0 4096
+        [ 2] .text             PROGBITS        ffffff8008081000 011000 5ee1b0 00  AX  0   0 2048
+    '''
+
+        ELF_PATTERN = re.compile(r&quot;^[\s]*\[(?P&lt;NUM&gt;[0-9 ]+)\]&quot; +
+                                 r&quot;[\s]+(?P&lt;NAME&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Type&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Address&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Off&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Size&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;ES&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Flg">(</a><span style="color: #51afef;"><a href="http://www.gnu.org/licenses/&gt;.
+#
+import re
+import gdb
+from subprocess import check_output, CalledProcessError
+
+
+class LoadLinuxKernelInitCommand(gdb.Command):
+    &quot;Load Linux Kernel init text from vmlinux&quot;
+
+    def __init__(self):
+        super(LoadLinuxKernelInitCommand,
+              self).__init__(&quot;load-linux-init&quot;, gdb.COMMAND_SUPPORT,
+                             gdb.COMPLETE_EXPRESSION, True)
+
+    def get_load_address(self, path, section):
+        '''
+        [Nr] Name              Type            Address          Off    Size   ES Flg Lk Inf Al
+        [ 0]                   NULL            0000000000000000 000000 000000 00      0   0  0
+        [ 1] .head.text        PROGBITS        ffffff8008080000 010000 001000 00  AX  0   0 4096
+        [ 2] .text             PROGBITS        ffffff8008081000 011000 5ee1b0 00  AX  0   0 2048
+    '''
+
+        ELF_PATTERN = re.compile(r&quot;^[\s]*\[(?P&lt;NUM&gt;[0-9 ]+)\]&quot; +
+                                 r&quot;[\s]+(?P&lt;NAME&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Type&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Address&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Off&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Size&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;ES&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Flg">self</a></span><a href="http://www.gnu.org/licenses/&gt;.
+#
+import re
+import gdb
+from subprocess import check_output, CalledProcessError
+
+
+class LoadLinuxKernelInitCommand(gdb.Command):
+    &quot;Load Linux Kernel init text from vmlinux&quot;
+
+    def __init__(self):
+        super(LoadLinuxKernelInitCommand,
+              self).__init__(&quot;load-linux-init&quot;, gdb.COMMAND_SUPPORT,
+                             gdb.COMPLETE_EXPRESSION, True)
+
+    def get_load_address(self, path, section):
+        '''
+        [Nr] Name              Type            Address          Off    Size   ES Flg Lk Inf Al
+        [ 0]                   NULL            0000000000000000 000000 000000 00      0   0  0
+        [ 1] .head.text        PROGBITS        ffffff8008080000 010000 001000 00  AX  0   0 4096
+        [ 2] .text             PROGBITS        ffffff8008081000 011000 5ee1b0 00  AX  0   0 2048
+    '''
+
+        ELF_PATTERN = re.compile(r&quot;^[\s]*\[(?P&lt;NUM&gt;[0-9 ]+)\]&quot; +
+                                 r&quot;[\s]+(?P&lt;NAME&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Type&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Address&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Off&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Size&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;ES&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Flg">, path, section):
+        </a><span style="color: #83898d;"><a href="http://www.gnu.org/licenses/&gt;.
+#
+import re
+import gdb
+from subprocess import check_output, CalledProcessError
+
+
+class LoadLinuxKernelInitCommand(gdb.Command):
+    &quot;Load Linux Kernel init text from vmlinux&quot;
+
+    def __init__(self):
+        super(LoadLinuxKernelInitCommand,
+              self).__init__(&quot;load-linux-init&quot;, gdb.COMMAND_SUPPORT,
+                             gdb.COMPLETE_EXPRESSION, True)
+
+    def get_load_address(self, path, section):
+        '''
+        [Nr] Name              Type            Address          Off    Size   ES Flg Lk Inf Al
+        [ 0]                   NULL            0000000000000000 000000 000000 00      0   0  0
+        [ 1] .head.text        PROGBITS        ffffff8008080000 010000 001000 00  AX  0   0 4096
+        [ 2] .text             PROGBITS        ffffff8008081000 011000 5ee1b0 00  AX  0   0 2048
+    '''
+
+        ELF_PATTERN = re.compile(r&quot;^[\s]*\[(?P&lt;NUM&gt;[0-9 ]+)\]&quot; +
+                                 r&quot;[\s]+(?P&lt;NAME&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Type&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Address&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Off&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Size&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;ES&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Flg">'''</a></span><a href="http://www.gnu.org/licenses/&gt;.
+#
+import re
+import gdb
+from subprocess import check_output, CalledProcessError
+
+
+class LoadLinuxKernelInitCommand(gdb.Command):
+    &quot;Load Linux Kernel init text from vmlinux&quot;
+
+    def __init__(self):
+        super(LoadLinuxKernelInitCommand,
+              self).__init__(&quot;load-linux-init&quot;, gdb.COMMAND_SUPPORT,
+                             gdb.COMPLETE_EXPRESSION, True)
+
+    def get_load_address(self, path, section):
+        '''
+        [Nr] Name              Type            Address          Off    Size   ES Flg Lk Inf Al
+        [ 0]                   NULL            0000000000000000 000000 000000 00      0   0  0
+        [ 1] .head.text        PROGBITS        ffffff8008080000 010000 001000 00  AX  0   0 4096
+        [ 2] .text             PROGBITS        ffffff8008081000 011000 5ee1b0 00  AX  0   0 2048
+    '''
+
+        ELF_PATTERN = re.compile(r&quot;^[\s]*\[(?P&lt;NUM&gt;[0-9 ]+)\]&quot; +
+                                 r&quot;[\s]+(?P&lt;NAME&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Type&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Address&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Off&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Size&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;ES&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Flg">
+</a><span style="color: #83898d;"><a href="http://www.gnu.org/licenses/&gt;.
+#
+import re
+import gdb
+from subprocess import check_output, CalledProcessError
+
+
+class LoadLinuxKernelInitCommand(gdb.Command):
+    &quot;Load Linux Kernel init text from vmlinux&quot;
+
+    def __init__(self):
+        super(LoadLinuxKernelInitCommand,
+              self).__init__(&quot;load-linux-init&quot;, gdb.COMMAND_SUPPORT,
+                             gdb.COMPLETE_EXPRESSION, True)
+
+    def get_load_address(self, path, section):
+        '''
+        [Nr] Name              Type            Address          Off    Size   ES Flg Lk Inf Al
+        [ 0]                   NULL            0000000000000000 000000 000000 00      0   0  0
+        [ 1] .head.text        PROGBITS        ffffff8008080000 010000 001000 00  AX  0   0 4096
+        [ 2] .text             PROGBITS        ffffff8008081000 011000 5ee1b0 00  AX  0   0 2048
+    '''
+
+        ELF_PATTERN = re.compile(r&quot;^[\s]*\[(?P&lt;NUM&gt;[0-9 ]+)\]&quot; +
+                                 r&quot;[\s]+(?P&lt;NAME&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Type&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Address&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Off&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Size&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;ES&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Flg">        [Nr] Name              Type            Address          Off    Size   ES Flg Lk Inf Al</a></span><a href="http://www.gnu.org/licenses/&gt;.
+#
+import re
+import gdb
+from subprocess import check_output, CalledProcessError
+
+
+class LoadLinuxKernelInitCommand(gdb.Command):
+    &quot;Load Linux Kernel init text from vmlinux&quot;
+
+    def __init__(self):
+        super(LoadLinuxKernelInitCommand,
+              self).__init__(&quot;load-linux-init&quot;, gdb.COMMAND_SUPPORT,
+                             gdb.COMPLETE_EXPRESSION, True)
+
+    def get_load_address(self, path, section):
+        '''
+        [Nr] Name              Type            Address          Off    Size   ES Flg Lk Inf Al
+        [ 0]                   NULL            0000000000000000 000000 000000 00      0   0  0
+        [ 1] .head.text        PROGBITS        ffffff8008080000 010000 001000 00  AX  0   0 4096
+        [ 2] .text             PROGBITS        ffffff8008081000 011000 5ee1b0 00  AX  0   0 2048
+    '''
+
+        ELF_PATTERN = re.compile(r&quot;^[\s]*\[(?P&lt;NUM&gt;[0-9 ]+)\]&quot; +
+                                 r&quot;[\s]+(?P&lt;NAME&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Type&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Address&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Off&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Size&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;ES&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Flg">
+</a><span style="color: #83898d;"><a href="http://www.gnu.org/licenses/&gt;.
+#
+import re
+import gdb
+from subprocess import check_output, CalledProcessError
+
+
+class LoadLinuxKernelInitCommand(gdb.Command):
+    &quot;Load Linux Kernel init text from vmlinux&quot;
+
+    def __init__(self):
+        super(LoadLinuxKernelInitCommand,
+              self).__init__(&quot;load-linux-init&quot;, gdb.COMMAND_SUPPORT,
+                             gdb.COMPLETE_EXPRESSION, True)
+
+    def get_load_address(self, path, section):
+        '''
+        [Nr] Name              Type            Address          Off    Size   ES Flg Lk Inf Al
+        [ 0]                   NULL            0000000000000000 000000 000000 00      0   0  0
+        [ 1] .head.text        PROGBITS        ffffff8008080000 010000 001000 00  AX  0   0 4096
+        [ 2] .text             PROGBITS        ffffff8008081000 011000 5ee1b0 00  AX  0   0 2048
+    '''
+
+        ELF_PATTERN = re.compile(r&quot;^[\s]*\[(?P&lt;NUM&gt;[0-9 ]+)\]&quot; +
+                                 r&quot;[\s]+(?P&lt;NAME&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Type&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Address&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Off&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Size&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;ES&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Flg">        [ 0]                   NULL            0000000000000000 000000 000000 00      0   0  0</a></span><a href="http://www.gnu.org/licenses/&gt;.
+#
+import re
+import gdb
+from subprocess import check_output, CalledProcessError
+
+
+class LoadLinuxKernelInitCommand(gdb.Command):
+    &quot;Load Linux Kernel init text from vmlinux&quot;
+
+    def __init__(self):
+        super(LoadLinuxKernelInitCommand,
+              self).__init__(&quot;load-linux-init&quot;, gdb.COMMAND_SUPPORT,
+                             gdb.COMPLETE_EXPRESSION, True)
+
+    def get_load_address(self, path, section):
+        '''
+        [Nr] Name              Type            Address          Off    Size   ES Flg Lk Inf Al
+        [ 0]                   NULL            0000000000000000 000000 000000 00      0   0  0
+        [ 1] .head.text        PROGBITS        ffffff8008080000 010000 001000 00  AX  0   0 4096
+        [ 2] .text             PROGBITS        ffffff8008081000 011000 5ee1b0 00  AX  0   0 2048
+    '''
+
+        ELF_PATTERN = re.compile(r&quot;^[\s]*\[(?P&lt;NUM&gt;[0-9 ]+)\]&quot; +
+                                 r&quot;[\s]+(?P&lt;NAME&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Type&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Address&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Off&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Size&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;ES&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Flg">
+</a><span style="color: #83898d;"><a href="http://www.gnu.org/licenses/&gt;.
+#
+import re
+import gdb
+from subprocess import check_output, CalledProcessError
+
+
+class LoadLinuxKernelInitCommand(gdb.Command):
+    &quot;Load Linux Kernel init text from vmlinux&quot;
+
+    def __init__(self):
+        super(LoadLinuxKernelInitCommand,
+              self).__init__(&quot;load-linux-init&quot;, gdb.COMMAND_SUPPORT,
+                             gdb.COMPLETE_EXPRESSION, True)
+
+    def get_load_address(self, path, section):
+        '''
+        [Nr] Name              Type            Address          Off    Size   ES Flg Lk Inf Al
+        [ 0]                   NULL            0000000000000000 000000 000000 00      0   0  0
+        [ 1] .head.text        PROGBITS        ffffff8008080000 010000 001000 00  AX  0   0 4096
+        [ 2] .text             PROGBITS        ffffff8008081000 011000 5ee1b0 00  AX  0   0 2048
+    '''
+
+        ELF_PATTERN = re.compile(r&quot;^[\s]*\[(?P&lt;NUM&gt;[0-9 ]+)\]&quot; +
+                                 r&quot;[\s]+(?P&lt;NAME&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Type&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Address&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Off&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Size&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;ES&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Flg">        [ 1] .head.text        PROGBITS        ffffff8008080000 010000 001000 00  AX  0   0 4096</a></span><a href="http://www.gnu.org/licenses/&gt;.
+#
+import re
+import gdb
+from subprocess import check_output, CalledProcessError
+
+
+class LoadLinuxKernelInitCommand(gdb.Command):
+    &quot;Load Linux Kernel init text from vmlinux&quot;
+
+    def __init__(self):
+        super(LoadLinuxKernelInitCommand,
+              self).__init__(&quot;load-linux-init&quot;, gdb.COMMAND_SUPPORT,
+                             gdb.COMPLETE_EXPRESSION, True)
+
+    def get_load_address(self, path, section):
+        '''
+        [Nr] Name              Type            Address          Off    Size   ES Flg Lk Inf Al
+        [ 0]                   NULL            0000000000000000 000000 000000 00      0   0  0
+        [ 1] .head.text        PROGBITS        ffffff8008080000 010000 001000 00  AX  0   0 4096
+        [ 2] .text             PROGBITS        ffffff8008081000 011000 5ee1b0 00  AX  0   0 2048
+    '''
+
+        ELF_PATTERN = re.compile(r&quot;^[\s]*\[(?P&lt;NUM&gt;[0-9 ]+)\]&quot; +
+                                 r&quot;[\s]+(?P&lt;NAME&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Type&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Address&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Off&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Size&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;ES&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Flg">
+</a><span style="color: #83898d;"><a href="http://www.gnu.org/licenses/&gt;.
+#
+import re
+import gdb
+from subprocess import check_output, CalledProcessError
+
+
+class LoadLinuxKernelInitCommand(gdb.Command):
+    &quot;Load Linux Kernel init text from vmlinux&quot;
+
+    def __init__(self):
+        super(LoadLinuxKernelInitCommand,
+              self).__init__(&quot;load-linux-init&quot;, gdb.COMMAND_SUPPORT,
+                             gdb.COMPLETE_EXPRESSION, True)
+
+    def get_load_address(self, path, section):
+        '''
+        [Nr] Name              Type            Address          Off    Size   ES Flg Lk Inf Al
+        [ 0]                   NULL            0000000000000000 000000 000000 00      0   0  0
+        [ 1] .head.text        PROGBITS        ffffff8008080000 010000 001000 00  AX  0   0 4096
+        [ 2] .text             PROGBITS        ffffff8008081000 011000 5ee1b0 00  AX  0   0 2048
+    '''
+
+        ELF_PATTERN = re.compile(r&quot;^[\s]*\[(?P&lt;NUM&gt;[0-9 ]+)\]&quot; +
+                                 r&quot;[\s]+(?P&lt;NAME&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Type&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Address&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Off&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Size&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;ES&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Flg">        [ 2] .text             PROGBITS        ffffff8008081000 011000 5ee1b0 00  AX  0   0 2048</a></span><a href="http://www.gnu.org/licenses/&gt;.
+#
+import re
+import gdb
+from subprocess import check_output, CalledProcessError
+
+
+class LoadLinuxKernelInitCommand(gdb.Command):
+    &quot;Load Linux Kernel init text from vmlinux&quot;
+
+    def __init__(self):
+        super(LoadLinuxKernelInitCommand,
+              self).__init__(&quot;load-linux-init&quot;, gdb.COMMAND_SUPPORT,
+                             gdb.COMPLETE_EXPRESSION, True)
+
+    def get_load_address(self, path, section):
+        '''
+        [Nr] Name              Type            Address          Off    Size   ES Flg Lk Inf Al
+        [ 0]                   NULL            0000000000000000 000000 000000 00      0   0  0
+        [ 1] .head.text        PROGBITS        ffffff8008080000 010000 001000 00  AX  0   0 4096
+        [ 2] .text             PROGBITS        ffffff8008081000 011000 5ee1b0 00  AX  0   0 2048
+    '''
+
+        ELF_PATTERN = re.compile(r&quot;^[\s]*\[(?P&lt;NUM&gt;[0-9 ]+)\]&quot; +
+                                 r&quot;[\s]+(?P&lt;NAME&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Type&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Address&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Off&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Size&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;ES&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Flg">
+</a><span style="color: #83898d;"><a href="http://www.gnu.org/licenses/&gt;.
+#
+import re
+import gdb
+from subprocess import check_output, CalledProcessError
+
+
+class LoadLinuxKernelInitCommand(gdb.Command):
+    &quot;Load Linux Kernel init text from vmlinux&quot;
+
+    def __init__(self):
+        super(LoadLinuxKernelInitCommand,
+              self).__init__(&quot;load-linux-init&quot;, gdb.COMMAND_SUPPORT,
+                             gdb.COMPLETE_EXPRESSION, True)
+
+    def get_load_address(self, path, section):
+        '''
+        [Nr] Name              Type            Address          Off    Size   ES Flg Lk Inf Al
+        [ 0]                   NULL            0000000000000000 000000 000000 00      0   0  0
+        [ 1] .head.text        PROGBITS        ffffff8008080000 010000 001000 00  AX  0   0 4096
+        [ 2] .text             PROGBITS        ffffff8008081000 011000 5ee1b0 00  AX  0   0 2048
+    '''
+
+        ELF_PATTERN = re.compile(r&quot;^[\s]*\[(?P&lt;NUM&gt;[0-9 ]+)\]&quot; +
+                                 r&quot;[\s]+(?P&lt;NAME&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Type&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Address&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Off&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Size&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;ES&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Flg">    '''</a></span><a href="http://www.gnu.org/licenses/&gt;.
+#
+import re
+import gdb
+from subprocess import check_output, CalledProcessError
+
+
+class LoadLinuxKernelInitCommand(gdb.Command):
+    &quot;Load Linux Kernel init text from vmlinux&quot;
+
+    def __init__(self):
+        super(LoadLinuxKernelInitCommand,
+              self).__init__(&quot;load-linux-init&quot;, gdb.COMMAND_SUPPORT,
+                             gdb.COMPLETE_EXPRESSION, True)
+
+    def get_load_address(self, path, section):
+        '''
+        [Nr] Name              Type            Address          Off    Size   ES Flg Lk Inf Al
+        [ 0]                   NULL            0000000000000000 000000 000000 00      0   0  0
+        [ 1] .head.text        PROGBITS        ffffff8008080000 010000 001000 00  AX  0   0 4096
+        [ 2] .text             PROGBITS        ffffff8008081000 011000 5ee1b0 00  AX  0   0 2048
+    '''
+
+        ELF_PATTERN = re.compile(r&quot;^[\s]*\[(?P&lt;NUM&gt;[0-9 ]+)\]&quot; +
+                                 r&quot;[\s]+(?P&lt;NAME&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Type&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Address&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Off&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Size&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;ES&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Flg">
+
+        </a><span style="color: #dcaeea;"><a href="http://www.gnu.org/licenses/&gt;.
+#
+import re
+import gdb
+from subprocess import check_output, CalledProcessError
+
+
+class LoadLinuxKernelInitCommand(gdb.Command):
+    &quot;Load Linux Kernel init text from vmlinux&quot;
+
+    def __init__(self):
+        super(LoadLinuxKernelInitCommand,
+              self).__init__(&quot;load-linux-init&quot;, gdb.COMMAND_SUPPORT,
+                             gdb.COMPLETE_EXPRESSION, True)
+
+    def get_load_address(self, path, section):
+        '''
+        [Nr] Name              Type            Address          Off    Size   ES Flg Lk Inf Al
+        [ 0]                   NULL            0000000000000000 000000 000000 00      0   0  0
+        [ 1] .head.text        PROGBITS        ffffff8008080000 010000 001000 00  AX  0   0 4096
+        [ 2] .text             PROGBITS        ffffff8008081000 011000 5ee1b0 00  AX  0   0 2048
+    '''
+
+        ELF_PATTERN = re.compile(r&quot;^[\s]*\[(?P&lt;NUM&gt;[0-9 ]+)\]&quot; +
+                                 r&quot;[\s]+(?P&lt;NAME&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Type&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Address&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Off&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Size&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;ES&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Flg">ELF_PATTERN</a></span><a href="http://www.gnu.org/licenses/&gt;.
+#
+import re
+import gdb
+from subprocess import check_output, CalledProcessError
+
+
+class LoadLinuxKernelInitCommand(gdb.Command):
+    &quot;Load Linux Kernel init text from vmlinux&quot;
+
+    def __init__(self):
+        super(LoadLinuxKernelInitCommand,
+              self).__init__(&quot;load-linux-init&quot;, gdb.COMMAND_SUPPORT,
+                             gdb.COMPLETE_EXPRESSION, True)
+
+    def get_load_address(self, path, section):
+        '''
+        [Nr] Name              Type            Address          Off    Size   ES Flg Lk Inf Al
+        [ 0]                   NULL            0000000000000000 000000 000000 00      0   0  0
+        [ 1] .head.text        PROGBITS        ffffff8008080000 010000 001000 00  AX  0   0 4096
+        [ 2] .text             PROGBITS        ffffff8008081000 011000 5ee1b0 00  AX  0   0 2048
+    '''
+
+        ELF_PATTERN = re.compile(r&quot;^[\s]*\[(?P&lt;NUM&gt;[0-9 ]+)\]&quot; +
+                                 r&quot;[\s]+(?P&lt;NAME&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Type&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Address&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Off&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Size&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;ES&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Flg"> = re.</a><span style="color: #c678dd;"><a href="http://www.gnu.org/licenses/&gt;.
+#
+import re
+import gdb
+from subprocess import check_output, CalledProcessError
+
+
+class LoadLinuxKernelInitCommand(gdb.Command):
+    &quot;Load Linux Kernel init text from vmlinux&quot;
+
+    def __init__(self):
+        super(LoadLinuxKernelInitCommand,
+              self).__init__(&quot;load-linux-init&quot;, gdb.COMMAND_SUPPORT,
+                             gdb.COMPLETE_EXPRESSION, True)
+
+    def get_load_address(self, path, section):
+        '''
+        [Nr] Name              Type            Address          Off    Size   ES Flg Lk Inf Al
+        [ 0]                   NULL            0000000000000000 000000 000000 00      0   0  0
+        [ 1] .head.text        PROGBITS        ffffff8008080000 010000 001000 00  AX  0   0 4096
+        [ 2] .text             PROGBITS        ffffff8008081000 011000 5ee1b0 00  AX  0   0 2048
+    '''
+
+        ELF_PATTERN = re.compile(r&quot;^[\s]*\[(?P&lt;NUM&gt;[0-9 ]+)\]&quot; +
+                                 r&quot;[\s]+(?P&lt;NAME&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Type&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Address&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Off&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Size&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;ES&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Flg">compile</a></span><a href="http://www.gnu.org/licenses/&gt;.
+#
+import re
+import gdb
+from subprocess import check_output, CalledProcessError
+
+
+class LoadLinuxKernelInitCommand(gdb.Command):
+    &quot;Load Linux Kernel init text from vmlinux&quot;
+
+    def __init__(self):
+        super(LoadLinuxKernelInitCommand,
+              self).__init__(&quot;load-linux-init&quot;, gdb.COMMAND_SUPPORT,
+                             gdb.COMPLETE_EXPRESSION, True)
+
+    def get_load_address(self, path, section):
+        '''
+        [Nr] Name              Type            Address          Off    Size   ES Flg Lk Inf Al
+        [ 0]                   NULL            0000000000000000 000000 000000 00      0   0  0
+        [ 1] .head.text        PROGBITS        ffffff8008080000 010000 001000 00  AX  0   0 4096
+        [ 2] .text             PROGBITS        ffffff8008081000 011000 5ee1b0 00  AX  0   0 2048
+    '''
+
+        ELF_PATTERN = re.compile(r&quot;^[\s]*\[(?P&lt;NUM&gt;[0-9 ]+)\]&quot; +
+                                 r&quot;[\s]+(?P&lt;NAME&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Type&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Address&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Off&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Size&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;ES&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Flg">(r</a><span style="color: #98be65;"><a href="http://www.gnu.org/licenses/&gt;.
+#
+import re
+import gdb
+from subprocess import check_output, CalledProcessError
+
+
+class LoadLinuxKernelInitCommand(gdb.Command):
+    &quot;Load Linux Kernel init text from vmlinux&quot;
+
+    def __init__(self):
+        super(LoadLinuxKernelInitCommand,
+              self).__init__(&quot;load-linux-init&quot;, gdb.COMMAND_SUPPORT,
+                             gdb.COMPLETE_EXPRESSION, True)
+
+    def get_load_address(self, path, section):
+        '''
+        [Nr] Name              Type            Address          Off    Size   ES Flg Lk Inf Al
+        [ 0]                   NULL            0000000000000000 000000 000000 00      0   0  0
+        [ 1] .head.text        PROGBITS        ffffff8008080000 010000 001000 00  AX  0   0 4096
+        [ 2] .text             PROGBITS        ffffff8008081000 011000 5ee1b0 00  AX  0   0 2048
+    '''
+
+        ELF_PATTERN = re.compile(r&quot;^[\s]*\[(?P&lt;NUM&gt;[0-9 ]+)\]&quot; +
+                                 r&quot;[\s]+(?P&lt;NAME&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Type&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Address&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Off&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Size&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;ES&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Flg">"^[\s]*\[(?P&lt;NUM&gt;[0-9 ]+)\]"</a></span><a href="http://www.gnu.org/licenses/&gt;.
+#
+import re
+import gdb
+from subprocess import check_output, CalledProcessError
+
+
+class LoadLinuxKernelInitCommand(gdb.Command):
+    &quot;Load Linux Kernel init text from vmlinux&quot;
+
+    def __init__(self):
+        super(LoadLinuxKernelInitCommand,
+              self).__init__(&quot;load-linux-init&quot;, gdb.COMMAND_SUPPORT,
+                             gdb.COMPLETE_EXPRESSION, True)
+
+    def get_load_address(self, path, section):
+        '''
+        [Nr] Name              Type            Address          Off    Size   ES Flg Lk Inf Al
+        [ 0]                   NULL            0000000000000000 000000 000000 00      0   0  0
+        [ 1] .head.text        PROGBITS        ffffff8008080000 010000 001000 00  AX  0   0 4096
+        [ 2] .text             PROGBITS        ffffff8008081000 011000 5ee1b0 00  AX  0   0 2048
+    '''
+
+        ELF_PATTERN = re.compile(r&quot;^[\s]*\[(?P&lt;NUM&gt;[0-9 ]+)\]&quot; +
+                                 r&quot;[\s]+(?P&lt;NAME&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Type&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Address&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Off&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Size&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;ES&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Flg"> +
+                                 r</a><span style="color: #98be65;"><a href="http://www.gnu.org/licenses/&gt;.
+#
+import re
+import gdb
+from subprocess import check_output, CalledProcessError
+
+
+class LoadLinuxKernelInitCommand(gdb.Command):
+    &quot;Load Linux Kernel init text from vmlinux&quot;
+
+    def __init__(self):
+        super(LoadLinuxKernelInitCommand,
+              self).__init__(&quot;load-linux-init&quot;, gdb.COMMAND_SUPPORT,
+                             gdb.COMPLETE_EXPRESSION, True)
+
+    def get_load_address(self, path, section):
+        '''
+        [Nr] Name              Type            Address          Off    Size   ES Flg Lk Inf Al
+        [ 0]                   NULL            0000000000000000 000000 000000 00      0   0  0
+        [ 1] .head.text        PROGBITS        ffffff8008080000 010000 001000 00  AX  0   0 4096
+        [ 2] .text             PROGBITS        ffffff8008081000 011000 5ee1b0 00  AX  0   0 2048
+    '''
+
+        ELF_PATTERN = re.compile(r&quot;^[\s]*\[(?P&lt;NUM&gt;[0-9 ]+)\]&quot; +
+                                 r&quot;[\s]+(?P&lt;NAME&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Type&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Address&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Off&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Size&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;ES&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Flg">"[\s]+(?P&lt;NAME&gt;[\S]+)"</a></span><a href="http://www.gnu.org/licenses/&gt;.
+#
+import re
+import gdb
+from subprocess import check_output, CalledProcessError
+
+
+class LoadLinuxKernelInitCommand(gdb.Command):
+    &quot;Load Linux Kernel init text from vmlinux&quot;
+
+    def __init__(self):
+        super(LoadLinuxKernelInitCommand,
+              self).__init__(&quot;load-linux-init&quot;, gdb.COMMAND_SUPPORT,
+                             gdb.COMPLETE_EXPRESSION, True)
+
+    def get_load_address(self, path, section):
+        '''
+        [Nr] Name              Type            Address          Off    Size   ES Flg Lk Inf Al
+        [ 0]                   NULL            0000000000000000 000000 000000 00      0   0  0
+        [ 1] .head.text        PROGBITS        ffffff8008080000 010000 001000 00  AX  0   0 4096
+        [ 2] .text             PROGBITS        ffffff8008081000 011000 5ee1b0 00  AX  0   0 2048
+    '''
+
+        ELF_PATTERN = re.compile(r&quot;^[\s]*\[(?P&lt;NUM&gt;[0-9 ]+)\]&quot; +
+                                 r&quot;[\s]+(?P&lt;NAME&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Type&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Address&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Off&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Size&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;ES&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Flg"> +
+                                 r</a><span style="color: #98be65;"><a href="http://www.gnu.org/licenses/&gt;.
+#
+import re
+import gdb
+from subprocess import check_output, CalledProcessError
+
+
+class LoadLinuxKernelInitCommand(gdb.Command):
+    &quot;Load Linux Kernel init text from vmlinux&quot;
+
+    def __init__(self):
+        super(LoadLinuxKernelInitCommand,
+              self).__init__(&quot;load-linux-init&quot;, gdb.COMMAND_SUPPORT,
+                             gdb.COMPLETE_EXPRESSION, True)
+
+    def get_load_address(self, path, section):
+        '''
+        [Nr] Name              Type            Address          Off    Size   ES Flg Lk Inf Al
+        [ 0]                   NULL            0000000000000000 000000 000000 00      0   0  0
+        [ 1] .head.text        PROGBITS        ffffff8008080000 010000 001000 00  AX  0   0 4096
+        [ 2] .text             PROGBITS        ffffff8008081000 011000 5ee1b0 00  AX  0   0 2048
+    '''
+
+        ELF_PATTERN = re.compile(r&quot;^[\s]*\[(?P&lt;NUM&gt;[0-9 ]+)\]&quot; +
+                                 r&quot;[\s]+(?P&lt;NAME&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Type&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Address&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Off&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Size&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;ES&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Flg">"[\s]+(?P&lt;Type&gt;[\S]+)"</a></span><a href="http://www.gnu.org/licenses/&gt;.
+#
+import re
+import gdb
+from subprocess import check_output, CalledProcessError
+
+
+class LoadLinuxKernelInitCommand(gdb.Command):
+    &quot;Load Linux Kernel init text from vmlinux&quot;
+
+    def __init__(self):
+        super(LoadLinuxKernelInitCommand,
+              self).__init__(&quot;load-linux-init&quot;, gdb.COMMAND_SUPPORT,
+                             gdb.COMPLETE_EXPRESSION, True)
+
+    def get_load_address(self, path, section):
+        '''
+        [Nr] Name              Type            Address          Off    Size   ES Flg Lk Inf Al
+        [ 0]                   NULL            0000000000000000 000000 000000 00      0   0  0
+        [ 1] .head.text        PROGBITS        ffffff8008080000 010000 001000 00  AX  0   0 4096
+        [ 2] .text             PROGBITS        ffffff8008081000 011000 5ee1b0 00  AX  0   0 2048
+    '''
+
+        ELF_PATTERN = re.compile(r&quot;^[\s]*\[(?P&lt;NUM&gt;[0-9 ]+)\]&quot; +
+                                 r&quot;[\s]+(?P&lt;NAME&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Type&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Address&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Off&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Size&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;ES&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Flg"> +
+                                 r</a><span style="color: #98be65;"><a href="http://www.gnu.org/licenses/&gt;.
+#
+import re
+import gdb
+from subprocess import check_output, CalledProcessError
+
+
+class LoadLinuxKernelInitCommand(gdb.Command):
+    &quot;Load Linux Kernel init text from vmlinux&quot;
+
+    def __init__(self):
+        super(LoadLinuxKernelInitCommand,
+              self).__init__(&quot;load-linux-init&quot;, gdb.COMMAND_SUPPORT,
+                             gdb.COMPLETE_EXPRESSION, True)
+
+    def get_load_address(self, path, section):
+        '''
+        [Nr] Name              Type            Address          Off    Size   ES Flg Lk Inf Al
+        [ 0]                   NULL            0000000000000000 000000 000000 00      0   0  0
+        [ 1] .head.text        PROGBITS        ffffff8008080000 010000 001000 00  AX  0   0 4096
+        [ 2] .text             PROGBITS        ffffff8008081000 011000 5ee1b0 00  AX  0   0 2048
+    '''
+
+        ELF_PATTERN = re.compile(r&quot;^[\s]*\[(?P&lt;NUM&gt;[0-9 ]+)\]&quot; +
+                                 r&quot;[\s]+(?P&lt;NAME&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Type&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Address&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Off&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Size&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;ES&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Flg">"[\s]+(?P&lt;Address&gt;[\S]+)"</a></span><a href="http://www.gnu.org/licenses/&gt;.
+#
+import re
+import gdb
+from subprocess import check_output, CalledProcessError
+
+
+class LoadLinuxKernelInitCommand(gdb.Command):
+    &quot;Load Linux Kernel init text from vmlinux&quot;
+
+    def __init__(self):
+        super(LoadLinuxKernelInitCommand,
+              self).__init__(&quot;load-linux-init&quot;, gdb.COMMAND_SUPPORT,
+                             gdb.COMPLETE_EXPRESSION, True)
+
+    def get_load_address(self, path, section):
+        '''
+        [Nr] Name              Type            Address          Off    Size   ES Flg Lk Inf Al
+        [ 0]                   NULL            0000000000000000 000000 000000 00      0   0  0
+        [ 1] .head.text        PROGBITS        ffffff8008080000 010000 001000 00  AX  0   0 4096
+        [ 2] .text             PROGBITS        ffffff8008081000 011000 5ee1b0 00  AX  0   0 2048
+    '''
+
+        ELF_PATTERN = re.compile(r&quot;^[\s]*\[(?P&lt;NUM&gt;[0-9 ]+)\]&quot; +
+                                 r&quot;[\s]+(?P&lt;NAME&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Type&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Address&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Off&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Size&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;ES&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Flg"> +
+                                 r</a><span style="color: #98be65;"><a href="http://www.gnu.org/licenses/&gt;.
+#
+import re
+import gdb
+from subprocess import check_output, CalledProcessError
+
+
+class LoadLinuxKernelInitCommand(gdb.Command):
+    &quot;Load Linux Kernel init text from vmlinux&quot;
+
+    def __init__(self):
+        super(LoadLinuxKernelInitCommand,
+              self).__init__(&quot;load-linux-init&quot;, gdb.COMMAND_SUPPORT,
+                             gdb.COMPLETE_EXPRESSION, True)
+
+    def get_load_address(self, path, section):
+        '''
+        [Nr] Name              Type            Address          Off    Size   ES Flg Lk Inf Al
+        [ 0]                   NULL            0000000000000000 000000 000000 00      0   0  0
+        [ 1] .head.text        PROGBITS        ffffff8008080000 010000 001000 00  AX  0   0 4096
+        [ 2] .text             PROGBITS        ffffff8008081000 011000 5ee1b0 00  AX  0   0 2048
+    '''
+
+        ELF_PATTERN = re.compile(r&quot;^[\s]*\[(?P&lt;NUM&gt;[0-9 ]+)\]&quot; +
+                                 r&quot;[\s]+(?P&lt;NAME&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Type&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Address&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Off&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Size&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;ES&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Flg">"[\s]+(?P&lt;Off&gt;[\S]+)"</a></span><a href="http://www.gnu.org/licenses/&gt;.
+#
+import re
+import gdb
+from subprocess import check_output, CalledProcessError
+
+
+class LoadLinuxKernelInitCommand(gdb.Command):
+    &quot;Load Linux Kernel init text from vmlinux&quot;
+
+    def __init__(self):
+        super(LoadLinuxKernelInitCommand,
+              self).__init__(&quot;load-linux-init&quot;, gdb.COMMAND_SUPPORT,
+                             gdb.COMPLETE_EXPRESSION, True)
+
+    def get_load_address(self, path, section):
+        '''
+        [Nr] Name              Type            Address          Off    Size   ES Flg Lk Inf Al
+        [ 0]                   NULL            0000000000000000 000000 000000 00      0   0  0
+        [ 1] .head.text        PROGBITS        ffffff8008080000 010000 001000 00  AX  0   0 4096
+        [ 2] .text             PROGBITS        ffffff8008081000 011000 5ee1b0 00  AX  0   0 2048
+    '''
+
+        ELF_PATTERN = re.compile(r&quot;^[\s]*\[(?P&lt;NUM&gt;[0-9 ]+)\]&quot; +
+                                 r&quot;[\s]+(?P&lt;NAME&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Type&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Address&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Off&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Size&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;ES&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Flg"> +
+                                 r</a><span style="color: #98be65;"><a href="http://www.gnu.org/licenses/&gt;.
+#
+import re
+import gdb
+from subprocess import check_output, CalledProcessError
+
+
+class LoadLinuxKernelInitCommand(gdb.Command):
+    &quot;Load Linux Kernel init text from vmlinux&quot;
+
+    def __init__(self):
+        super(LoadLinuxKernelInitCommand,
+              self).__init__(&quot;load-linux-init&quot;, gdb.COMMAND_SUPPORT,
+                             gdb.COMPLETE_EXPRESSION, True)
+
+    def get_load_address(self, path, section):
+        '''
+        [Nr] Name              Type            Address          Off    Size   ES Flg Lk Inf Al
+        [ 0]                   NULL            0000000000000000 000000 000000 00      0   0  0
+        [ 1] .head.text        PROGBITS        ffffff8008080000 010000 001000 00  AX  0   0 4096
+        [ 2] .text             PROGBITS        ffffff8008081000 011000 5ee1b0 00  AX  0   0 2048
+    '''
+
+        ELF_PATTERN = re.compile(r&quot;^[\s]*\[(?P&lt;NUM&gt;[0-9 ]+)\]&quot; +
+                                 r&quot;[\s]+(?P&lt;NAME&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Type&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Address&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Off&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Size&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;ES&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Flg">"[\s]+(?P&lt;Size&gt;[\S]+)"</a></span><a href="http://www.gnu.org/licenses/&gt;.
+#
+import re
+import gdb
+from subprocess import check_output, CalledProcessError
+
+
+class LoadLinuxKernelInitCommand(gdb.Command):
+    &quot;Load Linux Kernel init text from vmlinux&quot;
+
+    def __init__(self):
+        super(LoadLinuxKernelInitCommand,
+              self).__init__(&quot;load-linux-init&quot;, gdb.COMMAND_SUPPORT,
+                             gdb.COMPLETE_EXPRESSION, True)
+
+    def get_load_address(self, path, section):
+        '''
+        [Nr] Name              Type            Address          Off    Size   ES Flg Lk Inf Al
+        [ 0]                   NULL            0000000000000000 000000 000000 00      0   0  0
+        [ 1] .head.text        PROGBITS        ffffff8008080000 010000 001000 00  AX  0   0 4096
+        [ 2] .text             PROGBITS        ffffff8008081000 011000 5ee1b0 00  AX  0   0 2048
+    '''
+
+        ELF_PATTERN = re.compile(r&quot;^[\s]*\[(?P&lt;NUM&gt;[0-9 ]+)\]&quot; +
+                                 r&quot;[\s]+(?P&lt;NAME&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Type&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Address&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Off&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Size&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;ES&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Flg"> +
+                                 r</a><span style="color: #98be65;"><a href="http://www.gnu.org/licenses/&gt;.
+#
+import re
+import gdb
+from subprocess import check_output, CalledProcessError
+
+
+class LoadLinuxKernelInitCommand(gdb.Command):
+    &quot;Load Linux Kernel init text from vmlinux&quot;
+
+    def __init__(self):
+        super(LoadLinuxKernelInitCommand,
+              self).__init__(&quot;load-linux-init&quot;, gdb.COMMAND_SUPPORT,
+                             gdb.COMPLETE_EXPRESSION, True)
+
+    def get_load_address(self, path, section):
+        '''
+        [Nr] Name              Type            Address          Off    Size   ES Flg Lk Inf Al
+        [ 0]                   NULL            0000000000000000 000000 000000 00      0   0  0
+        [ 1] .head.text        PROGBITS        ffffff8008080000 010000 001000 00  AX  0   0 4096
+        [ 2] .text             PROGBITS        ffffff8008081000 011000 5ee1b0 00  AX  0   0 2048
+    '''
+
+        ELF_PATTERN = re.compile(r&quot;^[\s]*\[(?P&lt;NUM&gt;[0-9 ]+)\]&quot; +
+                                 r&quot;[\s]+(?P&lt;NAME&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Type&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Address&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Off&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Size&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;ES&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Flg">"[\s]+(?P&lt;ES&gt;[\S]+)"</a></span><a href="http://www.gnu.org/licenses/&gt;.
+#
+import re
+import gdb
+from subprocess import check_output, CalledProcessError
+
+
+class LoadLinuxKernelInitCommand(gdb.Command):
+    &quot;Load Linux Kernel init text from vmlinux&quot;
+
+    def __init__(self):
+        super(LoadLinuxKernelInitCommand,
+              self).__init__(&quot;load-linux-init&quot;, gdb.COMMAND_SUPPORT,
+                             gdb.COMPLETE_EXPRESSION, True)
+
+    def get_load_address(self, path, section):
+        '''
+        [Nr] Name              Type            Address          Off    Size   ES Flg Lk Inf Al
+        [ 0]                   NULL            0000000000000000 000000 000000 00      0   0  0
+        [ 1] .head.text        PROGBITS        ffffff8008080000 010000 001000 00  AX  0   0 4096
+        [ 2] .text             PROGBITS        ffffff8008081000 011000 5ee1b0 00  AX  0   0 2048
+    '''
+
+        ELF_PATTERN = re.compile(r&quot;^[\s]*\[(?P&lt;NUM&gt;[0-9 ]+)\]&quot; +
+                                 r&quot;[\s]+(?P&lt;NAME&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Type&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Address&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Off&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Size&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;ES&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Flg"> +
+                                 r</a><span style="color: #98be65;"><a href="http://www.gnu.org/licenses/&gt;.
+#
+import re
+import gdb
+from subprocess import check_output, CalledProcessError
+
+
+class LoadLinuxKernelInitCommand(gdb.Command):
+    &quot;Load Linux Kernel init text from vmlinux&quot;
+
+    def __init__(self):
+        super(LoadLinuxKernelInitCommand,
+              self).__init__(&quot;load-linux-init&quot;, gdb.COMMAND_SUPPORT,
+                             gdb.COMPLETE_EXPRESSION, True)
+
+    def get_load_address(self, path, section):
+        '''
+        [Nr] Name              Type            Address          Off    Size   ES Flg Lk Inf Al
+        [ 0]                   NULL            0000000000000000 000000 000000 00      0   0  0
+        [ 1] .head.text        PROGBITS        ffffff8008080000 010000 001000 00  AX  0   0 4096
+        [ 2] .text             PROGBITS        ffffff8008081000 011000 5ee1b0 00  AX  0   0 2048
+    '''
+
+        ELF_PATTERN = re.compile(r&quot;^[\s]*\[(?P&lt;NUM&gt;[0-9 ]+)\]&quot; +
+                                 r&quot;[\s]+(?P&lt;NAME&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Type&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Address&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Off&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Size&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;ES&gt;[\S]+)&quot; +
+                                 r&quot;[\s]+(?P&lt;Flg">"[\s]+(?P&lt;Flg&gt;</a>[\S]+)"</span>)
+
+        <span style="color: #dcaeea;">command</span> = r<span style="color: #98be65;">"readelf -WS "</span> + path + r<span style="color: #98be65;">"| grep -E '[[:space:]]+'"</span> + section
+        <span style="color: #dcaeea;">output</span> = check_output([command], shell=<span style="color: #a9a1e1;">True</span>).decode(<span style="color: #98be65;">"utf-8"</span>)
+        <span style="color: #dcaeea;">obj</span> = re.search(ELF_PATTERN, output)
+        <span style="color: #51afef;">if</span> obj <span style="color: #51afef;">is</span> <span style="color: #51afef;">not</span> <span style="color: #a9a1e1;">None</span>:
+            <span style="color: #dcaeea;">load_addr</span> = <span style="color: #c678dd;">int</span>(obj[<span style="color: #98be65;">'Address'</span>], 16)
+            <span style="color: #51afef;">return</span> load_addr
+
+    <span style="color: #51afef;">def</span> <span style="color: #c678dd;">invoke</span>(<span style="color: #51afef;">self</span>, arg, from_tty):
+        <span style="color: #dcaeea;">argv</span> = gdb.string_to_argv(arg)
+        <span style="color: #51afef;">if</span> <span style="color: #c678dd;">len</span>(argv) != 2:
+            <span style="color: #51afef;">raise</span> gdb.GdbError(<span style="color: #98be65;">"load-linux-init takes two argument"</span>)
+
+        <span style="color: #dcaeea;">load_addr</span> = <span style="color: #c678dd;">int</span>(<span style="color: #c678dd;">str</span>(gdb.parse_and_eval(argv[1])))
+        <span style="color: #51afef;">print</span>(<span style="color: #98be65;">"Loading linux init head to 0x%016x"</span> % (load_addr))
+        <span style="color: #dcaeea;">head_init_addr</span> = <span style="color: #51afef;">self</span>.get_load_address(argv[0], <span style="color: #98be65;">".head.text"</span>)
+        <span style="color: #51afef;">print</span>(<span style="color: #98be65;">"Original linux text address at 0x%016x"</span> % (head_init_addr))
+        <span style="color: #dcaeea;">offset</span> = head_init_addr - load_addr
+        <span style="color: #dcaeea;">text_addr</span> = <span style="color: #51afef;">self</span>.get_load_address(argv[0], <span style="color: #98be65;">".text"</span>) - offset
+        <span style="color: #dcaeea;">init_text_addr</span> = <span style="color: #51afef;">self</span>.get_load_address(argv[0], <span style="color: #98be65;">".init.text"</span>) - offset
+
+        <span style="color: #dcaeea;">command</span> = <span style="color: #98be65;">"add-symbol-file {:s} 0x{:x} -s .head.text 0x{:x} -s .init.text 0x{:x}"</span>.<span style="color: #c678dd;">format</span>(
+            argv[0], text_addr, load_addr, init_text_addr)
+        <span style="color: #51afef;">print</span>(<span style="color: #98be65;">"load linux image to physical address with command {:s}"</span>.<span style="color: #c678dd;">format</span>(
+            command))
+        gdb.execute(command)
+
+
+LoadLinuxKernelInitCommand()
+
+<span style="color: #5B6268;"># </span><span style="color: #5B6268;">Local Variables&#58;</span>
+<span style="color: #5B6268;"># </span><span style="color: #5B6268;">indent-tabs-mode: t</span>
+<span style="color: #5B6268;"># </span><span style="color: #5B6268;">tab-width: 8</span>
+<span style="color: #5B6268;"># </span><span style="color: #5B6268;">End:</span>
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-org29850a4" class="outline-3">
+<h3 id="org29850a4">Trace32</h3>
+<div class="outline-text-3" id="text-org29850a4">
+<ul class="org-ul">
+<li>Linux Attach<br></li>
+</ul>
+<p>
+<a href="http://hznas.hobot.cc/gitlab/zhaohui.shi/j5-trace32">J Ayers Trace32 Linux Attach</a><br>
+</p>
+
+<p>
+主要用来查看Linux系统中所有task的stacktrace<br>
+</p>
+
+<div class="org-src-container">
+<pre class="src src-bash">SET <span style="color: #dcaeea;">mypath</span>=%~dp0
+
+start C:\T32\bin\windows64\t32MARM64.exe -s %mypath%\linux-attach.cmm <span style="color: #98be65;">"%mypath%"</span> <span style="color: #98be65;">"U:/vmlinux"</span> <span style="color: #98be65;">"/Volumes/work/j5/kernel/"</span> U:/j5/kernel
+</pre>
+</div>
+
+<div id="org5438701" class="figure">
+<p><img src="assets/1914-1034-max.png" alt="1914-1034-max.png"><br>
+</p>
+</div>
+
+<ul class="org-ul">
+<li><p>
+<a href="https://www2.lauterbach.com/pdf/frontend_gdb.pdf">GDB Front-End</a><br>
+</p>
+
+<div id="org65fbf18" class="figure">
+<p><img src="assets/2021-05-06_11-30-54_screenshot.png" alt="2021-05-06_11-30-54_screenshot.png"><br>
+</p>
+</div></li>
+</ul>
+
+<ul class="org-ul">
+<li><p>
+<a href="https://www2.lauterbach.com/pdf/backend_gdb.pdf">GDB Back-End</a><br>
+</p>
+
+<div id="orgf2544bb" class="figure">
+<p><img src="assets/2021-05-06_10-38-52_screenshot.png" alt="2021-05-06_10-38-52_screenshot.png"><br>
+</p>
+</div></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org332cbda" class="outline-3">
+<h3 id="org332cbda">DS5</h3>
+<div class="outline-text-3" id="text-org332cbda">
+<ul class="org-ul">
+<li>主要用来调试Baremetal以及简单的OS，对Linux的支持非常差，约等于0<br></li>
+<li>在打断点时，需要先加载好镜像，然后再打断点，否则断点无效<br></li>
+</ul>
+
+<table>
+
+
+<colgroup>
+<col  class="org-left">
+
+<col  class="org-left">
+</colgroup>
+<tbody>
+<tr>
+<td class="org-left">Function</td>
+<td class="org-left">Descrription</td>
+</tr>
+
+<tr>
+<td class="org-left">add-symbol-file</td>
+<td class="org-left">Loads additional debug information into the debugger.</td>
+</tr>
+
+<tr>
+<td class="org-left">set substitute-path</td>
+<td class="org-left">Modifies the search paths used by the debugger when it executes any of the commands that look up and display source code.</td>
+</tr>
+
+<tr>
+<td class="org-left">reload-symbol-file</td>
+<td class="org-left">Reloads debug information from an already loaded image into the debugger using the same settings as the original load operation.</td>
+</tr>
+
+<tr>
+<td class="org-left">discard-symbol-file</td>
+<td class="org-left">Discards debug information relating to a specific file.</td>
+</tr>
+</tbody>
+</table>
+<ul class="org-ul">
+<li>resources<br>
+<a href="https://community.arm.com/developer/tools-software/tools/b/tools-software-ides-blog/posts/developing-jython-scripts-for-ds-5-translation-table-decoder">Developing Jython scripts for DS-5: Translation Table Decoder</a><br></li>
+</ul>
+</div>
+
+<div id="outline-container-orgc3ba370" class="outline-4">
+<h4 id="orgc3ba370">DS5 script</h4>
+<div class="outline-text-4" id="text-orgc3ba370">
+<div class="org-src-container">
+<pre class="src src-python"><span style="color: #5B6268;">#</span><span style="color: #5B6268;">!/usr/bin/env python2</span>
+<span style="color: #5B6268;"># </span><span style="color: #5B6268;">-*- coding: utf-8 -*-</span>
+
+<span style="color: #51afef;">import</span> os
+<span style="color: #51afef;">import</span> sys
+<span style="color: #51afef;">import</span> struct
+
+<span style="color: #dcaeea;">file_path</span> = os.path.abspath(os.path.dirname(__file__))
+<span style="color: #dcaeea;">ms</span> = <span style="color: #a9a1e1;">None</span>;
+
+<span style="color: #51afef;">try</span>:
+    <span style="color: #51afef;">from</span> arm_ds.debugger_v1 <span style="color: #51afef;">import</span> Debugger
+    <span style="color: #51afef;">from</span> arm_ds.debugger_v1 <span style="color: #51afef;">import</span> DebugException
+    <span style="color: #5B6268;"># </span><span style="color: #5B6268;">Debugger object for accessing the debugger</span>
+    <span style="color: #dcaeea;">debugger</span> = Debugger()
+
+    <span style="color: #5B6268;"># </span><span style="color: #5B6268;">Initialisation commands</span>
+    <span style="color: #dcaeea;">ec</span> = debugger.getExecutionContext(0)
+    ec.getExecutionService().stop()
+    ec.getExecutionService().waitForStop()
+    <span style="color: #dcaeea;">ms</span> = ec.getMemoryService();
+<span style="color: #51afef;">except</span> <span style="color: #ECBE7B;">BaseException</span> <span style="color: #51afef;">as</span> e:
+    <span style="color: #51afef;">print</span>(e)
+    <span style="color: #51afef;">pass</span>
+
+<span style="color: #51afef;">if</span> <span style="color: #c678dd;">__name__</span> == <span style="color: #98be65;">'__main__'</span>:
+    <span style="color: #51afef;">if</span> <span style="color: #c678dd;">len</span>(sys.argv) &lt; 3:
+        <span style="color: #51afef;">print</span>(<span style="color: #98be65;">"Usage: source %s &lt;address for dtb with base 16&gt; &lt;file_path&gt;"</span> % (sys.argv[0]))
+        <span style="color: #a9a1e1;">exit</span>(-1)
+
+    <span style="color: #dcaeea;">dtb_addr</span> = <span style="color: #c678dd;">int</span>(sys.argv[1], 16)
+    <span style="color: #51afef;">print</span>(<span style="color: #98be65;">"Attempting to dump dtb from 0x%016x"</span> %(dtb_addr))
+    <span style="color: #dcaeea;">magic</span>, <span style="color: #dcaeea;">totalsize</span>, <span style="color: #dcaeea;">version</span> = struct.unpack(<span style="color: #98be65;">'&gt;III'</span>, ms.read(dtb_addr, 12))
+    <span style="color: #51afef;">print</span>(<span style="color: #98be65;">"magic: 0x%08x, totalsize: 0x%08x, version: 0x%08x"</span> % (magic, totalsize, version))
+    <span style="color: #51afef;">if</span> magic != 0xd00dfeed:
+        <span style="color: #a9a1e1;">exit</span>(-2)
+        <span style="color: #51afef;">pass</span>
+
+    ms.dump(sys.argv[2], <span style="color: #98be65;">'binary'</span>, dtb_addr, dtb_addr + totalsize)
+
+    <span style="color: #51afef;">pass</span>
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="outline-container-org26eb2ca" class="outline-2">
+<h2 id="org26eb2ca">OS Debug</h2>
+<div class="outline-text-2" id="text-org26eb2ca">
+</div>
+<div id="outline-container-org39f1678" class="outline-4">
+<h4 id="org39f1678">U-Boot</h4>
+<div class="outline-text-4" id="text-org39f1678">
+<p>
+U-Boot Debug before relocate<br>
+U-Boot Debug after relocate<br>
+<a href="http://wiki.hobot.cc/display/Hangzhou/u-boot+Debugging">u-boot Debugging</a><br>
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgdcf9ed1" class="outline-4">
+<h4 id="orgdcf9ed1">Linux</h4>
+<div class="outline-text-4" id="text-orgdcf9ed1">
+<p>
+Linux Debug before MMU enable<br>
+Linux Debug after MMU enable<br>
+<a href="http://schspa.tk/2020/06/11/how-to-debugging-linux-booting-code.html">Debug linux kernel boot process</a><br>
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org1c0e60e" class="outline-2">
+<h2 id="org1c0e60e">Native Crash Examples</h2>
+<div class="outline-text-2" id="text-org1c0e60e">
+</div>
+<div id="outline-container-orgf3f74af" class="outline-3">
+<h3 id="orgf3f74af">StackFrame Analysis</h3>
+<div class="outline-text-3" id="text-orgf3f74af">
+</div>
+<div id="outline-container-org9cefee7" class="outline-4">
+<h4 id="org9cefee7">Stack Frame</h4>
+<div class="outline-text-4" id="text-org9cefee7">
+
+<div id="orge36e5da" class="figure">
+<p><img src="assets/2021-05-05_22-29-45_screenshot.png" alt="2021-05-05_22-29-45_screenshot.png" width="600px"><br>
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org5319b5f" class="outline-4">
+<h4 id="org5319b5f">Regulator Function</h4>
+<div class="outline-text-4" id="text-org5319b5f">
+<ol class="org-ol">
+<li>分配栈空间<br></li>
+<li>保存上下文寄存器<br></li>
+<li>函数内逻辑<br></li>
+<li>子过程调用<br></li>
+<li>处理返回值<br></li>
+<li>恢复寄存器上下文<br></li>
+<li>恢复栈指针<br></li>
+<li>返回<br></li>
+</ol>
+
+<p>
+Source<br>
+</p>
+<div class="org-src-container">
+<pre class="src src-C"><span style="color: #5B6268;">/*</span>
+<span style="color: #5B6268;"> * p1 and p2 should be directories on the same fs.</span>
+<span style="color: #5B6268;"> */</span>
+<span style="color: #51afef;">struct</span> <span style="color: #ECBE7B;">dentry</span> *<span style="color: #c678dd;">lock_rename</span>(<span style="color: #51afef;">struct</span> <span style="color: #ECBE7B;">dentry</span> *<span style="color: #dcaeea;">p1</span>, <span style="color: #51afef;">struct</span> <span style="color: #ECBE7B;">dentry</span> *<span style="color: #dcaeea;">p2</span>)
+{
+    <span style="color: #51afef;">struct</span> <span style="color: #ECBE7B;">dentry</span> *<span style="color: #dcaeea;">p</span>;
+
+    <span style="color: #51afef;">if</span> (p1 == p2) {
+        inode_lock_nested(p1-&gt;d_inode, I_MUTEX_PARENT);
+        <span style="color: #51afef;">return</span> <span style="color: #a9a1e1;">NULL</span>;
+    }
+
+    mutex_lock(&amp;p1-&gt;d_sb-&gt;s_vfs_rename_mutex);
+
+    p = d_ancestor(p2, p1);
+    <span style="color: #51afef;">if</span> (p) {
+        inode_lock_nested(p2-&gt;d_inode, I_MUTEX_PARENT);
+        inode_lock_nested(p1-&gt;d_inode, I_MUTEX_CHILD);
+        <span style="color: #51afef;">return</span> p;
+    }
+
+    p = d_ancestor(p1, p2);
+    <span style="color: #51afef;">if</span> (p) {
+        inode_lock_nested(p1-&gt;d_inode, I_MUTEX_PARENT);
+        inode_lock_nested(p2-&gt;d_inode, I_MUTEX_CHILD);
+        <span style="color: #51afef;">return</span> p;
+    }
+
+    <span style="color: #c678dd;">inode_lock_nested</span>(p1-&gt;d_inode, I_MUTEX_PARENT);
+    <span style="color: #c678dd;">inode_lock_nested</span>(p2-&gt;d_inode, I_MUTEX_PARENT2);
+    <span style="color: #51afef;">return</span> <span style="color: #a9a1e1;">NULL</span>;
+}
+<span style="color: #c678dd;">EXPORT_SYMBOL</span>(lock_rename);
+</pre>
+</div>
+
+<p>
+Disassemble<br>
+</p>
+<div class="org-src-container">
+<pre class="src src-bash">(gdb) disassemble /s lock_rename
+Dump of assembler code for <span style="color: #51afef;">function</span> <span style="color: #c678dd;">lock_rename</span>:
+fs/namei.c:
+2839    {
+2840            struct dentry *p;
+2841
+2842            if (<span style="color: #dcaeea;">p1</span> == p2) {
+   0xffffff800817e250 &lt;+0&gt;:     stp     x29, x30, [sp, <span style="color: #5B6268;">#</span><span style="color: #5B6268;">-48]!                    // &#20998;&#37197;&#26632;&#31354;&#38388;</span>
+   0xffffff800817e254 &lt;+4&gt;:     cmp     x0, x1
+   0xffffff800817e258 &lt;+8&gt;:     mov     x29, sp                                  // &#20445;&#23384;&#26632;&#24103;
+   0xffffff800817e25c &lt;+12&gt;:    stp     x19, x20, [sp, <span style="color: #5B6268;">#</span><span style="color: #5B6268;">16]                      // &#20445;&#23384;&#38656;&#35201;Callee&#20445;&#25345;&#30340;&#21442;&#25968;</span>
+   0xffffff800817e260 &lt;+16&gt;:    mov     x19, x0
+   0xffffff800817e264 &lt;+20&gt;:    b.ne    0xffffff800817e27c &lt;lock_rename+44&gt;  // b.any
+
+./include/linux/fs.h:
+748             down_write_nested(&amp;inode-&gt;i_rwsem, subclass);
+   0xffffff800817e268 &lt;+24&gt;:    ldr     x0, [x0, <span style="color: #5B6268;">#</span><span style="color: #5B6268;">48]                            // &#20808;&#24471;&#21040;p1-&gt;d_inode, check with ptype /o struct dentry</span>
+   0xffffff800817e26c &lt;+28&gt;:    mov     x20, <span style="color: #5B6268;">#</span><span style="color: #5B6268;">0x0                       // #0</span>
+   0xffffff800817e270 &lt;+32&gt;:    add     x0, x0, <span style="color: #5B6268;">#</span><span style="color: #5B6268;">0xa0                            // &#20877;&#33719;&#21462;&amp;p1-&gt;d_inode-&gt;i_rwsem check with ptype /o struct inode</span>
+   0xffffff800817e274 &lt;+36&gt;:    bl      0xffffff80087846e8 &lt;down_write&gt;          // &#35843;&#29992;&#23376;&#20989;&#25968;&#65292;&#36825;&#37324;&#27809;&#26377;&#35774;&#32622;x1&#21442;&#25968;&#65292;&#22240;&#20026;&#26368;&#21518;&#35843;&#29992;&#30340;down_write&#21482;&#26377;&#19968;&#20010;&#21442;&#25968;
+
+fs/namei.c:
+2844                    return NULL;
+   0xffffff800817e278 &lt;+40&gt;:    b       0xffffff800817e2f0 &lt;lock_rename+160&gt;
+
+2845            }
+2846
+2847            mutex_lock(&amp;p1-&gt;d_sb-&gt;s_vfs_rename_mutex);
+   0xffffff800817e27c &lt;+44&gt;:    str     x21, [sp, <span style="color: #5B6268;">#</span><span style="color: #5B6268;">32]</span>
+   0xffffff800817e280 &lt;+48&gt;:    mov     x21, x1
+   0xffffff800817e284 &lt;+52&gt;:    ldr     x0, [x0, <span style="color: #5B6268;">#</span><span style="color: #5B6268;">104]</span>
+   0xffffff800817e288 &lt;+56&gt;:    add     x0, x0, <span style="color: #5B6268;">#</span><span style="color: #5B6268;">0x418</span>
+   0xffffff800817e28c &lt;+60&gt;:    bl      0xffffff8008783950 &lt;mutex_lock&gt;
+
+2848
+2849            <span style="color: #dcaeea;">p</span> = d_ancestor(p2, p1);
+   0xffffff800817e290 &lt;+64&gt;:    mov     x1, x19
+   0xffffff800817e294 &lt;+68&gt;:    mov     x0, x21
+   0xffffff800817e298 &lt;+72&gt;:    bl      0xffffff800818dec8 &lt;d_ancestor&gt;
+   0xffffff800817e29c &lt;+76&gt;:    mov     x20, x0                                  //&#25972;&#20010;&#36807;&#31243;&#20043;&#20013;&#65292;&#23616;&#37096;&#21464;&#37327;p&#20840;&#31216;&#37117;&#27809;&#26377;&#23384;&#20648;&#22312;stack&#20013;&#65292;&#36825;&#26159;&#20010;&#34987;&#20248;&#21270;&#25481;&#30340;&#21464;&#37327;
+
+2850            if (p) {
+   0xffffff800817e2a0 &lt;+80&gt;:    cbz     x0, 0xffffff800817e2c4 &lt;lock_rename+116&gt;
+
+./include/linux/fs.h:
+748             down_write_nested(&amp;inode-&gt;i_rwsem, subclass);
+   0xffffff800817e2a4 &lt;+84&gt;:    ldr     x0, [x21, <span style="color: #5B6268;">#</span><span style="color: #5B6268;">48]</span>
+   0xffffff800817e2a8 &lt;+88&gt;:    add     x0, x0, <span style="color: #5B6268;">#</span><span style="color: #5B6268;">0xa0</span>
+   0xffffff800817e2ac &lt;+92&gt;:    bl      0xffffff80087846e8 &lt;down_write&gt;
+   0xffffff800817e2b0 &lt;+96&gt;:    ldr     x0, [x19, <span style="color: #5B6268;">#</span><span style="color: #5B6268;">48]</span>
+   0xffffff800817e2b4 &lt;+100&gt;:   add     x0, x0, <span style="color: #5B6268;">#</span><span style="color: #5B6268;">0xa0</span>
+   0xffffff800817e2b8 &lt;+104&gt;:   bl      0xffffff80087846e8 &lt;down_write&gt;
+
+fs/namei.c:
+2853                    return p;
+   0xffffff800817e2bc &lt;+108&gt;:   ldr     x21, [sp, <span style="color: #5B6268;">#</span><span style="color: #5B6268;">32]</span>
+   0xffffff800817e2c0 &lt;+112&gt;:   b       0xffffff800817e2f0 &lt;lock_rename+160&gt;
+
+2854            }
+2855
+2856            <span style="color: #dcaeea;">p</span> = d_ancestor(p1, p2);
+   0xffffff800817e2c4 &lt;+116&gt;:   mov     x1, x21
+   0xffffff800817e2c8 &lt;+120&gt;:   mov     x0, x19
+   0xffffff800817e2cc &lt;+124&gt;:   bl      0xffffff800818dec8 &lt;d_ancestor&gt;
+   0xffffff800817e2d0 &lt;+128&gt;:   mov     x20, x0
+
+./include/linux/fs.h:
+748             down_write_nested(&amp;inode-&gt;i_rwsem, subclass);
+   0xffffff800817e2d4 &lt;+132&gt;:   ldr     x0, [x19, <span style="color: #5B6268;">#</span><span style="color: #5B6268;">48]</span>
+   0xffffff800817e2d8 &lt;+136&gt;:   add     x0, x0, <span style="color: #5B6268;">#</span><span style="color: #5B6268;">0xa0</span>
+   0xffffff800817e2dc &lt;+140&gt;:   bl      0xffffff80087846e8 &lt;down_write&gt;
+   0xffffff800817e2e0 &lt;+144&gt;:   ldr     x0, [x21, <span style="color: #5B6268;">#</span><span style="color: #5B6268;">48]</span>
+   0xffffff800817e2e4 &lt;+148&gt;:   add     x0, x0, <span style="color: #5B6268;">#</span><span style="color: #5B6268;">0xa0</span>
+   0xffffff800817e2e8 &lt;+152&gt;:   bl      0xffffff80087846e8 &lt;down_write&gt;
+
+fs/namei.c:
+2865            return NULL;
+   0xffffff800817e2ec &lt;+156&gt;:   ldr     x21, [sp, <span style="color: #5B6268;">#</span><span style="color: #5B6268;">32]</span>
+   0xffffff800817e2f0 &lt;+160&gt;:   mov     x0, x20                                  // &#20934;&#22791;&#36820;&#22238;&#20540;
+   0xffffff800817e2f4 &lt;+164&gt;:   ldp     x19, x20, [sp, <span style="color: #5B6268;">#</span><span style="color: #5B6268;">16]                      // &#24674;&#22797;&#23492;&#23384;&#22120;</span>
+   0xffffff800817e2f8 &lt;+168&gt;:   ldp     x29, x30, [sp], <span style="color: #5B6268;">#</span><span style="color: #5B6268;">48                      //&#24674;&#22797;&#26632;&#24103;</span>
+   0xffffff800817e2fc &lt;+172&gt;:   ret                                              // return&#25351;&#20196;&#36820;&#22238;LR(X30)&#25351;&#38024;&#25152;&#22312;&#20301;&#32622;
+End of assembler dump.
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-org8a8eb8b" class="outline-4">
+<h4 id="org8a8eb8b">Variadic functions</h4>
+<div class="outline-text-4" id="text-org8a8eb8b">
+<ol class="org-ol">
+<li>same with Regulator Function<br></li>
+<li>保存X1-X7的寄存器到栈中<br></li>
+<li>对va_list的处理<br></li>
+</ol>
+<p>
+Souce<br>
+</p>
+<div class="org-src-container">
+<pre class="src src-C">asmlinkage __visible <span style="color: #ECBE7B;">int</span> <span style="color: #c678dd;">printk</span>(<span style="color: #51afef;">const</span> <span style="color: #ECBE7B;">char</span> *<span style="color: #dcaeea;">fmt</span>, ...)
+{
+    <span style="color: #ECBE7B;">va_list</span> <span style="color: #dcaeea;">args</span>;
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">r</span>;
+
+    va_start(args, fmt);
+    r = vprintk_func(fmt, args);
+    va_end(args);
+
+    <span style="color: #51afef;">return</span> r;
+}
+<span style="color: #c678dd;">EXPORT_SYMBOL</span>(printk);
+</pre>
+</div>
+
+<p>
+Disassemble<br>
+</p>
+<div class="org-src-container">
+<pre class="src src-bash">(gdb) disassemble /s
+Dump of assembler code for <span style="color: #51afef;">function</span> <span style="color: #c678dd;">printk</span>:
+kernel/printk/printk.c:
+1990    {
+=&gt; 0xffff000008127454 &lt;+0&gt;:     stp     x29, x30, [sp, <span style="color: #5B6268;">#</span><span style="color: #5B6268;">-176]!                     sp = 0xffff00000805bcf0</span>
+   0xffff000008127458 &lt;+4&gt;:     mov     w8, <span style="color: #5B6268;">#</span><span style="color: #5B6268;">0xffffffc8                 // #-56       sp = 0xFFFF00000805bc40</span>
+   0xffff00000812745c &lt;+8&gt;:     mov     x29, sp                                       <span style="color: #dcaeea;">x29</span> = sp, <span style="color: #dcaeea;">fp</span> = 0xFFFF00000805bc40
+   0xffff000008127460 &lt;+12&gt;:    add     x9, sp, <span style="color: #5B6268;">#</span><span style="color: #5B6268;">0x70                                 x9= 0xFFFF00000805bcb0</span>
+   0xffff000008127464 &lt;+16&gt;:    add     x10, sp, <span style="color: #5B6268;">#</span><span style="color: #5B6268;">0xb0                                x10 = 0xffff00000805bcf0  i.e. stack_top</span>
+   0xffff000008127468 &lt;+20&gt;:    str     x19, [sp, <span style="color: #5B6268;">#</span><span style="color: #5B6268;">16]                                backup x19 to stack Local Variables</span>
+   0xffff00000812746c &lt;+24&gt;:    adrp    x19, 0xffff0000092b9000 &lt;page_wait_table+5376&gt;
+   0xffff000008127470 &lt;+28&gt;:    add     x19, x19, <span style="color: #5B6268;">#</span><span style="color: #5B6268;">0x6c8                              x19 = address of __stack_chk_guard</span>
+   0xffff000008127474 &lt;+32&gt;:    stp     x10, x10, [sp, <span style="color: #5B6268;">#</span><span style="color: #5B6268;">72]                           prepare va_list args</span>
+   0xffff000008127478 &lt;+36&gt;:    str     x9, [sp, <span style="color: #5B6268;">#</span><span style="color: #5B6268;">88]                                 save x9 to 0xFFFF00000805BC98</span>
+   0xffff00000812747c &lt;+40&gt;:    ldr     x9, [x19]                                     load stack guard magic value to x9.
+   0xffff000008127480 &lt;+44&gt;:    str     x9, [sp, <span style="color: #5B6268;">#</span><span style="color: #5B6268;">104]                                store stack guard magic value to stack on 0xFFFF00000805BCA8.</span>
+   0xffff000008127484 &lt;+48&gt;:    mov     x9, <span style="color: #5B6268;">#</span><span style="color: #5B6268;">0x0                        // #0</span>
+   0xffff000008127488 &lt;+52&gt;:    stp     w8, wzr, [sp, <span style="color: #5B6268;">#</span><span style="color: #5B6268;">96]                           &#35774;&#32622;&#21021;&#22987;&#30340;__gr_offs</span>
+   0xffff00000812748c &lt;+56&gt;:    ldp     x8, x9, [sp, <span style="color: #5B6268;">#</span><span style="color: #5B6268;">72]</span>
+   0xffff000008127490 &lt;+60&gt;:    stp     x8, x9, [sp, <span style="color: #5B6268;">#</span><span style="color: #5B6268;">32]</span>
+   0xffff000008127494 &lt;+64&gt;:    ldp     x8, x9, [sp, <span style="color: #5B6268;">#</span><span style="color: #5B6268;">88]</span>
+   0xffff000008127498 &lt;+68&gt;:    stp     x1, x2, [sp, <span style="color: #5B6268;">#</span><span style="color: #5B6268;">120]                           &#23558;x1 ~ x7&#25918;&#20837;GP Arg Save Area&#30340;&#21306;&#22495;</span>
+   0xffff00000812749c &lt;+72&gt;:    add     x1, sp, <span style="color: #5B6268;">#</span><span style="color: #5B6268;">0x20</span>
+   0xffff0000081274a0 &lt;+76&gt;:    stp     x8, x9, [sp, <span style="color: #5B6268;">#</span><span style="color: #5B6268;">48]</span>
+   0xffff0000081274a4 &lt;+80&gt;:    stp     x3, x4, [sp, <span style="color: #5B6268;">#</span><span style="color: #5B6268;">136]</span>
+   0xffff0000081274a8 &lt;+84&gt;:    stp     x5, x6, [sp, <span style="color: #5B6268;">#</span><span style="color: #5B6268;">152]</span>
+   0xffff0000081274ac &lt;+88&gt;:    str     x7, [sp, <span style="color: #5B6268;">#</span><span style="color: #5B6268;">168]                               &#24050;&#32463;&#23558;GP Arg Save Area&#35774;&#32622;&#22909;,va_list args&#21442;&#25968;&#24050;&#32463;&#22788;&#29702;&#22909;&#20102;&#12290;</span>
+(gdb) i r pc
+pc             0xffff0000081274b0  0xffff0000081274b0 &lt;printk+92&gt;
+(gdb) p args
+$<span style="color: #dcaeea;">6</span> = {
+  <span style="color: #dcaeea;">__stack</span> = 0xffff00000805bcf0,
+  <span style="color: #dcaeea;">__gr_top</span> = 0xffff00000805bcf0,
+  <span style="color: #dcaeea;">__vr_top</span> = 0xffff00000805bcb0,
+  <span style="color: #dcaeea;">__gr_offs</span> = -56,
+  <span style="color: #dcaeea;">__vr_offs</span> = 0
+}
+   0xffff0000081274b0 &lt;+92&gt;:    bl      0xffff000008127e28 &lt;vprintk_func&gt;
+
+1996            va_end(args);
+1997
+1998            return r;
+   0xffff0000081274b4 &lt;+96&gt;:    ldr     x2, [sp, <span style="color: #5B6268;">#</span><span style="color: #5B6268;">104]</span>
+   0xffff0000081274b8 &lt;+100&gt;:   ldr     x1, [x19]
+   0xffff0000081274bc &lt;+104&gt;:   eor     x1, x2, x1
+   0xffff0000081274c0 &lt;+108&gt;:   cbz     x1, 0xffff0000081274c8 &lt;printk+116&gt;
+   0xffff0000081274c4 &lt;+112&gt;:   bl      0xffff0000080d3d48 &lt;__stack_chk_fail&gt;
+   0xffff0000081274c8 &lt;+116&gt;:   ldr     x19, [sp, <span style="color: #5B6268;">#</span><span style="color: #5B6268;">16]</span>
+   0xffff0000081274cc &lt;+120&gt;:   ldp     x29, x30, [sp], <span style="color: #5B6268;">#</span><span style="color: #5B6268;">176</span>
+   0xffff0000081274d0 &lt;+124&gt;:   ret
+End of assembler dump.
+</pre>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org18e8fd8" class="outline-3">
+<h3 id="org18e8fd8">Crash Analysis</h3>
+<div class="outline-text-3" id="text-org18e8fd8">
+</div>
+<div id="outline-container-orgb58d3f0" class="outline-4">
+<h4 id="orgb58d3f0">U-Boot Crash Due to firewall</h4>
+<div class="outline-text-4" id="text-orgb58d3f0">
+<ul class="org-ul">
+<li>J5 memory Firewall<br></li>
+<li>DS5 断点<br></li>
+<li>DS5 脚本<br></li>
+<li><a href="https://source.android.com/devices/architecture/dto/syntax">dtb overlay</a><br></li>
+</ul>
+</div>
+
+<div id="outline-container-org8600c96" class="outline-5">
+<h5 id="org8600c96">分析问题的直接原因</h5>
+<div class="outline-text-5" id="text-org8600c96">
+<p>
+看一下失败Log<br>
+</p>
+
+<div class="org-src-container">
+<pre class="src src-text">U-Boot SPL 2018.09-00970-ga8d5cac867 (Apr 28 2021 - 10:52:12 +0800)
+BUILD_FLAGS: M:-1 __ AV:0
+Trying to boot from HB_BLK
+NOTICE:  BL31: v2.1(debug):j5-fiq-test-37-gb75ca9a
+NOTICE:  BL31: Built : 04:17:41, Jan 28 2021
+INFO:    GICv3 without legacy support detected. ARM GICv3 driver initialized in EL3
+INFO:    GICv3 GICTNS support enable.
+INFO:    BL31: Initialising Exception Handling Framework
+INFO:    BL31: Initializing runtime services
+INFO:    hobotd malloc pool setup at 0x80274000, size:0x200000
+INFO:    BL31: Preparing for EL3 exit to normal world
+INFO:    Entry point address = 0x88000000
+INFO:    SPSR = 0x3c9
+INFO:
+hb_firewall_handler: irq 88 occured in EL3
+INFO:    hb_firewall_handler: r: 1@0x0000000020000d14, w: 0@0x0000000020000000
+BACKTRACE: START: hb_firewall_handler
+0: EL3: 0x8003eccc
+1: EL3: 0x800072e4
+2: EL3: 0x8000db3c
+3: EL3: 0x80044d54
+BACKTRACE: END: hb_firewall_handler
+PANIC in EL3.
+x30            = 0x00000000800072f0
+x0             = 0x0000000000000000
+x1             = 0x0000000000000060
+x2             = 0x0000000000000060
+x3             = 0x0000000000000000
+x4             = 0x0000000000000000
+x5             = 0x0000000020000000
+x6             = 0x00000000880c5dc9
+x7             = 0x0000000000000003
+x8             = 0x0000000000000001
+x9             = 0x0000000041453020
+x10            = 0x0000000000000735
+x11            = 0x0000000082fbb9ac
+x12            = 0x000000000000593c
+x13            = 0x0000000082fbba6c
+x14            = 0x00000000880bf2e8
+x15            = 0x0000000082fbbd7c
+x16            = 0x0000000000000000
+x17            = 0x0000000000000000
+x18            = 0x0000000000000000
+x19            = 0x000000008808f000
+x20            = 0x0000000080070190
+x21            = 0x000000008000d9b8
+x22            = 0x0000000000000000
+x23            = 0x0000000000000000
+x24            = 0x0000000000000000
+x25            = 0x0000000000000000
+x26            = 0x0000000000000000
+x27            = 0x0000000000000000
+x28            = 0x0000000000000000
+x29            = 0x0000000080068e90
+scr_el3        = 0x0000000000000735
+sctlr_el3      = 0x0000000030cd183f
+cptr_el3       = 0x0000000000000000
+tcr_el3        = 0x000000008081351d
+daif           = 0x00000000000002c0
+mair_el3       = 0x00000000004404ff
+spsr_el3       = 0x00000000800003c9
+elr_el3        = 0x000000008802b018
+ttbr0_el3      = 0x000000008007a801
+esr_el3        = 0x000000005e000000
+far_el3        = 0x0000000000000000
+spsr_el1       = 0x0000000000000000
+elr_el1        = 0x0000000000000000
+spsr_abt       = 0x0000000000000000
+spsr_und       = 0x0000000000000000
+spsr_irq       = 0x0000000000000000
+spsr_fiq       = 0x0000000000000000
+sctlr_el1      = 0x0000000030d00800
+actlr_el1      = 0x0000000000000000
+cpacr_el1      = 0x0000000000000000
+csselr_el1     = 0x0000000000000000
+sp_el1         = 0x0000000000000000
+esr_el1        = 0x0000000000000000
+ttbr0_el1      = 0x0000000000000000
+ttbr1_el1      = 0x0000000000000000
+mair_el1       = 0x0000000000000000
+amair_el1      = 0x0000000000000000
+tcr_el1        = 0x0000000000000000
+tpidr_el1      = 0x0000000000000000
+tpidr_el0      = 0x0000000000000000
+tpidrro_el0    = 0x0000000000000000
+par_el1        = 0x000000000000080d
+mpidr_el1      = 0x0000000081000000
+afsr0_el1      = 0x0000000000000000
+afsr1_el1      = 0x0000000000000000
+contextidr_el1 = 0x0000000000000000
+vbar_el1       = 0x0000000000000000
+cntp_ctl_el0   = 0x0000000000000000
+cntp_cval_el0  = 0x0000000000000000
+cntv_ctl_el0   = 0x0000000000000000
+cntv_cval_el0  = 0x0000000000000000
+cntkctl_el1    = 0x0000000000000000
+sp_el0         = 0x0000000080068e90
+isr_el1        = 0x0000000000000000
+dacr32_el2     = 0x0000000000000000
+ifsr32_el2     = 0x0000000000000000
+cpuectlr_el1   = 0x000000002808bc00
+</pre>
+</div>
+</div>
+
+<ul class="org-ul">
+<li><a id="orge92aa4b"></a>firewall中断<br>
+<div class="outline-text-6" id="text-orge92aa4b">
+<div class="org-src-container">
+<pre class="src src-text">hb_firewall_handler: irq 88 occured in EL3
+INFO:    hb_firewall_handler: r: 1@0x0000000020000d14, w: 0@0x0000000020000000
+BACKTRACE: START: hb_firewall_handler
+0: EL3: 0x8003eccc
+1: EL3: 0x800072e4
+2: EL3: 0x8000db3c
+3: EL3: 0x80044d54
+</pre>
+</div>
+<p>
+这个地方只看第二行打印的地址就可以了， <b>r: 1@0x0000000020000d14, w: 0@0x0000000020000000</b><br>
+</p>
+<div class="org-src-container">
+<pre class="src src-C">INFO(<span style="color: #98be65;">"%s: r: %u@0x%016llx, w: %u@0x%016llx \n"</span>, __func__,
+    r_master, r_far, w_master, w_far);
+</pre>
+</div>
+<p>
+r: 读取<br>
+1@0x0000000020000d14: master 1 在读取0x0000000020000d14地址时被拦截<br>
+master 1: <a href="http://gitlab.hobot.cc/HCPD/bootloader/blob/j5-dev/include/drivers/hobot/hb_firewall.h">MFW_MASTER_ID_CPU</a><br>
+</p>
+</div>
+</li>
+<li><a id="org7b18cf8"></a>触发源<br>
+<div class="outline-text-6" id="text-org7b18cf8">
+<p>
+由于firewall通过中断来触发, 这里的ELR寄存器仅供参考, ESR, FAR寄存器没有参考意义<br>
+</p>
+<div class="org-src-container">
+<pre class="src src-text">elr_el3        = 0x000000008802b018
+esr_el3        = 0x000000005e000000
+far_el3        = 0x0000000000000000
+</pre>
+</div>
+
+<p>
+在此例中，由于没有smp，也没有中断的干扰，所以，ELR_EL3基本会是在出错的指令附近<br>
+</p>
+
+<p>
+反编译uboot, 可以看到，大致位址就是在通过map来读取数据时.<br>
+</p>
+
+<div class="org-src-container">
+<pre class="src src-text">Dump of assembler code for function regmap_mmio_read32le:
+drivers/core/regmap-mmio.c:
+27  {
+28      struct regmap *map = ctx-&gt;map;
+29      u32 *ptr = map_physmem(map-&gt;ranges[0].start + offset, 4, MAP_NOCACHE);
+   0x000000008802b008 &lt;+0&gt;:    00 00 40 f9                      ldr x0, [x0]
+   0x000000008802b00c &lt;+4&gt;:    e1 03 01 2a                      mov w1, w1
+   0x000000008802b010 &lt;+8&gt;:    00 18 40 f9                      ldr x0, [x0, #48]
+30  
+31      *valp = le32_to_cpu(readl(ptr));
+   0x000000008802b014 &lt;+12&gt;:   20 68 60 b8                      ldr w0, [x1, x0]
+   0x000000008802b018 &lt;+16&gt;:   bf 3f 03 d5                      dmb sy
+   0x000000008802b01c &lt;+20&gt;:   40 00 00 b9                      str w0, [x2]
+32  
+33      return 0;
+34  }
+   0x000000008802b020 &lt;+24&gt;:   00 00 80 52                      mov w0, #0x0                    // #0
+   0x000000008802b024 &lt;+28&gt;:   c0 03 5f d6                      ret
+End of assembler dump.
+</pre>
+</div>
+</div>
+</li>
+</ul>
+</div>
+
+<div id="outline-container-org97c7544" class="outline-5">
+<h5 id="org97c7544">分析dtb overlay失败的原因</h5>
+<div class="outline-text-5" id="text-org97c7544">
+<ul class="org-ul">
+<li>源代码<br></li>
+</ul>
+<div class="org-src-container">
+<pre class="src src-C"><span style="color: #ECBE7B;">int</span> <span style="color: #c678dd;">merge_dtb</span>(<span style="color: #ECBE7B;">void</span> *<span style="color: #dcaeea;">dst</span>, <span style="color: #ECBE7B;">void</span> *<span style="color: #dcaeea;">src</span>)
+{
+    <span style="color: #ECBE7B;">u32</span> <span style="color: #dcaeea;">fdt_size</span>;
+    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">ret</span>;
+
+    <span style="color: #51afef;">if</span> (dst == <span style="color: #a9a1e1;">NULL</span> || src == <span style="color: #a9a1e1;">NULL</span>)
+        <span style="color: #51afef;">return</span> 0;
+    <span style="color: #83898d;">/**</span>
+<span style="color: #83898d;">     * in FPGA environment, dtb will be load to memory directly.</span>
+<span style="color: #83898d;">     * In this case, dst will be same as src, because we use same dtbs</span>
+<span style="color: #83898d;">     */</span>
+    <span style="color: #51afef;">if</span> (dst == src)
+        <span style="color: #51afef;">return</span> 0;
+
+    <span style="color: #51afef;">if</span> (fdt_magic(dst) != FDT_MAGIC || fdt_magic(src) != FDT_MAGIC) {
+        <span style="color: #51afef;">return</span> -EINVAL;
+    }
+
+    <span style="color: #83898d;">/**</span>
+<span style="color: #83898d;">     * overlay device tree properties</span>
+<span style="color: #83898d;">     * there is some services populated by secure monitor.</span>
+<span style="color: #83898d;">     * overlay our base device tree.</span>
+<span style="color: #83898d;">     */</span>
+    fdt_size = fdt_totalsize(dst);
+
+    assert(fdt_size &lt;= <span style="color: #51afef;">sizeof</span>(backup_buffer));
+    memcpy(backup_buffer, dst, fdt_size);
+    ret = fdt_overlay_apply_verbose(dst, src);
+    <span style="color: #51afef;">if</span> (ret) {
+        pr_err(<span style="color: #98be65;">"dtb overlay failed with status %d\n"</span>, ret);
+        memcpy(dst, backup_buffer, fdt_size);
+    }
+
+    <span style="color: #51afef;">return</span> ret;
+}
+</pre>
+</div>
+
+<ul class="org-ul">
+<li>在出故障的地方打上断点<br></li>
+</ul>
+<p>
+DS5中，必须在镜像加载之后打上的断点才能起作用，使用时需要格外注意<br>
+</p>
+<div class="org-src-container">
+<pre class="src src-bash">&gt;hb spl_perform_fixups
+Hardware breakpoint 2 at EL3:0x0000000020002F64
+on file spl.c, line 412
+on file spl.c, line 414
+&gt;c
+Execution stopped<span style="color: #51afef;"> in</span> EL3h mode at breakpoint 2: EL3:0x0000000020002F64
+In spl.c
+Unable to read source file /home/bin.zhu/jenkins/workspace/platform_j5/j5_testing@2/uboot/board/hobot/j5/spl/spl.c
+EL3:0x0000000020002F64   412,0   MOV      w1,#0x19
+&gt;bt
+<span style="color: #5B6268;">#</span><span style="color: #5B6268;">0 spl_perform_fixups(spl_image = (struct spl_image_info*) 0x2001BD08) at spl.c:412</span>
+<span style="color: #5B6268;">#</span><span style="color: #5B6268;">1 [board_init_r+0xEC]</span>
+<span style="color: #5B6268;">#</span><span style="color: #5B6268;">2 [_main+0x28]</span>
+&gt;hb *EL2N:0x88000000
+Hardware breakpoint 3 at EL2N:0x0000000088000000
+&gt;c
+Execution stopped<span style="color: #51afef;"> in</span> EL2h mode at breakpoint 3: EL2N:0x0000000088000000
+EL2N:0x0000000088000000   B        {pc}+40 ; 0x88000028
+&gt;bt
+<span style="color: #5B6268;">#</span><span style="color: #5B6268;">0 [EL2N:0x0000000088000000]</span>
+&gt;add-symbol-file ~/symbols/boot/u-boot
+&gt;hb merge_dtb
+Hardware breakpoint 4 at EL2N:0x00000000880039BC
+on file dtb_overlay.c, line 33
+</pre>
+</div>
+
+<ul class="org-ul">
+<li>调试dtb overlay的相关函数，使用DS5脚本来dump dtb<br></li>
+</ul>
+
+<div class="org-src-container">
+<pre class="src src-bash">&gt;c
+Execution stopped<span style="color: #51afef;"> in</span> EL2h mode at breakpoint 4: EL2N:0x00000000880039BC
+In dtb_overlay.c
+Unable to read source file /home/bin.zhu/jenkins/workspace/platform_j5/j5_testing@2/uboot/board/hobot/j5/dtb_overlay.c
+EL2N:0x00000000880039BC   33,0   STP      x29,x30,[sp,#-0x30]!
+&gt;i r x0 x1
+X0          0x00000000880BF2E8
+X1          0x000000008005FF40
+
+&gt;source ~/work/src/fpga-script/script/dump_dtbs.py 0x00000000880BF2E8 x0.dtb
+&gt;source ~/work/src/fpga-script/script/dump_dtbs.py 0x000000008005FF40 x1.dtb
+&gt;b puts
+Breakpoint 5.1 at EL3:0x0000000020006044
+    on file console.c, line 537
+Breakpoint 5.2 at EL2N:0x000000008801F8FC
+    on file console.c, line 537
+    on file console.c, line 548
+&gt;c
+Execution stopped<span style="color: #51afef;"> in</span> EL2h mode at breakpoint 5.2: EL2N:0x000000008801F8FC
+In console.c
+EL2N:0x000000008801F8FC   537,0   {
+&gt;p s
+$<span style="color: #dcaeea;">10</span> = 0x82FBBB58 <span style="color: #98be65;">"failed on fdt_overlay_apply(): FDT_ERR_NOTFOUND</span>
+<span style="color: #98be65;">"</span>
+&gt;bt
+<span style="color: #5B6268;">#</span><span style="color: #5B6268;">0 puts(s = 0x82FBBB58 "failed on fdt_overlay_apply(): FDT_ERR_NOTFOUND</span>
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-org016eb59" class="outline-5">
+<h5 id="org016eb59">dtb overlay失败的原因</h5>
+<div class="outline-text-5" id="text-org016eb59">
+<p>
+从上边的操作log来看，失败原因是 <b>FDT_ERR_NOTFOUND</b> ,一般在对应需要overlay的节点找不到时才会报这个错误.<br>
+上边已经把fdt_overlay_apply_verbose函数的输入已经dump到文件中了，接下来分析这两个dtb文件既可<br>
+</p>
+
+<ul class="org-ul">
+<li>反编译dtb<br></li>
+</ul>
+<div class="org-src-container">
+<pre class="src src-bash">dtc -I dts -O dtb -o x0.dts x0.dtb
+dtc -I dts -O dtb -o x1.dts x1.dtb
+</pre>
+</div>
+
+<ul class="org-ul">
+<li>x0相关信息:<br></li>
+</ul>
+<div class="org-src-container">
+<pre class="src src-dts"><span style="color: #ECBE7B;">__symbols__</span> {
+    <span style="color: #dcaeea;">pmu</span> = <span style="color: #98be65;">"/pmu@aon"</span>;
+    <span style="color: #dcaeea;">gic</span> = <span style="color: #98be65;">"/interrupt-controller@58000000"</span>;
+    <span style="color: #dcaeea;">vmmcsd_fixed</span> = <span style="color: #98be65;">"/fixedregulator"</span>;
+    <span style="color: #dcaeea;">vmcsd1_fixed</span> = <span style="color: #98be65;">"/fixedregulator1"</span>;
+    <span style="color: #dcaeea;">tee_regmap</span> = <span style="color: #98be65;">"/tee_regmap_services"</span>;
+    <span style="color: #dcaeea;">gclk3</span> = <span style="color: #98be65;">"/gclk3"</span>;
+    <span style="color: #dcaeea;">cspi0</span> = <span style="color: #98be65;">"/cspi@0x48020000"</span>;
+    <span style="color: #dcaeea;">nor</span> = <span style="color: #98be65;">"/cspi@0x48020000/flash@0"</span>;
+    <span style="color: #dcaeea;">nand</span> = <span style="color: #98be65;">"/cspi@0x48020000/flash@1"</span>;
+    <span style="color: #dcaeea;">hyper</span> = <span style="color: #98be65;">"/cspi@0x48020000/flash@2"</span>;
+    <span style="color: #dcaeea;">hb_sci</span> = <span style="color: #98be65;">"/hb_sci@boot_flags"</span>;
+    -<span style="color: #dcaeea;">decoder</span> = <span style="color: #98be65;">"/hb_sci@sec_boot_flags"</span>;
+    <span style="color: #dcaeea;">ns,rclk-en</span> = <span style="color: #98be65;">"/firmware@tee"</span>;
+    <span style="color: #dcaeea;">n</span> = <span style="color: #98be65;">"/psci"</span>;
+    <span style="color: #dcaeea;">ess</span> = <span style="color: #98be65;">"/reserved-memory"</span>;
+};
+
+</pre>
+</div>
+
+<ul class="org-ul">
+<li>x1相关信息<br></li>
+</ul>
+<div class="org-src-container">
+<pre class="src src-dts"><span style="color: #ECBE7B;">__fixups__</span> {
+    <span style="color: #dcaeea;">firmware</span> = <span style="color: #98be65;">"/fragment@0:target:0"</span>;
+    <span style="color: #dcaeea;">reserved_memory</span> = <span style="color: #98be65;">"/fragment@1:target:0"</span>;
+    <span style="color: #dcaeea;">psci</span> = <span style="color: #98be65;">"/fragment@2:target:0"</span>;
+    <span style="color: #dcaeea;">tee_regmap</span> = <span style="color: #98be65;">"/fragment@3:target:0"</span>;
+    <span style="color: #dcaeea;">hb_sci</span> = <span style="color: #98be65;">"/fragment@4:target:0"</span>;
+    <span style="color: #dcaeea;">hb_sec_sci</span> = <span style="color: #98be65;">"/fragment@5:target:0"</span>;
+    <span style="color: #dcaeea;">soc</span> = <span style="color: #98be65;">"/fragment@6:target:0"</span>;
+};
+</pre>
+</div>
+
+<p>
+根据dtb overlay的原理，__fixups__对应的条目，必须在__symbols__里边能有相应的匹配项，才能overlay成功.<br>
+由上面的结果，很容易可以看出x0都应的symbol里边有部份条目不正常. x0是uboot.bin镜像中自带的dtb，尝试从image中dump出该dtb<br>
+</p>
+<ul class="org-ul">
+<li>dtb in image<br></li>
+</ul>
+
+<p>
+find offset in uboot.img.bin<br>
+</p>
+<div class="org-src-container">
+<pre class="src src-text">Section Headers:
+  [Nr] Name              Type            Address          Off    Size   ES Flg Lk Inf Al
+  [ 0]                   NULL            0000000000000000 000000 000000 00      0   0  0
+  [ 1] .text             PROGBITS        0000000088000000 010000 000128 00  AX  0   0  8
+  [ 2] .efi_runtime      PROGBITS        0000000088000128 010128 000990 00 WAX  0   0  8
+  [ 3] .text_rest        PROGBITS        0000000088001000 011000 07514c 00  AX  0   0 2048
+  [ 4] .rodata           PROGBITS        0000000088076150 086150 0263a7 00   A  0   0  8
+  [ 5] .hash             HASH            000000008809c4f8 0ac4f8 000018 04   A  0   0  8
+  [ 6] .data             PROGBITS        000000008809c510 0ac510 00679e 00  WA  0   0  8
+  [ 7] .got              PROGBITS        00000000880a2cb0 0b2cb0 000008 08  WA  0   0  8
+  [ 8] .got.plt          PROGBITS        00000000880a2cb8 0b2cb8 000018 08  WA  0   0  8
+  [ 9] .u_boot_list      PROGBITS        00000000880a2cd0 0b2cd0 003c70 00  WA  0   0  4
+  [10] .efi_runtime_rel  RELA            00000000880a6940 0b6940 0001e0 18   A  0   0  8
+  [11] .rela.dyn         RELA            00000000880a6b20 0b6b20 0187c8 18   A  0   0  8
+  [12] .dtbo_reserved    NOBITS          00000000880bf2e8 0cf2e8 040000 00  WA  0   0  8
+  [13] .bss_start        PROGBITS        00000000880ff2e8 10f2e8 000000 00  WA  0   0  8
+  [14] .bss              NOBITS          00000000880ff300 10f2e8 05bb68 00  WA  0   0 64
+  [15] .bss_end          PROGBITS        000000008815ae68 16ae68 000000 00  WA  0   0  8
+  [16] .debug_line       PROGBITS        0000000000000000 16ae68 052cd9 00      0   0  1
+  [17] .debug_info       PROGBITS        0000000000000000 1bdb41 32b788 00      0   0  1
+  [18] .debug_abbrev     PROGBITS        0000000000000000 4e92c9 04f098 00      0   0  1
+  [19] .debug_aranges    PROGBITS        0000000000000000 538370 00ebd0 00      0   0 16
+  [20] .comment          PROGBITS        0000000000000000 546f40 000024 01  MS  0   0  1
+  [21] .debug_frame      PROGBITS        0000000000000000 546f68 0251c0 00      0   0  8
+  [22] .debug_str        PROGBITS        0000000000000000 56c128 02988d 01  MS  0   0  1
+  [23] .debug_loc        PROGBITS        0000000000000000 5959b5 168f93 00      0   0  1
+  [24] .debug_ranges     PROGBITS        0000000000000000 6fe950 0257d0 00      0   0 16
+  [25] .shstrtab         STRTAB          0000000000000000 76a431 00011a 00      0   0  1
+  [26] .symtab           SYMTAB          0000000000000000 724120 034398 18     27 7211  8
+  [27] .strtab           STRTAB          0000000000000000 7584b8 011f79 00      0   0  1
+</pre>
+</div>
+
+<p>
+dtb在uboot.img.bin中的位址: 0x00000000880bf2e8 - 0x0000000088000000 + 0x240 = 0xbf528<br>
+</p>
+<div class="org-src-container">
+<pre class="src src-bash">dd <span style="color: #dcaeea;">if</span>=uboot.img.bin <span style="color: #dcaeea;">of</span>=dtb-in-image.dtb <span style="color: #dcaeea;">bs</span>=1 <span style="color: #dcaeea;">skip</span>=78365
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-dts"><span style="color: #ECBE7B;">__symbols__</span> {
+        <span style="color: #dcaeea;">tee_regmap</span> = <span style="color: #98be65;">"/tee_regmap_services"</span>;
+        <span style="color: #dcaeea;">gclk3</span> = <span style="color: #98be65;">"/gclk3"</span>;
+        <span style="color: #dcaeea;">cspi0</span> = <span style="color: #98be65;">"/cspi@0x48020000"</span>;
+        <span style="color: #dcaeea;">nor</span> = <span style="color: #98be65;">"/cspi@0x48020000/flash@0"</span>;
+        <span style="color: #dcaeea;">nand</span> = <span style="color: #98be65;">"/cspi@0x48020000/flash@1"</span>;
+        <span style="color: #dcaeea;">hyper</span> = <span style="color: #98be65;">"/cspi@0x48020000/flash@2"</span>;
+        <span style="color: #dcaeea;">hb_sci</span> = <span style="color: #98be65;">"/hb_sci@boot_flags"</span>;
+        <span style="color: #dcaeea;">hb_sec_sci</span> = <span style="color: #98be65;">"/hb_sci@sec_boot_flags"</span>;
+        <span style="color: #dcaeea;">firmware</span> = <span style="color: #98be65;">"/firmware@tee"</span>;
+        <span style="color: #dcaeea;">psci</span> = <span style="color: #98be65;">"/psci"</span>;
+        <span style="color: #dcaeea;">reserved_memory</span> = <span style="color: #98be65;">"/reserved-memory"</span>;
+};
+</pre>
+</div>
+
+<ul class="org-ul">
+<li>Use watchpoint to check if it‘s modified by BL31 or someware else.<br>
+在这个例子中，此处的内存并没有有被意外修改，所以此处省略加watchpoint的示例.<br></li>
+</ul>
+
+<ul class="org-ul">
+<li>dump in image &amp; after load<br></li>
+</ul>
+
+<div class="org-src-container">
+<pre class="src src-text">00007290: 3500 6932 6336 0069 3263 3700 7063 6965  5.i2c6.i2c7.pcie
+000072a0: 006d 6d63 3000 6d6d 6331 0074 6565 5f72  .mmc0.mmc1.tee_r
+000072b0: 6567 6d61 7000 6763 6c6b 3300 6373 7069  egmap.gclk3.cspi
+000072c0: 3000 6e6f 7200 6e61 6e64 0068 7970 6572  0.nor.nand.hyper
+000072d0: 0068 625f 7363 6900 2d64 6563 6f64 6572  .hb_sci.-decoder
+000072e0: 0063 646e 732c 7263 6c6b 2d65 6e00 6163  .cdns,rclk-en.ac
+000072f0: 6365 7373 0063 646e 732c 7061 6765 2d73  cess.cdns,page-s
+00007300: 697a                                 
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-text">00007290: 3500 6932 6336 0069 3263 3700 7063 6965  5.i2c6.i2c7.pcie
+000072a0: 006d 6d63 3000 6d6d 6331 0074 6565 5f72  .mmc0.mmc1.tee_r
+000072b0: 6567 6d61 7000 6763 6c6b 3300 6373 7069  egmap.gclk3.cspi
+000072c0: 3000 6e6f 7200 6e61 6e64 0068 7970 6572  0.nor.nand.hyper
+000072d0: 0068 625f 7363 6900 6862 5f73 6563 5f73  .hb_sci.hb_sec_s
+000072e0: 6369 0066 6972 6d77 6172 6500 7073 6369  ci.firmware.psci
+000072f0: 0072 6573 6572 7665 645f 6d65 6d6f 7279  .reserved_memory
+00007300: 00                                   
+</pre>
+</div>
+
+<ul class="org-ul">
+<li>确定是loader的问题，并修复<br></li>
+</ul>
+<p>
+从上面的结果可以看到，在加载后，这里dtb里边的__symbol__已经是不正常的状态了.<br>
+修复patch：<a href="http://gitlab.hobot.cc/ptd/ss/hobot-system/uboot/commit/c391f2c99817ed90d0e1a69bb42ff21b5e94959d">hb_load: image_len + header size, image_len not include header size.</a><br>
+</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<script src="https://utteranc.es/client.js"
+    repo="schspa/schspa.github.io"
+    issue-term="title"
+    label="✨💬✨"
+    theme="github-light"
+    crossorigin="anonymous"
+    async>
+</script>
+<div class="me">
+  <span><b>Contact me via :)</b><span>
+  <div class="contact">
+    <a id="email" href="mailto:schspa@gmail.com" target="_blank"><i class="fab fa-mailchimp animated heartBeat delay-2s slower"></i></a>
+    <a id="github" href="//github.com/schspa" target="_blank"><i class="fab fa-github animated heartBeat delay-2s slower"></i></a>
+  </div>
+</div>
+
+<div id="jinrishici-sentence" style="font-weight: 700;">虚怀乃若谷，水深则流缓。</div>
+<script src="https://sdk.jinrishici.com/v2/browser/jinrishici.js" charset="utf-8"></script>
+</div>
+</body>
+</html>

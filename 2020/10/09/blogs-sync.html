@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2021-01-31 日 22:54 -->
+<!-- 2021-10-12 二 19:35 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Use Github Action to Sync blogs</title>
@@ -10,10 +10,12 @@
 <meta name="description" content="Use Github Action to Sync blogs"
 >
 <link rel="shortcut icon" href="/images/rose-red.png" type="image/x-icon" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" integrity="sha256-sAcc18zvMnaJZrNT4v8J0T4HqzEUiUTlVFgDIywjQek=" crossorigin="anonymous">
 <link rel="stylesheet" href="/css/animate.min.css" />
 <link rel="stylesheet" href="/css/all.min.css" />
 <link rel="stylesheet" type="text/css" href="/css/style.css" />
 <link rel="stylesheet" type="text/css" href="/css/navbar.css" />
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/js/bootstrap.min.js" integrity="sha256-/hGxZHGQ57fXLp+NDusFZsZo/PG21Bp2+hXYV5a6w+g=" crossorigin="anonymous"></script>
 <script src="/js/jquery.min.js"></script>
 <script src="/js/darkreader.js"></script>
 <script src="/user.config.js"></script>
@@ -60,22 +62,22 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#orgdedc98c">环境介绍</a></li>
-<li><a href="#org2fd4b25">Runner 配置</a>
+<li><a href="#orgd212838">环境介绍</a></li>
+<li><a href="#orge464387">Runner 配置</a>
 <ul>
-<li><a href="#org86bff60">安装github runner</a></li>
-<li><a href="#orgc91354e">自启动runner</a></li>
-<li><a href="#org32a2825">runner权限设置</a></li>
+<li><a href="#org15b5761">安装github runner</a></li>
+<li><a href="#org6b895fe">自启动runner</a></li>
+<li><a href="#org6ec7850">runner权限设置</a></li>
 </ul>
 </li>
-<li><a href="#org44bc86e">设置在push操作时自动更新</a></li>
+<li><a href="#org5c6abc8">设置在push操作时自动更新</a></li>
 </ul>
 </div>
 </div>
 
-<div id="outline-container-orgdedc98c" class="outline-2">
-<h2 id="orgdedc98c">环境介绍</h2>
-<div class="outline-text-2" id="text-orgdedc98c">
+<div id="outline-container-orgd212838" class="outline-2">
+<h2 id="orgd212838">环境介绍</h2>
+<div class="outline-text-2" id="text-orgd212838">
 <p>
 我自己的Blog是通过<a href="https://orgmode.org/manual/Publishing.html">org-publish</a>来生成的, 生成之后部属在<a href="http://schspa.tk">schspa.tk</a>以及<a href="http://schspa.github.io">github io</a>上，之前每次更新博客之后，我都会向两个服务器上去同步一下博客，<br>
 现在github有了<a href="https://github.com/features/actions">github action</a> 并且可以支持使用自己runner服务，这样我们就可以利用github action来动态在更新github action时自动更新博客了。<br>
@@ -114,22 +116,22 @@
 </div>
 </div>
 
-<div id="outline-container-org2fd4b25" class="outline-2">
-<h2 id="org2fd4b25">Runner 配置</h2>
-<div class="outline-text-2" id="text-org2fd4b25">
+<div id="outline-container-orge464387" class="outline-2">
+<h2 id="orge464387">Runner 配置</h2>
+<div class="outline-text-2" id="text-orge464387">
 </div>
-<div id="outline-container-org86bff60" class="outline-3">
-<h3 id="org86bff60">安装github runner</h3>
-<div class="outline-text-3" id="text-org86bff60">
+<div id="outline-container-org15b5761" class="outline-3">
+<h3 id="org15b5761">安装github runner</h3>
+<div class="outline-text-3" id="text-org15b5761">
 <p>
 按照下面的官方文档可以很容易的部属好runner，部属过程很顺利，没有遇到任何错误<br>
 <a href="https://docs.github.com/en/free-pro-team@latest/actions/hosting-your-own-runners/adding-self-hosted-runners">https://docs.github.com/en/free-pro-team@latest/actions/hosting-your-own-runners/adding-self-hosted-runners</a><br>
 </p>
 </div>
 </div>
-<div id="outline-container-orgc91354e" class="outline-3">
-<h3 id="orgc91354e">自启动runner</h3>
-<div class="outline-text-3" id="text-orgc91354e">
+<div id="outline-container-org6b895fe" class="outline-3">
+<h3 id="org6b895fe">自启动runner</h3>
+<div class="outline-text-3" id="text-org6b895fe">
 <p>
 按照官方的wiki，linux下可以使用官方自己给的systemd服务配置文件就可以配置好开机自启动<br>
 <a href="https://docs.github.com/en/free-pro-team@latest/actions/hosting-your-own-runners/configuring-the-self-hosted-runner-application-as-a-service">https://docs.github.com/en/free-pro-team@latest/actions/hosting-your-own-runners/configuring-the-self-hosted-runner-application-as-a-service</a><br>
@@ -160,9 +162,9 @@ Oct 09 22:54:47 ip-172-31-43-98 runsvc.sh[2032]: .path=/usr/local/sbin:/usr/loca
 </div>
 </div>
 
-<div id="outline-container-org32a2825" class="outline-3">
-<h3 id="org32a2825">runner权限设置</h3>
-<div class="outline-text-3" id="text-org32a2825">
+<div id="outline-container-org6ec7850" class="outline-3">
+<h3 id="org6ec7850">runner权限设置</h3>
+<div class="outline-text-3" id="text-org6ec7850">
 <p>
 由于runner直接安装在了host机上，没有docker等容器的保护，所以权限方面要格外设置好，放置不法分子利用这个runner来攻击服务器。<br>
 </p>
@@ -171,8 +173,8 @@ Oct 09 22:54:47 ip-172-31-43-98 runsvc.sh[2032]: .path=/usr/local/sbin:/usr/loca
 下面是我自己的权限设置，只允许自己使用<br>
 </p>
 
-<div id="org90d239a" class="figure">
-<p><img src="asserts/github-selfhost-action-setup.jpg" alt="github-selfhost-action-setup.jpg"><br>
+<div id="orgbd6e34c" class="figure">
+<p><img src="assets/github-selfhost-action-setup.jpg" alt="github-selfhost-action-setup.jpg"><br>
 </p>
 <p><span class="figure-number">Figure 1: </span>runner权限设置</p>
 </div>
@@ -180,9 +182,9 @@ Oct 09 22:54:47 ip-172-31-43-98 runsvc.sh[2032]: .path=/usr/local/sbin:/usr/loca
 </div>
 </div>
 
-<div id="outline-container-org44bc86e" class="outline-2">
-<h2 id="org44bc86e">设置在push操作时自动更新</h2>
-<div class="outline-text-2" id="text-org44bc86e">
+<div id="outline-container-org5c6abc8" class="outline-2">
+<h2 id="org5c6abc8">设置在push操作时自动更新</h2>
+<div class="outline-text-2" id="text-org5c6abc8">
 <p>
 配置文件：<br>
 </p>

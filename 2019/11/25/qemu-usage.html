@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2021-01-31 日 22:54 -->
+<!-- 2021-10-12 二 19:35 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>qemu使用踩坑</title>
@@ -10,10 +10,12 @@
 <meta name="description" content="qemu.org"
 >
 <link rel="shortcut icon" href="/images/rose-red.png" type="image/x-icon" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" integrity="sha256-sAcc18zvMnaJZrNT4v8J0T4HqzEUiUTlVFgDIywjQek=" crossorigin="anonymous">
 <link rel="stylesheet" href="/css/animate.min.css" />
 <link rel="stylesheet" href="/css/all.min.css" />
 <link rel="stylesheet" type="text/css" href="/css/style.css" />
 <link rel="stylesheet" type="text/css" href="/css/navbar.css" />
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/js/bootstrap.min.js" integrity="sha256-/hGxZHGQ57fXLp+NDusFZsZo/PG21Bp2+hXYV5a6w+g=" crossorigin="anonymous"></script>
 <script src="/js/jquery.min.js"></script>
 <script src="/js/darkreader.js"></script>
 <script src="/user.config.js"></script>
@@ -60,28 +62,28 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#orgf0a8126">编译qemu</a></li>
-<li><a href="#org8a500c1">运行</a></li>
-<li><a href="#org47a957b">文件共享</a>
+<li><a href="#org85623cf">编译qemu</a></li>
+<li><a href="#org69a5981">运行</a></li>
+<li><a href="#org19f0886">文件共享</a>
 <ul>
-<li><a href="#orgb4eb3b7">9P over virtiofs</a></li>
+<li><a href="#org557f2a5">9P over virtiofs</a></li>
 </ul>
 </li>
-<li><a href="#org5c018ee">网络设置</a>
+<li><a href="#orgc68db97">网络设置</a>
 <ul>
-<li><a href="#org3fcd27b">linux Host</a></li>
-<li><a href="#org1e9fe5e"><span class="todo TODO">TODO</span> Macos Host</a></li>
-<li><a href="#orgc381c14">qemu command line</a></li>
+<li><a href="#org40edf1b">linux Host</a></li>
+<li><a href="#orgee248f4"><span class="todo TODO">TODO</span> Macos Host</a></li>
+<li><a href="#org5eebb60">qemu command line</a></li>
 </ul>
 </li>
-<li><a href="#org19ab1fe">参考文档</a></li>
+<li><a href="#org0c5c331">参考文档</a></li>
 </ul>
 </div>
 </div>
 
-<div id="outline-container-orgf0a8126" class="outline-2">
-<h2 id="orgf0a8126">编译qemu</h2>
-<div class="outline-text-2" id="text-orgf0a8126">
+<div id="outline-container-org85623cf" class="outline-2">
+<h2 id="org85623cf">编译qemu</h2>
+<div class="outline-text-2" id="text-org85623cf">
 <div class="org-src-container">
 <pre class="src src-bash">./configure --target-list=aarch64-softmmu --enable-virtfs
 make -j8
@@ -93,9 +95,9 @@ make -j8
 </div>
 </div>
 
-<div id="outline-container-org8a500c1" class="outline-2">
-<h2 id="org8a500c1">运行</h2>
-<div class="outline-text-2" id="text-org8a500c1">
+<div id="outline-container-org69a5981" class="outline-2">
+<h2 id="org69a5981">运行</h2>
+<div class="outline-text-2" id="text-org69a5981">
 <div class="org-src-container">
 <pre class="src src-bash">qemu-system-aarch64 -machine virt -cpu cortex-a57 -machine <span style="color: #dcaeea;">type</span>=virt -nographic -smp 4 -m 2048 --append <span style="color: #98be65;">"console=ttyAMA0"</span> --kernel ~/work/src/linux.git/arch/arm64/boot/Image --initrd ~/work/buildroot-2018.05/output/images/rootfs.cpio.bz2
 </pre>
@@ -103,13 +105,13 @@ make -j8
 </div>
 </div>
 
-<div id="outline-container-org47a957b" class="outline-2">
-<h2 id="org47a957b">文件共享</h2>
-<div class="outline-text-2" id="text-org47a957b">
+<div id="outline-container-org19f0886" class="outline-2">
+<h2 id="org19f0886">文件共享</h2>
+<div class="outline-text-2" id="text-org19f0886">
 </div>
-<div id="outline-container-orgb4eb3b7" class="outline-3">
-<h3 id="orgb4eb3b7"><a href="https://wiki.qemu.org/Documentation/9psetup">9P over virtiofs</a></h3>
-<div class="outline-text-3" id="text-orgb4eb3b7">
+<div id="outline-container-org557f2a5" class="outline-3">
+<h3 id="org557f2a5"><a href="https://wiki.qemu.org/Documentation/9psetup">9P over virtiofs</a></h3>
+<div class="outline-text-3" id="text-org557f2a5">
 <p>
 9pfs是基于网络的文件共享协议，qemu中的软件可以通过此种方法来访问宿主机中的文件。详见Plan 9 9p remote filesystem protocol<br>
 <b>qemu在Mac OS上不支持virtio，故无法使用以下的方法</b><br>
@@ -159,13 +161,13 @@ mount tag也可以通过sysfs来查看<br>
 </div>
 </div>
 
-<div id="outline-container-org5c018ee" class="outline-2">
-<h2 id="org5c018ee">网络设置</h2>
-<div class="outline-text-2" id="text-org5c018ee">
+<div id="outline-container-orgc68db97" class="outline-2">
+<h2 id="orgc68db97">网络设置</h2>
+<div class="outline-text-2" id="text-orgc68db97">
 </div>
-<div id="outline-container-org3fcd27b" class="outline-3">
-<h3 id="org3fcd27b">linux Host</h3>
-<div class="outline-text-3" id="text-org3fcd27b">
+<div id="outline-container-org40edf1b" class="outline-3">
+<h3 id="org40edf1b">linux Host</h3>
+<div class="outline-text-3" id="text-org40edf1b">
 <ul class="org-ul">
 <li><p>
 设置网络设备<br>
@@ -204,12 +206,12 @@ sudo kill $(cat /var/run/qemu-dhcp-br0.pid)
 </ul>
 </div>
 </div>
-<div id="outline-container-org1e9fe5e" class="outline-3">
-<h3 id="org1e9fe5e"><span class="todo TODO">TODO</span> Macos Host</h3>
+<div id="outline-container-orgee248f4" class="outline-3">
+<h3 id="orgee248f4"><span class="todo TODO">TODO</span> Macos Host</h3>
 </div>
-<div id="outline-container-orgc381c14" class="outline-3">
-<h3 id="orgc381c14">qemu command line</h3>
-<div class="outline-text-3" id="text-orgc381c14">
+<div id="outline-container-org5eebb60" class="outline-3">
+<h3 id="org5eebb60">qemu command line</h3>
+<div class="outline-text-3" id="text-org5eebb60">
 <div class="org-src-container">
 <pre class="src src-bash">-netdev tap,<span style="color: #dcaeea;">ifname</span>=tap0,<span style="color: #dcaeea;">id</span>=net0,<span style="color: #dcaeea;">script</span>=no,<span style="color: #dcaeea;">downscript</span>=no -device virtio-net-device,<span style="color: #dcaeea;">netdev</span>=net0,<span style="color: #dcaeea;">mac</span>=52:55:00:fa:ee:10
 </pre>
@@ -218,9 +220,9 @@ sudo kill $(cat /var/run/qemu-dhcp-br0.pid)
 </div>
 </div>
 
-<div id="outline-container-org19ab1fe" class="outline-2">
-<h2 id="org19ab1fe">参考文档</h2>
-<div class="outline-text-2" id="text-org19ab1fe">
+<div id="outline-container-org0c5c331" class="outline-2">
+<h2 id="org0c5c331">参考文档</h2>
+<div class="outline-text-2" id="text-org0c5c331">
 <p>
 <a href="http://www.voidcn.com/article/p-xlgkygpv-p.html">http://www.voidcn.com/article/p-xlgkygpv-p.html</a><br>
 <a href="https://kennedy-han.github.io/2015/06/15/QEMU-arm64-guide.html">https://kennedy-han.github.io/2015/06/15/QEMU-arm64-guide.html</a><br>

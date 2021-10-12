@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2021-02-04 四 21:09 -->
+<!-- 2021-10-12 二 19:35 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>QEMU virtio-9p-device assert failed</title>
@@ -10,10 +10,12 @@
 <meta name="description" content="QEMU virtio-9p-device assert failed"
 >
 <link rel="shortcut icon" href="/images/rose-red.png" type="image/x-icon" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" integrity="sha256-sAcc18zvMnaJZrNT4v8J0T4HqzEUiUTlVFgDIywjQek=" crossorigin="anonymous">
 <link rel="stylesheet" href="/css/animate.min.css" />
 <link rel="stylesheet" href="/css/all.min.css" />
 <link rel="stylesheet" type="text/css" href="/css/style.css" />
 <link rel="stylesheet" type="text/css" href="/css/navbar.css" />
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/js/bootstrap.min.js" integrity="sha256-/hGxZHGQ57fXLp+NDusFZsZo/PG21Bp2+hXYV5a6w+g=" crossorigin="anonymous"></script>
 <script src="/js/jquery.min.js"></script>
 <script src="/js/darkreader.js"></script>
 <script src="/user.config.js"></script>
@@ -60,37 +62,38 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents">
 <ul>
-<li><a href="#orgcbe76ab">Problems</a></li>
-<li><a href="#org6a5ae85">Problem analyse</a>
+<li><a href="#orgabb1f4e">Problems</a></li>
+<li><a href="#orgc746f93">Problem analyse</a>
 <ul>
-<li><a href="#orgb6e8bfd">google it.</a></li>
-<li><a href="#orgda5c171">查一下本地仓库的提交记录</a></li>
-<li><a href="#org3861935">稍微调试一下</a>
+<li><a href="#orgc03d2e4">google it.</a></li>
+<li><a href="#org5f45998">查一下本地仓库的提交记录</a></li>
+<li><a href="#org4caffcd">稍微调试一下</a>
 <ul>
-<li><a href="#org39c26c9">看看之前已经合入的修复patch</a></li>
-<li><a href="#orgaeb192e">回过头看我们的设备名称</a></li>
-<li><a href="#orgd351ed6">调试以下修复的patch</a></li>
-<li><a href="#orgdf4d1d5">看看这个地址为什么不对</a></li>
-<li><a href="#org9521152">看一看virtio-mmio的创建代码</a></li>
-<li><a href="#orga1dcaab">看看其他平台</a></li>
+<li><a href="#orga772ee0">看看之前已经合入的修复patch</a></li>
+<li><a href="#org735fa9a">回过头看我们的设备名称</a></li>
+<li><a href="#orgf51a8f6">调试以下修复的patch</a></li>
+<li><a href="#org9128cf1">看看这个地址为什么不对</a></li>
+<li><a href="#org6e16b9b">看一看virtio-mmio的创建代码</a></li>
+<li><a href="#orga57b6ec">看看其他平台</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li><a href="#orgfc39fdc">修复方案</a>
+<li><a href="#org449fe01">修复方案</a>
 <ul>
-<li><a href="#orgbf5b7e5">添加sysbus_mmio_map的调用</a></li>
-<li><a href="#org24f4e79">使用arm virt平台上的初始化</a></li>
-<li><a href="#org5984f9d">不太OK的解决方案</a></li>
+<li><a href="#org81fed80">添加sysbus_mmio_map的调用</a></li>
+<li><a href="#org9bd53a9">使用arm virt平台上的初始化</a></li>
+<li><a href="#orgc5df3b8">不太OK的解决方案</a></li>
+<li><a href="#org6239fa7">提交的qemu中的解决方案</a></li>
 </ul>
 </li>
 </ul>
 </div>
 </div>
 
-<div id="outline-container-orgcbe76ab" class="outline-2">
-<h2 id="orgcbe76ab">Problems</h2>
-<div class="outline-text-2" id="text-orgcbe76ab">
+<div id="outline-container-orgabb1f4e" class="outline-2">
+<h2 id="orgabb1f4e">Problems</h2>
+<div class="outline-text-2" id="text-orgabb1f4e">
 <p>
 在xlnx-versal-virt平台上，创建多个相同类型的virtio设备时，会报错<br>
 </p>
@@ -117,13 +120,13 @@
 </div>
 </div>
 
-<div id="outline-container-org6a5ae85" class="outline-2">
-<h2 id="org6a5ae85">Problem analyse</h2>
-<div class="outline-text-2" id="text-org6a5ae85">
+<div id="outline-container-orgc746f93" class="outline-2">
+<h2 id="orgc746f93">Problem analyse</h2>
+<div class="outline-text-2" id="text-orgc746f93">
 </div>
-<div id="outline-container-orgb6e8bfd" class="outline-3">
-<h3 id="orgb6e8bfd">google it.</h3>
-<div class="outline-text-3" id="text-orgb6e8bfd">
+<div id="outline-container-orgc03d2e4" class="outline-3">
+<h3 id="orgc03d2e4">google it.</h3>
+<div class="outline-text-3" id="text-orgc03d2e4">
 <ul class="org-ul">
 <li>bug report<br>
 <a href="https://bugs.launchpad.net/qemu/+bug/1594239">https://bugs.launchpad.net/qemu/+bug/1594239</a><br></li>
@@ -134,24 +137,24 @@
 </div>
 </div>
 
-<div id="outline-container-orgda5c171" class="outline-3">
-<h3 id="orgda5c171">查一下本地仓库的提交记录</h3>
-<div class="outline-text-3" id="text-orgda5c171">
+<div id="outline-container-org5f45998" class="outline-3">
+<h3 id="org5f45998">查一下本地仓库的提交记录</h3>
+<div class="outline-text-3" id="text-org5f45998">
 <p>
-<img src="asserts/2021-02-03_16-27-59_screenshot.png" alt="2021-02-03_16-27-59_screenshot.png"><br>
+<img src="assets/2021-02-03_16-27-59_screenshot.png" alt="2021-02-03_16-27-59_screenshot.png"><br>
 这个提交好好的躺在这里呢, 2333.<br>
 </p>
 </div>
 </div>
 
-<div id="outline-container-org3861935" class="outline-3">
-<h3 id="org3861935">稍微调试一下</h3>
-<div class="outline-text-3" id="text-org3861935">
+<div id="outline-container-org4caffcd" class="outline-3">
+<h3 id="org4caffcd">稍微调试一下</h3>
+<div class="outline-text-3" id="text-org4caffcd">
 <p>
 gdb调试一下<br>
 </p>
 <div class="org-src-container">
-<pre class="src src-bash">Reading symbols from ./qemu-system-aarch64...                                                                                                                                                  
+<pre class="src src-bash">Reading symbols from ./qemu-system<span style="color: #98be65;">\-</span>aarch64...                                                                                                                                                  
 (gdb) <span style="color: #c678dd;">r</span>                                                                                                                                                                                        
 Starting program: /home/schspa/work/qemu-master/build/qemu-system-aarch64 -machine xlnx-versal-virt -nographic -smp 2 -m 128 -fsdev local,<span style="color: #dcaeea;">id</span>=shareid,<span style="color: #dcaeea;">path</span>=/home/schspa/work,<span style="color: #dcaeea;">security_model</span>=none
  -device virtio-9p-device,<span style="color: #dcaeea;">fsdev</span>=shareid,<span style="color: #dcaeea;">mount_tag</span>=share -fsdev local,<span style="color: #dcaeea;">id</span>=shareid1,<span style="color: #dcaeea;">path</span>=/home/schspa/Music,<span style="color: #dcaeea;">security_model</span>=none -device virtio-9p-device,<span style="color: #dcaeea;">fsdev</span>=shareid1,<span style="color: #dcaeea;">mount_tag</span>=share1          
@@ -226,9 +229,9 @@ qemu-system-aarch64: ../migration/savevm.c:860: vmstate_register_with_alias_id: 
 </p>
 </div>
 
-<div id="outline-container-org39c26c9" class="outline-4">
-<h4 id="org39c26c9">看看之前已经合入的修复patch</h4>
-<div class="outline-text-4" id="text-org39c26c9">
+<div id="outline-container-orga772ee0" class="outline-4">
+<h4 id="orga772ee0">看看之前已经合入的修复patch</h4>
+<div class="outline-text-4" id="text-orga772ee0">
 <blockquote>
 <p>
 (1) The virtio device whose devpath is to be formatted resides on a<br>
@@ -248,14 +251,14 @@ qemu-system-aarch64: ../migration/savevm.c:860: vmstate_register_with_alias_id: 
 </ul>
 </blockquote>
 <p>
-修复方法中有剃刀修复的方法，从comment中可知，修复中为VirtIOMMIOProxy的bus添加了get_dev_path的实现,最终获取设备时会生成virtio-mmio@000000000a003e00这样的设备名称.<br>
+修复方法中有提到修复的方法，从comment中可知，修复中为VirtIOMMIOProxy的bus添加了get_dev_path的实现,最终获取设备时会生成virtio-mmio@000000000a003e00这样的设备名称.<br>
 </p>
 </div>
 </div>
 
-<div id="outline-container-orgaeb192e" class="outline-4">
-<h4 id="orgaeb192e">回过头看我们的设备名称</h4>
-<div class="outline-text-4" id="text-orgaeb192e">
+<div id="outline-container-org735fa9a" class="outline-4">
+<h4 id="org735fa9a">回过头看我们的设备名称</h4>
+<div class="outline-text-4" id="text-org735fa9a">
 <div class="org-src-container">
 <pre class="src src-bash">(gdb) <span style="color: #c678dd;">print</span> se-&gt;idstr 
 $<span style="color: #dcaeea;">6</span> = <span style="color: #98be65;">"virtio-mmio@"</span>, <span style="color: #98be65;">'f'</span> &lt;repeats 16 times&gt;, <span style="color: #98be65;">"/virtio-9p"</span>, <span style="color: #98be65;">'\000'</span> &lt;repeats 217 times&gt;
@@ -267,9 +270,9 @@ $<span style="color: #dcaeea;">6</span> = <span style="color: #98be65;">"virtio-
 </div>
 </div>
 
-<div id="outline-container-orgd351ed6" class="outline-4">
-<h4 id="orgd351ed6">调试以下修复的patch</h4>
-<div class="outline-text-4" id="text-orgd351ed6">
+<div id="outline-container-orgf51a8f6" class="outline-4">
+<h4 id="orgf51a8f6">调试以下修复的patch</h4>
+<div class="outline-text-4" id="text-orgf51a8f6">
 <ul class="org-ul">
 <li><p>
 这里我们看一下virtio_mmio_bus_get_dev_path的执行情况:<br>
@@ -312,14 +315,14 @@ $<span style="color: #dcaeea;">2</span> = {{
 </pre>
 </div>
 <p>
-从这里可以看到，升成名字时用的address就是0xffffffffffffffff. 所以这个patch是每什么问题的。<br>
+从这里可以看到，生成名字时用的address就是0xffffffffffffffff. 所以这个patch是没什么问题的。<br>
 </p></li>
 </ul>
 </div>
 </div>
-<div id="outline-container-orgdf4d1d5" class="outline-4">
-<h4 id="orgdf4d1d5">看看这个地址为什么不对</h4>
-<div class="outline-text-4" id="text-orgdf4d1d5">
+<div id="outline-container-org9128cf1" class="outline-4">
+<h4 id="org9128cf1">看看这个地址为什么不对</h4>
+<div class="outline-text-4" id="text-org9128cf1">
 <p>
 首先se的类型是SysBusDevice *, 对应的相关代码是sysbus.c<br>
 </p>
@@ -368,9 +371,9 @@ $<span style="color: #dcaeea;">2</span> = {{
 </div>
 </div>
 
-<div id="outline-container-org9521152" class="outline-4">
-<h4 id="org9521152">看一看virtio-mmio的创建代码</h4>
-<div class="outline-text-4" id="text-org9521152">
+<div id="outline-container-org6e16b9b" class="outline-4">
+<h4 id="org6e16b9b">看一看virtio-mmio的创建代码</h4>
+<div class="outline-text-4" id="text-org6e16b9b">
 <p>
 平台xlnx-versal-virt的相关代码为:<br>
 </p>
@@ -408,9 +411,9 @@ $<span style="color: #dcaeea;">2</span> = {{
 </div>
 </div>
 
-<div id="outline-container-orga1dcaab" class="outline-4">
-<h4 id="orga1dcaab">看看其他平台</h4>
-<div class="outline-text-4" id="text-orga1dcaab">
+<div id="outline-container-orga57b6ec" class="outline-4">
+<h4 id="orga57b6ec">看看其他平台</h4>
+<div class="outline-text-4" id="text-orga57b6ec">
 <p>
 下边是arm virt平台的初始化代码.<br>
 </p>
@@ -467,16 +470,16 @@ $<span style="color: #dcaeea;">2</span> = {{
 </div>
 </div>
 
-<div id="outline-container-orgfc39fdc" class="outline-2">
-<h2 id="orgfc39fdc">修复方案</h2>
-<div class="outline-text-2" id="text-orgfc39fdc">
+<div id="outline-container-org449fe01" class="outline-2">
+<h2 id="org449fe01">修复方案</h2>
+<div class="outline-text-2" id="text-org449fe01">
 <p>
 下边是尝试的几个解决方案:<br>
 </p>
 </div>
-<div id="outline-container-orgbf5b7e5" class="outline-3">
-<h3 id="orgbf5b7e5">添加sysbus_mmio_map的调用</h3>
-<div class="outline-text-3" id="text-orgbf5b7e5">
+<div id="outline-container-org81fed80" class="outline-3">
+<h3 id="org81fed80">添加sysbus_mmio_map的调用</h3>
+<div class="outline-text-3" id="text-org81fed80">
 <p>
 在xlnx-versal-virt平台的virtio-mmio初始化时调用sysbus_mmio_map<br>
 </p>
@@ -506,9 +509,9 @@ $<span style="color: #dcaeea;">2</span> = {{
 </div>
 </div>
 
-<div id="outline-container-org24f4e79" class="outline-3">
-<h3 id="org24f4e79">使用arm virt平台上的初始化</h3>
-<div class="outline-text-3" id="text-org24f4e79">
+<div id="outline-container-org9bd53a9" class="outline-3">
+<h3 id="org9bd53a9">使用arm virt平台上的初始化</h3>
+<div class="outline-text-3" id="text-org9bd53a9">
 <p>
 将xlnx-versal-virt平台的virtio-mmio也使用与arm virt相同的方法来初始化，patch如下<br>
 </p>
@@ -597,9 +600,9 @@ xlnx-versal-virt在处理system_memory时，将Versal.fpd.apu.mr设置为system_
 </ol>
 </div>
 </div>
-<div id="outline-container-org5984f9d" class="outline-3">
-<h3 id="org5984f9d">不太OK的解决方案</h3>
-<div class="outline-text-3" id="text-org5984f9d">
+<div id="outline-container-orgc5df3b8" class="outline-3">
+<h3 id="orgc5df3b8">不太OK的解决方案</h3>
+<div class="outline-text-3" id="text-orgc5df3b8">
 <p>
 既然上边两个看起来ok的解决方案都有问题，那么就用个不太好的解决方案吧。<br>
 </p>
@@ -617,6 +620,17 @@ xlnx-versal-virt在处理system_memory时，将Versal.fpd.apu.mr设置为system_
 </div>
 <p>
 看起来这里直接修改了对应subsys的mmio addr，这也是无奈之举，其实这个平台上只是需要设置好这个地址就可以了。<br>
+</p>
+</div>
+</div>
+
+<div id="outline-container-org6239fa7" class="outline-3">
+<h3 id="org6239fa7">提交的qemu中的解决方案</h3>
+<div class="outline-text-3" id="text-org6239fa7">
+<p>
+经过一番交流，终于提交了合适的解决方案<br>
+<a href="https://lists.nongnu.org/archive/html/qemu-devel/2021-02/msg07826.html">https://lists.nongnu.org/archive/html/qemu-devel/2021-02/msg07826.html</a><br>
+<a href="https://patchew.org/QEMU/20210225053606.385884-1-schspa@gmail.com/">https://patchew.org/QEMU/20210225053606.385884-1-schspa@gmail.com/</a><br>
 </p>
 </div>
 </div>
