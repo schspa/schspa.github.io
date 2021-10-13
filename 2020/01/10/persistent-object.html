@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2021-10-12 二 19:52 -->
+<!-- 2021-10-13 三 13:47 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>OPTEE persistent-object</title>
@@ -62,6 +62,7 @@
 <div id="text-table-of-contents">
 <ul>
 <li><a href="#org1701085">Description</a></li>
+<li><a href="#orgb851d5f">Secure storage</a></li>
 <li><a href="#org2ca2b69">Usage (secure storage)</a>
 <ul>
 <li><a href="#org66deff0">userspace</a></li>
@@ -85,7 +86,22 @@
 <div class="outline-text-2" id="text-org1701085">
 <p>
 PersistentObject顾名思议，是可以持久化保存的对象，下面简单分析一下实现的原理。<br>
-<a href="https://optee.readthedocs.io/en/latest/architecture/secure_storage.html#ree-fs-secure-storage">https://optee.readthedocs.io/en/latest/architecture/secure_storage.html#ree-fs-secure-storage</a><br>
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgb851d5f" class="outline-2">
+<h2 id="orgb851d5f">Secure storage</h2>
+<div class="outline-text-2" id="text-orgb851d5f">
+<p>
+首先，看一下optee如何处理secure数据的存储，加密。<br>
+optee官方文档：<a href="https://optee.readthedocs.io/en/latest/architecture/secure_storage.html#ree-fs-secure-storage">https://optee.readthedocs.io/en/latest/architecture/secure_storage.html#ree-fs-secure-storage</a><br>
+系统框架：<br>
+<img src="https://optee.readthedocs.io/en/latest/_images/secure_storage_system_architecture.png" alt="secure_storage_system_architecture.png"><br>
+</p>
+
+<p>
+由上图可知，整个流程大致为：TEE File System在保存文件时，首先通过tee中的文件系统接口调用linux内核中的TEE driver，TEE driver再调用内核态的TEE Supplicant来完成文件系统的访问。最终的文件存储操作是通过ree的文件系统来存储，所以只要ree可以读写文件，这条链路就可以正常运行。<br>
 </p>
 </div>
 </div>
@@ -360,7 +376,7 @@ TEE_CloseAndDeletePersistentObject1<br>
 </p>
 
 
-<div id="org51310b1" class="figure">
+<div id="orgcc9bee8" class="figure">
 <p><img src="assets/persistentobject-api-map.png" alt="persistentobject-api-map.png"><br>
 </p>
 </div>
@@ -494,7 +510,7 @@ fops table: tee_svc_storage_file_ops<br>
 <li><a id="orge52e266"></a>ree_fs_create<br>
 <div class="outline-text-4" id="text-orge52e266">
 
-<div id="org47afbdd" class="figure">
+<div id="orgda795c7" class="figure">
 <p><img src="assets/ree_fs_create.png" alt="ree_fs_create.png"><br>
 </p>
 </div>
@@ -515,10 +531,15 @@ fops table: tee_svc_storage_file_ops<br>
 <h2 id="org31697e6">All Operation flow</h2>
 <div class="outline-text-2" id="text-org31697e6">
 
-<div id="org9ee7105" class="figure">
+<div id="org3c48c53" class="figure">
 <p><img src="assets/secure-storage-flow.png" alt="secure-storage-flow.png"><br>
 </p>
 </div>
+
+<p>
+从上面的流程可以看到，系统在访问文件时，需要通过一系列的流程，最后通过ree中的tee_supplicant服务来完成最终的文件访问操作，系统会在TEE中对文件进行加解密的操作，这样ree就无法获取tee中保存的文件的内容，从而安全的存储我们所需要的数据。<br>
+在此基础上，TEE还对数据进行了加密，hash校验，防止ree有机会去窜改数据。<br>
+</p>
 </div>
 </div>
 </div>
