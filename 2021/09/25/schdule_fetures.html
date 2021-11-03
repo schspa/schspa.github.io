@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2021-10-12 二 19:35 -->
+<!-- 2021-11-03 三 20:34 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Linux scheduled features</title>
@@ -64,6 +64,8 @@
 <ul>
 <li><a href="#org8cabb2d">查看系统中开启的调度特性</a></li>
 <li><a href="#org55238aa">RT_RUNTIME_SHARE</a></li>
+<li><a href="#orgfc09755">TTWU_QUEUE</a></li>
+<li><a href="#org58f1582">GENTLE_FAIR_SLEEPERS</a></li>
 </ul>
 </div>
 </div>
@@ -81,8 +83,46 @@ cat /sys/kernel/debug/sched_features<br>
 <h2 id="org55238aa">RT_RUNTIME_SHARE</h2>
 <div class="outline-text-2" id="text-org55238aa">
 <p>
-RT_RUNTIME_SHARE<br>
+定义：<a target="_blank" href="https://github.com/torvalds/linux/blob/b133f076639b918bb6ad157f6308b0f595058959/kernel/sched/features.h#L80">kernel</a><br>
+<a target="_blank" href="https://github.com/torvalds/linux/blob/b133f076639b918bb6ad157f6308b0f595058959/kernel/sched/rt.c#L839">kernel</a><br>
+   由这个函数可知，当开启RT_RUNTIME_SHARE并且rq进程运行的时间超过当前runqueue的rt_runtime时，系统将通过从其他的cpu上抽取一部份之间分给当前的rq。开启之后，rt time以及rt_throttled的判定就会变成共享所由cpu所占用的执行时间，从而可以使单个cpu的rt进程执行时间达到100%.<br>
+   开启这个feature时，会造成由于RT线程BUG导致单个CPU一直执行RT进程(绑定CPU的情况下)，而把其他进程饿死。最新版的内核已经默认关闭了这个feature.<br>
+   详情参考<a href="https://www.mail-archive.com/linux-kernel@vger.kernel.org/msg2315022.html">https://www.mail-archive.com/linux-kernel@vger.kernel.org/msg2315022.html</a> 这个patch的commit信息.<br>
 </p>
+</div>
+</div>
+
+<div id="outline-container-orgfc09755" class="outline-2">
+<h2 id="orgfc09755">TTWU_QUEUE</h2>
+<div class="outline-text-2" id="text-orgfc09755">
+<p>
+<a target="_blank" href="https://github.com/torvalds/linux/blob/b133f076639b918bb6ad157f6308b0f595058959/kernel/sched/features.h#L53">kernel</a><br>
+当开启这个特性时，系统将通过ipi中断的方式来将进程加入到等待队列，由此避免去加rq锁<br>
+<a target="_blank" href="https://github.com/torvalds/linux/blob/b133f076639b918bb6ad157f6308b0f595058959/kernel/sched/core.c#L3585">kernel</a><br>
+</p>
+
+
+<p>
+<a href="https://review.lineageos.org/c/LineageOS/android_kernel_essential_msm8998/+/208190/1">https://review.lineageos.org/c/LineageOS/android_kernel_essential_msm8998/+/208190/1</a><br>
+</p>
+</div>
+</div>
+
+<div id="outline-container-org58f1582" class="outline-2">
+<h2 id="org58f1582">GENTLE_FAIR_SLEEPERS</h2>
+<div class="outline-text-2" id="text-org58f1582">
+<p>
+<a target="_blank" href="https://github.com/torvalds/linux/blob/b133f076639b918bb6ad157f6308b0f595058959/kernel/sched/features.h#L7">kernel</a><br>
+</p>
+
+<p>
+内核注释<br>
+</p>
+<blockquote>
+<p>
+Only give sleepers 50% of their service deficit. This allows them to run sooner, but does not allow tons of sleepers to rip the spread apart.<br>
+</p>
+</blockquote>
 </div>
 </div>
 </div>

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2021-10-13 三 10:05 -->
+<!-- 2021-11-03 三 20:34 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>irq wakeup in linux</title>
@@ -183,7 +183,6 @@ GIC可以被关闭电源，也可以不关闭电源，这个在SOC设计阶段�
 </div>
 </div>
 
-
 <div id="outline-container-orgdf72b0e" class="outline-3">
 <h3 id="orgdf72b0e">CPU Power Down</h3>
 <div class="outline-text-3" id="text-orgdf72b0e">
@@ -242,7 +241,7 @@ Reset之后，CPU需要从RVBAR寄存器所显示的地址来重新启动。RVBA
 <h4 id="org76e8360">RESET的执行地址</h4>
 <div class="outline-text-4" id="text-org76e8360">
 
-<div id="org28b27a4" class="figure">
+<div id="orgc1457b0" class="figure">
 <p><img src="assets/2021-03-05_13-40-42_screenshot.png" alt="2021-03-05_13-40-42_screenshot.png"><br>
 </p>
 </div>
@@ -252,7 +251,7 @@ Reset之后，CPU需要从RVBAR寄存器所显示的地址来重新启动。RVBA
 </p>
 
 
-<div id="org56388db" class="figure">
+<div id="orgdb745f3" class="figure">
 <p><img src="assets/2021-03-05_13-43-32_screenshot.png" alt="2021-03-05_13-43-32_screenshot.png"><br>
 </p>
 </div>
@@ -428,7 +427,7 @@ The entry_point_address parameter is used by the caller to specify where code ex
 为了有一个对atf中的休眠唤醒流程有一个直观的影响，使用下面的代码调用时序图来说明<br>
 </p>
 
-<div id="org2ee536d" class="figure">
+<div id="org2a5d081" class="figure">
 <p><img src="assets/atf-suspend-resume.png" alt="atf-suspend-resume.png"><br>
 </p>
 </div>
