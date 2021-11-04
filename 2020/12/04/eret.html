@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<!-- 2021-11-04 四 11:09 -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AARCH64 ERET</title>
+<meta name="generator" content="Org mode">
+<meta name="author" content="Schspa">
+<meta name="description" content="AARCH64 ERET"
+>
+<link rel="shortcut icon" href="/images/rose-red.png" type="image/x-icon" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" integrity="sha256-sAcc18zvMnaJZrNT4v8J0T4HqzEUiUTlVFgDIywjQek=" crossorigin="anonymous">
+<link rel="stylesheet" href="/css/animate.min.css" />
+<link rel="stylesheet" href="/css/all.min.css" />
+<link rel="stylesheet" type="text/css" href="/css/style.css" />
+<link rel="stylesheet" type="text/css" href="/css/navbar.css" />
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/js/bootstrap.min.js" integrity="sha256-/hGxZHGQ57fXLp+NDusFZsZo/PG21Bp2+hXYV5a6w+g=" crossorigin="anonymous"></script>
+<script src="/js/jquery.min.js"></script>
+<script src="/js/darkreader.js"></script>
+<script src="/user.config.js"></script>
+<script src="/js/main.js"></script>
+</head>
+<body>
+<div id="preamble" class="status">
+<div class="mobile-container">
+  <!-- Top Navigation Menu -->
+  <div class="topnav">
+    <div id="header">
+      <a href="/" class="logo">Schspa's Blog</a>
+      <a href="javascript:void(0);" class="icon" onclick="toggleheader()">
+        <i class="fa fa-bars"></i>
+      </a>
+    </div>
+    <div id="nav_headers">
+      <a href="/sitemap.html" class="menu-item">Categories</a>
+    </div>
+  </div>
+  <!-- End smartphone / tablet look -->
+</div>
+
+<header id="header" class="header">
+  <div class="logo-wrapper">
+    <a href="/" class="logo">Schspa's Blogs</a>
+  </div>
+
+  <nav class="site-navbar">
+    <ul id="menu" class="menu">
+      <li class="menu-item">
+        <a class="menu-item-link" href="/">Home</a>
+      </li>
+      <li class="menu-item">
+        <a class="menu-item-link" href="/sitemap.html">Categories</a>
+      </li>
+    </ul>
+  </nav>
+</header>
+</div>
+<div id="content">
+<h1 class="title">AARCH64 ERET</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#orge177650">Exception &amp; ERET的使用场景</a></li>
+<li><a href="#org2a0ee34">ERET返回后代码从何处开始执行？</a>
+<ul>
+<li><a href="#orgf776a6c">先看ERET的伪代码</a></li>
+<li><a href="#org214a8a8">再看Exception产生的伪代码</a></li>
+</ul>
+</li>
+<li><a href="#org37ac314">总结</a></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orge177650" class="outline-2">
+<h2 id="orge177650">Exception &amp; ERET的使用场景</h2>
+<div class="outline-text-2" id="text-orge177650">
+<p>
+ERET用来在系统异常处理完成后返回原来的执行流程并继续运行下去<br>
+看似简单的功能，实现却并不简单，需要考虑很多场景,不同场景下行为也会有些差异<br>
+在ARMv8 TRM中有伪代码，通过分析伪代码，可以从一个角度看清ERET指令的功能。<br>
+</p>
+
+<p>
+典型场景:<br>
+</p>
+<ol class="org-ol">
+<li>SVC，HVC，SMC等软件异常指令<br></li>
+<li>Synchronous Exception异常<br></li>
+<li><p>
+IRQ/FIQ／System Error返回<br>
+</p>
+
+<p>
+从上面的场景中，可以看到，在不同的场景下，异常处理返回后需要从不同的地址继续执行<br>
+</p>
+<ul class="org-ul">
+<li>Data Abort: 需要从当前位置重新执行出错的指令，以便读取到正确的数据<br></li>
+
+<li>SVC, HVC, SMC：需要从出错指令的下一条指令开始继续执行，否则将会重新进入特权模式<br></li>
+</ul></li>
+</ol>
+</div>
+</div>
+
+<div id="outline-container-org2a0ee34" class="outline-2">
+<h2 id="org2a0ee34">ERET返回后代码从何处开始执行？</h2>
+<div class="outline-text-2" id="text-org2a0ee34">
+</div>
+<div id="outline-container-orgf776a6c" class="outline-3">
+<h3 id="orgf776a6c">先看ERET的伪代码</h3>
+<div class="outline-text-3" id="text-orgf776a6c">
+<p>
+伪代码:<br>
+</p>
+<div class="org-src-container">
+<pre class="src src-C"><span style="color: #5B6268;">// </span><span style="color: #5B6268;">AArch64.ExceptionReturn()</span>
+<span style="color: #5B6268;">// </span><span style="color: #5B6268;">=========================</span>
+AArch64.ExceptionReturn(bits(64) new_pc, bits(32) spsr)
+    <span style="color: #c678dd;">SynchronizeContext</span>();
+    sync_errors = HaveIESB() &amp;&amp; SCTLR[].IESB == <span style="color: #98be65;">'1'</span>;
+    <span style="color: #51afef;">if</span> HaveDoubleFaultExt() <span style="color: #ECBE7B;">then</span>
+        <span style="color: #dcaeea;">sync_errors</span> = sync_errors || (SCR_EL3.EA == <span style="color: #98be65;">'1'</span> &amp;&amp; SCR_EL3.NMEA == <span style="color: #98be65;">'1'</span> &amp;&amp; PSTATE.EL == EL3);
+    <span style="color: #51afef;">if</span> sync_errors then
+        SynchronizeErrors();
+        iesb_req = TRUE;
+        <span style="color: #c678dd;">TakeUnmaskedPhysicalSErrorInterrupts</span>(iesb_req);
+    <span style="color: #5B6268;">// </span><span style="color: #5B6268;">Attempts to change to an illegal state will invoke the Illegal Execution state mechanism</span>
+    <span style="color: #c678dd;">SetPSTATEFromPSR</span>(spsr);
+    <span style="color: #c678dd;">ClearExclusiveLocal</span>(<span style="color: #ECBE7B;">ProcessorID</span>());
+    <span style="color: #c678dd;">SendEventLocal</span>();
+
+    <span style="color: #51afef;">if</span> PSTATE.IL == <span style="color: #98be65;">'1'</span> &amp;&amp; spsr&lt;4&gt; == <span style="color: #98be65;">'1'</span> &amp;&amp; spsr&lt;20&gt; == <span style="color: #98be65;">'0'</span> then
+        <span style="color: #5B6268;">// </span><span style="color: #5B6268;">If the exception return is illegal, PC[63:32,1:0] are UNKNOWN</span>
+        new_pc&lt;63:32&gt; = bits(32) UNKNOWN;
+        new_pc&lt;1:0&gt; = bits(2) UNKNOWN;
+    <span style="color: #ECBE7B;">elsif</span> <span style="color: #c678dd;">UsingAArch32</span>() then
+        <span style="color: #5B6268;">// </span><span style="color: #5B6268;">Return to AArch32</span>
+        <span style="color: #5B6268;">// </span><span style="color: #5B6268;">ELR_ELx[1:0] or ELR_ELx[0] are treated as being 0, depending on the target instruction set state</span>
+        <span style="color: #51afef;">if</span> PSTATE.T == <span style="color: #98be65;">'1'</span> then
+            new_pc&lt;0&gt; = <span style="color: #98be65;">'0'</span>;      <span style="color: #5B6268;">// </span><span style="color: #5B6268;">T32</span>
+        <span style="color: #51afef;">else</span>
+            new_pc&lt;1:0&gt; = <span style="color: #ECBE7B;">'</span>00<span style="color: #ECBE7B;">'</span>;   <span style="color: #5B6268;">// </span><span style="color: #5B6268;">A32</span>
+    <span style="color: #51afef;">else</span>                                  <span style="color: #5B6268;">// </span><span style="color: #5B6268;">Return to AArch64</span>
+        <span style="color: #5B6268;">// </span><span style="color: #5B6268;">ELR_ELx[63:56] might include a tag</span>
+        new_pc = AArch64.BranchAddr(new_pc);
+    <span style="color: #51afef;">if</span> UsingAArch32() <span style="color: #ECBE7B;">then</span>
+        <span style="color: #5B6268;">// </span><span style="color: #5B6268;">32 most significant bits are ignored.</span>
+        <span style="color: #c678dd;">BranchTo</span>(new_pc&lt;31:0&gt;, BranchType_ERET);
+    <span style="color: #51afef;">else</span>
+        BranchToAddr(new_pc, BranchType_ERET);
+</pre>
+</div>
+
+<p>
+通过上面的代码可以发现，ERET并没有对返回的地址做取后一条指令地址的操作，仅仅对异常指令的低位进行了修正.<br>
+由此可见，系统在执行ESR指令i之前，系统就已经将LR设置为了需要正确返回的地址了。<br>
+</p>
+</div>
+</div>
+
+
+
+
+<div id="outline-container-org214a8a8" class="outline-3">
+<h3 id="org214a8a8">再看Exception产生的伪代码</h3>
+<div class="outline-text-3" id="text-org214a8a8">
+<dl class="org-dl">
+<dt>DataAbort</dt><dd>da<br></dd>
+</dl>
+<div class="org-src-container">
+<pre class="src src-C"><span style="color: #5B6268;">// </span><span style="color: #5B6268;">AArch64.DataAbort()</span>
+<span style="color: #5B6268;">// </span><span style="color: #5B6268;">===================</span>
+
+AArch64.DataAbort(bits(64) vaddress, <span style="color: #ECBE7B;">FaultRecord</span> <span style="color: #dcaeea;">fault</span>)
+   route_to_el3 = HaveEL(EL3) &amp;&amp; SCR_EL3.EA == <span style="color: #98be65;">'1'</span> &amp;&amp; IsExternalAbort(fault);
+   route_to_el2 = (PSTATE.EL IN {EL0, EL1} &amp;&amp; EL2Enabled() &amp;&amp; (HCR_EL2.TGE == <span style="color: #98be65;">'1'</span> ||
+           (HaveRASExt() &amp;&amp; HCR_EL2.TEA == <span style="color: #98be65;">'1'</span> &amp;&amp; IsExternalAbort(fault)) ||
+           (HaveNV2Ext() &amp;&amp; fault.acctype == AccType_NV2REGISTER) ||
+           IsSecondStage(fault)));
+
+   bits(64) preferred_exception_return = ThisInstrAddr();
+   <span style="color: #51afef;">if</span> (HaveDoubleFaultExt() &amp;&amp; (PSTATE.EL == EL3 || route_to_el3) &amp;&amp;
+       IsExternalAbort(fault) &amp;&amp; SCR_EL3.EASE == <span style="color: #98be65;">'1'</span>) <span style="color: #ECBE7B;">then</span>
+       <span style="color: #dcaeea;">vect_offset</span> = 0x180;
+   <span style="color: #51afef;">else</span>
+       vect_offset = 0x0;
+   <span style="color: #51afef;">if</span> HaveNV2Ext() &amp;&amp; fault.acctype == AccType_NV2REGISTER then
+       exception = AArch64.AbortSyndrome(Exception_NV2DataAbort, fault, vaddress);
+   <span style="color: #51afef;">else</span>
+       exception = AArch64.AbortSyndrome(Exception_DataAbort, fault, vaddress);
+   <span style="color: #51afef;">if</span> PSTATE.EL == EL3 || route_to_el3 then
+       AArch64.TakeException(EL3, exception, preferred_exception_return, vect_offset);
+   <span style="color: #ECBE7B;">elsif</span> <span style="color: #dcaeea;">PSTATE</span>.EL == EL2 || route_to_el2 then
+       AArch64.TakeException(EL2, exception, preferred_exception_return, vect_offset);
+   <span style="color: #51afef;">else</span>
+       AArch64.TakeException(EL1, exception, preferred_exception_return, vect_offset); 
+</pre>
+</div>
+
+<p>
+从DataAbort的伪代码中可以看出，系统在取preferred_exception_return时，使用的是ThisInstrAddr，即ELR的值将设置为出错指令的下一条指令. AArch64.TakeException过程将把preferred_exception_return的值设置到ELR寄存器中<br>
+</p>
+<dl class="org-dl">
+<dt>CallSupervisor</dt><dd><p>
+svc<br>
+</p>
+<div class="org-src-container">
+<pre class="src src-C">aarch64/exceptions/syscalls/AArch64.CallSupervisor
+<span style="color: #5B6268;">// </span><span style="color: #5B6268;">AArch64.CallSupervisor()</span>
+<span style="color: #5B6268;">// </span><span style="color: #5B6268;">========================</span>
+<span style="color: #5B6268;">// </span><span style="color: #5B6268;">Calls the Supervisor</span>
+
+AArch64.CallSupervisor(bits(16) immediate)
+
+    <span style="color: #51afef;">if</span> UsingAArch32() <span style="color: #ECBE7B;">then</span> <span style="color: #c678dd;">AArch32</span>.ITAdvance();
+    <span style="color: #c678dd;">SSAdvance</span>();
+    route_to_el2 = PSTATE.EL == EL0 &amp;&amp; EL2Enabled() &amp;&amp; HCR_EL2.TGE == <span style="color: #98be65;">'1'</span>;
+
+    bits(64) preferred_exception_return = NextInstrAddr();
+    vect_offset = 0x0;
+
+    exception = ExceptionSyndrome(Exception_SupervisorCall);
+    exception.syndrome&lt;15:0&gt; = immediate;
+
+    <span style="color: #51afef;">if</span> UInt(PSTATE.EL) &gt; UInt(EL1) <span style="color: #ECBE7B;">then</span>
+        <span style="color: #c678dd;">AArch64</span>.TakeException(PSTATE.EL, exception, preferred_exception_return, vect_offset);
+    elsif route_to_el2 <span style="color: #ECBE7B;">then</span>
+        <span style="color: #c678dd;">AArch64</span>.TakeException(EL2, exception, preferred_exception_return, vect_offset);
+    <span style="color: #51afef;">else</span>
+        AArch64.TakeException(EL1, exception, preferred_exception_return, vect_offset);
+</pre>
+</div>
+
+<p>
+同理，从SVC指令的伪代码中，可以看到，preferred_exception_return被设置为了NextInstrAddr()下一条指令的地址<br>
+</p></dd>
+</dl>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org37ac314" class="outline-2">
+<h2 id="org37ac314">总结</h2>
+<div class="outline-text-2" id="text-org37ac314">
+<p>
+AARCH64 CPU在发生异常的时候，会根据异常的Class来将ELR设置为不同的地址，所以，ELR寄存器存储的是异常处理之后需要返回的地址，而不是发生异常的指令地址.<br>
+</p>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<script src="https://utteranc.es/client.js"
+    repo="schspa/schspa.github.io"
+    issue-term="title"
+    label="✨💬✨"
+    theme="github-light"
+    crossorigin="anonymous"
+    async>
+</script>
+<div class="me">
+  <span><b>Contact me via :)</b><span>
+  <div class="contact">
+    <a id="email" href="mailto:schspa@gmail.com" target="_blank"><i class="fab fa-mailchimp animated heartBeat delay-2s slower"></i></a>
+    <a id="github" href="//github.com/schspa" target="_blank"><i class="fab fa-github animated heartBeat delay-2s slower"></i></a>
+  </div>
+</div>
+
+<div id="jinrishici-sentence" style="font-weight: 700;">虚怀乃若谷，水深则流缓。</div>
+<script src="https://sdk.jinrishici.com/v2/browser/jinrishici.js" charset="utf-8"></script>
+</div>
+</body>
+</html>
