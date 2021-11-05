@@ -1,0 +1,547 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<!-- 2021-11-08 一 09:58 -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ARM64 Page type</title>
+<meta name="generator" content="Org mode">
+<meta name="author" content="schspa">
+<meta name="description" content="arm64-page-flags.org"
+>
+<meta name="keywords" content="GRE nGnRnE">
+<link rel="shortcut icon" href="/images/rose-red.png" type="image/x-icon" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" integrity="sha256-sAcc18zvMnaJZrNT4v8J0T4HqzEUiUTlVFgDIywjQek=" crossorigin="anonymous">
+<link rel="stylesheet" href="/css/animate.min.css" />
+<link rel="stylesheet" href="/css/all.min.css" />
+<link rel="stylesheet" type="text/css" href="/css/style.css" />
+<link rel="stylesheet" type="text/css" href="/css/navbar.css" />
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/js/bootstrap.min.js" integrity="sha256-/hGxZHGQ57fXLp+NDusFZsZo/PG21Bp2+hXYV5a6w+g=" crossorigin="anonymous"></script>
+<script src="/js/jquery.min.js"></script>
+<script src="/js/darkreader.js"></script>
+<script src="/user.config.js"></script>
+<script src="/js/main.js"></script>
+</head>
+<body>
+<div id="preamble" class="status">
+<div class="mobile-container">
+  <!-- Top Navigation Menu -->
+  <div class="topnav">
+    <div id="header">
+      <a href="/" class="logo">Schspa's Blog</a>
+      <a href="javascript:void(0);" class="icon" onclick="toggleheader()">
+        <i class="fa fa-bars"></i>
+      </a>
+    </div>
+    <div id="nav_headers">
+      <a href="/sitemap.html" class="menu-item">Categories</a>
+    </div>
+  </div>
+  <!-- End smartphone / tablet look -->
+</div>
+
+<header id="header" class="header">
+  <div class="logo-wrapper">
+    <a href="/" class="logo">Schspa's Blogs</a>
+  </div>
+
+  <nav class="site-navbar">
+    <ul id="menu" class="menu">
+      <li class="menu-item">
+        <a class="menu-item-link" href="/">Home</a>
+      </li>
+      <li class="menu-item">
+        <a class="menu-item-link" href="/sitemap.html">Categories</a>
+      </li>
+    </ul>
+  </nav>
+</header>
+</div>
+<div id="content">
+<h1 class="title">ARM64 Page type</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#orgd9120f5">查看内存属性</a></li>
+<li><a href="#org9c6f028">两种pagetype</a>
+<ul>
+<li><a href="#org438e5ae">指定内存类型</a></li>
+<li><a href="#org8b451dc">Normal Memory</a></li>
+<li><a href="#orgf156629">Device Memory</a></li>
+<li><a href="#org4d5d0ac">Strongly Ordered Memory :: ARMv7 platform, merge into Device Memory</a></li>
+</ul>
+</li>
+<li><a href="#org7319093">MMU table</a>
+<ul>
+<li><a href="#org5ee3fa0">Input Address size limit.</a></li>
+<li><a href="#org791280a">Translate table</a></li>
+<li><a href="#orge7edaca">example</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orgd9120f5" class="outline-2">
+<h2 id="orgd9120f5">查看内存属性</h2>
+<div class="outline-text-2" id="text-orgd9120f5">
+
+<div id="org691f1b4" class="figure">
+<p><img src="assets/find-aarch64-memory-attr.png" alt="find-aarch64-memory-attr.png"><br>
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org9c6f028" class="outline-2">
+<h2 id="org9c6f028">两种pagetype</h2>
+<div class="outline-text-2" id="text-org9c6f028">
+<p>
+在ARM64中，共分两种内存类型<sup><a id="fnr.1" class="footref" href="#fn.1">1</a></sup><br>
+</p>
+</div>
+
+<div id="outline-container-org438e5ae" class="outline-3">
+<h3 id="org438e5ae">指定内存类型</h3>
+<div class="outline-text-3" id="text-org438e5ae">
+<p>
+How does system distinguish memory types?<br>
+table entry[4:2] -&gt; MAIR(Memory Attribute Indirection Register) -&gt; Attr&lt;n&gt;[7:4] -&gt; Device Memory or Normal Memory<br>
+<img src="assets/arm64-memory-types.png" alt="arm64-memory-types.png"><br>
+</p>
+
+<div class="org-src-container">
+<pre class="src src-C"><span style="color: #5B6268;">/*</span>
+<span style="color: #5B6268;"> * Memory types available.</span>
+<span style="color: #5B6268;"> */</span>
+<span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #dcaeea;">MT_DEVICE_nGnRnE</span>        0
+<span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #dcaeea;">MT_DEVICE_nGnRE</span>         1
+<span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #dcaeea;">MT_DEVICE_GRE</span>           2
+<span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #dcaeea;">MT_NORMAL_NC</span>            3
+<span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #dcaeea;">MT_NORMAL</span>               4
+<span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #dcaeea;">MT_NORMAL_WT</span>            5
+
+</pre>
+</div>
+<div class="org-src-container">
+<pre class="src src-asm"><span style="color: #5B6268;">/*</span>
+<span style="color: #5B6268;"> * Memory region attributes for LPAE:</span>
+<span style="color: #5B6268;"> *</span>
+<span style="color: #5B6268;"> *   n = AttrIndx[2:0]</span>
+<span style="color: #5B6268;"> *          n   MAIR</span>
+<span style="color: #5B6268;"> *   DEVICE_nGnRnE  000 00000000</span>
+<span style="color: #5B6268;"> *   DEVICE_nGnRE   001 00000100</span>
+<span style="color: #5B6268;"> *   DEVICE_GRE     010 00001100</span>
+
+<span style="color: #5B6268;"> *   NORMAL_NC      011 01000100</span>
+<span style="color: #5B6268;"> *   NORMAL         100 11111111</span>
+<span style="color: #5B6268;"> *   NORMAL_WT      101 10111011</span>
+<span style="color: #5B6268;"> */</span>
+<span style="color: #c678dd;">ldr</span> <span style="color: #51afef;">x5</span>, =MAIR(0x00, MT_DEVICE_nGnRnE) | \
+         <span style="color: #51afef;">MAIR</span>(0x04, MT_DEVICE_nGnRE) | \
+         <span style="color: #51afef;">MAIR</span>(0x0c, MT_DEVICE_GRE) | \
+         <span style="color: #51afef;">MAIR</span>(0x44, MT_NORMAL_NC) | \
+         <span style="color: #51afef;">MAIR</span>(0xff, MT_NORMAL) | \
+         <span style="color: #51afef;">MAIR</span>(0xbb, MT_NORMAL_WT)
+<span style="color: #c678dd;">msr</span> <span style="color: #51afef;">mair</span>_el1, x5
+</pre>
+</div>
+
+<p>
+来看一看实机抓到的寄存器设置值： (qemu aarch64)<br>
+</p>
+<div class="org-src-container">
+<pre class="src src-shell">TTBR0_EL1      0x7a13f000       2048126976
+TTBR1_EL1      0x14c0000410c6000        93449693359267840
+TCR_EL1        0x34b5503510     226380231952
+PMUSERENR_EL0  0x0      0
+MAIR_EL1       0xbbff440c0400   206705032692736
+TCR_EL2        0x0      0
+VTTBR_EL2      0x0      0
+AMAIR0         0x0      0
+</pre>
+</div>
+
+<table>
+
+
+<colgroup>
+<col  class="org-left">
+
+<col  class="org-left">
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-left">Attr&lt;n&gt;[7:4]</th>
+<th scope="col" class="org-left">Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-left">0000</td>
+<td class="org-left">Device memory. See encoding of Attr&lt;n&gt;[3:0] for th00RW, RW not 00 Normal memory, Outer Write-Through Transient</td>
+</tr>
+
+<tr>
+<td class="org-left">0100</td>
+<td class="org-left">Normal memory, Outer Non-cacheable</td>
+</tr>
+
+<tr>
+<td class="org-left">01RW</td>
+<td class="org-left">RW not 00 Normal memory, Outer Write-Back Transient</td>
+</tr>
+
+<tr>
+<td class="org-left">10RW</td>
+<td class="org-left">Normal memory, Outer Write-Through Non-transien11RW Normal memory, Outer Write-Back Non-transient</td>
+</tr>
+</tbody>
+</table>
+
+<table>
+
+
+<colgroup>
+<col  class="org-right">
+
+<col  class="org-left">
+</colgroup>
+<thead>
+<tr>
+<th scope="col" class="org-right">Attr&lt;n&gt;[3:0]</th>
+<th scope="col" class="org-left">Meaning when Attr&lt;n&gt;[7:4] is 0000 Meaning when Attr&lt;n&gt;[7:4] is not 0000</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td class="org-right">0000</td>
+<td class="org-left">Device-nGnRnE memory UNPREDICTABLE</td>
+</tr>
+
+<tr>
+<td class="org-right">00RW</td>
+<td class="org-left">RW not 00 UNPREDICTABLE Normal memory, Inner Write-Through Transient</td>
+</tr>
+
+<tr>
+<td class="org-right">0100</td>
+<td class="org-left">Device-nGnRE memory Normal memory, Inner Non-cacheable</td>
+</tr>
+
+<tr>
+<td class="org-right">01RW</td>
+<td class="org-left">RW not 00 UNPREDICTABLE Normal memory, Inner Write-Back Transient</td>
+</tr>
+
+<tr>
+<td class="org-right">1000</td>
+<td class="org-left">Device-nGRE memory Normal memory, Inner Write-Through Non-transient (RW=10RW, RW not 00 UNPREDICTABLE Normal memory, Inner Write-Through Non-transient</td>
+</tr>
+
+<tr>
+<td class="org-right">1100</td>
+<td class="org-left">Device-GRE memory Normal memory, Inner Write-Back Non-transient (RW=00)</td>
+</tr>
+
+<tr>
+<td class="org-right">11RW</td>
+<td class="org-left">RW not 00 UNPREDICTABLE Normal memory, Inner Write-Back Non-transient</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+<div id="outline-container-org8b451dc" class="outline-3">
+<h3 id="org8b451dc">Normal Memory</h3>
+<div class="outline-text-3" id="text-org8b451dc">
+</div>
+<ul class="org-ul">
+<li><a id="org726c781"></a>MT_NORMAL_NC<br>
+<div class="outline-text-4" id="text-org726c781">
+<p>
+Attr&lt;n&gt; = 0x44, Normal memory, Outer Non-cacheable, Inner Non-cacheabe<br>
+就是普通的不带cache访问的类型<br>
+</p>
+</div>
+</li>
+<li><a id="org9990277"></a>MT_NORMAL<br>
+<div class="outline-text-4" id="text-org9990277">
+<p>
+Attr&lt;n&gt; = 0xff, Normal memory, Outer Write-Back Non-transient, Outer Read-Allocate, Outer Write-Allocate, Inner Write-Back, Inner Read-Allocate, Inner-Write-Allocate<br>
+这个就是带cache的普通内存，速度最快, 读写都是先经过cache。<br>
+</p>
+</div>
+</li>
+<li><a id="orgb568d38"></a>MT_NORMAL_WT<br>
+<div class="outline-text-4" id="text-orgb568d38">
+<p>
+Attr&lt;n&gt; = 0xbb, Normal memory, Outer Write-Through Non-transient, Outer Read-Allocate, Outer Write-Allocate, Inner Write-Through, Inner Read-Allocate, Inner-Write-Allocate<br>
+这个也是带cache的设置，读取时会经过cache，写入时则不经过cache<br>
+</p>
+</div>
+</li>
+</ul>
+</div>
+
+<div id="outline-container-orgf156629" class="outline-3">
+<h3 id="orgf156629">Device Memory</h3>
+<div class="outline-text-3" id="text-orgf156629">
+</div>
+<ul class="org-ul">
+<li><a id="org206686c"></a>GRE<br>
+<div class="outline-text-4" id="text-org206686c">
+<p>
+ref to <a href="https://developer.arm.com/documentation/den0024/a/Memory-Ordering/Memory-types/Device-memory?lang=en">ARM Cortex-A Series Programmer's Guide for ARMv8-A#Device memory</a><br>
+</p>
+<dl class="org-dl">
+<dt>G</dt><dd>Gathering<br>
+这个属性决定了多次访问是否可以合并成一次总线访问。如果地址被标记为nG，那么总线上的传输就必须和程序指定的传输相一致<br></dd>
+<dt>R</dt><dd>Re-ordering<br>
+这个属性决定了设备是否会对传输进行重新排序，如果设置为nR,那么对于本块地址空间的访问就<br></dd>
+</dl>
+<p>
+会全部按照程序中的顺序来进行访问。这块内存的大小时由具体平台决定的，如果这个block很大，那么这个属性将会覆盖多个页面项。<br>
+</p>
+<dl class="org-dl">
+<dt>E</dt><dd>Early Write Acknowledgement<br>
+这个属性决定了在处理器项从设备写入时是否允许从中间的缓冲buffer发送写入完成的应答信号。如果某个地址被标记为nE，<br>
+那么这个信号就必须由从外设设备发出。如果被标记为E，那么这个信号就可以由中间的互联中的buffer来发出。<br></dd>
+</dl>
+</div>
+</li>
+</ul>
+</div>
+<div id="outline-container-org4d5d0ac" class="outline-3">
+<h3 id="org4d5d0ac">Strongly Ordered Memory :: ARMv7 platform, merge into Device Memory</h3>
+</div>
+</div>
+
+<div id="outline-container-org7319093" class="outline-2">
+<h2 id="org7319093">MMU table</h2>
+<div class="outline-text-2" id="text-org7319093">
+</div>
+<div id="outline-container-org5ee3fa0" class="outline-3">
+<h3 id="org5ee3fa0">Input Address size limit.</h3>
+<div class="outline-text-3" id="text-org5ee3fa0">
+<p>
+通过TCR_ELx.T0SZ 可以控制系统进行映射的地址范围，计算方法 size = 2 ^(64 - TCR_ELx.T0SZ).<br>
+默认值为0，启用最大支持的地址范围，一般不需要进行修改，当需要限制地址范围时可以使用这个寄存器来控制.<br>
+</p>
+
+<div id="orgd4221c1" class="figure">
+<p><img src="assets/2021-11-04_18-44-51_screenshot.png" alt="2021-11-04_18-44-51_screenshot.png"><br>
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org791280a" class="outline-3">
+<h3 id="org791280a">Translate table</h3>
+<div class="outline-text-3" id="text-org791280a">
+<p>
+VMSAv8-64 translation table format descriptors<br>
+<img src="assets/11_Translation_table_format.png" alt="11_Translation_table_format.png"><br>
+</p>
+</div>
+
+<ul class="org-ul">
+<li><a id="org58f7340"></a>An invalid or fault entry.<br>
+<div class="outline-text-4" id="text-org58f7340">
+<p>
+最低位为0表示无效的表项，当访问该地址时，系统将会产生同步的data abort.<br>
+</p>
+</div>
+</li>
+<li><a id="orgbde3def"></a>A table entry, that points to the next-level translation table.<br>
+<div class="outline-text-4" id="text-orgbde3def">
+<p>
+table entry表示还有下一级的映射表需要去查询，就只是一个简单的下级地址记录，功能比较简单.<br>
+</p>
+
+<div id="org2616e03" class="figure">
+<p><img src="assets/2021-11-04_18-48-42_screenshot.png" alt="2021-11-04_18-48-42_screenshot.png"><br>
+</p>
+</div>
+</div>
+</li>
+
+<li><a id="org13215bd"></a>A block entry, that defines the memory properties for the access.<br>
+<div class="outline-text-4" id="text-org13215bd">
+<p>
+block entry表示一个具体的映射项，当系统记录了最终映射到的地址，以及一些属性的配制，mmu设置的内存属性全部都可以从这里查到.<br>
+</p>
+
+<div id="org1bb6933" class="figure">
+<p><img src="assets/2021-11-04_16-25-15_screenshot.png" alt="2021-11-04_16-25-15_screenshot.png"><br>
+</p>
+</div>
+</div>
+</li>
+</ul>
+</div>
+
+<div id="outline-container-orge7edaca" class="outline-3">
+<h3 id="orge7edaca">example</h3>
+<div class="outline-text-3" id="text-orge7edaca">
+<p>
+下面是一个具体的映射表的例子，颗粒度：4KB<br>
+</p>
+</div>
+<ul class="org-ul">
+<li><a id="orge4ea5b2"></a>相关寄存器值以及映射表内容<br>
+<div class="outline-text-4" id="text-orge4ea5b2">
+<div class="org-src-container">
+<pre class="src src-bash">i r TCR_EL2
+TCR_EL2     0x0007FFF78081351C
+
+i r TTBR0_EL2
+TTBR0_EL2   0x00000000FFFF0000
+
+x/16g SP:0x00000000FFFF0000
+SP:0x00000000FFFF0000:  0x00000000FFFF1003  0x0060000040000401  0x0000000080000711  0x00000000C0000711  0x0000000100000711  0x0000000140000711  0x0000000000000000  0x0000000000000000
+SP:0x00000000FFFF0040:  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000
+
+x/256g SP:0x00000000FFFF1000
+SP:0x00000000FFFF1000:  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000
+SP:0x00000000FFFF1040:  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000
+SP:0x00000000FFFF1080:  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000
+SP:0x00000000FFFF10C0:  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000
+SP:0x00000000FFFF1100:  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000
+SP:0x00000000FFFF1140:  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000
+SP:0x00000000FFFF1180:  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000
+SP:0x00000000FFFF11C0:  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000
+SP:0x00000000FFFF1200:  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000
+SP:0x00000000FFFF1240:  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000
+SP:0x00000000FFFF1280:  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000
+SP:0x00000000FFFF12C0:  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000
+SP:0x00000000FFFF1300:  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000
+SP:0x00000000FFFF1340:  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000
+SP:0x00000000FFFF1380:  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000
+SP:0x00000000FFFF13C0:  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000
+SP:0x00000000FFFF1400:  0x0060000010000401  0x0060000010200401  0x0060000010400401  0x0060000010600401  0x0060000010800401  0x0060000010A00401  0x0060000010C00401  0x0060000010E00401
+SP:0x00000000FFFF1440:  0x0060000011000401  0x0060000011200401  0x0060000011400401  0x0060000011600401  0x0060000011800401  0x0060000011A00401  0x0060000011C00401  0x0060000011E00401
+SP:0x00000000FFFF1480:  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000
+SP:0x00000000FFFF14C0:  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000
+SP:0x00000000FFFF1500:  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000
+SP:0x00000000FFFF1540:  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000
+SP:0x00000000FFFF1580:  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000
+SP:0x00000000FFFF15C0:  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000
+SP:0x00000000FFFF1600:  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000
+SP:0x00000000FFFF1640:  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000
+SP:0x00000000FFFF1680:  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000
+SP:0x00000000FFFF16C0:  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000
+SP:0x00000000FFFF1700:  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000
+SP:0x00000000FFFF1740:  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000
+SP:0x00000000FFFF1780:  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000
+SP:0x00000000FFFF17C0:  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000  0x0000000000000000
+</pre>
+</div>
+</div>
+</li>
+<li><a id="org2c99143"></a>TCR_EL2<br>
+<div class="outline-text-4" id="text-org2c99143">
+<p>
+从这个寄存器中，我们可以得到如下信息：<br>
+</p>
+<table>
+
+
+<colgroup>
+<col  class="org-left">
+
+<col  class="org-right">
+
+<col  class="org-left">
+</colgroup>
+<tbody>
+<tr>
+<td class="org-left">field</td>
+<td class="org-right">value</td>
+<td class="org-left">meaning</td>
+</tr>
+
+<tr>
+<td class="org-left">TCR_EL2.TG0</td>
+<td class="org-right">0x0</td>
+<td class="org-left">4KB Granule size</td>
+</tr>
+
+<tr>
+<td class="org-left">TCR_EL2.T0SZ</td>
+<td class="org-right">0x1C</td>
+<td class="org-left">可用地址范围 0 ~ 2^(64-28)</td>
+</tr>
+</tbody>
+</table>
+
+<p>
+对于4KB的颗粒度, 每一级的地址范围如下图<br>
+</p>
+
+<div id="org4896a1b" class="figure">
+<p><img src="assets/2021-11-04_15-45-13_screenshot.png" alt="2021-11-04_15-45-13_screenshot.png"><br>
+</p>
+</div>
+</div>
+</li>
+<li><a id="org1c38112"></a>mmu 表项解释<br>
+<div class="outline-text-4" id="text-org1c38112">
+<p>
+在上面这个例子中，mmu table位于 0xffff0000 的位置，每个表项有64bit长度, 使用4KB的颗粒度.<br>
+</p>
+
+<ol class="org-ol">
+<li>T0SZ<br>
+= 0b011100 = 28, 由此可得地址范围为 0 ~ 0x1000000000<br></li>
+<li>对于每一项<br>
+bit[0]: indicates whether the descriptor is valid, 对于未映射的项，访问是会触发data abort.<br>
+Bit[1] of the descriptor indicates the descriptor type. 0: Block, 1: Table<br></li>
+
+<li>解析<br>
+第一项： 0x00000000FFFF1003: 表示存在level 0映射, table类型, 下级table地址在 0x00000000FFFF1000<br>
+    64项： 0x00000000FFFF1400 :  0x0060000010000401: block类型, 每个block大小2MB,根据地址计算，对应的范围是 [0x10000000 , 0x10200000) , Upper attribute: [63:51] = 0b0000000001100, Lower attribute: [11:2)] = 0b0100000000 XN,PXN,AF<br>
+第二项： 0x0060000040000401: Block类型，每个block 1GB大小根据地址计算，对应的范围是 [0x40000000 , 0x8000000)<br>
+剩余项； 和第二项类似。<br></li>
+</ol>
+</div>
+</li>
+</ul>
+</div>
+</div>
+<div id="footnotes">
+<h2 class="footnotes">Footnotes: </h2>
+<div id="text-footnotes">
+
+<div class="footdef"><sup><a id="fn.1" class="footnum" href="#fnr.1">1</a></sup> <div class="footpara"><p class="footpara">
+详见ARM官方文档DEN0024A_v8_architecture_PG.pdf 13.1 Memory types<br>
+<a href="https://developer.arm.com/documentation/101811/0101">https://developer.arm.com/documentation/101811/0101</a><br>
+</p></div></div>
+
+
+</div>
+</div></div>
+<div id="postamble" class="status">
+<script src="https://utteranc.es/client.js"
+    repo="schspa/schspa.github.io"
+    issue-term="title"
+    label="✨💬✨"
+    theme="github-light"
+    crossorigin="anonymous"
+    async>
+</script>
+<div class="me">
+  <span><b>Contact me via :)</b><span>
+  <div class="contact">
+    <a id="email" href="mailto:schspa@gmail.com" target="_blank"><i class="fab fa-mailchimp animated heartBeat delay-2s slower"></i></a>
+    <a id="github" href="//github.com/schspa" target="_blank"><i class="fab fa-github animated heartBeat delay-2s slower"></i></a>
+  </div>
+</div>
+
+<div id="jinrishici-sentence" style="font-weight: 700;">虚怀乃若谷，水深则流缓。</div>
+<script src="https://sdk.jinrishici.com/v2/browser/jinrishici.js" charset="utf-8"></script>
+</div>
+</body>
+</html>
