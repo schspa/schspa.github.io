@@ -84,7 +84,7 @@ blockquote {
     color: #369;
 }
 
-li > ul, li > ol { padding-left: .16rem; }
+dl, ol, ul {margin-left: .16rem; padding-left: 0;}
 
 .underline { border-bottom: 1px solid #333; }
 
