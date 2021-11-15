@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2021-11-11 四 20:55 -->
+<!-- 2021-11-15 一 14:01 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Atomic operation in aarch64</title>
@@ -78,7 +78,7 @@
 </ul>
 </li>
 <li><a href="#org8bf72ef">总线的设置</a></li>
-<li><a href="#org550476f"><span class="todo TODO">TODO</span> 对于内核注释中提到的omap平台，硬件上使用了哪种互连网络，最终导致了系统无法在non-cached内存中使用原子操作？</a></li>
+<li><a href="#org550476f">对于内核注释中提到的omap平台，硬件上使用了哪种互连网络，最终导致了系统无法在non-cached内存中使用原子操作？</a></li>
 <li><a href="#org68d8a06"><span class="done DONE">DONE</span> 对于上述平台，如果软件上去使用原子操作指令访问non-cached内存，会有什么后果？</a></li>
 </ul>
 </div>
@@ -150,10 +150,15 @@ atomic_add &amp; atomic_dec<br>
      })
 
 </pre>
+</div></li>
+</ul>
 </div>
-<ol class="org-ol">
-<li><p>
-LSE<br>
+<ul class="org-ul">
+<li><a id="org6f64001"></a>Linux atomic指令的两种实现<br>
+<ul class="org-ul">
+<li><a id="org86fd216"></a>LSE<br>
+<div class="outline-text-5" id="text-org86fd216">
+<p>
 使用ARMv8.1中新增加的原子操作指令<br>
 </p>
 <div class="org-src-container">
@@ -184,10 +189,12 @@ LSE<br>
 </div>
 <p>
 从上可以看到，系统使用了单条指令stadd就完成了原子加操作，这些指令是ARMv8.1 添加的指令，并不是所有的AARCH64都支持这种指令。<br>
-</p></li>
-<li><p>
-<a href="https://zh.wikipedia.org/wiki/Load-link/store-conditional">LL_SC</a> Load-link/store-condiitional<br>
 </p>
+</div>
+</li>
+
+<li><a id="orgdb77a68"></a>LL_SC]] Load-link/store-condiitional<br>
+<div class="outline-text-5" id="text-orgdb77a68">
 <div class="org-src-container">
 <pre class="src src-C"><span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #c678dd;">ATOMIC_OP</span>(<span style="color: #dcaeea;">op</span>, <span style="color: #dcaeea;">asm_op</span>, <span style="color: #dcaeea;">constraint</span>)                                                               \
     <span style="color: #51afef;">static</span> <span style="color: #51afef;">inline</span> <span style="color: #ECBE7B;">void</span>                                                                                                  \
@@ -225,14 +232,14 @@ ATOMIC_OP(__VA_ARGS__)                                          \
 </div>
 <p>
 从这里的实现可一看到，系统同过ldxr和stxr指令对配和算数运算指令一同完成原子操作。<br>
-</p></li>
-</ol></li>
-</ul>
-<p>
-在其他的原子操作中都是类似的实现，不再赘述。<br>
 </p>
 </div>
+</li>
+</ul>
+</li>
+</ul>
 </div>
+
 <div id="outline-container-org0e5e96b" class="outline-3">
 <h3 id="org0e5e96b">ARM64平台原子操作指令</h3>
 <div class="outline-text-3" id="text-org0e5e96b">
@@ -286,13 +293,13 @@ A32/T32: ldrex, strex, ldaex, stlex<br>
 <h3 id="org7767aac">CPUECTLR.ATOM</h3>
 <div class="outline-text-3" id="text-org7767aac">
 
-<div id="orga62a326" class="figure">
+<div id="org4790712" class="figure">
 <p><img src="assets/CPUECTLR-ATOM.png" alt="CPUECTLR-ATOM.png"><br>
 </p>
 </div>
 
 <p>
-通过CPU的这个寄存器可以控制atomic访问的时候具体是使用near/far，默认的配制中，根据不同的情况，硬件一般会自动根据cache hit的情况自动切换，这之中并不需要软件的参与。<br>
+通过CPU的这个寄存器可以控制atomic访问的时候具体是使用near/far，默认的配置中，根据不同的情况，硬件一般会自动根据cache hit的情况自动切换，这之中并不需要软件的参与。<br>
 </p>
 </div>
 </div>
@@ -314,7 +321,12 @@ A32/T32: ldrex, strex, ldaex, stlex<br>
 </div>
 
 <div id="outline-container-org550476f" class="outline-2">
-<h2 id="org550476f"><span class="todo TODO">TODO</span> 对于内核注释中提到的omap平台，硬件上使用了哪种互连网络，最终导致了系统无法在non-cached内存中使用原子操作？</h2>
+<h2 id="org550476f">对于内核注释中提到的omap平台，硬件上使用了哪种互连网络，最终导致了系统无法在non-cached内存中使用原子操作？</h2>
+<div class="outline-text-2" id="text-org550476f">
+<p>
+由于没有具体的OMAP平台资料，由上述的信息可以得知，这个是由于SOC内部的总线，或者最后端内存的硬件实现而造成的。不光是OMAP，很多ARM平台的SOC都有相同的问题. 但是一般cache都是打开的状态，所以软件一般不需要关心这个问题。<br>
+</p>
+</div>
 </div>
 
 <div id="outline-container-org68d8a06" class="outline-2">
