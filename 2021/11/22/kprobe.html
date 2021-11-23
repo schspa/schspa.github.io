@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<!-- 2021-11-23 二 13:58 -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kprobe in linux with aarch64</title>
+<meta name="generator" content="Org mode">
+<meta name="author" content="Schspa">
+<meta name="description" content="kprobe.org"
+>
+<link rel="shortcut icon" href="/images/rose-red.png" type="image/x-icon" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" integrity="sha256-sAcc18zvMnaJZrNT4v8J0T4HqzEUiUTlVFgDIywjQek=" crossorigin="anonymous">
+<link rel="stylesheet" href="/css/animate.min.css" />
+<link rel="stylesheet" href="/css/all.min.css" />
+<link rel="stylesheet" type="text/css" href="/css/style.css" />
+<link rel="stylesheet" type="text/css" href="/css/navbar.css" />
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/js/bootstrap.min.js" integrity="sha256-/hGxZHGQ57fXLp+NDusFZsZo/PG21Bp2+hXYV5a6w+g=" crossorigin="anonymous"></script>
+<script src="/js/jquery.min.js"></script>
+<script src="/js/darkreader.js"></script>
+<script src="/user.config.js"></script>
+<script src="/js/main.js"></script>
+</head>
+<body>
+<div id="preamble" class="status">
+<div class="mobile-container">
+  <!-- Top Navigation Menu -->
+  <div class="topnav">
+    <div id="header">
+      <a href="/" class="logo">Schspa's Blog</a>
+      <a href="javascript:void(0);" class="icon" onclick="toggleheader()">
+        <i class="fa fa-bars"></i>
+      </a>
+    </div>
+    <div id="nav_headers">
+      <a href="/sitemap.html" class="menu-item">Categories</a>
+    </div>
+  </div>
+  <!-- End smartphone / tablet look -->
+</div>
+
+<header id="header" class="header">
+  <div class="logo-wrapper">
+    <a href="/" class="logo">Schspa's Blogs</a>
+  </div>
+
+  <nav class="site-navbar">
+    <ul id="menu" class="menu">
+      <li class="menu-item">
+        <a class="menu-item-link" href="/">Home</a>
+      </li>
+      <li class="menu-item">
+        <a class="menu-item-link" href="/sitemap.html">Categories</a>
+      </li>
+    </ul>
+  </nav>
+</header>
+</div>
+<div id="content">
+<h1 class="title">Kprobe in linux with aarch64</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#org31fa66a">Overview</a></li>
+<li><a href="#org39613fa">basic usage</a>
+<ul>
+<li><a href="#orgc246cf3">Kernel config</a></li>
+<li><a href="#orgc93d11f">kprobe</a></li>
+<li><a href="#org13c4f7f">kretprobe</a></li>
+</ul>
+</li>
+<li><a href="#orgc40bb01">kprobe VS kretprobe</a></li>
+<li><a href="#org243415f">底层实现</a>
+<ul>
+<li><a href="#orgc1c5776">kprobe</a>
+<ul>
+<li><a href="#org531aec0">kprobe 相关关键代码</a></li>
+<li><a href="#orgdcd7043">kprobe执行流程</a></li>
+</ul>
+</li>
+<li><a href="#org8c47146">kretprobe</a>
+<ul>
+<li><a href="#orgb4310d8">注册</a></li>
+<li><a href="#org27db33c">pre_handler</a></li>
+<li><a href="#org21b64eb">kretprobe_trampoline</a></li>
+<li><a href="#org1acd11d">kretprobe summary</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#orgbf6cb9d">Summary</a></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org31fa66a" class="outline-2">
+<h2 id="org31fa66a">Overview</h2>
+<div class="outline-text-2" id="text-org31fa66a">
+<p>
+kprobe是Linux内核自带的调试机制，可以在内核的函数执行前后添加钩子来执行自定义函数来达到修改，调试内核的目的。<br>
+具体简介可以参考内核官方文档，这个文档已经有比较详细的记录.<br>
+<a href="https://www.kernel.org/doc/html/latest/trace/kprobes.html">https://www.kernel.org/doc/html/latest/trace/kprobes.html</a><br>
+</p>
+</div>
+</div>
+
+<div id="outline-container-org39613fa" class="outline-2">
+<h2 id="org39613fa">basic usage</h2>
+<div class="outline-text-2" id="text-org39613fa">
+<p>
+先来看一下这个功能的基础使用方法, 官方的两个例子很简单<br>
+</p>
+</div>
+
+<div id="outline-container-orgc246cf3" class="outline-3">
+<h3 id="orgc246cf3">Kernel config</h3>
+<div class="outline-text-3" id="text-orgc246cf3">
+<div class="org-src-container">
+<pre class="src src-text"><code>CONFIG_KPROBES=y</code>
+<code>CONFIG_SAMPLES=y</code>
+<code>CONFIG_SAMPLE_KPROBES=y</code>
+<code>CONFIG_CONFIG_SAMPLE_KRETPROBES=y</code>
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgc93d11f" class="outline-3">
+<h3 id="orgc93d11f">kprobe</h3>
+<div class="outline-text-3" id="text-orgc93d11f">
+<div class="org-src-container">
+<pre class="src src-bash"><code>insmod kprobe_example.ko <span style="color: #dcaeea;">symbol</span>=cmdline_proc_open</code>
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-bash"><code>root@j5dvb:/system/lib/modules/4.14.74# cat /proc/cmdline </code>
+<code>[  277.486723] &lt;cmdline_proc_open&gt; pre_handler: p-&gt;<span style="color: #dcaeea;">addr</span> = 0xffffff8008205f10, <span style="color: #dcaeea;">pc</span> = 0xffffff8008205f10, <span style="color: #dcaeea;">pstate</span> = 0x60400149</code>
+<code>[  277.488094] &lt;cmdline_proc_open&gt; post_handler: p-&gt;<span style="color: #dcaeea;">addr</span> = 0xffffff8008205f10, <span style="color: #dcaeea;">pstate</span> = 0x60400149</code>
+<code><span style="color: #dcaeea;">console</span>=uart8250,mmio32,0x43B90000,921600n8 <span style="color: #dcaeea;">root</span>=/dev/ram0 <span style="color: #dcaeea;">rdinit</span>=/init rw rootwait <span style="color: #dcaeea;">loglevel</span>=14 hobotboot.hardware=j5dvb hobotboot.reason=freboot hobotboot.fchm_fault=0x00000001 hobotboot.fault_timestamp=1637559008 hobotboot.ipaddr=10.106.32.44 hobotboot.slot_suffix=_a hobotboot.bpu_slot_suffix=_-1 hobotboot.mode=normal <span style="color: #dcaeea;">module_blacklist</span>=isp_hw1 <span style="color: #dcaeea;">dyndbg</span>=<span style="color: #98be65;">"module module +p;"</span> </code>
+<code>root@j5dvb:/system/lib/modules/4.14.74# </code>
+</pre>
+</div>
+
+<p>
+上述命令可以在打开/proc/cmdline这个命令时运行自己注册的钩子函数<br>
+</p>
+</div>
+</div>
+
+<div id="outline-container-org13c4f7f" class="outline-3">
+<h3 id="org13c4f7f">kretprobe</h3>
+<div class="outline-text-3" id="text-org13c4f7f">
+<div class="org-src-container">
+<pre class="src src-bash"><code>insmod kretprobe_example.ko <span style="color: #dcaeea;">func</span>=meminfo_proc_show</code>
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-bash"><code>root@j5dvb:/system/lib/modules/4.14.74# cat /proc/meminfo</code>
+<code>[  561.094342] meminfo_proc_show returned 0 and took 27667 ns to execute</code>
+<code>MemTotal:        3771188 kB</code>
+<code>MemFree:         2865632 kB</code>
+<code>MemAvailable:    3013684 kB</code>
+<code>Buffers:            1688 kB</code>
+<code>Cached:           156948 kB</code>
+<code>SwapCached:            0 kB</code>
+<code>Active:           327792 kB</code>
+</pre>
+</div>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-orgc40bb01" class="outline-2">
+<h2 id="orgc40bb01">kprobe VS kretprobe</h2>
+<div class="outline-text-2" id="text-orgc40bb01">
+<p>
+kretprobe底层通过kprobe来实现，与kprobe的不同在于实现了一系列辅助的函数来支持instance的实例化，这样在每次运行到对应的函数/地址时会自动生成一个新的private data，从而实现并发和多实例.<br>
+</p>
+
+<p>
+从官方的例子就可以看到，kretprobe可以实现统计函数运行时间的功能，但是简单的kprobe就不行（因为没有private data）。<br>
+</p>
+<div class="org-src-container">
+<pre class="src src-C"><code><span style="color: #51afef;">typedef</span> <span style="color: #ECBE7B;">int</span> (*<span style="color: #ECBE7B;">kprobe_pre_handler_t</span>) (<span style="color: #51afef;">struct</span> <span style="color: #ECBE7B;">kprobe</span> *, <span style="color: #51afef;">struct</span> <span style="color: #ECBE7B;">pt_regs</span> *);</code>
+<code><span style="color: #51afef;">typedef</span> <span style="color: #ECBE7B;">void</span> (*<span style="color: #ECBE7B;">kprobe_post_handler_t</span>) (<span style="color: #51afef;">struct</span> <span style="color: #ECBE7B;">kprobe</span> *, <span style="color: #51afef;">struct</span> <span style="color: #ECBE7B;">pt_regs</span> *,</code>
+<code>                <span style="color: #ECBE7B;">unsigned</span> <span style="color: #ECBE7B;">long</span> <span style="color: #dcaeea;">flags</span>);</code>
+<code><span style="color: #51afef;">typedef</span> <span style="color: #ECBE7B;">int</span> (*<span style="color: #ECBE7B;">kretprobe_handler_t</span>) (<span style="color: #51afef;">struct</span> <span style="color: #ECBE7B;">kretprobe_instance</span> *,</code>
+<code>                <span style="color: #51afef;">struct</span> <span style="color: #ECBE7B;">pt_regs</span> *);</code>
+</pre>
+</div>
+<p>
+kprobe的回调中，kprobe是全局共享的，所以没有简单的办法去追踪每次的函数调用。而kretprobe的回调会有instance的概念，并且可以可以携带private在kretprobe_instance中.<br>
+</p>
+
+<p>
+简而言之，kretprobe会处理好多实例的问题，并且对每次的函数进入，退出都有对应的private data可供保存对应的数据。而kprobe只能探测单条指令，在指令运行前后执行注册进取的callback.<br>
+</p>
+</div>
+</div>
+
+
+<div id="outline-container-org243415f" class="outline-2">
+<h2 id="org243415f">底层实现</h2>
+<div class="outline-text-2" id="text-org243415f">
+</div>
+<div id="outline-container-orgc1c5776" class="outline-3">
+<h3 id="orgc1c5776">kprobe</h3>
+<div class="outline-text-3" id="text-orgc1c5776">
+<p>
+kprobe_addr 用来获取需要patch的指令地址，目前可以通过指定add/symbol + offset的方法来指定.<br>
+check_kprobe_rereg 用来检查kprobe对象是否已经被注册过，如果已经被注册过，就返回-EINVAL的错误<br>
+prepare_kprobe 用来记录原始的指令, 计算新的指令，并且注册到系统的insn的处理中<br>
+arm_kprobe 用来给text代码段打patch，将需要trap的指令替换成debug指令<br>
+</p>
+</div>
+
+<div id="outline-container-org531aec0" class="outline-4">
+<h4 id="org531aec0">kprobe 相关关键代码</h4>
+<div class="outline-text-4" id="text-org531aec0">
+<p>
+在注册kprobe时，系统将对应地址的指令替换成brk的指令，当系统运行到对应的地址时，系统会触发debug的异常<br>
+</p>
+<div class="org-src-container">
+<pre class="src src-C"><code><span style="color: #5B6268;">/* </span><span style="color: #5B6268;">arm kprobe: install breakpoint in text</span><span style="color: #5B6268;"> */</span></code>
+<code><span style="color: #ECBE7B;">void</span> <span style="color: #c678dd;">__kprobes</span> arch_arm_kprobe(<span style="color: #51afef;">struct</span> <span style="color: #ECBE7B;">kprobe</span> *<span style="color: #dcaeea;">p</span>)</code>
+<code>{</code>
+<code>    <span style="color: #ECBE7B;">void</span> *<span style="color: #dcaeea;">addr</span> = p-&gt;addr;</code>
+<code>    <span style="color: #ECBE7B;">u32</span> <span style="color: #dcaeea;">insn</span> = BRK64_OPCODE_KPROBES;</code>
+<code></code>
+<code>    aarch64_insn_patch_text(&amp;addr, &amp;insn, 1);</code>
+<code>}</code>
+<code></code>
+<code><span style="color: #5B6268;">/* </span><span style="color: #5B6268;">disarm kprobe: remove breakpoint from text</span><span style="color: #5B6268;"> */</span></code>
+<code><span style="color: #ECBE7B;">void</span> <span style="color: #c678dd;">__kprobes</span> arch_disarm_kprobe(<span style="color: #51afef;">struct</span> <span style="color: #ECBE7B;">kprobe</span> *<span style="color: #dcaeea;">p</span>)</code>
+<code>{</code>
+<code>    <span style="color: #ECBE7B;">void</span> *<span style="color: #dcaeea;">addr</span> = p-&gt;addr;</code>
+<code></code>
+<code>    aarch64_insn_patch_text(&amp;addr, &amp;p-&gt;opcode, 1);</code>
+<code>}</code>
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-C"><code><span style="color: #51afef;">static</span> <span style="color: #ECBE7B;">int</span> <span style="color: #c678dd;">brk_handler</span>(<span style="color: #ECBE7B;">unsigned</span> <span style="color: #ECBE7B;">long</span> <span style="color: #dcaeea;">unused</span>, <span style="color: #ECBE7B;">unsigned</span> <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">esr</span>,</code>
+<code>                    <span style="color: #51afef;">struct</span> <span style="color: #ECBE7B;">pt_regs</span> *<span style="color: #dcaeea;">regs</span>)</code>
+<code>{</code>
+<code>    <span style="color: #51afef;">if</span> (call_break_hook(regs, esr) == DBG_HOOK_HANDLED)</code>
+<code>        <span style="color: #51afef;">return</span> 0;</code>
+<code></code>
+<code>    <span style="color: #51afef;">if</span> (user_mode(regs)) {</code>
+<code>        send_user_sigtrap(TRAP_BRKPT);</code>
+<code>    } <span style="color: #51afef;">else</span> {</code>
+<code>        pr_warn(<span style="color: #98be65;">"Unexpected kernel BRK exception at EL1\n"</span>);</code>
+<code>        <span style="color: #51afef;">return</span> -EFAULT;</code>
+<code>    }</code>
+<code></code>
+<code>    <span style="color: #51afef;">return</span> 0;</code>
+<code>}</code>
+<code><span style="color: #c678dd;">NOKPROBE_SYMBOL</span>(brk_handler);</code>
+</pre>
+</div>
+<p>
+在brk handler中，kprobe通过设置单部调试来实现调试指令的运行, 代码如下所示<br>
+</p>
+<div class="org-src-container">
+<pre class="src src-C"><code><span style="color: #51afef;">static</span> <span style="color: #ECBE7B;">void</span> <span style="color: #c678dd;">__kprobes</span> kprobe_handler(<span style="color: #51afef;">struct</span> <span style="color: #ECBE7B;">pt_regs</span> *<span style="color: #dcaeea;">regs</span>)</code>
+<code>{</code>
+<code>    <span style="color: #51afef;">struct</span> <span style="color: #ECBE7B;">kprobe</span> *<span style="color: #dcaeea;">p</span>, *<span style="color: #dcaeea;">cur_kprobe</span>;</code>
+<code>    <span style="color: #51afef;">struct</span> <span style="color: #ECBE7B;">kprobe_ctlblk</span> *<span style="color: #dcaeea;">kcb</span>;</code>
+<code>    <span style="color: #ECBE7B;">unsigned</span> <span style="color: #ECBE7B;">long</span> <span style="color: #dcaeea;">addr</span> = instruction_pointer(regs);</code>
+<code></code>
+<code>    kcb = get_kprobe_ctlblk();</code>
+<code>    cur_kprobe = kprobe_running();</code>
+<code></code>
+<code>    p = get_kprobe((<span style="color: #ECBE7B;">kprobe_opcode_t</span> *) addr);</code>
+<code></code>
+<code>    <span style="color: #51afef;">if</span> (p) {</code>
+<code>        <span style="color: #51afef;">if</span> (cur_kprobe) {</code>
+<code>            <span style="color: #51afef;">if</span> (reenter_kprobe(p, regs, kcb))</code>
+<code>                <span style="color: #51afef;">return</span>;</code>
+<code>        } <span style="color: #51afef;">else</span> {</code>
+<code>            <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">Probe hit</span><span style="color: #5B6268;"> */</span></code>
+<code>            set_current_kprobe(p);</code>
+<code>            kcb-&gt;kprobe_status = KPROBE_HIT_ACTIVE;</code>
+<code></code>
+<code>            <span style="color: #5B6268;">/*</span></code>
+<code><span style="color: #5B6268;">             * If we have no pre-handler or it returned 0, we</span></code>
+<code><span style="color: #5B6268;">             * continue with normal processing.  If we have a</span></code>
+<code><span style="color: #5B6268;">             * pre-handler and it returned non-zero, it will</span></code>
+<code><span style="color: #5B6268;">             * modify the execution path and no need to single</span></code>
+<code><span style="color: #5B6268;">             * stepping. Let's just reset current kprobe and exit.</span></code>
+<code><span style="color: #5B6268;">             */</span></code>
+<code>            <span style="color: #51afef;">if</span> (<span style="color: #51afef; font-weight: bold;">!</span>p-&gt;pre_handler || <span style="color: #51afef; font-weight: bold;">!</span>p-&gt;pre_handler(p, regs)) {</code>
+<code>                setup_singlestep(p, regs, kcb, 0);</code>
+<code>            } <span style="color: #51afef;">else</span></code>
+<code>                reset_current_kprobe();</code>
+<code>        }</code>
+<code>    }</code>
+<code>    <span style="color: #5B6268;">/*</span></code>
+<code><span style="color: #5B6268;">     * The breakpoint instruction was removed right</span></code>
+<code><span style="color: #5B6268;">     * after we hit it.  Another cpu has removed</span></code>
+<code><span style="color: #5B6268;">     * either a probepoint or a debugger breakpoint</span></code>
+<code><span style="color: #5B6268;">     * at this address.  In either case, no further</span></code>
+<code><span style="color: #5B6268;">     * handling of this interrupt is appropriate.</span></code>
+<code><span style="color: #5B6268;">     * Return back to original instruction, and continue.</span></code>
+<code><span style="color: #5B6268;">     */</span></code>
+<code>}</code>
+</pre>
+</div>
+
+<p>
+在被hook的指令单步执行之后，系统通过 <a target="_blank" href="https://github.com/torvalds/linux/blob/b133f076639b918bb6ad157f6308b0f595058959/arch/arm64/kernel/probes/kprobes.c#L335">kprobe_breakpoint_ss_handler</a> 来处理接下来的任务, 并在此处清理单步调试的设置，并调用post_handler<br>
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgdcd7043" class="outline-4">
+<h4 id="orgdcd7043">kprobe执行流程</h4>
+<div class="outline-text-4" id="text-orgdcd7043">
+<p>
+流程图大致如下:<br>
+</p>
+<p>
+<img src="assets/.kprobe_call_sequence.png" alt=".kprobe_call_sequence.png"><br>
+上图大概画出了aarch64架构下kprobe的执行流程，从图中可以看到，kprobe利用修改指令，并且CPU单步调试的功能完成整个kprobe的功能。<br>
+</p>
+
+<p>
+注：为了方便，图中并没有画出需要模拟指令的运行路径，对于需要模拟运行的指令，如b，bl等并不会使用单步调试的功能，而是通过软件来模拟，见代码<a target="_blank" href="https://github.com/torvalds/linux/blob/b133f076639b918bb6ad157f6308b0f595058959/arch/arm64/kernel/probes/kprobes.c#L65">singlestep for insn simulation</a>, 并且在模拟完成之后直接调用 post_handler回调。<br>
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org8c47146" class="outline-3">
+<h3 id="org8c47146">kretprobe</h3>
+<div class="outline-text-3" id="text-org8c47146">
+</div>
+<div id="outline-container-orgb4310d8" class="outline-4">
+<h4 id="orgb4310d8">注册</h4>
+<div class="outline-text-4" id="text-orgb4310d8">
+<p>
+kretprobe在kprobe的基础上实现，注册函数很简单，参数检查，分配对象，以及注册kprobe<br>
+<a target="_blank" href="https://github.com/torvalds/linux/blob/b133f076639b918bb6ad157f6308b0f595058959/kernel/kprobes.c#L1983">kernel source for register_kretprobe</a><br>
+</p>
+<ol class="org-ol">
+<li>检查参数<br>
+kretprobe要求探测的函数位于行数开端，在注册时系统会检查地址是否在函数的开始位置 <a target="_blank" href="https://github.com/torvalds/linux/blob/b133f076639b918bb6ad157f6308b0f595058959/kernel/kprobes.c#L1967">kprobe_on_func_entry</a><br></li>
+<li>根据maxactive来分配kretprobe_instance对象<br></li>
+<li>注册kprobe<br></li>
+</ol>
+</div>
+</div>
+
+<div id="outline-container-org27db33c" class="outline-4">
+<h4 id="org27db33c">pre_handler</h4>
+<div class="outline-text-4" id="text-org27db33c">
+<p>
+<a target="_blank" href="https://github.com/torvalds/linux/blob/b133f076639b918bb6ad157f6308b0f595058959/kernel/kprobes.c#L1922">kernel source for pre_handler_kretprobe</a><br>
+</p>
+
+<ol class="org-ol">
+<li>从freelist中取出一个未使用的kretprobe_instance对象<br></li>
+<li>如果注册有entry_handler，则运行entry_handler<br></li>
+<li>如果有entry_handler并且运行返回非0，释放kretprobe_instance对象，并结束<br></li>
+<li>运行arch_prepare_kretprobe，保存并修改函数运行返回地址为kretprobe_trampoline<br></li>
+<li>被探测的函数继续运行，返回后将会直接返回kretprobe_trampoline<br></li>
+</ol>
+</div>
+</div>
+
+<div id="outline-container-org21b64eb" class="outline-4">
+<h4 id="org21b64eb">kretprobe_trampoline</h4>
+<div class="outline-text-4" id="text-org21b64eb">
+<p>
+<a target="_blank" href="https://github.com/torvalds/linux/blob/b133f076639b918bb6ad157f6308b0f595058959/arch/arm64/kernel/probes/kprobes_trampoline.S#L64">kretprobe_trampoline</a><br>
+<a target="_blank" href="https://github.com/torvalds/linux/blob/b133f076639b918bb6ad157f6308b0f595058959/kernel/kprobes.c#L1860">__kretprobe_trampoline_handler</a><br>
+</p>
+<ol class="org-ol">
+<li>获取被探测函数的真实返回地址 (该地址在arch_prepare_kretprobe 中被保存)<br></li>
+<li>将kretprobe_instance的ret_addr设置为真实的返回地址 (针对一个函数注册了多了kretprobe的情况)<br></li>
+<li>调用handler的回调, 并且回收kretprobe_instance对象<br></li>
+</ol>
+</div>
+</div>
+
+<div id="outline-container-org1acd11d" class="outline-4">
+<h4 id="org1acd11d">kretprobe summary</h4>
+<div class="outline-text-4" id="text-org1acd11d">
+<p>
+根据上述的分析，kretprobe通过在函数的首地址放置kprobe探针，并通过修改lr指针的方式完成捕获整个函数的调用开始以及结束。<br>
+</p>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgbf6cb9d" class="outline-2">
+<h2 id="orgbf6cb9d">Summary</h2>
+<div class="outline-text-2" id="text-orgbf6cb9d">
+<p>
+以上分析了kprobe和kretprobe的基本实现，由分析可得结论，kprobe只能分析单条指令，其两个callback函数会在指令执行的前后被调用。<br>
+而kretprobe能分析整个函数的执行，其两个callback会在函数调用前，以及函数运行返回后执行。<br>
+</p>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<script src="https://utteranc.es/client.js"
+    repo="schspa/schspa.github.io"
+    issue-term="title"
+    label="✨💬✨"
+    theme="github-light"
+    crossorigin="anonymous"
+    async>
+</script>
+<div class="me">
+  <span><b>Contact me via :)</b><span>
+  <div class="contact">
+    <a id="email" href="mailto:schspa@gmail.com" target="_blank"><i class="fab fa-mailchimp animated heartBeat delay-2s slower"></i></a>
+    <a id="github" href="//github.com/schspa" target="_blank"><i class="fab fa-github animated heartBeat delay-2s slower"></i></a>
+  </div>
+</div>
+
+<div id="jinrishici-sentence" style="font-weight: 700;">虚怀乃若谷，水深则流缓。</div>
+<script src="https://sdk.jinrishici.com/v2/browser/jinrishici.js" charset="utf-8"></script>
+</div>
+</body>
+</html>

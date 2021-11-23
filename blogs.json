@@ -183,6 +183,21 @@
     ]
   },
   {
+    "file-path": "~/org/linux/debug/kprobe.org",
+    "URL": "/2021/11/22/kprobe.html",
+    "TITLE": "Kprobe in linux with aarch64",
+    "DATE": "<2021-11-22 13:33:00>",
+    "FILETAGS": [
+      "Linux Kernel",
+      "Kprobe",
+      "Debug",
+      "blogs"
+    ],
+    "CATEGORY": [
+      "Linux"
+    ]
+  },
+  {
     "file-path": "~/org/linux/boot/how-to-debugging-linux-booting-code.org",
     "URL": "/2020/06/11/how-to-debugging-linux-booting-code.html",
     "TITLE": "Debug linux kernel boot process",
