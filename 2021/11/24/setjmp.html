@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<!-- 2021-11-26 五 16:56 -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>setjmp/longjmp in C</title>
+<meta name="generator" content="Org mode">
+<meta name="author" content="Schspa">
+<meta name="description" content="Setjmp analysis"
+>
+<link rel="shortcut icon" href="/images/rose-red.png" type="image/x-icon" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" integrity="sha256-sAcc18zvMnaJZrNT4v8J0T4HqzEUiUTlVFgDIywjQek=" crossorigin="anonymous">
+<link rel="stylesheet" href="/css/animate.min.css" />
+<link rel="stylesheet" href="/css/all.min.css" />
+<link rel="stylesheet" type="text/css" href="/css/style.css" />
+<link rel="stylesheet" type="text/css" href="/css/navbar.css" />
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/js/bootstrap.min.js" integrity="sha256-/hGxZHGQ57fXLp+NDusFZsZo/PG21Bp2+hXYV5a6w+g=" crossorigin="anonymous"></script>
+<script src="/js/jquery.min.js"></script>
+<script src="/js/darkreader.js"></script>
+<script src="/user.config.js"></script>
+<script src="/js/main.js"></script>
+</head>
+<body>
+<div id="preamble" class="status">
+<div class="mobile-container">
+  <!-- Top Navigation Menu -->
+  <div class="topnav">
+    <div id="header">
+      <a href="/" class="logo">Schspa's Blog</a>
+      <a href="javascript:void(0);" class="icon" onclick="toggleheader()">
+        <i class="fa fa-bars"></i>
+      </a>
+    </div>
+    <div id="nav_headers">
+      <a href="/sitemap.html" class="menu-item">Categories</a>
+    </div>
+  </div>
+  <!-- End smartphone / tablet look -->
+</div>
+
+<header id="header" class="header">
+  <div class="logo-wrapper">
+    <a href="/" class="logo">Schspa's Blogs</a>
+  </div>
+
+  <nav class="site-navbar">
+    <ul id="menu" class="menu">
+      <li class="menu-item">
+        <a class="menu-item-link" href="/">Home</a>
+      </li>
+      <li class="menu-item">
+        <a class="menu-item-link" href="/sitemap.html">Categories</a>
+      </li>
+    </ul>
+  </nav>
+</header>
+</div>
+<div id="content">
+<h1 class="title">setjmp/longjmp in C</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#org8dca8e8">Example Analysis</a></li>
+<li><a href="#org5f102e1">libc implement of setjmp/longjmp</a>
+<ul>
+<li><a href="#orgb2d5a5c">setjmp</a></li>
+<li><a href="#org9679efe">longjmp</a></li>
+</ul>
+</li>
+<li><a href="#orga7e1948">risk of setjmp/longjmp usage</a></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org8dca8e8" class="outline-2">
+<h2 id="org8dca8e8">Example Analysis</h2>
+<div class="outline-text-2" id="text-org8dca8e8">
+<p>
+下面代码是setjmp以及longjmp的使用实例，以及其反汇编出来的结果，具体api的使用细节请参考man手册<br>
+</p>
+
+<div class="org-src-container">
+<pre class="src src-C" id="orge9fcd83"><code><span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;stdio.h&gt;</span></code>
+<code><span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;setjmp.h&gt;</span></code>
+<code></code>
+<code><span style="color: #51afef;">static</span> <span style="color: #ECBE7B;">jmp_buf</span> <span style="color: #dcaeea;">env</span>;</code>
+<code></code>
+<code><span style="color: #ECBE7B;">double</span> <span style="color: #c678dd;">divide</span>(<span style="color: #ECBE7B;">double</span> <span style="color: #dcaeea;">a</span>,<span style="color: #ECBE7B;">double</span> <span style="color: #dcaeea;">b</span>)</code>
+<code>{</code>
+<code>    <span style="color: #51afef;">const</span> <span style="color: #ECBE7B;">double</span> <span style="color: #dcaeea;">delta</span> = 0.00000000001;</code>
+<code>    <span style="color: #51afef;">if</span>(<span style="color: #51afef; font-weight: bold;">!</span>((-delta &lt; b) &amp;&amp; (b &lt; delta)))</code>
+<code>    {</code>
+<code>        <span style="color: #51afef;">return</span>  a/b ;</code>
+<code>    }</code>
+<code>    <span style="color: #51afef;">else</span></code>
+<code>    {</code>
+<code>        longjmp(env, 1);</code>
+<code>        <span style="color: #51afef;">return</span> 0;</code>
+<code>    }</code>
+<code>}</code>
+<code></code>
+<code><span style="color: #ECBE7B;">int</span> <span style="color: #c678dd;">main</span>( )</code>
+<code>{</code>
+<code>    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">ret</span>;</code>
+<code></code>
+<code>    ret = setjmp(env);</code>
+<code></code>
+<code>    <span style="color: #51afef;">if</span> (<span style="color: #51afef; font-weight: bold;">!</span>ret) {</code>
+<code>        printf(<span style="color: #98be65;">"5/0=%lf\n"</span>, divide(5,0));</code>
+<code>    } <span style="color: #51afef;">else</span>  <span style="color: #51afef;">if</span> (ret == 1) {</code>
+<code>        printf(<span style="color: #98be65;">"ERR\n"</span>);</code>
+<code>    }</code>
+<code>    <span style="color: #51afef;">return</span> 0;</code>
+<code>}</code>
+</pre>
+</div>
+
+<p>
+对应的汇编代码<br>
+</p>
+
+<div class="org-src-container">
+<pre class="src src-asm"><code><span style="color: #c678dd;">Dump</span> <span style="color: #51afef;">of</span> assembler code for function divide:</code>
+<code>/tmp/ox-bash-Zoz37R5Hg/test.c:</code>
+<code><span style="color: #c678dd;">7</span>   {</code>
+<code><span style="color: #c678dd;">8</span>       <span style="color: #51afef;">const</span> double delta = 0.00000000001<span style="color: #5B6268;">;</span></code>
+<code><span style="color: #c678dd;">9</span>       <span style="color: #51afef;">if</span>(!((-delta &lt; b) &amp;&amp; (b &lt; delta)))</code>
+<code>   <span style="color: #51afef;">0x0000000000000894</span> &lt;+0&gt;: 00 00 00 90 adrp    x0, 0x0</code>
+<code>   <span style="color: #51afef;">0x0000000000000898</span> &lt;+4&gt;: 02 7c 44 fd ldr d2, [x0, #2296]</code>
+<code>   <span style="color: #51afef;">0x000000000000089c</span> &lt;+8&gt;: 30 20 62 1e fcmpe   d1, d2</code>
+<code>   <span style="color: #51afef;">0x00000000000008a0</span> &lt;+12&gt;:    6c 00 00 54 b.gt    0x8ac &lt;divide+24&gt;</code>
+<code></code>
+<code><span style="color: #c678dd;">10</span>      {</code>
+<code><span style="color: #c678dd;">11</span>          <span style="color: #51afef;">return</span>  a/b <span style="color: #5B6268;">;</span></code>
+<code>   <span style="color: #51afef;">0x00000000000008a4</span> &lt;+16&gt;:    00 18 61 1e fdiv    d0, d0, d1</code>
+<code></code>
+<code><span style="color: #c678dd;">16</span>          <span style="color: #51afef;">return</span> 0<span style="color: #5B6268;">;</span></code>
+<code><span style="color: #c678dd;">17</span>      }</code>
+<code><span style="color: #c678dd;">18</span>  }</code>
+<code>   <span style="color: #51afef;">0x00000000000008a8</span> &lt;+20&gt;:    c0 03 5f d6 ret</code>
+<code></code>
+<code><span style="color: #c678dd;">9</span>       <span style="color: #51afef;">if</span>(!((-delta &lt; b) &amp;&amp; (b &lt; delta)))</code>
+<code>   <span style="color: #51afef;">0x00000000000008ac</span> &lt;+24&gt;:    00 00 00 90 adrp    x0, 0x0</code>
+<code>   <span style="color: #51afef;">0x00000000000008b0</span> &lt;+28&gt;:    02 80 44 fd ldr d2, [x0, #2304]</code>
+<code>   <span style="color: #51afef;">0x00000000000008b4</span> &lt;+32&gt;:    30 20 62 1e fcmpe   d1, d2</code>
+<code>   <span style="color: #51afef;">0x00000000000008b8</span> &lt;+36&gt;:    44 00 00 54 b.mi    0x8c0 &lt;divide+44&gt;  <span style="color: #5B6268;">// </span><span style="color: #5B6268;">b.first</span></code>
+<code>   <span style="color: #51afef;">0x00000000000008bc</span> &lt;+40&gt;:    fa ff ff 17 b   0x8a4 &lt;divide+16&gt;</code>
+<code></code>
+<code><span style="color: #c678dd;">12</span>      }</code>
+<code><span style="color: #c678dd;">13</span>      <span style="color: #51afef;">else</span></code>
+<code><span style="color: #c678dd;">14</span>      {</code>
+<code><span style="color: #c678dd;">15</span>          <span style="color: #51afef;">longjmp</span>(env, 1)<span style="color: #5B6268;">;</span></code>
+<code>   <span style="color: #51afef;">0x00000000000008c0</span> &lt;+44&gt;:    fd 7b bf a9 stp x29, x30, [sp, #-16]!</code>
+<code>   <span style="color: #51afef;">0x00000000000008c4</span> &lt;+48&gt;:    80 00 00 b0 adrp    x0, 0x11000 <a href="mailto:_setjmp%40got.plt">&lt;_setjmp@got.plt&gt;</a></code>
+<code>   <span style="color: #51afef;">0x00000000000008c8</span> &lt;+52&gt;:    21 00 80 52 mov w1, #0x1                    <span style="color: #5B6268;">// </span><span style="color: #5B6268;">#1</span></code>
+<code></code>
+<code><span style="color: #c678dd;">7</span>   {</code>
+<code>   <span style="color: #51afef;">0x00000000000008cc</span> &lt;+56&gt;:    fd 03 00 91 mov x29, sp</code>
+<code></code>
+<code><span style="color: #c678dd;">12</span>      }</code>
+<code><span style="color: #c678dd;">13</span>      <span style="color: #51afef;">else</span></code>
+<code><span style="color: #c678dd;">14</span>      {</code>
+<code><span style="color: #c678dd;">15</span>          <span style="color: #51afef;">longjmp</span>(env, 1)<span style="color: #5B6268;">;</span></code>
+<code>   <span style="color: #51afef;">0x00000000000008d0</span> &lt;+60&gt;:    00 40 01 91 add x0, x0, #0x50</code>
+<code>   <span style="color: #51afef;">0x00000000000008d4</span> &lt;+64&gt;:    7f ff ff 97 bl  0x6d0 <a href="mailto:longjmp%40plt">&lt;longjmp@plt&gt;</a></code>
+<code><span style="color: #c678dd;">End</span> <span style="color: #51afef;">of</span> assembler dump.</code>
+<code><span style="color: #c678dd;">Dump</span> <span style="color: #51afef;">of</span> assembler code for function main:</code>
+<code>/tmp/ox-bash-Zoz37R5Hg/test.c:</code>
+<code><span style="color: #c678dd;">21</span>  {</code>
+<code><span style="color: #c678dd;">22</span>      <span style="color: #51afef;">int</span> ret<span style="color: #5B6268;">;</span></code>
+<code><span style="color: #c678dd;">23</span>  </code>
+<code><span style="color: #c678dd;">24</span>      <span style="color: #51afef;">ret</span> = setjmp(env)<span style="color: #5B6268;">;</span></code>
+<code>   <span style="color: #51afef;">0x0000000000000700</span> &lt;+0&gt;: fd 7b bf a9 stp x29, x30, [sp, #-16]!</code>
+<code>   <span style="color: #51afef;">0x0000000000000704</span> &lt;+4&gt;: 80 00 00 b0 adrp    x0, 0x11000 <a href="mailto:_setjmp%40got.plt">&lt;_setjmp@got.plt&gt;</a></code>
+<code>   <span style="color: #51afef;">0x0000000000000708</span> &lt;+8&gt;: 00 40 01 91 add x0, x0, #0x50</code>
+<code></code>
+<code><span style="color: #c678dd;">21</span>  {</code>
+<code>   <span style="color: #51afef;">0x000000000000070c</span> &lt;+12&gt;:    fd 03 00 91 mov x29, sp</code>
+<code></code>
+<code><span style="color: #c678dd;">22</span>      <span style="color: #51afef;">int</span> ret<span style="color: #5B6268;">;</span></code>
+<code><span style="color: #c678dd;">23</span>  </code>
+<code><span style="color: #c678dd;">24</span>      <span style="color: #51afef;">ret</span> = setjmp(env)<span style="color: #5B6268;">;</span></code>
+<code>   <span style="color: #51afef;">0x0000000000000710</span> &lt;+16&gt;:    d8 ff ff 97 bl  0x670 <a href="mailto:_setjmp%40plt">&lt;_setjmp@plt&gt;</a></code>
+<code></code>
+<code><span style="color: #c678dd;">25</span>  </code>
+<code><span style="color: #c678dd;">26</span>      <span style="color: #51afef;">if</span> (!ret) {</code>
+<code>   <span style="color: #51afef;">0x0000000000000714</span> &lt;+20&gt;:    a0 00 00 35 cbnz    w0, 0x728 &lt;main+40&gt;</code>
+<code></code>
+<code><span style="color: #c678dd;">15</span>          <span style="color: #51afef;">longjmp</span>(env, 1)<span style="color: #5B6268;">;</span></code>
+<code>   <span style="color: #51afef;">0x0000000000000718</span> &lt;+24&gt;:    80 00 00 b0 adrp    x0, 0x11000 <a href="mailto:_setjmp%40got.plt">&lt;_setjmp@got.plt&gt;</a></code>
+<code>   <span style="color: #51afef;">0x000000000000071c</span> &lt;+28&gt;:    21 00 80 52 mov w1, #0x1                    <span style="color: #5B6268;">// </span><span style="color: #5B6268;">#1</span></code>
+<code>   <span style="color: #51afef;">0x0000000000000720</span> &lt;+32&gt;:    00 40 01 91 add x0, x0, #0x50</code>
+<code>   <span style="color: #51afef;">0x0000000000000724</span> &lt;+36&gt;:    eb ff ff 97 bl  0x6d0 <a href="mailto:longjmp%40plt">&lt;longjmp@plt&gt;</a></code>
+<code></code>
+<code><span style="color: #c678dd;">27</span>          <span style="color: #51afef;">printf</span>(<span style="color: #98be65;">"5/0=%lf\n"</span>, divide(5,0))<span style="color: #5B6268;">;</span></code>
+<code><span style="color: #c678dd;">28</span>      } else  if (ret == 1) {</code>
+<code>   <span style="color: #51afef;">0x0000000000000728</span> &lt;+40&gt;:    1f 04 00 71 cmp w0, #0x1</code>
+<code>   <span style="color: #51afef;">0x000000000000072c</span> &lt;+44&gt;:    81 00 00 54 b.ne    0x73c &lt;main+60&gt;  <span style="color: #5B6268;">// </span><span style="color: #5B6268;">b.any</span></code>
+<code></code>
+<code><span style="color: #c678dd;">29</span>          <span style="color: #51afef;">printf</span>(<span style="color: #98be65;">"ERR\n"</span>)<span style="color: #5B6268;">;</span></code>
+<code>   <span style="color: #51afef;">0x0000000000000730</span> &lt;+48&gt;:    00 00 00 90 adrp    x0, 0x0</code>
+<code>   <span style="color: #51afef;">0x0000000000000734</span> &lt;+52&gt;:    00 d0 23 91 add x0, x0, #0x8f4</code>
+<code>   <span style="color: #51afef;">0x0000000000000738</span> &lt;+56&gt;:    e2 ff ff 97 bl  0x6c0 <a href="mailto:puts%40plt">&lt;puts@plt&gt;</a></code>
+<code></code>
+<code><span style="color: #c678dd;">30</span>      }</code>
+<code><span style="color: #c678dd;">31</span>      <span style="color: #51afef;">return</span> 0<span style="color: #5B6268;">;</span></code>
+<code>   <span style="color: #51afef;">0x000000000000073c</span> &lt;+60&gt;:    00 00 80 52 mov w0, #0x0                    <span style="color: #5B6268;">// </span><span style="color: #5B6268;">#0</span></code>
+<code>   <span style="color: #51afef;">0x0000000000000740</span> &lt;+64&gt;:    fd 7b c1 a8 ldp x29, x30, [sp], #16</code>
+<code>   <span style="color: #51afef;">0x0000000000000744</span> &lt;+68&gt;:    c0 03 5f d6 ret</code>
+<code><span style="color: #c678dd;">End</span> <span style="color: #51afef;">of</span> assembler dump.</code>
+</pre>
+</div>
+
+<p>
+从上面的汇编代码可以看到，setjmp/longjmp只是普通的函数调用，调用到c库里边的_setjmp/longjmp函数，并没有和编译器有太大的联系.<br>
+</p>
+</div>
+</div>
+
+<div id="outline-container-org5f102e1" class="outline-2">
+<h2 id="org5f102e1">libc implement of setjmp/longjmp</h2>
+<div class="outline-text-2" id="text-org5f102e1">
+<p>
+<a href="https://github.com/lattera/glibc/blob/895ef79e04a953cac1493863bcae29ad85657ee1/sysdeps/aarch64/setjmp.S#L29">https://github.com/lattera/glibc/blob/895ef79e04a953cac1493863bcae29ad85657ee1/sysdeps/aarch64/setjmp.S#L29</a><br>
+</p>
+</div>
+
+<div id="outline-container-orgb2d5a5c" class="outline-3">
+<h3 id="orgb2d5a5c">setjmp</h3>
+<div class="outline-text-3" id="text-orgb2d5a5c">
+<div class="org-src-container">
+<pre class="src src-asm"><code><span style="color: #5B6268;">/* </span><span style="color: #5B6268;">Keep traditional entry points in with sigsetjmp(). */</span></code>
+<code><span style="color: #c678dd;">ENTRY</span> (setjmp)</code>
+<code>    <span style="color: #51afef;">mov</span> x1, #1</code>
+<code>    <span style="color: #51afef;">b</span>   1f</code>
+<code><span style="color: #c678dd;">END</span> (setjmp)</code>
+<code></code>
+<code><span style="color: #c678dd;">ENTRY</span> (_setjmp)</code>
+<code>    <span style="color: #51afef;">mov</span> x1, #0</code>
+<code>    <span style="color: #51afef;">b</span>   1f</code>
+<code><span style="color: #c678dd;">END</span> (_setjmp)</code>
+<code><span style="color: #c678dd;">libc_hidden_def</span> (_setjmp)</code>
+<code></code>
+<code><span style="color: #c678dd;">ENTRY</span> (__sigsetjmp)</code>
+<code>    <span style="color: #51afef;">DELOUSE</span> (0)</code>
+<code></code>
+<code><span style="color: #c678dd;">1</span>:</code>
+<code>    <span style="color: #51afef;">stp</span> x19, x20, [x0, #JB_X19&lt;&lt;3]</code>
+<code>    <span style="color: #51afef;">stp</span> x21, x22, [x0, #JB_X21&lt;&lt;3]</code>
+<code>    <span style="color: #51afef;">stp</span> x23, x24, [x0, #JB_X23&lt;&lt;3]</code>
+<code>    <span style="color: #51afef;">stp</span> x25, x26, [x0, #JB_X25&lt;&lt;3]</code>
+<code>    <span style="color: #51afef;">stp</span> x27, x28, [x0, #JB_X27&lt;&lt;3]</code>
+<code></code>
+<code><span style="color: #51afef; font-weight: bold;">#ifdef</span> <span style="color: #dcaeea;">PTR_MANGLE</span></code>
+<code>    <span style="color: #51afef;">PTR_MANGLE</span> (4, 30, 3, 2)</code>
+<code>    <span style="color: #51afef;">stp</span> x29,  x4, [x0, #JB_X29&lt;&lt;3]</code>
+<code><span style="color: #51afef; font-weight: bold;">#else</span></code>
+<code>    <span style="color: #51afef;">stp</span> x29, x30, [x0, #JB_X29&lt;&lt;3]</code>
+<code><span style="color: #51afef; font-weight: bold;">#endif</span></code>
+<code>    <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">setjmp probe takes 3 arguments, address of jump buffer</span></code>
+<code><span style="color: #5B6268;">       first argument (8@x0), return value second argument (-4@x1),</span></code>
+<code><span style="color: #5B6268;">       and target address (8@x30), respectively.  */</span></code>
+<code>    <span style="color: #51afef;">LIBC_PROBE</span> (setjmp, 3, 8@x0, -4@x1, 8@x30)</code>
+<code>    <span style="color: #51afef;">stp</span>  d8,  d9, [x0, #JB_D8&lt;&lt;3]</code>
+<code>    <span style="color: #51afef;">stp</span> d10, d11, [x0, #JB_D10&lt;&lt;3]</code>
+<code>    <span style="color: #51afef;">stp</span> d12, d13, [x0, #JB_D12&lt;&lt;3]</code>
+<code>    <span style="color: #51afef;">stp</span> d14, d15, [x0, #JB_D14&lt;&lt;3]</code>
+<code><span style="color: #51afef; font-weight: bold;">#ifdef</span> <span style="color: #dcaeea;">PTR_MANGLE</span></code>
+<code>    <span style="color: #51afef;">mov</span> x4, sp</code>
+<code>    <span style="color: #51afef;">PTR_MANGLE</span> (5, 4, 3, 2)</code>
+<code>    <span style="color: #51afef;">str</span> x5, [x0, #JB_SP&lt;&lt;3]</code>
+<code><span style="color: #51afef; font-weight: bold;">#else</span></code>
+<code>    <span style="color: #51afef;">mov</span> x2,  sp</code>
+<code>    <span style="color: #51afef;">str</span> x2,  [x0, #JB_SP&lt;&lt;3]</code>
+<code><span style="color: #51afef; font-weight: bold;">#endif</span></code>
+<code><span style="color: #51afef; font-weight: bold;">#if</span> <span style="color: #dcaeea;">IS_IN</span> (rtld)</code>
+<code>    <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">In ld.so we never save the signal mask */</span></code>
+<code>    <span style="color: #51afef;">mov</span> w0, #0</code>
+<code>    <span style="color: #51afef;">RET</span></code>
+<code><span style="color: #51afef; font-weight: bold;">#else</span></code>
+<code>    <span style="color: #51afef;">b</span>   C_SYMBOL_NAME(__sigjmp_save)</code>
+<code><span style="color: #51afef; font-weight: bold;">#endif</span></code>
+<code><span style="color: #c678dd;">END</span> (__sigsetjmp)</code>
+<code><span style="color: #c678dd;">hidden_def</span> (__sigsetjmp)</code>
+</pre>
+</div>
+
+<p>
+从setjmp的实现中可以看到，setjmp只是简单的保存了当前的寄存器信息，包括lr，以及其他需要保存的寄存器，__sigjmp_save还会保存当前的signal mask信息<br>
+</p>
+</div>
+</div>
+<div id="outline-container-org9679efe" class="outline-3">
+<h3 id="org9679efe">longjmp</h3>
+<div class="outline-text-3" id="text-org9679efe">
+<p>
+<a href="https://github.com/lattera/glibc/blob/895ef79e04a953cac1493863bcae29ad85657ee1/sysdeps/aarch64/__longjmp.S#L25">https://github.com/lattera/glibc/blob/895ef79e04a953cac1493863bcae29ad85657ee1/sysdeps/aarch64/__longjmp.S#L25</a><br>
+</p>
+<div class="org-src-container">
+<pre class="src src-asm"><code><span style="color: #c678dd;">ENTRY</span> (__longjmp)</code>
+<code>    <span style="color: #51afef;">cfi_def_cfa</span>(x0, 0)</code>
+<code>    <span style="color: #51afef;">cfi_offset</span>(x19, JB_X19&lt;&lt;3)</code>
+<code>    <span style="color: #51afef;">cfi_offset</span>(x20, JB_X20&lt;&lt;3)</code>
+<code>    <span style="color: #51afef;">cfi_offset</span>(x21, JB_X21&lt;&lt;3)</code>
+<code>    <span style="color: #51afef;">cfi_offset</span>(x22, JB_X22&lt;&lt;3)</code>
+<code>    <span style="color: #51afef;">cfi_offset</span>(x23, JB_X23&lt;&lt;3)</code>
+<code>    <span style="color: #51afef;">cfi_offset</span>(x24, JB_X24&lt;&lt;3)</code>
+<code>    <span style="color: #51afef;">cfi_offset</span>(x25, JB_X25&lt;&lt;3)</code>
+<code>    <span style="color: #51afef;">cfi_offset</span>(x26, JB_X26&lt;&lt;3)</code>
+<code>    <span style="color: #51afef;">cfi_offset</span>(x27, JB_X27&lt;&lt;3)</code>
+<code>    <span style="color: #51afef;">cfi_offset</span>(x28, JB_X28&lt;&lt;3)</code>
+<code>    <span style="color: #51afef;">cfi_offset</span>(x29, JB_X29&lt;&lt;3)</code>
+<code>    <span style="color: #51afef;">cfi_offset</span>(x30, JB_LR&lt;&lt;3)</code>
+<code></code>
+<code>    <span style="color: #51afef;">cfi_offset</span>( d8, JB_D8&lt;&lt;3)</code>
+<code>    <span style="color: #51afef;">cfi_offset</span>( d9, JB_D9&lt;&lt;3)</code>
+<code>    <span style="color: #51afef;">cfi_offset</span>(d10, JB_D10&lt;&lt;3)</code>
+<code>    <span style="color: #51afef;">cfi_offset</span>(d11, JB_D11&lt;&lt;3)</code>
+<code>    <span style="color: #51afef;">cfi_offset</span>(d12, JB_D12&lt;&lt;3)</code>
+<code>    <span style="color: #51afef;">cfi_offset</span>(d13, JB_D13&lt;&lt;3)</code>
+<code>    <span style="color: #51afef;">cfi_offset</span>(d14, JB_D14&lt;&lt;3)</code>
+<code>    <span style="color: #51afef;">cfi_offset</span>(d15, JB_D15&lt;&lt;3)</code>
+<code></code>
+<code>    <span style="color: #51afef;">DELOUSE</span> (0)</code>
+<code></code>
+<code>    <span style="color: #51afef;">ldp</span> x19, x20, [x0, #JB_X19&lt;&lt;3]</code>
+<code>    <span style="color: #51afef;">ldp</span> x21, x22, [x0, #JB_X21&lt;&lt;3]</code>
+<code>    <span style="color: #51afef;">ldp</span> x23, x24, [x0, #JB_X23&lt;&lt;3]</code>
+<code>    <span style="color: #51afef;">ldp</span> x25, x26, [x0, #JB_X25&lt;&lt;3]</code>
+<code>    <span style="color: #51afef;">ldp</span> x27, x28, [x0, #JB_X27&lt;&lt;3]</code>
+<code><span style="color: #51afef; font-weight: bold;">#ifdef</span> <span style="color: #dcaeea;">PTR_DEMANGLE</span></code>
+<code>    <span style="color: #51afef;">ldp</span> x29,  x4, [x0, #JB_X29&lt;&lt;3]</code>
+<code>    <span style="color: #51afef;">PTR_DEMANGLE</span> (30, 4, 3, 2)</code>
+<code><span style="color: #51afef; font-weight: bold;">#else</span></code>
+<code>    <span style="color: #51afef;">ldp</span> x29, x30, [x0, #JB_X29&lt;&lt;3]</code>
+<code><span style="color: #51afef; font-weight: bold;">#endif</span></code>
+<code>    <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">longjmp probe takes 3 arguments, address of jump buffer as</span></code>
+<code><span style="color: #5B6268;">       first argument (8@x0), return value as second argument (-4@x1),</span></code>
+<code><span style="color: #5B6268;">       and target address (8@x30), respectively.  */</span></code>
+<code>    <span style="color: #51afef;">LIBC_PROBE</span> (longjmp, 3, 8@x0, -4@x1, 8@x30)</code>
+<code>    <span style="color: #51afef;">ldp</span>  d8,  d9, [x0, #JB_D8&lt;&lt;3]</code>
+<code>    <span style="color: #51afef;">ldp</span> d10, d11, [x0, #JB_D10&lt;&lt;3]</code>
+<code>    <span style="color: #51afef;">ldp</span> d12, d13, [x0, #JB_D12&lt;&lt;3]</code>
+<code>    <span style="color: #51afef;">ldp</span> d14, d15, [x0, #JB_D14&lt;&lt;3]</code>
+<code></code>
+<code>        <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">Originally this was implemented with a series of</span></code>
+<code><span style="color: #5B6268;">       .cfi_restore() directives.</span></code>
+<code><span style="color: #5B6268;">           The theory was that cfi_restore should revert to previous</span></code>
+<code><span style="color: #5B6268;">           frame value is the same as the current value.  In practice</span></code>
+<code><span style="color: #5B6268;">           this doesn't work, even after cfi_restore() gdb continues</span></code>
+<code><span style="color: #5B6268;">           to try to recover a previous frame value offset from x0,</span></code>
+<code><span style="color: #5B6268;">           which gets stuffed after a few more instructions.  The</span></code>
+<code><span style="color: #5B6268;">           cfi_same_value() mechanism appears to work fine.  */</span></code>
+<code></code>
+<code>    <span style="color: #51afef;">cfi_same_value</span>(x19)</code>
+<code>    <span style="color: #51afef;">cfi_same_value</span>(x20)</code>
+<code>    <span style="color: #51afef;">cfi_same_value</span>(x21)</code>
+<code>    <span style="color: #51afef;">cfi_same_value</span>(x22)</code>
+<code>    <span style="color: #51afef;">cfi_same_value</span>(x23)</code>
+<code>    <span style="color: #51afef;">cfi_same_value</span>(x24)</code>
+<code>    <span style="color: #51afef;">cfi_same_value</span>(x25)</code>
+<code>    <span style="color: #51afef;">cfi_same_value</span>(x26)</code>
+<code>    <span style="color: #51afef;">cfi_same_value</span>(x27)</code>
+<code>    <span style="color: #51afef;">cfi_same_value</span>(x28)</code>
+<code>    <span style="color: #51afef;">cfi_same_value</span>(x29)</code>
+<code>    <span style="color: #51afef;">cfi_same_value</span>(x30)</code>
+<code>    <span style="color: #51afef;">cfi_same_value</span>(d8)</code>
+<code>    <span style="color: #51afef;">cfi_same_value</span>(d9)</code>
+<code>    <span style="color: #51afef;">cfi_same_value</span>(d10)</code>
+<code>    <span style="color: #51afef;">cfi_same_value</span>(d11)</code>
+<code>    <span style="color: #51afef;">cfi_same_value</span>(d12)</code>
+<code>    <span style="color: #51afef;">cfi_same_value</span>(d13)</code>
+<code>    <span style="color: #51afef;">cfi_same_value</span>(d14)</code>
+<code>    <span style="color: #51afef;">cfi_same_value</span>(d15)</code>
+<code><span style="color: #51afef; font-weight: bold;">#ifdef</span> <span style="color: #dcaeea;">PTR_DEMANGLE</span></code>
+<code>    <span style="color: #51afef;">ldr</span> x4, [x0, #JB_SP&lt;&lt;3]</code>
+<code>    <span style="color: #51afef;">PTR_DEMANGLE</span> (5, 4, 3, 2)</code>
+<code><span style="color: #51afef; font-weight: bold;">#else</span></code>
+<code>    <span style="color: #51afef;">ldr</span> x5, [x0, #JB_SP&lt;&lt;3]</code>
+<code><span style="color: #51afef; font-weight: bold;">#endif</span></code>
+<code>    <span style="color: #51afef;">mov</span> sp, x5</code>
+<code></code>
+<code>    <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">longjmp_target probe takes 3 arguments, address of jump buffer</span></code>
+<code><span style="color: #5B6268;">       as first argument (8@x0), return value as second argument (-4@x1),</span></code>
+<code><span style="color: #5B6268;">       and target address (8@x30), respectively.  */</span></code>
+<code>    <span style="color: #51afef;">LIBC_PROBE</span> (longjmp_target, 3, 8@x0, -4@x1, 8@x30)</code>
+<code>    <span style="color: #51afef;">cmp</span> x1, #0</code>
+<code>    <span style="color: #51afef;">mov</span> x0, #1</code>
+<code>    <span style="color: #51afef;">csel</span>    x0, x1, x0, ne</code>
+<code>    <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">Use br instead of ret because ret is guaranteed to mispredict */</span></code>
+<code>    <span style="color: #51afef;">br</span>  x30</code>
+<code><span style="color: #c678dd;">END</span> (__longjmp)</code>
+</pre>
+</div>
+
+<p>
+从longjmp的实现中，longjmp会还原之前的寄存器，并且重新返回之前保存的lr指针位置<br>
+</p>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-orga7e1948" class="outline-2">
+<h2 id="orga7e1948">risk of setjmp/longjmp usage</h2>
+<div class="outline-text-2" id="text-orga7e1948">
+<p>
+由于setjmp/longjmp的实现，以及编译器的优化，会导致某些情况下出现局部变量的值被修改的情况<br>
+</p>
+<ul class="org-ul">
+<li>由于编译器优化，不同的变量可能使用同一个寄存器/栈空间来实现，因次带来问题<br></li>
+<li>由于编译器优化，代码顺序被调整而导致问题<br></li>
+</ul>
+
+<p>
+使用时局部变量需要使用volatile关键字来修饰，防止编译器优化<br>
+详情请参考标准文档 <a href="http://www.open-std.org/jtc1/sc22/wg14/www/docs/n1494.pdf">http://www.open-std.org/jtc1/sc22/wg14/www/docs/n1494.pdf</a> 7.13.1.1 The setjmp macro<br>
+</p>
+
+<ul class="org-ul">
+<li>the entire controlling expression of a selection or iteration statement;<br></li>
+<li>one operand of a relational or equality operator with the other operand an integer constant expression, with the resulting expression being the entire controlling expression of a selection or iteration statement;<br></li>
+<li>the operand of a unary ! operator with the resulting expression being the entire controlling expression of a selection or iteration statement; or<br></li>
+<li>the entire expression of an expression statement (possibly cast to void).<br></li>
+</ul>
+
+<p>
+详情可以参考：<br>
+<a href="https://rules.sonarsource.com/c/RSPEC-982">https://rules.sonarsource.com/c/RSPEC-982</a><br>
+<a href="https://gcc.gnu.org/bugzilla/show_bug.cgi?id=56982">https://gcc.gnu.org/bugzilla/show_bug.cgi?id=56982</a><br>
+</p>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<script src="https://utteranc.es/client.js"
+    repo="schspa/schspa.github.io"
+    issue-term="title"
+    label="✨💬✨"
+    theme="github-light"
+    crossorigin="anonymous"
+    async>
+</script>
+<div class="me">
+  <span><b>Contact me via :)</b><span>
+  <div class="contact">
+    <a id="email" href="mailto:schspa@gmail.com" target="_blank"><i class="fab fa-mailchimp animated heartBeat delay-2s slower"></i></a>
+    <a id="github" href="//github.com/schspa" target="_blank"><i class="fab fa-github animated heartBeat delay-2s slower"></i></a>
+  </div>
+</div>
+
+<div id="jinrishici-sentence" style="font-weight: 700;">虚怀乃若谷，水深则流缓。</div>
+<script src="https://sdk.jinrishici.com/v2/browser/jinrishici.js" charset="utf-8"></script>
+</div>
+</body>
+</html>

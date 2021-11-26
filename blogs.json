@@ -222,6 +222,18 @@
     ]
   },
   {
+    "file-path": "~/org/lang/compile/setjmp.org",
+    "URL": "/2021/11/24/setjmp.html",
+    "TITLE": "setjmp/longjmp in C",
+    "DATE": "<2021-11-24 20:11:38>",
+    "FILETAGS": [
+      "blogs"
+    ],
+    "CATEGORY": [
+      "Compiler"
+    ]
+  },
+  {
     "file-path": "~/org/lang/compile/aligned-access.org",
     "URL": "/2020/12/24/aligned-access.html",
     "TITLE": "Generate Aligned Access Code",

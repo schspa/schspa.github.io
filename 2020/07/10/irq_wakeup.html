@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2021-11-15 一 13:47 -->
+<!-- 2021-11-26 五 15:55 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>irq wakeup in linux</title>
@@ -280,7 +280,7 @@ Reset之后，CPU需要从RVBAR寄存器所显示的地址来重新启动。RVBA
 <h4 id="org76e8360">RESET的执行地址</h4>
 <div class="outline-text-4" id="text-org76e8360">
 
-<div id="org1e3f3a3" class="figure">
+<div id="org6065b77" class="figure">
 <p><img src="assets/2021-03-05_13-40-42_screenshot.png" alt="2021-03-05_13-40-42_screenshot.png"><br>
 </p>
 </div>
@@ -290,7 +290,7 @@ Reset之后，CPU需要从RVBAR寄存器所显示的地址来重新启动。RVBA
 </p>
 
 
-<div id="org5b9e604" class="figure">
+<div id="orgc464a0e" class="figure">
 <p><img src="assets/2021-03-05_13-43-32_screenshot.png" alt="2021-03-05_13-43-32_screenshot.png"><br>
 </p>
 </div>
@@ -347,26 +347,26 @@ Skip chip.irq_set_wake(), for this irq chip<br>
 由以下patch引入，提交说明已经很明确<br>
 </p>
 <div class="org-src-container">
-<pre class="src src-diff"><span style="color: #a4aab6;">60f96b41f71d2a13d1c0a457b8b77958f77142d1</span>
-<span style="color: #a4aab6;">Author:</span><span style="color: #3f444a;">     </span><span style="color: #a4aab6;">Santosh</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">Shilimkar</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;"><a href="mailto:santosh.shilimkar%40ti.com">&lt;santosh.shilimkar@ti.com&gt;</a></span>
-<span style="color: #a4aab6;">AuthorDate:</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">Fri</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">Sep</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">9</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">13:59:35</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">2011</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">+0530</span>
-<span style="color: #a4aab6;">Commit:</span><span style="color: #3f444a;">     </span><span style="color: #a4aab6;">Thomas</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">Gleixner</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;"><a href="mailto:tglx%40linutronix.de">&lt;tglx@linutronix.de&gt;</a></span>
-<span style="color: #a4aab6;">CommitDate:</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">Mon</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">Sep</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">12</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">09:52:49</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">2011</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">+0200</span>
-
-<span style="color: #a4aab6;">Parent:</span><span style="color: #3f444a;">     </span><span style="color: #a4aab6;">ed585a651681e</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">genirq:</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">Make</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">irq_shutdown()</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">symmetric</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">vs.</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">irq_startup</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">again</span>
-<span style="color: #a4aab6;">Contained:</span><span style="color: #3f444a;">  </span><span style="color: #a4aab6;">(no</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">branch)</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">master</span>
-<span style="color: #a4aab6;">Follows:</span><span style="color: #3f444a;">    </span><span style="color: #a4aab6;">v3.1-rc5</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">(93)</span>
-<span style="color: #a4aab6;">Precedes:</span><span style="color: #3f444a;">   </span><span style="color: #a4aab6;">v3.2-rc1</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">(11433)</span>
-
-<span style="color: #a4aab6;">genirq:</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">Add</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">IRQCHIP_SKIP_SET_WAKE</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">flag</span>
-
-<span style="color: #a4aab6;">Some</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">irq</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">chips</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">need</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">the</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">irq_set_wake()</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">functionality,</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">but</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">do</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">not</span>
-<span style="color: #a4aab6;">require</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">a</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">irq_set_wake()</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">callback.</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">Instead</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">of</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">forcing</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">an</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">empty</span>
-<span style="color: #a4aab6;">callback</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">to</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">be</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">implemented</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">add</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">a</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">flag</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">which</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">notes</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">this</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">fact.</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">Check</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">for</span>
-<span style="color: #a4aab6;">the</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">flag</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">in</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">set_irq_wake_real()</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">and</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">return</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">success</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">when</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">set.</span>
-
-<span style="color: #a4aab6;">Signed-off-by:</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">Santosh</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">Shilimkar</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;"><a href="mailto:santosh.shilimkar%40ti.com">&lt;santosh.shilimkar@ti.com&gt;</a></span>
-Cc:<span style="color: #3f444a;"> </span>Thomas<span style="color: #3f444a;"> </span>Gleixner<span style="color: #3f444a;"> </span><a href="mailto:tglx%40linutronix.de">&lt;tglx@linutronix.de&gt;</a>
+<pre class="src src-diff"><code><span style="color: #a4aab6;">60f96b41f71d2a13d1c0a457b8b77958f77142d1</span></code>
+<code><span style="color: #a4aab6;">Author:</span><span style="color: #3f444a;">     </span><span style="color: #a4aab6;">Santosh</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">Shilimkar</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;"><a href="mailto:santosh.shilimkar%40ti.com">&lt;santosh.shilimkar@ti.com&gt;</a></span></code>
+<code><span style="color: #a4aab6;">AuthorDate:</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">Fri</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">Sep</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">9</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">13:59:35</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">2011</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">+0530</span></code>
+<code><span style="color: #a4aab6;">Commit:</span><span style="color: #3f444a;">     </span><span style="color: #a4aab6;">Thomas</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">Gleixner</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;"><a href="mailto:tglx%40linutronix.de">&lt;tglx@linutronix.de&gt;</a></span></code>
+<code><span style="color: #a4aab6;">CommitDate:</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">Mon</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">Sep</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">12</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">09:52:49</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">2011</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">+0200</span></code>
+<code></code>
+<code><span style="color: #a4aab6;">Parent:</span><span style="color: #3f444a;">     </span><span style="color: #a4aab6;">ed585a651681e</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">genirq:</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">Make</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">irq_shutdown()</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">symmetric</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">vs.</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">irq_startup</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">again</span></code>
+<code><span style="color: #a4aab6;">Contained:</span><span style="color: #3f444a;">  </span><span style="color: #a4aab6;">(no</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">branch)</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">master</span></code>
+<code><span style="color: #a4aab6;">Follows:</span><span style="color: #3f444a;">    </span><span style="color: #a4aab6;">v3.1-rc5</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">(93)</span></code>
+<code><span style="color: #a4aab6;">Precedes:</span><span style="color: #3f444a;">   </span><span style="color: #a4aab6;">v3.2-rc1</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">(11433)</span></code>
+<code></code>
+<code><span style="color: #a4aab6;">genirq:</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">Add</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">IRQCHIP_SKIP_SET_WAKE</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">flag</span></code>
+<code></code>
+<code><span style="color: #a4aab6;">Some</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">irq</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">chips</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">need</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">the</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">irq_set_wake()</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">functionality,</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">but</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">do</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">not</span></code>
+<code><span style="color: #a4aab6;">require</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">a</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">irq_set_wake()</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">callback.</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">Instead</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">of</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">forcing</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">an</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">empty</span></code>
+<code><span style="color: #a4aab6;">callback</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">to</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">be</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">implemented</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">add</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">a</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">flag</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">which</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">notes</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">this</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">fact.</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">Check</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">for</span></code>
+<code><span style="color: #a4aab6;">the</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">flag</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">in</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">set_irq_wake_real()</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">and</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">return</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">success</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">when</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">set.</span></code>
+<code></code>
+<code><span style="color: #a4aab6;">Signed-off-by:</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">Santosh</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">Shilimkar</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;"><a href="mailto:santosh.shilimkar%40ti.com">&lt;santosh.shilimkar@ti.com&gt;</a></span></code>
+<code>Cc:<span style="color: #3f444a;"> </span>Thomas<span style="color: #3f444a;"> </span>Gleixner<span style="color: #3f444a;"> </span><a href="mailto:tglx%40linutronix.de">&lt;tglx@linutronix.de&gt;</a></code>
 </pre>
 </div>
 </div>
@@ -429,7 +429,7 @@ M.<br>
 </p>
 <ol class="org-ol">
 <li>GIC处于always on的电源域，这种情况下，通过设置SKIP_SET_WAKE就可以简单的解决我们的问题，因为不需要做任何事，系统总可以通过gic来唤醒。<br></li>
-<li>GIC会被掉电，这种情况下，需要额外的硬件来将系统唤醒（意味着各个SOC厂商都有各不相同的实现），这种情况下，gic的驱动也无法去处理，这就需要通过stacked irqchip来实现，平台的irqchip通过作为顶级的irqchip，gic作为下级irqchip就可以由SOC厂商去具体定制唤醒功能的设置。<br></li>
+<li>GIC会被掉电，这种情况下，需要额外的硬件来将系统唤醒（意味着各个SOC厂商都有各不相同的实现），这种情况下，gic的驱动也无法去处理，这就需要通过stacked irqchip来实现，平台的irqchip通过作为下级的irqchip，gic作为顶层irqchip就可以由SOC厂商去具体定制唤醒功能的设置。<br></li>
 <li>GIC会掉电，没有任何办法唤醒系统。这种情况完全是错误的，休眠等于自杀，需要避免进入这个状况。<br></li>
 </ol>
 <p>
@@ -465,35 +465,35 @@ device tree<br>
 dts中配置了sysirq，其parent是gic，<br>
 </p>
 <div class="org-src-container">
-<pre class="src src-dts"><span style="color: #dcaeea;">gic</span>: <span style="color: #ECBE7B;">interrupt-controller</span>@58000000 {
-    <span style="color: #dcaeea;">status</span> = <span style="color: #98be65;">"okay"</span>;
-    <span style="color: #dcaeea;">compatible</span> = <span style="color: #98be65;">"arm,gic-v3"</span>;
-    #<span style="color: #dcaeea;">interrupt-cells</span> = &lt;3&gt;;
-    #<span style="color: #dcaeea;">address-cells</span> = &lt;2&gt;;
-    #<span style="color: #dcaeea;">size-cells</span> = &lt;2&gt;;
-    <span style="color: #dcaeea;">ranges</span>;
-    <span style="color: #dcaeea;">interrupt-controller</span>;
-    <span style="color: #dcaeea;">reg</span> =   &lt;0x0 0x58000000 0x0 0x10000&gt;,       <span style="color: #5B6268;">// GICD</span>
-        &lt;0x0 0x58040000 0x0 0x100000&gt;;      <span style="color: #5B6268;">// GICR0~7</span>
-    <span style="color: #dcaeea;">interrupts</span> = &lt;1 9 4&gt;;
-};
-
-<span style="color: #dcaeea;">sysirq</span>: sysirq@<span style="color: #ECBE7B;">system</span> {
-    <span style="color: #dcaeea;">compatible</span> = <span style="color: #98be65;">"xxx,XX-sysirq"</span>, <span style="color: #98be65;">"syscon"</span>;
-    #<span style="color: #dcaeea;">interrupt-cells</span> = &lt;3&gt;;
-    <span style="color: #dcaeea;">interrupt-parent</span> = &lt;&amp;<span style="color: #dcaeea;">gic</span>&gt;;
-    <span style="color: #dcaeea;">interrupt-controller</span>;
-    <span style="color: #dcaeea;">ranges</span>;
-    <span style="color: #dcaeea;">services</span> = &lt;&amp;<span style="color: #dcaeea;">tee_regmap</span>&gt;;
-    <span style="color: #dcaeea;">irq-map</span> = &lt;48 2 0&gt;, <span style="color: #5B6268;">// GPIO</span>
-    &lt;29 4 1&gt;, <span style="color: #5B6268;">// AON RTC</span>
-    &lt;31 6 0&gt;, <span style="color: #5B6268;">// aon timer1</span>
-    &lt;30 8 0&gt;, <span style="color: #5B6268;">// aon time0</span>
-    &lt;9 10 0&gt;, <span style="color: #5B6268;">// eth0</span>
-    &lt;33 18 0&gt;, <span style="color: #5B6268;">// canfd0</span>
-    &lt;36 14 0&gt;; <span style="color: #5B6268;">// canfd1</span>
-    <span style="color: #dcaeea;">reg</span> = &lt;0x0 0x43060000 0x0 0x634&gt;;
-};
+<pre class="src src-dts"><code><span style="color: #dcaeea;">gic</span>: <span style="color: #ECBE7B;">interrupt-controller</span>@58000000 {</code>
+<code>    <span style="color: #dcaeea;">status</span> = <span style="color: #98be65;">"okay"</span>;</code>
+<code>    <span style="color: #dcaeea;">compatible</span> = <span style="color: #98be65;">"arm,gic-v3"</span>;</code>
+<code>    #<span style="color: #dcaeea;">interrupt-cells</span> = &lt;3&gt;;</code>
+<code>    #<span style="color: #dcaeea;">address-cells</span> = &lt;2&gt;;</code>
+<code>    #<span style="color: #dcaeea;">size-cells</span> = &lt;2&gt;;</code>
+<code>    <span style="color: #dcaeea;">ranges</span>;</code>
+<code>    <span style="color: #dcaeea;">interrupt-controller</span>;</code>
+<code>    <span style="color: #dcaeea;">reg</span> =   &lt;0x0 0x58000000 0x0 0x10000&gt;,       <span style="color: #5B6268;">// GICD</span></code>
+<code>        &lt;0x0 0x58040000 0x0 0x100000&gt;;      <span style="color: #5B6268;">// GICR0~7</span></code>
+<code>    <span style="color: #dcaeea;">interrupts</span> = &lt;1 9 4&gt;;</code>
+<code>};</code>
+<code></code>
+<code><span style="color: #dcaeea;">sysirq</span>: sysirq@<span style="color: #ECBE7B;">system</span> {</code>
+<code>    <span style="color: #dcaeea;">compatible</span> = <span style="color: #98be65;">"xxx,XX-sysirq"</span>, <span style="color: #98be65;">"syscon"</span>;</code>
+<code>    #<span style="color: #dcaeea;">interrupt-cells</span> = &lt;3&gt;;</code>
+<code>    <span style="color: #dcaeea;">interrupt-parent</span> = &lt;&amp;<span style="color: #dcaeea;">gic</span>&gt;;</code>
+<code>    <span style="color: #dcaeea;">interrupt-controller</span>;</code>
+<code>    <span style="color: #dcaeea;">ranges</span>;</code>
+<code>    <span style="color: #dcaeea;">services</span> = &lt;&amp;<span style="color: #dcaeea;">tee_regmap</span>&gt;;</code>
+<code>    <span style="color: #dcaeea;">irq-map</span> = &lt;48 2 0&gt;, <span style="color: #5B6268;">// GPIO</span></code>
+<code>    &lt;29 4 1&gt;, <span style="color: #5B6268;">// AON RTC</span></code>
+<code>    &lt;31 6 0&gt;, <span style="color: #5B6268;">// aon timer1</span></code>
+<code>    &lt;30 8 0&gt;, <span style="color: #5B6268;">// aon time0</span></code>
+<code>    &lt;9 10 0&gt;, <span style="color: #5B6268;">// eth0</span></code>
+<code>    &lt;33 18 0&gt;, <span style="color: #5B6268;">// canfd0</span></code>
+<code>    &lt;36 14 0&gt;; <span style="color: #5B6268;">// canfd1</span></code>
+<code>    <span style="color: #dcaeea;">reg</span> = &lt;0x0 0x43060000 0x0 0x634&gt;;</code>
+<code>};</code>
 </pre>
 </div>
 </div>
@@ -502,10 +502,10 @@ dts中配置了sysirq，其parent是gic，<br>
 <li><a id="orgf17e84f"></a>get map configuration from device tree node.<br>
 <div class="outline-text-5" id="text-orgf17e84f">
 <div class="org-src-container">
-<pre class="src src-dts"><span style="color: #dcaeea;">irq-map</span> = &lt;irq-number enable-bit polar-bit&gt;;
-#<span style="color: #dcaeea;">address-cells</span> = &lt;2&gt;;
-#<span style="color: #dcaeea;">size-cells</span> = &lt;2&gt;;
-<span style="color: #dcaeea;">reg</span> = &lt;0x0 0x43840000 0x0 0x634&gt;;
+<pre class="src src-dts"><code><span style="color: #dcaeea;">irq-map</span> = &lt;irq-number enable-bit polar-bit&gt;;</code>
+<code>#<span style="color: #dcaeea;">address-cells</span> = &lt;2&gt;;</code>
+<code>#<span style="color: #dcaeea;">size-cells</span> = &lt;2&gt;;</code>
+<code><span style="color: #dcaeea;">reg</span> = &lt;0x0 0x43840000 0x0 0x634&gt;;</code>
 </pre>
 </div>
 </div>
@@ -526,32 +526,32 @@ dts中配置了sysirq，其parent是gic，<br>
 <h4 id="orge030d08">irq initialization</h4>
 <div class="outline-text-4" id="text-orge030d08">
 <div class="org-src-container">
-<pre class="src src-C">(<span style="color: #ECBE7B;">gdb</span>) bt
-<span style="color: #51afef; font-weight: bold;">#0</span>  XX_irq_of_init (node=0xffffffc03efed568, parent=0x0 &lt;bl1_entrypoint&gt;) at ./include/linux/irqdomain.h:298
-<span style="color: #51afef; font-weight: bold;">#1</span>  0xffffff8008856224 in of_irq_init (matches=&lt;optimized out&gt;) <span style="color: #ECBE7B;">at</span> <span style="color: #dcaeea;">drivers</span>/of/irq.c:546
-<span style="color: #51afef; font-weight: bold;">#2</span>  0xffffff8008849240 in irqchip_init () <span style="color: #ECBE7B;">at</span> <span style="color: #dcaeea;">drivers</span>/irqchip/irqchip.c:29
-<span style="color: #51afef; font-weight: bold;">#3</span>  0xffffff800883241c in init_IRQ () <span style="color: #ECBE7B;">at</span> <span style="color: #dcaeea;">arch</span>/arm64/kernel/irq.c:91
-<span style="color: #51afef; font-weight: bold;">#4</span>  0xffffff80088309f8 in start_kernel () <span style="color: #ECBE7B;">at</span> <span style="color: #dcaeea;">init</span>/main.c:611
-<span style="color: #51afef; font-weight: bold;">#5</span>  0x0000000000000000 in ?? ()
-<span style="color: #ECBE7B;">Backtrace</span> <span style="color: #c678dd;">stopped</span>: previous frame identical to this frame (<span style="color: #ECBE7B;">corrupt</span> <span style="color: #dcaeea;">stack</span>?)
+<pre class="src src-C"><code>(<span style="color: #ECBE7B;">gdb</span>) bt</code>
+<code><span style="color: #51afef; font-weight: bold;">#0</span>  XX_irq_of_init (node=0xffffffc03efed568, parent=0x0 &lt;bl1_entrypoint&gt;) at ./include/linux/irqdomain.h:298</code>
+<code><span style="color: #51afef; font-weight: bold;">#1</span>  0xffffff8008856224 in of_irq_init (matches=&lt;optimized out&gt;) <span style="color: #ECBE7B;">at</span> <span style="color: #dcaeea;">drivers</span>/of/irq.c:546</code>
+<code><span style="color: #51afef; font-weight: bold;">#2</span>  0xffffff8008849240 in irqchip_init () <span style="color: #ECBE7B;">at</span> <span style="color: #dcaeea;">drivers</span>/irqchip/irqchip.c:29</code>
+<code><span style="color: #51afef; font-weight: bold;">#3</span>  0xffffff800883241c in init_IRQ () <span style="color: #ECBE7B;">at</span> <span style="color: #dcaeea;">arch</span>/arm64/kernel/irq.c:91</code>
+<code><span style="color: #51afef; font-weight: bold;">#4</span>  0xffffff80088309f8 in start_kernel () <span style="color: #ECBE7B;">at</span> <span style="color: #dcaeea;">init</span>/main.c:611</code>
+<code><span style="color: #51afef; font-weight: bold;">#5</span>  0x0000000000000000 in ?? ()</code>
+<code><span style="color: #ECBE7B;">Backtrace</span> <span style="color: #c678dd;">stopped</span>: previous frame identical to this frame (<span style="color: #ECBE7B;">corrupt</span> <span style="color: #dcaeea;">stack</span>?)</code>
 </pre>
 </div>
 <p>
 查找partent的irq, 并添加新的irq_domain<br>
 </p>
 <div class="org-src-container">
-<pre class="src src-C">domain_parent = irq_find_host(parent);
-<span style="color: #51afef;">if</span> (<span style="color: #51afef; font-weight: bold;">!</span>domain_parent) {
-    pr_err(<span style="color: #98be65;">"XX_irq: interrupt-parent not found\n"</span>);
-    <span style="color: #51afef;">return</span> -EINVAL;
-}
-
-domain = irq_domain_add_hierarchy(domain_parent, 0, intpol_num, node,
-                  &amp;sysirq_domain_ops, chip_data);
-<span style="color: #51afef;">if</span> (<span style="color: #51afef; font-weight: bold;">!</span>domain) {
-    ret = -ENOMEM;
-    <span style="color: #51afef;">goto</span> <span style="color: #a9a1e1;">out_unmap</span>;
-}
+<pre class="src src-C"><code>domain_parent = irq_find_host(parent);</code>
+<code><span style="color: #51afef;">if</span> (<span style="color: #51afef; font-weight: bold;">!</span>domain_parent) {</code>
+<code>    pr_err(<span style="color: #98be65;">"XX_irq: interrupt-parent not found\n"</span>);</code>
+<code>    <span style="color: #51afef;">return</span> -EINVAL;</code>
+<code>}</code>
+<code></code>
+<code>domain = irq_domain_add_hierarchy(domain_parent, 0, intpol_num, node,</code>
+<code>                  &amp;sysirq_domain_ops, chip_data);</code>
+<code><span style="color: #51afef;">if</span> (<span style="color: #51afef; font-weight: bold;">!</span>domain) {</code>
+<code>    ret = -ENOMEM;</code>
+<code>    <span style="color: #51afef;">goto</span> <span style="color: #a9a1e1;">out_unmap</span>;</code>
+<code>}</code>
 </pre>
 </div>
 <p>
@@ -567,32 +567,32 @@ domain = irq_domain_add_hierarchy(domain_parent, 0, intpol_num, node,
 <h4 id="orgb944abf">irq domain ops</h4>
 <div class="outline-text-4" id="text-orgb944abf">
 <div class="org-src-container">
-<pre class="src src-C"><span style="color: #51afef;">static</span> <span style="color: #ECBE7B;">int</span> <span style="color: #c678dd;">XX_irq_domain_translate</span>(<span style="color: #51afef;">struct</span> <span style="color: #ECBE7B;">irq_domain</span> *<span style="color: #dcaeea;">d</span>,
-                                <span style="color: #51afef;">struct</span> <span style="color: #ECBE7B;">irq_fwspec</span> *<span style="color: #dcaeea;">fwspec</span>,
-                                <span style="color: #ECBE7B;">unsigned</span> <span style="color: #ECBE7B;">long</span> *<span style="color: #dcaeea;">hwirq</span>,
-                                <span style="color: #ECBE7B;">unsigned</span> <span style="color: #ECBE7B;">int</span> *<span style="color: #dcaeea;">type</span>)
-{
-    <span style="color: #51afef;">if</span> (is_of_node(fwspec-&gt;fwnode)) {
-        <span style="color: #51afef;">if</span> (fwspec-&gt;param_count != 3)
-            <span style="color: #51afef;">return</span> -EINVAL;
-
-        <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">No PPI should point to this domain</span><span style="color: #5B6268;"> */</span>
-        <span style="color: #51afef;">if</span> (fwspec-&gt;param[0] != GIC_SPI)
-            <span style="color: #51afef;">return</span> -EINVAL;
-
-        *hwirq = fwspec-&gt;param[1];
-        *type = fwspec-&gt;param[2] &amp; IRQ_TYPE_SENSE_MASK;
-        <span style="color: #51afef;">return</span> 0;
-    }
-
-    <span style="color: #51afef;">return</span> -EINVAL;
-}
-
-<span style="color: #51afef;">static</span> <span style="color: #51afef;">const</span> <span style="color: #51afef;">struct</span> <span style="color: #ECBE7B;">irq_domain_ops</span> <span style="color: #dcaeea;">sysirq_domain_ops</span> = {
-    .translate  = XX_irq_domain_translate,
-    .alloc              = XX_irq_domain_alloc,
-    .free               = irq_domain_free_irqs_common,
-};
+<pre class="src src-C"><code><span style="color: #51afef;">static</span> <span style="color: #ECBE7B;">int</span> <span style="color: #c678dd;">XX_irq_domain_translate</span>(<span style="color: #51afef;">struct</span> <span style="color: #ECBE7B;">irq_domain</span> *<span style="color: #dcaeea;">d</span>,</code>
+<code>                                <span style="color: #51afef;">struct</span> <span style="color: #ECBE7B;">irq_fwspec</span> *<span style="color: #dcaeea;">fwspec</span>,</code>
+<code>                                <span style="color: #ECBE7B;">unsigned</span> <span style="color: #ECBE7B;">long</span> *<span style="color: #dcaeea;">hwirq</span>,</code>
+<code>                                <span style="color: #ECBE7B;">unsigned</span> <span style="color: #ECBE7B;">int</span> *<span style="color: #dcaeea;">type</span>)</code>
+<code>{</code>
+<code>    <span style="color: #51afef;">if</span> (is_of_node(fwspec-&gt;fwnode)) {</code>
+<code>        <span style="color: #51afef;">if</span> (fwspec-&gt;param_count != 3)</code>
+<code>            <span style="color: #51afef;">return</span> -EINVAL;</code>
+<code></code>
+<code>        <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">No PPI should point to this domain</span><span style="color: #5B6268;"> */</span></code>
+<code>        <span style="color: #51afef;">if</span> (fwspec-&gt;param[0] != GIC_SPI)</code>
+<code>            <span style="color: #51afef;">return</span> -EINVAL;</code>
+<code></code>
+<code>        *hwirq = fwspec-&gt;param[1];</code>
+<code>        *type = fwspec-&gt;param[2] &amp; IRQ_TYPE_SENSE_MASK;</code>
+<code>        <span style="color: #51afef;">return</span> 0;</code>
+<code>    }</code>
+<code></code>
+<code>    <span style="color: #51afef;">return</span> -EINVAL;</code>
+<code>}</code>
+<code></code>
+<code><span style="color: #51afef;">static</span> <span style="color: #51afef;">const</span> <span style="color: #51afef;">struct</span> <span style="color: #ECBE7B;">irq_domain_ops</span> <span style="color: #dcaeea;">sysirq_domain_ops</span> = {</code>
+<code>    .translate  = XX_irq_domain_translate,</code>
+<code>    .alloc              = XX_irq_domain_alloc,</code>
+<code>    .free               = irq_domain_free_irqs_common,</code>
+<code>};</code>
 </pre>
 </div>
 <p>
@@ -611,9 +611,9 @@ arm atf中实现了psci协议，当系统休眠时，可以通过psci来进入�
 suspend的方法原型为：<br>
 </p>
 <div class="org-src-container">
-<pre class="src src-C"><span style="color: #ECBE7B;">int</span> <span style="color: #c678dd;">psci_cpu_suspend</span>(<span style="color: #ECBE7B;">unsigned</span> <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">power_state</span>,
-        <span style="color: #ECBE7B;">uintptr_t</span> <span style="color: #dcaeea;">entrypoint</span>,
-        <span style="color: #ECBE7B;">u_register_t</span> <span style="color: #dcaeea;">context_id</span>);
+<pre class="src src-C"><code><span style="color: #ECBE7B;">int</span> <span style="color: #c678dd;">psci_cpu_suspend</span>(<span style="color: #ECBE7B;">unsigned</span> <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">power_state</span>,</code>
+<code>        <span style="color: #ECBE7B;">uintptr_t</span> <span style="color: #dcaeea;">entrypoint</span>,</code>
+<code>        <span style="color: #ECBE7B;">u_register_t</span> <span style="color: #dcaeea;">context_id</span>);</code>
 </pre>
 </div>
 </div>
@@ -644,7 +644,7 @@ The entry_point_address parameter is used by the caller to specify where code ex
 为了有一个对atf中的休眠唤醒流程有一个直观的影响，使用下面的代码调用时序图来说明<br>
 </p>
 
-<div id="orge798392" class="figure">
+<div id="org3a57ebe" class="figure">
 <p><img src="assets/atf-suspend-resume.png" alt="atf-suspend-resume.png"><br>
 </p>
 </div>
