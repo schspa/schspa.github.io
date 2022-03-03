@@ -1,14 +1,13 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2021-10-12 二 20:23 -->
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- 2022-03-03 Thu 11:47 -->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>OPTEE std call process</title>
-<meta name="generator" content="Org mode">
-<meta name="author" content="Schspa">
-<meta name="description" content="OPTEE std call process"
->
+<meta name="author" content="Schspa" />
+<meta name="description" content="OPTEE std call process" />
+<meta name="generator" content="Org Mode" />
 <link rel="shortcut icon" href="/images/rose-red.png" type="image/x-icon" />
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" integrity="sha256-sAcc18zvMnaJZrNT4v8J0T4HqzEUiUTlVFgDIywjQek=" crossorigin="anonymous">
 <link rel="stylesheet" href="/css/animate.min.css" />
@@ -56,15 +55,15 @@
   </nav>
 </header>
 </div>
-<div id="content">
+<div id="content" class="content">
 <h1 class="title">OPTEE std call process</h1>
-<div id="table-of-contents">
+<div id="table-of-contents" role="doc-toc">
 <h2>Table of Contents</h2>
-<div id="text-table-of-contents">
+<div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#org3f30812">Example Code</a></li>
-<li><a href="#org8cf7a2b">std call process</a></li>
-<li><a href="#org4af9103">optee data struct</a></li>
+<li><a href="#orgf2bddcd">Example Code</a></li>
+<li><a href="#org58366b3">std call process</a></li>
+<li><a href="#org68fb327">optee data struct</a></li>
 </ul>
 </div>
 </div>
@@ -73,89 +72,89 @@ OPTEE 主要通过std call的方式来给non-secure world来提供服务，在�
 为了方便起见，这里使用optee example中的hello_world来作为例子<br>
 </p>
 
-<div id="outline-container-org3f30812" class="outline-2">
-<h2 id="org3f30812">Example Code</h2>
-<div class="outline-text-2" id="text-org3f30812">
+<div id="outline-container-orgf2bddcd" class="outline-2">
+<h2 id="orgf2bddcd">Example Code</h2>
+<div class="outline-text-2" id="text-orgf2bddcd">
 <div class="org-src-container">
-<pre class="src src-C"><span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;err.h&gt;</span>
-<span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;stdio.h&gt;</span>
-<span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;string.h&gt;</span>
-
-<span style="color: #5B6268;">/* </span><span style="color: #5B6268;">OP-TEE TEE client API (built by optee_client)</span><span style="color: #5B6268;"> */</span>
-<span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;tee_client_api.h&gt;</span>
-
-<span style="color: #5B6268;">/* </span><span style="color: #5B6268;">For the UUID (found in the TA's h-file(s))</span><span style="color: #5B6268;"> */</span>
-<span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;hello_world_ta.h&gt;</span>
-
-<span style="color: #ECBE7B;">int</span> <span style="color: #c678dd;">main</span>(<span style="color: #ECBE7B;">void</span>)
-{
-    <span style="color: #ECBE7B;">TEEC_Result</span> <span style="color: #dcaeea;">res</span>;
-    <span style="color: #ECBE7B;">TEEC_Context</span> <span style="color: #dcaeea;">ctx</span>;
-    <span style="color: #ECBE7B;">TEEC_Session</span> <span style="color: #dcaeea;">sess</span>;
-    <span style="color: #ECBE7B;">TEEC_Operation</span> <span style="color: #dcaeea;">op</span>;
-    <span style="color: #ECBE7B;">TEEC_UUID</span> <span style="color: #dcaeea;">uuid</span> = TA_HELLO_WORLD_UUID;
-    <span style="color: #ECBE7B;">uint32_t</span> <span style="color: #dcaeea;">err_origin</span>;
-
-    <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">Initialize a context connecting us to the TEE</span><span style="color: #5B6268;"> */</span>
-    res = TEEC_InitializeContext(<span style="color: #a9a1e1;">NULL</span>, &amp;ctx);
-    <span style="color: #51afef;">if</span> (res != TEEC_SUCCESS)
-        errx(1, <span style="color: #98be65;">"TEEC_InitializeContext failed with code 0x%x"</span>, res);
-
-    <span style="color: #5B6268;">/*</span>
-<span style="color: #5B6268;">     * Open a session to the "hello world" TA, the TA will print "hello</span>
-<span style="color: #5B6268;">     * world!" in the log when the session is created.</span>
-<span style="color: #5B6268;">     */</span>
-    res = TEEC_OpenSession(&amp;ctx, &amp;sess, &amp;uuid,
-                   TEEC_LOGIN_PUBLIC, <span style="color: #a9a1e1;">NULL</span>, <span style="color: #a9a1e1;">NULL</span>, &amp;err_origin);
-    <span style="color: #51afef;">if</span> (res != TEEC_SUCCESS)
-        errx(1, <span style="color: #98be65;">"TEEC_Opensession failed with code 0x%x origin 0x%x"</span>,
-            res, err_origin);
-
-    <span style="color: #5B6268;">/*</span>
-<span style="color: #5B6268;">     * Execute a function in the TA by invoking it, in this case</span>
-<span style="color: #5B6268;">     * we're incrementing a number.</span>
-<span style="color: #5B6268;">     *</span>
-<span style="color: #5B6268;">     * The value of command ID part and how the parameters are</span>
-<span style="color: #5B6268;">     * interpreted is part of the interface provided by the TA.</span>
-<span style="color: #5B6268;">     */</span>
-
-    <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">Clear the TEEC_Operation struct</span><span style="color: #5B6268;"> */</span>
-    memset(&amp;op, 0, <span style="color: #51afef;">sizeof</span>(op));
-
-    <span style="color: #5B6268;">/*</span>
-<span style="color: #5B6268;">     * Prepare the argument. Pass a value in the first parameter,</span>
-<span style="color: #5B6268;">     * the remaining three parameters are unused.</span>
-<span style="color: #5B6268;">     */</span>
-    op.paramTypes = TEEC_PARAM_TYPES(TEEC_VALUE_INOUT, TEEC_NONE,
-                     TEEC_NONE, TEEC_NONE);
-    op.params[0].value.a = 42;
-
-    <span style="color: #5B6268;">/*</span>
-<span style="color: #5B6268;">     * TA_HELLO_WORLD_CMD_INC_VALUE is the actual function in the TA to be</span>
-<span style="color: #5B6268;">     * called.</span>
-<span style="color: #5B6268;">     */</span>
-    printf(<span style="color: #98be65;">"Invoking TA to increment %d\n"</span>, op.params[0].value.a);
-    res = TEEC_InvokeCommand(&amp;sess, TA_HELLO_WORLD_CMD_INC_VALUE, &amp;op,
-                 &amp;err_origin);
-    <span style="color: #51afef;">if</span> (res != TEEC_SUCCESS)
-        errx(1, <span style="color: #98be65;">"TEEC_InvokeCommand failed with code 0x%x origin 0x%x"</span>,
-            res, err_origin);
-    printf(<span style="color: #98be65;">"TA incremented value to %d\n"</span>, op.params[0].value.a);
-
-    <span style="color: #5B6268;">/*</span>
-<span style="color: #5B6268;">     * We're done with the TA, close the session and</span>
-<span style="color: #5B6268;">     * destroy the context.</span>
-<span style="color: #5B6268;">     *</span>
-<span style="color: #5B6268;">     * The TA will print "Goodbye!" in the log when the</span>
-<span style="color: #5B6268;">     * session is closed.</span>
-<span style="color: #5B6268;">     */</span>
-
-    TEEC_CloseSession(&amp;sess);
-
-    TEEC_FinalizeContext(&amp;ctx);
-
-    <span style="color: #51afef;">return</span> 0;
-}
+<pre class="src src-C"><code><span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;err.h&gt;</span></code>
+<code><span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;stdio.h&gt;</span></code>
+<code><span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;string.h&gt;</span></code>
+<code></code>
+<code><span style="color: #5B6268;">/* </span><span style="color: #5B6268;">OP-TEE TEE client API (built by optee_client)</span><span style="color: #5B6268;"> */</span></code>
+<code><span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;tee_client_api.h&gt;</span></code>
+<code></code>
+<code><span style="color: #5B6268;">/* </span><span style="color: #5B6268;">For the UUID (found in the TA's h-file(s))</span><span style="color: #5B6268;"> */</span></code>
+<code><span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;hello_world_ta.h&gt;</span></code>
+<code></code>
+<code><span style="color: #ECBE7B;">int</span> <span style="color: #c678dd;">main</span>(<span style="color: #ECBE7B;">void</span>)</code>
+<code>{</code>
+<code>    <span style="color: #ECBE7B;">TEEC_Result</span> <span style="color: #dcaeea;">res</span>;</code>
+<code>    <span style="color: #ECBE7B;">TEEC_Context</span> <span style="color: #dcaeea;">ctx</span>;</code>
+<code>    <span style="color: #ECBE7B;">TEEC_Session</span> <span style="color: #dcaeea;">sess</span>;</code>
+<code>    <span style="color: #ECBE7B;">TEEC_Operation</span> <span style="color: #dcaeea;">op</span>;</code>
+<code>    <span style="color: #ECBE7B;">TEEC_UUID</span> <span style="color: #dcaeea;">uuid</span> = TA_HELLO_WORLD_UUID;</code>
+<code>    <span style="color: #ECBE7B;">uint32_t</span> <span style="color: #dcaeea;">err_origin</span>;</code>
+<code></code>
+<code>    <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">Initialize a context connecting us to the TEE</span><span style="color: #5B6268;"> */</span></code>
+<code>    res = TEEC_InitializeContext(<span style="color: #a9a1e1;">NULL</span>, &amp;ctx);</code>
+<code>    <span style="color: #51afef;">if</span> (res != TEEC_SUCCESS)</code>
+<code>        errx(1, <span style="color: #98be65;">"TEEC_InitializeContext failed with code 0x%x"</span>, res);</code>
+<code></code>
+<code>    <span style="color: #5B6268;">/*</span></code>
+<code><span style="color: #5B6268;">     * Open a session to the "hello world" TA, the TA will print "hello</span></code>
+<code><span style="color: #5B6268;">     * world!" in the log when the session is created.</span></code>
+<code><span style="color: #5B6268;">     */</span></code>
+<code>    res = TEEC_OpenSession(&amp;ctx, &amp;sess, &amp;uuid,</code>
+<code>                   TEEC_LOGIN_PUBLIC, <span style="color: #a9a1e1;">NULL</span>, <span style="color: #a9a1e1;">NULL</span>, &amp;err_origin);</code>
+<code>    <span style="color: #51afef;">if</span> (res != TEEC_SUCCESS)</code>
+<code>        errx(1, <span style="color: #98be65;">"TEEC_Opensession failed with code 0x%x origin 0x%x"</span>,</code>
+<code>            res, err_origin);</code>
+<code></code>
+<code>    <span style="color: #5B6268;">/*</span></code>
+<code><span style="color: #5B6268;">     * Execute a function in the TA by invoking it, in this case</span></code>
+<code><span style="color: #5B6268;">     * we're incrementing a number.</span></code>
+<code><span style="color: #5B6268;">     *</span></code>
+<code><span style="color: #5B6268;">     * The value of command ID part and how the parameters are</span></code>
+<code><span style="color: #5B6268;">     * interpreted is part of the interface provided by the TA.</span></code>
+<code><span style="color: #5B6268;">     */</span></code>
+<code></code>
+<code>    <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">Clear the TEEC_Operation struct</span><span style="color: #5B6268;"> */</span></code>
+<code>    memset(&amp;op, 0, <span style="color: #51afef;">sizeof</span>(op));</code>
+<code></code>
+<code>    <span style="color: #5B6268;">/*</span></code>
+<code><span style="color: #5B6268;">     * Prepare the argument. Pass a value in the first parameter,</span></code>
+<code><span style="color: #5B6268;">     * the remaining three parameters are unused.</span></code>
+<code><span style="color: #5B6268;">     */</span></code>
+<code>    op.paramTypes = TEEC_PARAM_TYPES(TEEC_VALUE_INOUT, TEEC_NONE,</code>
+<code>                     TEEC_NONE, TEEC_NONE);</code>
+<code>    op.params[0].value.a = 42;</code>
+<code></code>
+<code>    <span style="color: #5B6268;">/*</span></code>
+<code><span style="color: #5B6268;">     * TA_HELLO_WORLD_CMD_INC_VALUE is the actual function in the TA to be</span></code>
+<code><span style="color: #5B6268;">     * called.</span></code>
+<code><span style="color: #5B6268;">     */</span></code>
+<code>    printf(<span style="color: #98be65;">"Invoking TA to increment %d\n"</span>, op.params[0].value.a);</code>
+<code>    res = TEEC_InvokeCommand(&amp;sess, TA_HELLO_WORLD_CMD_INC_VALUE, &amp;op,</code>
+<code>                 &amp;err_origin);</code>
+<code>    <span style="color: #51afef;">if</span> (res != TEEC_SUCCESS)</code>
+<code>        errx(1, <span style="color: #98be65;">"TEEC_InvokeCommand failed with code 0x%x origin 0x%x"</span>,</code>
+<code>            res, err_origin);</code>
+<code>    printf(<span style="color: #98be65;">"TA incremented value to %d\n"</span>, op.params[0].value.a);</code>
+<code></code>
+<code>    <span style="color: #5B6268;">/*</span></code>
+<code><span style="color: #5B6268;">     * We're done with the TA, close the session and</span></code>
+<code><span style="color: #5B6268;">     * destroy the context.</span></code>
+<code><span style="color: #5B6268;">     *</span></code>
+<code><span style="color: #5B6268;">     * The TA will print "Goodbye!" in the log when the</span></code>
+<code><span style="color: #5B6268;">     * session is closed.</span></code>
+<code><span style="color: #5B6268;">     */</span></code>
+<code></code>
+<code>    TEEC_CloseSession(&amp;sess);</code>
+<code></code>
+<code>    TEEC_FinalizeContext(&amp;ctx);</code>
+<code></code>
+<code>    <span style="color: #51afef;">return</span> 0;</code>
+<code>}</code>
 </pre>
 </div>
 
@@ -173,9 +172,9 @@ OPTEE 主要通过std call的方式来给non-secure world来提供服务，在�
 </div>
 </div>
 
-<div id="outline-container-org8cf7a2b" class="outline-2">
-<h2 id="org8cf7a2b">std call process</h2>
-<div class="outline-text-2" id="text-org8cf7a2b">
+<div id="outline-container-org58366b3" class="outline-2">
+<h2 id="org58366b3">std call process</h2>
+<div class="outline-text-2" id="text-org58366b3">
 <p>
 下图展示了一次helloworld的调用中，系统内部的大致流程，由此图可知，每次系统进行trusted world服务调用时，系统都需要进入smc来进行运行环境的切换（aarch64进行secure/non secure的切换必须通过EL3来完成）<br>
 </p>
@@ -186,9 +185,9 @@ OPTEE 主要通过std call的方式来给non-secure world来提供服务，在�
 </div>
 </div>
 
-<div id="outline-container-org4af9103" class="outline-2">
-<h2 id="org4af9103">optee data struct</h2>
-<div class="outline-text-2" id="text-org4af9103">
+<div id="outline-container-org68fb327" class="outline-2">
+<h2 id="org68fb327">optee data struct</h2>
+<div class="outline-text-2" id="text-org68fb327">
 <p>
 optee服务调用时涉及很多个数据结构的传递，下面的图展示了一下open_session操作时各个数据结构之间的大致关系，分析代码时可以作为参考<br>
 </p>

@@ -1,15 +1,14 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2021-10-12 二 19:35 -->
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- 2022-03-03 Thu 11:48 -->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Linux Signal Handle</title>
-<meta name="generator" content="Org mode">
-<meta name="author" content="Schspa">
-<meta name="description" content="security.org"
->
-<meta name="keywords" content="Security">
+<meta name="author" content="Schspa" />
+<meta name="description" content="security.org" />
+<meta name="keywords" content="Security" />
+<meta name="generator" content="Org Mode" />
 <link rel="shortcut icon" href="/images/rose-red.png" type="image/x-icon" />
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" integrity="sha256-sAcc18zvMnaJZrNT4v8J0T4HqzEUiUTlVFgDIywjQek=" crossorigin="anonymous">
 <link rel="stylesheet" href="/css/animate.min.css" />
@@ -57,11 +56,11 @@
   </nav>
 </header>
 </div>
-<div id="content">
+<div id="content" class="content">
 <h1 class="title">Linux Signal Handle</h1>
-<div id="table-of-contents">
+<div id="table-of-contents" role="doc-toc">
 <h2>Table of Contents</h2>
-<div id="text-table-of-contents">
+<div id="text-table-of-contents" role="doc-toc">
 <ul>
 <li><a href="#linux-signal-handle">1. Linux signal handle</a></li>
 <li><a href="#提纲">2. 提纲：</a>
@@ -149,53 +148,53 @@
 </p>
 
 <div class="org-src-container">
-<pre class="src src-C"><span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #dcaeea;">_NSIG</span>       64
-<span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #dcaeea;">_NSIG_BPW</span>   __BITS_PER_LONG
-<span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #dcaeea;">_NSIG_WORDS</span> (_NSIG / _NSIG_BPW)
-
-<span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #dcaeea;">SIGHUP</span>       1
-<span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #dcaeea;">SIGINT</span>       2
-<span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #dcaeea;">SIGQUIT</span>      3
-<span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #dcaeea;">SIGILL</span>       4
-<span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #dcaeea;">SIGTRAP</span>      5
-<span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #dcaeea;">SIGABRT</span>      6
-<span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #dcaeea;">SIGIOT</span>       6
-<span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #dcaeea;">SIGBUS</span>       7
-<span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #dcaeea;">SIGFPE</span>       8
-<span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #dcaeea;">SIGKILL</span>      9
-<span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #dcaeea;">SIGUSR1</span>     10
-<span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #dcaeea;">SIGSEGV</span>     11
-<span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #dcaeea;">SIGUSR2</span>     12
-<span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #dcaeea;">SIGPIPE</span>     13
-<span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #dcaeea;">SIGALRM</span>     14
-<span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #dcaeea;">SIGTERM</span>     15
-<span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #dcaeea;">SIGSTKFLT</span>   16
-<span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #dcaeea;">SIGCHLD</span>     17
-<span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #dcaeea;">SIGCONT</span>     18
-<span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #dcaeea;">SIGSTOP</span>     19
-<span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #dcaeea;">SIGTSTP</span>     20
-<span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #dcaeea;">SIGTTIN</span>     21
-<span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #dcaeea;">SIGTTOU</span>     22
-<span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #dcaeea;">SIGURG</span>      23
-<span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #dcaeea;">SIGXCPU</span>     24
-<span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #dcaeea;">SIGXFSZ</span>     25
-<span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #dcaeea;">SIGVTALRM</span>   26
-<span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #dcaeea;">SIGPROF</span>     27
-<span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #dcaeea;">SIGWINCH</span>    28
-<span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #dcaeea;">SIGIO</span>       29
-<span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #dcaeea;">SIGPOLL</span>     SIGIO
-<span style="color: #5B6268;">/*</span>
-<span style="color: #5B6268;">#define SIGLOST     29</span>
-<span style="color: #5B6268;">*/</span>
-<span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #dcaeea;">SIGPWR</span>      30
-<span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #dcaeea;">SIGSYS</span>      31
-<span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #dcaeea;">SIGUNUSED</span>   31
-
-<span style="color: #5B6268;">/* </span><span style="color: #5B6268;">These should not be considered constants from userland.</span><span style="color: #5B6268;">  */</span>
-<span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #dcaeea;">SIGRTMIN</span>    32
-<span style="color: #51afef; font-weight: bold;">#if</span><span style="color: #51afef; font-weight: bold;">n</span><span style="color: #51afef; font-weight: bold;">def</span> SIGRTMAX
-<span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #dcaeea;">SIGRTMAX</span>    _NSIG
-<span style="color: #51afef; font-weight: bold;">#endif</span>
+<pre class="src src-C"><code><span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #dcaeea;">_NSIG</span>       64</code>
+<code><span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #dcaeea;">_NSIG_BPW</span>   __BITS_PER_LONG</code>
+<code><span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #dcaeea;">_NSIG_WORDS</span> (_NSIG / _NSIG_BPW)</code>
+<code></code>
+<code><span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #dcaeea;">SIGHUP</span>       1</code>
+<code><span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #dcaeea;">SIGINT</span>       2</code>
+<code><span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #dcaeea;">SIGQUIT</span>      3</code>
+<code><span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #dcaeea;">SIGILL</span>       4</code>
+<code><span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #dcaeea;">SIGTRAP</span>      5</code>
+<code><span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #dcaeea;">SIGABRT</span>      6</code>
+<code><span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #dcaeea;">SIGIOT</span>       6</code>
+<code><span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #dcaeea;">SIGBUS</span>       7</code>
+<code><span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #dcaeea;">SIGFPE</span>       8</code>
+<code><span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #dcaeea;">SIGKILL</span>      9</code>
+<code><span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #dcaeea;">SIGUSR1</span>     10</code>
+<code><span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #dcaeea;">SIGSEGV</span>     11</code>
+<code><span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #dcaeea;">SIGUSR2</span>     12</code>
+<code><span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #dcaeea;">SIGPIPE</span>     13</code>
+<code><span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #dcaeea;">SIGALRM</span>     14</code>
+<code><span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #dcaeea;">SIGTERM</span>     15</code>
+<code><span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #dcaeea;">SIGSTKFLT</span>   16</code>
+<code><span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #dcaeea;">SIGCHLD</span>     17</code>
+<code><span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #dcaeea;">SIGCONT</span>     18</code>
+<code><span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #dcaeea;">SIGSTOP</span>     19</code>
+<code><span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #dcaeea;">SIGTSTP</span>     20</code>
+<code><span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #dcaeea;">SIGTTIN</span>     21</code>
+<code><span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #dcaeea;">SIGTTOU</span>     22</code>
+<code><span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #dcaeea;">SIGURG</span>      23</code>
+<code><span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #dcaeea;">SIGXCPU</span>     24</code>
+<code><span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #dcaeea;">SIGXFSZ</span>     25</code>
+<code><span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #dcaeea;">SIGVTALRM</span>   26</code>
+<code><span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #dcaeea;">SIGPROF</span>     27</code>
+<code><span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #dcaeea;">SIGWINCH</span>    28</code>
+<code><span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #dcaeea;">SIGIO</span>       29</code>
+<code><span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #dcaeea;">SIGPOLL</span>     SIGIO</code>
+<code><span style="color: #5B6268;">/*</span></code>
+<code><span style="color: #5B6268;">#define SIGLOST     29</span></code>
+<code><span style="color: #5B6268;">*/</span></code>
+<code><span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #dcaeea;">SIGPWR</span>      30</code>
+<code><span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #dcaeea;">SIGSYS</span>      31</code>
+<code><span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #dcaeea;">SIGUNUSED</span>   31</code>
+<code></code>
+<code><span style="color: #5B6268;">/* </span><span style="color: #5B6268;">These should not be considered constants from userland.</span><span style="color: #5B6268;">  */</span></code>
+<code><span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #dcaeea;">SIGRTMIN</span>    32</code>
+<code><span style="color: #51afef; font-weight: bold;">#if</span><span style="color: #51afef; font-weight: bold;">n</span><span style="color: #51afef; font-weight: bold;">def</span> SIGRTMAX</code>
+<code><span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #dcaeea;">SIGRTMAX</span>    _NSIG</code>
+<code><span style="color: #51afef; font-weight: bold;">#endif</span></code>
 </pre>
 </div>
 </div>
@@ -208,54 +207,54 @@ Signal 内部数据结构<br>
 </p>
 
 <div class="org-src-container">
-<pre class="src src-C"><span style="color: #51afef;">struct</span> <span style="color: #ECBE7B;">task_struct</span> {
-  <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">Signal handlers:</span><span style="color: #5B6268;"> */</span>
-  <span style="color: #51afef;">struct</span> <span style="color: #ECBE7B;">signal_struct</span>      *<span style="color: #dcaeea;">signal</span>;    <span style="color: #5B6268;">//</span><span style="color: #5B6268;">&#21516;&#19968;&#32447;&#31243;&#32452;&#20849;&#26377;&#30340;sigpending&#38142;&#34920;</span>
-  <span style="color: #51afef;">struct</span> <span style="color: #ECBE7B;">sighand_struct</span>     *<span style="color: #dcaeea;">sighand</span>;
-  <span style="color: #ECBE7B;">sigset_t</span>          <span style="color: #dcaeea;">blocked</span>;
-  <span style="color: #ECBE7B;">sigset_t</span>          <span style="color: #dcaeea;">real_blocked</span>;
-  <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">Restored if set_restore_sigmask() was used:</span><span style="color: #5B6268;"> */</span>
-  <span style="color: #ECBE7B;">sigset_t</span>          <span style="color: #dcaeea;">saved_sigmask</span>;
-  <span style="color: #51afef;">struct</span> <span style="color: #ECBE7B;">sigpending</span>     <span style="color: #dcaeea;">pending</span>;        <span style="color: #5B6268;">//</span><span style="color: #5B6268;">&#31169;&#26377;&#30340;sigpending&#38142;&#34920;</span>
-  <span style="color: #ECBE7B;">unsigned</span> <span style="color: #ECBE7B;">long</span>         <span style="color: #dcaeea;">sas_ss_sp</span>;
-  <span style="color: #ECBE7B;">size_t</span>                <span style="color: #dcaeea;">sas_ss_size</span>;
-  <span style="color: #ECBE7B;">unsigned</span> <span style="color: #ECBE7B;">int</span>          <span style="color: #dcaeea;">sas_ss_flags</span>;
-}&#65307;
-
-<span style="color: #51afef;">struct</span> signal_struct {
-    <span style="color: #ECBE7B;">atomic_t</span>        <span style="color: #dcaeea;">sigcnt</span>;
-    <span style="color: #ECBE7B;">atomic_t</span>        <span style="color: #dcaeea;">live</span>;
-    <span style="color: #ECBE7B;">int</span>         <span style="color: #dcaeea;">nr_threads</span>;
-    <span style="color: #51afef;">struct</span> <span style="color: #ECBE7B;">list_head</span>    <span style="color: #dcaeea;">thread_head</span>;
-
-    <span style="color: #ECBE7B;">wait_queue_head_t</span>   <span style="color: #dcaeea;">wait_chldexit</span>;  <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">for wait4()</span><span style="color: #5B6268;"> */</span>
-  <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">shared signal handling:</span><span style="color: #5B6268;"> */</span>
-    <span style="color: #51afef;">struct</span> <span style="color: #ECBE7B;">sigpending</span>   <span style="color: #dcaeea;">shared_pending</span>;
-
-    <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">thread group exit support</span><span style="color: #5B6268;"> */</span>
-    <span style="color: #ECBE7B;">int</span>         <span style="color: #dcaeea;">group_exit_code</span>;
-    <span style="color: #51afef;">struct</span> <span style="color: #ECBE7B;">task_struct</span>  *<span style="color: #dcaeea;">group_exit_task</span>;
-    <span style="color: #51afef;">struct</span> <span style="color: #ECBE7B;">rlimit</span> <span style="color: #dcaeea;">rlim</span>[RLIM_NLIMITS];
-}&#65307;
-
-<span style="color: #51afef;">struct</span> sigpending {
-    <span style="color: #51afef;">struct</span> <span style="color: #ECBE7B;">list_head</span> <span style="color: #dcaeea;">list</span>;
-    <span style="color: #ECBE7B;">sigset_t</span> <span style="color: #dcaeea;">signal</span>;
-};
-
-<span style="color: #51afef;">struct</span> <span style="color: #ECBE7B;">sigqueue</span> {
-    <span style="color: #51afef;">struct</span> <span style="color: #ECBE7B;">list_head</span> <span style="color: #dcaeea;">list</span>;
-    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">flags</span>;
-    <span style="color: #ECBE7B;">siginfo_t</span> <span style="color: #dcaeea;">info</span>;
-    <span style="color: #51afef;">struct</span> <span style="color: #ECBE7B;">user_struct</span> *<span style="color: #dcaeea;">user</span>;
-};
-
-<span style="color: #51afef;">struct</span> <span style="color: #ECBE7B;">sighand_struct</span> {
-    <span style="color: #ECBE7B;">atomic_t</span>        <span style="color: #dcaeea;">count</span>;
-    <span style="color: #51afef;">struct</span> <span style="color: #ECBE7B;">k_sigaction</span>  <span style="color: #dcaeea;">action</span>[_NSIG];
-    <span style="color: #ECBE7B;">spinlock_t</span>      <span style="color: #dcaeea;">siglock</span>;
-    <span style="color: #ECBE7B;">wait_queue_head_t</span>   <span style="color: #dcaeea;">signalfd_wqh</span>;
-};
+<pre class="src src-C"><code><span style="color: #51afef;">struct</span> <span style="color: #ECBE7B;">task_struct</span> {</code>
+<code>  <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">Signal handlers:</span><span style="color: #5B6268;"> */</span></code>
+<code>  <span style="color: #51afef;">struct</span> <span style="color: #ECBE7B;">signal_struct</span>      *<span style="color: #dcaeea;">signal</span>;    <span style="color: #5B6268;">//</span><span style="color: #5B6268;">&#21516;&#19968;&#32447;&#31243;&#32452;&#20849;&#26377;&#30340;sigpending&#38142;&#34920;</span></code>
+<code>  <span style="color: #51afef;">struct</span> <span style="color: #ECBE7B;">sighand_struct</span>     *<span style="color: #dcaeea;">sighand</span>;</code>
+<code>  <span style="color: #ECBE7B;">sigset_t</span>          <span style="color: #dcaeea;">blocked</span>;</code>
+<code>  <span style="color: #ECBE7B;">sigset_t</span>          <span style="color: #dcaeea;">real_blocked</span>;</code>
+<code>  <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">Restored if set_restore_sigmask() was used:</span><span style="color: #5B6268;"> */</span></code>
+<code>  <span style="color: #ECBE7B;">sigset_t</span>          <span style="color: #dcaeea;">saved_sigmask</span>;</code>
+<code>  <span style="color: #51afef;">struct</span> <span style="color: #ECBE7B;">sigpending</span>     <span style="color: #dcaeea;">pending</span>;        <span style="color: #5B6268;">//</span><span style="color: #5B6268;">&#31169;&#26377;&#30340;sigpending&#38142;&#34920;</span></code>
+<code>  <span style="color: #ECBE7B;">unsigned</span> <span style="color: #ECBE7B;">long</span>         <span style="color: #dcaeea;">sas_ss_sp</span>;</code>
+<code>  <span style="color: #ECBE7B;">size_t</span>                <span style="color: #dcaeea;">sas_ss_size</span>;</code>
+<code>  <span style="color: #ECBE7B;">unsigned</span> <span style="color: #ECBE7B;">int</span>          <span style="color: #dcaeea;">sas_ss_flags</span>;</code>
+<code>}&#65307;</code>
+<code></code>
+<code><span style="color: #51afef;">struct</span> signal_struct {</code>
+<code>    <span style="color: #ECBE7B;">atomic_t</span>        <span style="color: #dcaeea;">sigcnt</span>;</code>
+<code>    <span style="color: #ECBE7B;">atomic_t</span>        <span style="color: #dcaeea;">live</span>;</code>
+<code>    <span style="color: #ECBE7B;">int</span>         <span style="color: #dcaeea;">nr_threads</span>;</code>
+<code>    <span style="color: #51afef;">struct</span> <span style="color: #ECBE7B;">list_head</span>    <span style="color: #dcaeea;">thread_head</span>;</code>
+<code></code>
+<code>    <span style="color: #ECBE7B;">wait_queue_head_t</span>   <span style="color: #dcaeea;">wait_chldexit</span>;  <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">for wait4()</span><span style="color: #5B6268;"> */</span></code>
+<code>  <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">shared signal handling:</span><span style="color: #5B6268;"> */</span></code>
+<code>    <span style="color: #51afef;">struct</span> <span style="color: #ECBE7B;">sigpending</span>   <span style="color: #dcaeea;">shared_pending</span>;</code>
+<code></code>
+<code>    <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">thread group exit support</span><span style="color: #5B6268;"> */</span></code>
+<code>    <span style="color: #ECBE7B;">int</span>         <span style="color: #dcaeea;">group_exit_code</span>;</code>
+<code>    <span style="color: #51afef;">struct</span> <span style="color: #ECBE7B;">task_struct</span>  *<span style="color: #dcaeea;">group_exit_task</span>;</code>
+<code>    <span style="color: #51afef;">struct</span> <span style="color: #ECBE7B;">rlimit</span> <span style="color: #dcaeea;">rlim</span>[RLIM_NLIMITS];</code>
+<code>}&#65307;</code>
+<code></code>
+<code><span style="color: #51afef;">struct</span> sigpending {</code>
+<code>    <span style="color: #51afef;">struct</span> <span style="color: #ECBE7B;">list_head</span> <span style="color: #dcaeea;">list</span>;</code>
+<code>    <span style="color: #ECBE7B;">sigset_t</span> <span style="color: #dcaeea;">signal</span>;</code>
+<code>};</code>
+<code></code>
+<code><span style="color: #51afef;">struct</span> <span style="color: #ECBE7B;">sigqueue</span> {</code>
+<code>    <span style="color: #51afef;">struct</span> <span style="color: #ECBE7B;">list_head</span> <span style="color: #dcaeea;">list</span>;</code>
+<code>    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">flags</span>;</code>
+<code>    <span style="color: #ECBE7B;">siginfo_t</span> <span style="color: #dcaeea;">info</span>;</code>
+<code>    <span style="color: #51afef;">struct</span> <span style="color: #ECBE7B;">user_struct</span> *<span style="color: #dcaeea;">user</span>;</code>
+<code>};</code>
+<code></code>
+<code><span style="color: #51afef;">struct</span> <span style="color: #ECBE7B;">sighand_struct</span> {</code>
+<code>    <span style="color: #ECBE7B;">atomic_t</span>        <span style="color: #dcaeea;">count</span>;</code>
+<code>    <span style="color: #51afef;">struct</span> <span style="color: #ECBE7B;">k_sigaction</span>  <span style="color: #dcaeea;">action</span>[_NSIG];</code>
+<code>    <span style="color: #ECBE7B;">spinlock_t</span>      <span style="color: #dcaeea;">siglock</span>;</code>
+<code>    <span style="color: #ECBE7B;">wait_queue_head_t</span>   <span style="color: #dcaeea;">signalfd_wqh</span>;</code>
+<code>};</code>
 </pre>
 </div>
 
@@ -298,7 +297,7 @@ Signal 内部数据结构<br>
 <h3 id="内核中信号发送流程"><span class="section-number-3">4.1.</span> 内核中信号发送流程</h3>
 <div class="outline-text-3" id="text-内核中信号发送流程">
 
-<div id="orgc797df5" class="figure">
+<div id="org6b625ab" class="figure">
 <p><img src="assets/linux-send-signal-flow.png" alt="linux-send-signal-flow.png"><br>
 </p>
 </div>
@@ -362,47 +361,47 @@ complete_signal函数 1. 优先给主线程 2. 在所有线程中查找可以
 <li>Stop<br></li>
 </ul>
 
-<pre class="example" id="org28dbf5d">
-“ +--------------------+------------------+
- * | POSIX signal     | default action |
- * +------------------+------------------+
- * | SIGHUP           | terminate
- * | SIGINT           | terminate
- * | SIGQUIT          | coredump
- * | SIGILL           | coredump
- * | SIGTRAP          | coredump
- * | SIGABRT/SIGIOT   | coredump
- * | SIGBUS           | coredump
- * | SIGFPE           | coredump
- * | SIGKILL          | terminate
- * | SIGUSR1          | terminate
- * | SIGSEGV          | coredump
- * | SIGUSR2          | terminate
- * | SIGPIPE          | terminate
- * | SIGALRM          | terminate
- * | SIGTERM          | terminate
- * | SIGCHLD          | ignore
- * | SIGCONT          | ignore
- * | SIGSTOP          | stop
- * | SIGTSTP          | stop
- * | SIGTTIN          | stop
- * | SIGTTOU          | stop
- * | SIGURG           | ignore
- * | SIGXCPU          | coredump
- * | SIGXFSZ          | coredump
- * | SIGVTALRM        | terminate
- * | SIGPROF          | terminate
- * | SIGPOLL/SIGIO    | terminate
- * | SIGSYS/SIGUNUSED | coredump
- * | SIGSTKFLT        | terminate
- * | SIGWINCH         | ignore
- * | SIGPWR           | terminate
- * | SIGRTMIN-SIGRTMAX| terminate
- * +------------------+------------------+
- * | non-POSIX signal | default action |
- * +------------------+------------------+
- * | SIGEMT           | coredump |
- * +--------------------+------------------+”
+<pre class="example" id="org5069f8b">
+<code>“ +--------------------+------------------+</code>
+<code> * | POSIX signal     | default action |</code>
+<code> * +------------------+------------------+</code>
+<code> * | SIGHUP           | terminate</code>
+<code> * | SIGINT           | terminate</code>
+<code> * | SIGQUIT          | coredump</code>
+<code> * | SIGILL           | coredump</code>
+<code> * | SIGTRAP          | coredump</code>
+<code> * | SIGABRT/SIGIOT   | coredump</code>
+<code> * | SIGBUS           | coredump</code>
+<code> * | SIGFPE           | coredump</code>
+<code> * | SIGKILL          | terminate</code>
+<code> * | SIGUSR1          | terminate</code>
+<code> * | SIGSEGV          | coredump</code>
+<code> * | SIGUSR2          | terminate</code>
+<code> * | SIGPIPE          | terminate</code>
+<code> * | SIGALRM          | terminate</code>
+<code> * | SIGTERM          | terminate</code>
+<code> * | SIGCHLD          | ignore</code>
+<code> * | SIGCONT          | ignore</code>
+<code> * | SIGSTOP          | stop</code>
+<code> * | SIGTSTP          | stop</code>
+<code> * | SIGTTIN          | stop</code>
+<code> * | SIGTTOU          | stop</code>
+<code> * | SIGURG           | ignore</code>
+<code> * | SIGXCPU          | coredump</code>
+<code> * | SIGXFSZ          | coredump</code>
+<code> * | SIGVTALRM        | terminate</code>
+<code> * | SIGPROF          | terminate</code>
+<code> * | SIGPOLL/SIGIO    | terminate</code>
+<code> * | SIGSYS/SIGUNUSED | coredump</code>
+<code> * | SIGSTKFLT        | terminate</code>
+<code> * | SIGWINCH         | ignore</code>
+<code> * | SIGPWR           | terminate</code>
+<code> * | SIGRTMIN-SIGRTMAX| terminate</code>
+<code> * +------------------+------------------+</code>
+<code> * | non-POSIX signal | default action |</code>
+<code> * +------------------+------------------+</code>
+<code> * | SIGEMT           | coredump |</code>
+<code> * +--------------------+------------------+”</code>
 </pre>
 
 <blockquote>
@@ -413,7 +412,7 @@ kernel developer's reference manual。" iBooks.<br>
 </blockquote>
 
 
-<div id="org5cc24e2" class="figure">
+<div id="orgbf94ddc" class="figure">
 <p><img src="assets/signal-send-process.png" alt="signal-send-process.png"><br>
 </p>
 </div>
@@ -423,7 +422,7 @@ kernel developer's reference manual。" iBooks.<br>
 <li><a id="process-defined-handler"></a>Process defined handler<br>
 <div class="outline-text-5" id="text-process-defined-handler">
 
-<div id="org0025b0f" class="figure">
+<div id="org41f41a0" class="figure">
 <p><img src="assets/2020-09-09_16-27-04_screenshot.png" alt="2020-09-09_16-27-04_screenshot.png"><br>
 </p>
 </div>
@@ -449,13 +448,13 @@ signal<br>
 </p>
 
 
-<div id="org870aa97" class="figure">
+<div id="orge782f3d" class="figure">
 <p><img src="assets/do-signal-stop.png" alt="do-signal-stop.png"><br>
 </p>
 </div>
 
 
-<div id="org4c8a4be" class="figure">
+<div id="org1832f36" class="figure">
 <p><img src="assets/do-signal-d-stop.png" alt="do-signal-d-stop.png"><br>
 </p>
 </div>
@@ -466,7 +465,7 @@ signal<br>
 <h4 id="kill流程-sigkill"><span class="section-number-4">4.2.3.</span> kill流程 (SIGKILL)</h4>
 <div class="outline-text-4" id="text-kill流程-sigkill">
 
-<div id="orgfaaa1fe" class="figure">
+<div id="org828fa82" class="figure">
 <p><img src="assets/linux-sigkill-process.png" alt="linux-sigkill-process.png"><br>
 </p>
 </div>
@@ -482,52 +481,52 @@ signal<br>
 <li><a id="异常处理表"></a>异常处理表<br>
 <div class="outline-text-5" id="text-异常处理表">
 <div class="org-src-container">
-<pre class="src src-C"><span style="color: #51afef;">static</span> <span style="color: #51afef;">const</span> <span style="color: #51afef;">struct</span> <span style="color: #ECBE7B;">fault_info</span> <span style="color: #dcaeea;">fault_info</span>[] = {
-    { do_bad,       SIGKILL, SI_KERNEL, <span style="color: #98be65;">"ttbr address size fault"</span>   },
-    { do_bad,       SIGKILL, SI_KERNEL, <span style="color: #98be65;">"level 1 address size fault"</span>    },
-    { do_bad,       SIGKILL, SI_KERNEL, <span style="color: #98be65;">"level 2 address size fault"</span>    },
-    { do_bad,       SIGKILL, SI_KERNEL, <span style="color: #98be65;">"level 3 address size fault"</span>    },
-    { do_translation_fault, SIGSEGV, SEGV_MAPERR,   <span style="color: #98be65;">"level 0 translation fault"</span> },
-    { do_translation_fault, SIGSEGV, SEGV_MAPERR,   <span style="color: #98be65;">"level 1 translation fault"</span> },
-    { do_translation_fault, SIGSEGV, SEGV_MAPERR,   <span style="color: #98be65;">"level 2 translation fault"</span> },
-    { do_translation_fault, SIGSEGV, SEGV_MAPERR,   <span style="color: #98be65;">"level 3 translation fault"</span> },
-    { do_bad,       SIGKILL, SI_KERNEL, <span style="color: #98be65;">"unknown 8"</span>         },
-    { do_page_fault,    SIGSEGV, SEGV_ACCERR,   <span style="color: #98be65;">"level 1 access flag fault"</span> },
-    { do_page_fault,    SIGSEGV, SEGV_ACCERR,   <span style="color: #98be65;">"level 2 access flag fault"</span> },
-    { do_page_fault,    SIGSEGV, SEGV_ACCERR,   <span style="color: #98be65;">"level 3 access flag fault"</span> },
-    { do_bad,       SIGKILL, SI_KERNEL, <span style="color: #98be65;">"unknown 12"</span>            },
-    { do_page_fault,    SIGSEGV, SEGV_ACCERR,   <span style="color: #98be65;">"level 1 permission fault"</span>  },
-    { do_page_fault,    SIGSEGV, SEGV_ACCERR,   <span style="color: #98be65;">"level 2 permission fault"</span>  },
-    { do_page_fault,    SIGSEGV, SEGV_ACCERR,   <span style="color: #98be65;">"level 3 permission fault"</span>  },
-    { do_sea,       SIGBUS,  BUS_OBJERR,    <span style="color: #98be65;">"synchronous external abort"</span>    },
-    { do_bad,       SIGKILL, SI_KERNEL, <span style="color: #98be65;">"unknown 17"</span>            },
-  ...
-};
-<span style="color: #51afef;">static</span> <span style="color: #ECBE7B;">void</span> <span style="color: #c678dd;">do_bad_area</span>(<span style="color: #ECBE7B;">unsigned</span> <span style="color: #ECBE7B;">long</span> <span style="color: #dcaeea;">addr</span>, <span style="color: #ECBE7B;">unsigned</span> <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">esr</span>, <span style="color: #51afef;">struct</span> <span style="color: #ECBE7B;">pt_regs</span> *<span style="color: #dcaeea;">regs</span>)
-{
-    <span style="color: #5B6268;">/*</span>
-<span style="color: #5B6268;">     * If we are in kernel mode at this point, we have no context to</span>
-<span style="color: #5B6268;">     * handle this fault with.</span>
-<span style="color: #5B6268;">     */</span>
-    <span style="color: #51afef;">if</span> (user_mode(regs)) {
-        <span style="color: #51afef;">const</span> <span style="color: #51afef;">struct</span> <span style="color: #ECBE7B;">fault_info</span> *<span style="color: #dcaeea;">inf</span> = esr_to_fault_info(esr);
-        <span style="color: #51afef;">struct</span> <span style="color: #ECBE7B;">siginfo</span> <span style="color: #dcaeea;">si</span> = {
-            .si_signo   = inf-&gt;sig,
-            .si_code    = inf-&gt;code,
-            .si_addr    = (<span style="color: #ECBE7B;">void</span> <span style="color: #dcaeea;">__user</span> *)addr,
-        };
-
-        __do_user_fault(&amp;si, esr);
-    } <span style="color: #51afef;">else</span> {
-        __do_kernel_fault(addr, esr, regs);
-    }
-}
-
-<span style="color: #51afef;">static</span> <span style="color: #ECBE7B;">void</span> <span style="color: #c678dd;">__do_user_fault</span>(<span style="color: #51afef;">struct</span> <span style="color: #ECBE7B;">siginfo</span> *<span style="color: #dcaeea;">info</span>, <span style="color: #ECBE7B;">unsigned</span> <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">esr</span>)
-{
-  ...
-  arm64_force_sig_info(info, esr_to_fault_info(esr)-&gt;name, current);
-}
+<pre class="src src-C"><code><span style="color: #51afef;">static</span> <span style="color: #51afef;">const</span> <span style="color: #51afef;">struct</span> <span style="color: #ECBE7B;">fault_info</span> <span style="color: #dcaeea;">fault_info</span>[] = {</code>
+<code>    { do_bad,       SIGKILL, SI_KERNEL, <span style="color: #98be65;">"ttbr address size fault"</span>   },</code>
+<code>    { do_bad,       SIGKILL, SI_KERNEL, <span style="color: #98be65;">"level 1 address size fault"</span>    },</code>
+<code>    { do_bad,       SIGKILL, SI_KERNEL, <span style="color: #98be65;">"level 2 address size fault"</span>    },</code>
+<code>    { do_bad,       SIGKILL, SI_KERNEL, <span style="color: #98be65;">"level 3 address size fault"</span>    },</code>
+<code>    { do_translation_fault, SIGSEGV, SEGV_MAPERR,   <span style="color: #98be65;">"level 0 translation fault"</span> },</code>
+<code>    { do_translation_fault, SIGSEGV, SEGV_MAPERR,   <span style="color: #98be65;">"level 1 translation fault"</span> },</code>
+<code>    { do_translation_fault, SIGSEGV, SEGV_MAPERR,   <span style="color: #98be65;">"level 2 translation fault"</span> },</code>
+<code>    { do_translation_fault, SIGSEGV, SEGV_MAPERR,   <span style="color: #98be65;">"level 3 translation fault"</span> },</code>
+<code>    { do_bad,       SIGKILL, SI_KERNEL, <span style="color: #98be65;">"unknown 8"</span>         },</code>
+<code>    { do_page_fault,    SIGSEGV, SEGV_ACCERR,   <span style="color: #98be65;">"level 1 access flag fault"</span> },</code>
+<code>    { do_page_fault,    SIGSEGV, SEGV_ACCERR,   <span style="color: #98be65;">"level 2 access flag fault"</span> },</code>
+<code>    { do_page_fault,    SIGSEGV, SEGV_ACCERR,   <span style="color: #98be65;">"level 3 access flag fault"</span> },</code>
+<code>    { do_bad,       SIGKILL, SI_KERNEL, <span style="color: #98be65;">"unknown 12"</span>            },</code>
+<code>    { do_page_fault,    SIGSEGV, SEGV_ACCERR,   <span style="color: #98be65;">"level 1 permission fault"</span>  },</code>
+<code>    { do_page_fault,    SIGSEGV, SEGV_ACCERR,   <span style="color: #98be65;">"level 2 permission fault"</span>  },</code>
+<code>    { do_page_fault,    SIGSEGV, SEGV_ACCERR,   <span style="color: #98be65;">"level 3 permission fault"</span>  },</code>
+<code>    { do_sea,       SIGBUS,  BUS_OBJERR,    <span style="color: #98be65;">"synchronous external abort"</span>    },</code>
+<code>    { do_bad,       SIGKILL, SI_KERNEL, <span style="color: #98be65;">"unknown 17"</span>            },</code>
+<code>  ...</code>
+<code>};</code>
+<code><span style="color: #51afef;">static</span> <span style="color: #ECBE7B;">void</span> <span style="color: #c678dd;">do_bad_area</span>(<span style="color: #ECBE7B;">unsigned</span> <span style="color: #ECBE7B;">long</span> <span style="color: #dcaeea;">addr</span>, <span style="color: #ECBE7B;">unsigned</span> <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">esr</span>, <span style="color: #51afef;">struct</span> <span style="color: #ECBE7B;">pt_regs</span> *<span style="color: #dcaeea;">regs</span>)</code>
+<code>{</code>
+<code>    <span style="color: #5B6268;">/*</span></code>
+<code><span style="color: #5B6268;">     * If we are in kernel mode at this point, we have no context to</span></code>
+<code><span style="color: #5B6268;">     * handle this fault with.</span></code>
+<code><span style="color: #5B6268;">     */</span></code>
+<code>    <span style="color: #51afef;">if</span> (user_mode(regs)) {</code>
+<code>        <span style="color: #51afef;">const</span> <span style="color: #51afef;">struct</span> <span style="color: #ECBE7B;">fault_info</span> *<span style="color: #dcaeea;">inf</span> = esr_to_fault_info(esr);</code>
+<code>        <span style="color: #51afef;">struct</span> <span style="color: #ECBE7B;">siginfo</span> <span style="color: #dcaeea;">si</span> = {</code>
+<code>            .si_signo   = inf-&gt;sig,</code>
+<code>            .si_code    = inf-&gt;code,</code>
+<code>            .si_addr    = (<span style="color: #ECBE7B;">void</span> <span style="color: #dcaeea;">__user</span> *)addr,</code>
+<code>        };</code>
+<code></code>
+<code>        __do_user_fault(&amp;si, esr);</code>
+<code>    } <span style="color: #51afef;">else</span> {</code>
+<code>        __do_kernel_fault(addr, esr, regs);</code>
+<code>    }</code>
+<code>}</code>
+<code></code>
+<code><span style="color: #51afef;">static</span> <span style="color: #ECBE7B;">void</span> <span style="color: #c678dd;">__do_user_fault</span>(<span style="color: #51afef;">struct</span> <span style="color: #ECBE7B;">siginfo</span> *<span style="color: #dcaeea;">info</span>, <span style="color: #ECBE7B;">unsigned</span> <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">esr</span>)</code>
+<code>{</code>
+<code>  ...</code>
+<code>  arm64_force_sig_info(info, esr_to_fault_info(esr)-&gt;name, current);</code>
+<code>}</code>
 </pre>
 </div>
 </div>
@@ -539,18 +538,18 @@ signal<br>
 <a href="http://androidxref.com/8.1.0_r33/xref/system/core/debuggerd/tombstoned/tombstoned.rc#1">system/core/debuggerd/tombstoned/tombstoned.rc</a><br>
 </p>
 
-<pre class="example" id="orgf295ad3">
-service tombstoned /system/bin/tombstoned
-    user tombstoned
-    group system
-
-    # Don't start tombstoned until after the real /data is mounted.
-    class late_start
-
-    socket tombstoned_crash seqpacket 0666 system system
-    socket tombstoned_intercept seqpacket 0666 system system
-    socket tombstoned_java_trace seqpacket 0666 system system
-    writepid /dev/cpuset/system-background/tasks
+<pre class="example" id="org6048a32">
+<code>service tombstoned /system/bin/tombstoned</code>
+<code>    user tombstoned</code>
+<code>    group system</code>
+<code></code>
+<code>    # Don't start tombstoned until after the real /data is mounted.</code>
+<code>    class late_start</code>
+<code></code>
+<code>    socket tombstoned_crash seqpacket 0666 system system</code>
+<code>    socket tombstoned_intercept seqpacket 0666 system system</code>
+<code>    socket tombstoned_java_trace seqpacket 0666 system system</code>
+<code>    writepid /dev/cpuset/system-background/tasks</code>
 </pre>
 </div>
 </li>
@@ -564,138 +563,138 @@ for android O<br>
 </p>
 
 <div class="org-src-container">
-<pre class="src src-C"><span style="color: #5B6268;">/*</span>
-<span style="color: #5B6268;"> * This code is called after the linker has linked itself and</span>
-<span style="color: #5B6268;"> * fixed it's own GOT. It is safe to make references to externs</span>
-<span style="color: #5B6268;"> * and other non-local data at this point.</span>
-<span style="color: #5B6268;"> */</span>
-<span style="color: #51afef;">static</span> <span style="color: #c678dd;">ElfW</span>(Addr) <span style="color: #c678dd;">__linker_init_post_relocation</span>(KernelArgumentBlock&amp; args) {
-  <span style="color: #ECBE7B;">ProtectedDataGuard</span> <span style="color: #dcaeea;">guard</span>;
-  ...
-<span style="color: #51afef; font-weight: bold;">#ifdef</span> __ANDROID__
-  debuggerd_callbacks_t callbacks = {
-    .get_abort_message = []() {
-      <span style="color: #51afef;">return</span> g_abort_message;
-    },
-    .post_dump = &amp;notify_gdb_of_libraries,
-  };
-  debuggerd_init(&amp;callbacks);
-<span style="color: #51afef; font-weight: bold;">#endif</span>
-  g_linker_logger.ResetState();
-  ...
-}
-
-<span style="color: #5B6268;">// </span><span style="color: #5B6268;">Handler that does crash dumping by forking and doing the processing in the child.</span>
-<span style="color: #5B6268;">// </span><span style="color: #5B6268;">Do this by ptracing the relevant thread, and then execing debuggerd to do the actual dump.</span>
-<span style="color: #51afef;">static</span> <span style="color: #ECBE7B;">void</span> <span style="color: #c678dd;">debuggerd_signal_handler</span>(<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">signal_number</span>, <span style="color: #ECBE7B;">siginfo_t</span>* <span style="color: #dcaeea;">info</span>, <span style="color: #ECBE7B;">void</span>* <span style="color: #dcaeea;">context</span>) {
-  ...
-  debugger_thread_info thread_info = {
-    .crash_dump_started = <span style="color: #a9a1e1;">false</span>,
-    .pseudothread_tid = -1,
-    .crashing_tid = __gettid(),
-    .signal_number = signal_number,
-    .info = info
-  };
-
-  <span style="color: #5B6268;">// </span><span style="color: #5B6268;">Set PR_SET_DUMPABLE to 1, so that crash_dump can ptrace us.</span>
-  <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">orig_dumpable</span> = prctl(PR_GET_DUMPABLE);
-  <span style="color: #51afef;">if</span> (prctl(PR_SET_DUMPABLE, 1) != 0) {
-    fatal_errno(<span style="color: #98be65;">"failed to set dumpable"</span>);
-  }
-
-  <span style="color: #5B6268;">// </span><span style="color: #5B6268;">Essentially pthread_create without CLONE_FILES (see debuggerd_dispatch_pseudothread).</span>
-  <span style="color: #ECBE7B;">pid_t</span> <span style="color: #dcaeea;">child_pid</span> =
-    clone(debuggerd_dispatch_pseudothread, pseudothread_stack,
-          CLONE_THREAD | CLONE_SIGHAND | CLONE_VM | CLONE_CHILD_SETTID | CLONE_CHILD_CLEARTID,
-          &amp;thread_info, nullptr, nullptr, &amp;thread_info.pseudothread_tid);
-  <span style="color: #51afef;">if</span> (child_pid == -1) {
-    fatal_errno(<span style="color: #98be65;">"failed to spawn debuggerd dispatch thread"</span>);
-  }
-  <span style="color: #5B6268;">// </span><span style="color: #5B6268;">Wait for the child to start...</span>
-  futex_wait(&amp;thread_info.pseudothread_tid, -1);
-
-  <span style="color: #5B6268;">// </span><span style="color: #5B6268;">and then wait for it to finish.</span>
-  futex_wait(&amp;thread_info.pseudothread_tid, child_pid);
-}
-
-<span style="color: #51afef;">static</span> <span style="color: #ECBE7B;">int</span> <span style="color: #c678dd;">debuggerd_dispatch_pseudothread</span>(<span style="color: #ECBE7B;">void</span>* <span style="color: #dcaeea;">arg</span>) {
-  <span style="color: #ECBE7B;">debugger_thread_info</span>* <span style="color: #dcaeea;">thread_info</span> = static_cast&lt;debugger_thread_info*&gt;(arg);
-
-  <span style="color: #51afef;">for</span> (<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">i</span> = 0; i &lt; 1024; ++i) {
-    close(i);
-  }
-
-  <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">devnull</span> = TEMP_FAILURE_RETRY(open(<span style="color: #98be65;">"/dev/null"</span>, O_RDWR));
-
-  <span style="color: #5B6268;">// </span><span style="color: #5B6268;">devnull will be 0.</span>
-  TEMP_FAILURE_RETRY(dup2(devnull, STDOUT_FILENO));
-  TEMP_FAILURE_RETRY(dup2(devnull, STDERR_FILENO));
-
-  <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">pipefds</span>[2];
-  <span style="color: #51afef;">if</span> (pipe(pipefds) != 0) {
-    fatal_errno(<span style="color: #98be65;">"failed to create pipe"</span>);
-  }
-
-  <span style="color: #5B6268;">// </span><span style="color: #5B6268;">Don't use fork(2) to avoid calling pthread_atfork handlers.</span>
-  <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">forkpid</span> = clone(nullptr, nullptr, 0, nullptr);
-  <span style="color: #51afef;">if</span> (forkpid == -1) {
-    async_safe_format_log(ANDROID_LOG_FATAL, <span style="color: #98be65;">"libc"</span>,
-                          <span style="color: #98be65;">"failed to fork in debuggerd signal handler: %s"</span>, strerror(errno));
-  } <span style="color: #51afef;">else</span> <span style="color: #51afef;">if</span> (forkpid == 0) {
-    TEMP_FAILURE_RETRY(dup2(pipefds[1], STDOUT_FILENO));
-    close(pipefds[0]);
-    close(pipefds[1]);
-
-    raise_caps();
-
-    <span style="color: #ECBE7B;">char</span> <span style="color: #dcaeea;">main_tid</span>[10];
-    <span style="color: #ECBE7B;">char</span> <span style="color: #dcaeea;">pseudothread_tid</span>[10];
-    <span style="color: #ECBE7B;">char</span> <span style="color: #dcaeea;">debuggerd_dump_type</span>[10];
-    async_safe_format_buffer(main_tid, <span style="color: #51afef;">sizeof</span>(main_tid), <span style="color: #98be65;">"%d"</span>, thread_info-&gt;crashing_tid);
-    async_safe_format_buffer(pseudothread_tid, <span style="color: #51afef;">sizeof</span>(pseudothread_tid), <span style="color: #98be65;">"%d"</span>,
-                             thread_info-&gt;pseudothread_tid);
-    async_safe_format_buffer(debuggerd_dump_type, <span style="color: #51afef;">sizeof</span>(debuggerd_dump_type), <span style="color: #98be65;">"%d"</span>,
-                             get_dump_type(thread_info));
-
-    execl(CRASH_DUMP_PATH, CRASH_DUMP_NAME, main_tid, pseudothread_tid, debuggerd_dump_type,
-          nullptr);
-
-    fatal_errno(<span style="color: #98be65;">"exec failed"</span>);
-  } <span style="color: #51afef;">else</span> {
-    close(pipefds[1]);
-    <span style="color: #ECBE7B;">char</span> <span style="color: #dcaeea;">buf</span>[4];
-    <span style="color: #ECBE7B;">ssize_t</span> <span style="color: #dcaeea;">rc</span> = TEMP_FAILURE_RETRY(read(pipefds[0], &amp;buf, <span style="color: #51afef;">sizeof</span>(buf)));
-    <span style="color: #51afef;">if</span> (rc == -1) {
-      async_safe_format_log(ANDROID_LOG_FATAL, <span style="color: #98be65;">"libc"</span>, <span style="color: #98be65;">"read of IPC pipe failed: %s"</span>,
-                            strerror(errno));
-    } <span style="color: #51afef;">else</span> <span style="color: #51afef;">if</span> (rc == 0) {
-      async_safe_format_log(ANDROID_LOG_FATAL, <span style="color: #98be65;">"libc"</span>, <span style="color: #98be65;">"crash_dump helper failed to exec"</span>);
-    } <span style="color: #51afef;">else</span> <span style="color: #51afef;">if</span> (rc != 1) {
-      async_safe_format_log(ANDROID_LOG_FATAL, <span style="color: #98be65;">"libc"</span>,
-                            <span style="color: #98be65;">"read of IPC pipe returned unexpected value: %zd"</span>, rc);
-    } <span style="color: #51afef;">else</span> {
-      <span style="color: #51afef;">if</span> (buf[0] != <span style="color: #98be65;">'\1'</span>) {
-        async_safe_format_log(ANDROID_LOG_FATAL, <span style="color: #98be65;">"libc"</span>, <span style="color: #98be65;">"crash_dump helper reported failure"</span>);
-      } <span style="color: #51afef;">else</span> {
-        thread_info-&gt;crash_dump_started = <span style="color: #a9a1e1;">true</span>;
-      }
-    }
-    close(pipefds[0]);
-
-    <span style="color: #5B6268;">// </span><span style="color: #5B6268;">Don't leave a zombie child.</span>
-    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">status</span>;
-    <span style="color: #51afef;">if</span> (TEMP_FAILURE_RETRY(waitpid(forkpid, &amp;status, 0)) == -1) {
-      async_safe_format_log(ANDROID_LOG_FATAL, <span style="color: #98be65;">"libc"</span>, <span style="color: #98be65;">"failed to wait for crash_dump helper: %s"</span>,
-                            strerror(errno));
-    } <span style="color: #51afef;">else</span> <span style="color: #51afef;">if</span> (WIFSTOPPED(status) || WIFSIGNALED(status)) {
-      async_safe_format_log(ANDROID_LOG_FATAL, <span style="color: #98be65;">"libc"</span>, <span style="color: #98be65;">"crash_dump helper crashed or stopped"</span>);
-      thread_info-&gt;crash_dump_started = <span style="color: #a9a1e1;">false</span>;
-    }
-  }
-
-  syscall(__NR_exit, 0);
-  <span style="color: #51afef;">return</span> 0;
-}
+<pre class="src src-C"><code><span style="color: #5B6268;">/*</span></code>
+<code><span style="color: #5B6268;"> * This code is called after the linker has linked itself and</span></code>
+<code><span style="color: #5B6268;"> * fixed it's own GOT. It is safe to make references to externs</span></code>
+<code><span style="color: #5B6268;"> * and other non-local data at this point.</span></code>
+<code><span style="color: #5B6268;"> */</span></code>
+<code><span style="color: #51afef;">static</span> <span style="color: #c678dd;">ElfW</span>(Addr) <span style="color: #c678dd;">__linker_init_post_relocation</span>(KernelArgumentBlock&amp; args) {</code>
+<code>  <span style="color: #ECBE7B;">ProtectedDataGuard</span> <span style="color: #dcaeea;">guard</span>;</code>
+<code>  ...</code>
+<code><span style="color: #51afef; font-weight: bold;">#ifdef</span> __ANDROID__</code>
+<code>  debuggerd_callbacks_t callbacks = {</code>
+<code>    .get_abort_message = []() {</code>
+<code>      <span style="color: #51afef;">return</span> g_abort_message;</code>
+<code>    },</code>
+<code>    .post_dump = &amp;notify_gdb_of_libraries,</code>
+<code>  };</code>
+<code>  debuggerd_init(&amp;callbacks);</code>
+<code><span style="color: #51afef; font-weight: bold;">#endif</span></code>
+<code>  g_linker_logger.ResetState();</code>
+<code>  ...</code>
+<code>}</code>
+<code></code>
+<code><span style="color: #5B6268;">// </span><span style="color: #5B6268;">Handler that does crash dumping by forking and doing the processing in the child.</span></code>
+<code><span style="color: #5B6268;">// </span><span style="color: #5B6268;">Do this by ptracing the relevant thread, and then execing debuggerd to do the actual dump.</span></code>
+<code><span style="color: #51afef;">static</span> <span style="color: #ECBE7B;">void</span> <span style="color: #c678dd;">debuggerd_signal_handler</span>(<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">signal_number</span>, <span style="color: #ECBE7B;">siginfo_t</span>* <span style="color: #dcaeea;">info</span>, <span style="color: #ECBE7B;">void</span>* <span style="color: #dcaeea;">context</span>) {</code>
+<code>  ...</code>
+<code>  debugger_thread_info thread_info = {</code>
+<code>    .crash_dump_started = <span style="color: #a9a1e1;">false</span>,</code>
+<code>    .pseudothread_tid = -1,</code>
+<code>    .crashing_tid = __gettid(),</code>
+<code>    .signal_number = signal_number,</code>
+<code>    .info = info</code>
+<code>  };</code>
+<code></code>
+<code>  <span style="color: #5B6268;">// </span><span style="color: #5B6268;">Set PR_SET_DUMPABLE to 1, so that crash_dump can ptrace us.</span></code>
+<code>  <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">orig_dumpable</span> = prctl(PR_GET_DUMPABLE);</code>
+<code>  <span style="color: #51afef;">if</span> (prctl(PR_SET_DUMPABLE, 1) != 0) {</code>
+<code>    fatal_errno(<span style="color: #98be65;">"failed to set dumpable"</span>);</code>
+<code>  }</code>
+<code></code>
+<code>  <span style="color: #5B6268;">// </span><span style="color: #5B6268;">Essentially pthread_create without CLONE_FILES (see debuggerd_dispatch_pseudothread).</span></code>
+<code>  <span style="color: #ECBE7B;">pid_t</span> <span style="color: #dcaeea;">child_pid</span> =</code>
+<code>    clone(debuggerd_dispatch_pseudothread, pseudothread_stack,</code>
+<code>          CLONE_THREAD | CLONE_SIGHAND | CLONE_VM | CLONE_CHILD_SETTID | CLONE_CHILD_CLEARTID,</code>
+<code>          &amp;thread_info, nullptr, nullptr, &amp;thread_info.pseudothread_tid);</code>
+<code>  <span style="color: #51afef;">if</span> (child_pid == -1) {</code>
+<code>    fatal_errno(<span style="color: #98be65;">"failed to spawn debuggerd dispatch thread"</span>);</code>
+<code>  }</code>
+<code>  <span style="color: #5B6268;">// </span><span style="color: #5B6268;">Wait for the child to start...</span></code>
+<code>  futex_wait(&amp;thread_info.pseudothread_tid, -1);</code>
+<code></code>
+<code>  <span style="color: #5B6268;">// </span><span style="color: #5B6268;">and then wait for it to finish.</span></code>
+<code>  futex_wait(&amp;thread_info.pseudothread_tid, child_pid);</code>
+<code>}</code>
+<code></code>
+<code><span style="color: #51afef;">static</span> <span style="color: #ECBE7B;">int</span> <span style="color: #c678dd;">debuggerd_dispatch_pseudothread</span>(<span style="color: #ECBE7B;">void</span>* <span style="color: #dcaeea;">arg</span>) {</code>
+<code>  <span style="color: #ECBE7B;">debugger_thread_info</span>* <span style="color: #dcaeea;">thread_info</span> = static_cast&lt;debugger_thread_info*&gt;(arg);</code>
+<code></code>
+<code>  <span style="color: #51afef;">for</span> (<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">i</span> = 0; i &lt; 1024; ++i) {</code>
+<code>    close(i);</code>
+<code>  }</code>
+<code></code>
+<code>  <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">devnull</span> = TEMP_FAILURE_RETRY(open(<span style="color: #98be65;">"/dev/null"</span>, O_RDWR));</code>
+<code></code>
+<code>  <span style="color: #5B6268;">// </span><span style="color: #5B6268;">devnull will be 0.</span></code>
+<code>  TEMP_FAILURE_RETRY(dup2(devnull, STDOUT_FILENO));</code>
+<code>  TEMP_FAILURE_RETRY(dup2(devnull, STDERR_FILENO));</code>
+<code></code>
+<code>  <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">pipefds</span>[2];</code>
+<code>  <span style="color: #51afef;">if</span> (pipe(pipefds) != 0) {</code>
+<code>    fatal_errno(<span style="color: #98be65;">"failed to create pipe"</span>);</code>
+<code>  }</code>
+<code></code>
+<code>  <span style="color: #5B6268;">// </span><span style="color: #5B6268;">Don't use fork(2) to avoid calling pthread_atfork handlers.</span></code>
+<code>  <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">forkpid</span> = clone(nullptr, nullptr, 0, nullptr);</code>
+<code>  <span style="color: #51afef;">if</span> (forkpid == -1) {</code>
+<code>    async_safe_format_log(ANDROID_LOG_FATAL, <span style="color: #98be65;">"libc"</span>,</code>
+<code>                          <span style="color: #98be65;">"failed to fork in debuggerd signal handler: %s"</span>, strerror(errno));</code>
+<code>  } <span style="color: #51afef;">else</span> <span style="color: #51afef;">if</span> (forkpid == 0) {</code>
+<code>    TEMP_FAILURE_RETRY(dup2(pipefds[1], STDOUT_FILENO));</code>
+<code>    close(pipefds[0]);</code>
+<code>    close(pipefds[1]);</code>
+<code></code>
+<code>    raise_caps();</code>
+<code></code>
+<code>    <span style="color: #ECBE7B;">char</span> <span style="color: #dcaeea;">main_tid</span>[10];</code>
+<code>    <span style="color: #ECBE7B;">char</span> <span style="color: #dcaeea;">pseudothread_tid</span>[10];</code>
+<code>    <span style="color: #ECBE7B;">char</span> <span style="color: #dcaeea;">debuggerd_dump_type</span>[10];</code>
+<code>    async_safe_format_buffer(main_tid, <span style="color: #51afef;">sizeof</span>(main_tid), <span style="color: #98be65;">"%d"</span>, thread_info-&gt;crashing_tid);</code>
+<code>    async_safe_format_buffer(pseudothread_tid, <span style="color: #51afef;">sizeof</span>(pseudothread_tid), <span style="color: #98be65;">"%d"</span>,</code>
+<code>                             thread_info-&gt;pseudothread_tid);</code>
+<code>    async_safe_format_buffer(debuggerd_dump_type, <span style="color: #51afef;">sizeof</span>(debuggerd_dump_type), <span style="color: #98be65;">"%d"</span>,</code>
+<code>                             get_dump_type(thread_info));</code>
+<code></code>
+<code>    execl(CRASH_DUMP_PATH, CRASH_DUMP_NAME, main_tid, pseudothread_tid, debuggerd_dump_type,</code>
+<code>          nullptr);</code>
+<code></code>
+<code>    fatal_errno(<span style="color: #98be65;">"exec failed"</span>);</code>
+<code>  } <span style="color: #51afef;">else</span> {</code>
+<code>    close(pipefds[1]);</code>
+<code>    <span style="color: #ECBE7B;">char</span> <span style="color: #dcaeea;">buf</span>[4];</code>
+<code>    <span style="color: #ECBE7B;">ssize_t</span> <span style="color: #dcaeea;">rc</span> = TEMP_FAILURE_RETRY(read(pipefds[0], &amp;buf, <span style="color: #51afef;">sizeof</span>(buf)));</code>
+<code>    <span style="color: #51afef;">if</span> (rc == -1) {</code>
+<code>      async_safe_format_log(ANDROID_LOG_FATAL, <span style="color: #98be65;">"libc"</span>, <span style="color: #98be65;">"read of IPC pipe failed: %s"</span>,</code>
+<code>                            strerror(errno));</code>
+<code>    } <span style="color: #51afef;">else</span> <span style="color: #51afef;">if</span> (rc == 0) {</code>
+<code>      async_safe_format_log(ANDROID_LOG_FATAL, <span style="color: #98be65;">"libc"</span>, <span style="color: #98be65;">"crash_dump helper failed to exec"</span>);</code>
+<code>    } <span style="color: #51afef;">else</span> <span style="color: #51afef;">if</span> (rc != 1) {</code>
+<code>      async_safe_format_log(ANDROID_LOG_FATAL, <span style="color: #98be65;">"libc"</span>,</code>
+<code>                            <span style="color: #98be65;">"read of IPC pipe returned unexpected value: %zd"</span>, rc);</code>
+<code>    } <span style="color: #51afef;">else</span> {</code>
+<code>      <span style="color: #51afef;">if</span> (buf[0] != <span style="color: #98be65;">'\1'</span>) {</code>
+<code>        async_safe_format_log(ANDROID_LOG_FATAL, <span style="color: #98be65;">"libc"</span>, <span style="color: #98be65;">"crash_dump helper reported failure"</span>);</code>
+<code>      } <span style="color: #51afef;">else</span> {</code>
+<code>        thread_info-&gt;crash_dump_started = <span style="color: #a9a1e1;">true</span>;</code>
+<code>      }</code>
+<code>    }</code>
+<code>    close(pipefds[0]);</code>
+<code></code>
+<code>    <span style="color: #5B6268;">// </span><span style="color: #5B6268;">Don't leave a zombie child.</span></code>
+<code>    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">status</span>;</code>
+<code>    <span style="color: #51afef;">if</span> (TEMP_FAILURE_RETRY(waitpid(forkpid, &amp;status, 0)) == -1) {</code>
+<code>      async_safe_format_log(ANDROID_LOG_FATAL, <span style="color: #98be65;">"libc"</span>, <span style="color: #98be65;">"failed to wait for crash_dump helper: %s"</span>,</code>
+<code>                            strerror(errno));</code>
+<code>    } <span style="color: #51afef;">else</span> <span style="color: #51afef;">if</span> (WIFSTOPPED(status) || WIFSIGNALED(status)) {</code>
+<code>      async_safe_format_log(ANDROID_LOG_FATAL, <span style="color: #98be65;">"libc"</span>, <span style="color: #98be65;">"crash_dump helper crashed or stopped"</span>);</code>
+<code>      thread_info-&gt;crash_dump_started = <span style="color: #a9a1e1;">false</span>;</code>
+<code>    }</code>
+<code>  }</code>
+<code></code>
+<code>  syscall(__NR_exit, 0);</code>
+<code>  <span style="color: #51afef;">return</span> 0;</code>
+<code>}</code>
 </pre>
 </div>
 
@@ -727,22 +726,22 @@ CLONE_CHILD_CLEARTID;<br>
 /d/tracing/events/signal/signal_deliver<br>
 </p>
 
-<pre class="example" id="org4d7c608">
-remote_job_disp-24083 [000] d..2  5497.143322: signal_deliver: sig=9 errno=0 code=0 sa_handler=0 sa_flags=0
-ActivityManager-7834  [001] d..2  5497.171845: signal_generate: sig=9 errno=0 code=0 comm=id.printspooler pid=25155 grp=1 res=0
-   FileObserver-25196 [000] d..3  5497.176538: signal_generate: sig=17 errno=0 code=262146 comm=main pid=7514 grp=1 res=0
-           main-7514  [002] d..2  5497.176804: signal_deliver: sig=17 errno=0 code=262146 sa_handler=7f836cfef8 sa_flags=0
-ActivityManager-7834  [001] d..2  5497.222412: signal_generate: sig=9 errno=0 code=0 comm=rsonalassistant pid=24800 grp=1 res=0
-ActivityManager-7834  [001] d..2  5497.227639: signal_generate: sig=9 errno=0 code=0 comm=rsonalassistant pid=24800 grp=1 res=2
-  Profile Saver-24878 [000] d..3  5497.229721: signal_generate: sig=17 errno=0 code=262146 comm=main pid=717 grp=1 res=0
-           main-717   [001] d..2  5497.230300: signal_deliver: sig=17 errno=0 code=262146 sa_handler=f31702e1 sa_flags=4000000
-remote_job_disp-24083 [000] d..3  5497.285461: signal_generate: sig=17 errno=0 code=262146 comm=main pid=717 grp=1 res=0
-           main-717   [001] d..2  5497.285844: signal_deliver: sig=17 errno=0 code=262146 sa_handler=f31702e1 sa_flags=4000000
-        SysUiBg-8259  [000] d.h6  5497.365086: signal_generate: sig=32 errno=0 code=131070 comm=POSIX timer 344 pid=15551 grp=0 res=0
-      Thread-24-25413 [001] d.h3  5497.751070: signal_generate: sig=32 errno=0 code=131070 comm=POSIX timer 0 pid=8158 grp=0 res=0
-      Thread-24-25413 [001] d.h3  5497.868609: signal_generate: sig=32 errno=0 code=131070 comm=POSIX timer 344 pid=15551 grp=0 res=0
-  Binder:7518_3-8391  [002] d.h2  5497.958303: signal_generate: sig=14 errno=0 code=128 comm=sensors.qcom pid=614 grp=1 res=0
-          perfd-2666  [007] .n.1  5498.123490: tracing_mark_write: B|459|perf_lock_acq: send output handle 10233 to client(pid 7767, tid=8320)
+<pre class="example" id="org58784a3">
+<code>remote_job_disp-24083 [000] d..2  5497.143322: signal_deliver: sig=9 errno=0 code=0 sa_handler=0 sa_flags=0</code>
+<code>ActivityManager-7834  [001] d..2  5497.171845: signal_generate: sig=9 errno=0 code=0 comm=id.printspooler pid=25155 grp=1 res=0</code>
+<code>   FileObserver-25196 [000] d..3  5497.176538: signal_generate: sig=17 errno=0 code=262146 comm=main pid=7514 grp=1 res=0</code>
+<code>           main-7514  [002] d..2  5497.176804: signal_deliver: sig=17 errno=0 code=262146 sa_handler=7f836cfef8 sa_flags=0</code>
+<code>ActivityManager-7834  [001] d..2  5497.222412: signal_generate: sig=9 errno=0 code=0 comm=rsonalassistant pid=24800 grp=1 res=0</code>
+<code>ActivityManager-7834  [001] d..2  5497.227639: signal_generate: sig=9 errno=0 code=0 comm=rsonalassistant pid=24800 grp=1 res=2</code>
+<code>  Profile Saver-24878 [000] d..3  5497.229721: signal_generate: sig=17 errno=0 code=262146 comm=main pid=717 grp=1 res=0</code>
+<code>           main-717   [001] d..2  5497.230300: signal_deliver: sig=17 errno=0 code=262146 sa_handler=f31702e1 sa_flags=4000000</code>
+<code>remote_job_disp-24083 [000] d..3  5497.285461: signal_generate: sig=17 errno=0 code=262146 comm=main pid=717 grp=1 res=0</code>
+<code>           main-717   [001] d..2  5497.285844: signal_deliver: sig=17 errno=0 code=262146 sa_handler=f31702e1 sa_flags=4000000</code>
+<code>        SysUiBg-8259  [000] d.h6  5497.365086: signal_generate: sig=32 errno=0 code=131070 comm=POSIX timer 344 pid=15551 grp=0 res=0</code>
+<code>      Thread-24-25413 [001] d.h3  5497.751070: signal_generate: sig=32 errno=0 code=131070 comm=POSIX timer 0 pid=8158 grp=0 res=0</code>
+<code>      Thread-24-25413 [001] d.h3  5497.868609: signal_generate: sig=32 errno=0 code=131070 comm=POSIX timer 344 pid=15551 grp=0 res=0</code>
+<code>  Binder:7518_3-8391  [002] d.h2  5497.958303: signal_generate: sig=14 errno=0 code=128 comm=sensors.qcom pid=614 grp=1 res=0</code>
+<code>          perfd-2666  [007] .n.1  5498.123490: tracing_mark_write: B|459|perf_lock_acq: send output handle 10233 to client(pid 7767, tid=8320)</code>
 </pre>
 </div>
 </li>
@@ -753,49 +752,49 @@ remote_job_disp-24083 [000] d..3  5497.285461: signal_generate: sig=17 errno=0 c
 cat /proc/xxx/status<br>
 </p>
 
-<pre class="example" id="org00488c3">
-mido:/ # cat /proc/7767/status                                                                                                                             
-Name:   system_server
-State:  S (sleeping)
-Tgid:   7767
-Pid:    7767
-PPid:   7514
-TracerPid:  0
-Uid:    1000    1000    1000    1000
-Gid:    1000    1000    1000    1000
-Ngid:   0
-FDSize: 1024
-Groups: 1001 1002 1003 1004 1005 1006 1007 1008 1009 1010 1018 1021 1032 3001 3002 3003 3006 3007 3009 3010 9801
-VmPeak:  2826432 kB
-VmSize:  2702540 kB
-VmLck:    144456 kB
-VmPin:         0 kB
-VmHWM:    383340 kB
-VmRSS:    325492 kB
-VmData:   438872 kB
-VmStk:      8196 kB
-VmExe:        16 kB
-VmLib:    140536 kB
-VmPTE:      1824 kB
-VmSwap:    24688 kB
-Threads:    211
-SigQ:   6/10397                         //size/limits
-SigPnd: 0000000000000000              //挂起，等待处理的信号（本线程专属）
-ShdPnd: 0000000000000000              //挂起，等待处理的信号（线程组公用）
-SigBlk: 0000000000001204              //被sigwait注册处理的信号， 这里 3) SIGQUIT, 10) SIGUSR1, 13) SIGPIPE被上层通过系统调用等待
-SigIgn: 0000000000000001              //忽略的信号
-SigCgt: 20000002000084f8              //被上层通过sigaction注册捕捉的信号，这个地方SIGABRT， SIGBUS， SIGSEGV等异常信号都被捕捉，用以输出tomestone
-CapInh: 0000000000000000
-CapPrm: 0000001007897c20
-CapEff: 0000001007897c20
-CapBnd: 0000000000000000
-Seccomp:    0
-Cpus_allowed:   d7
-Cpus_allowed_list:  0-2,4,6-7
-Mems_allowed:   1
-Mems_allowed_list:  0
-voluntary_ctxt_switches:    69902
-nonvoluntary_ctxt_switches: 3480
+<pre class="example" id="orgf52faa1">
+<code>mido:/ # cat /proc/7767/status                                                                                                                             </code>
+<code>Name:   system_server</code>
+<code>State:  S (sleeping)</code>
+<code>Tgid:   7767</code>
+<code>Pid:    7767</code>
+<code>PPid:   7514</code>
+<code>TracerPid:  0</code>
+<code>Uid:    1000    1000    1000    1000</code>
+<code>Gid:    1000    1000    1000    1000</code>
+<code>Ngid:   0</code>
+<code>FDSize: 1024</code>
+<code>Groups: 1001 1002 1003 1004 1005 1006 1007 1008 1009 1010 1018 1021 1032 3001 3002 3003 3006 3007 3009 3010 9801</code>
+<code>VmPeak:  2826432 kB</code>
+<code>VmSize:  2702540 kB</code>
+<code>VmLck:    144456 kB</code>
+<code>VmPin:         0 kB</code>
+<code>VmHWM:    383340 kB</code>
+<code>VmRSS:    325492 kB</code>
+<code>VmData:   438872 kB</code>
+<code>VmStk:      8196 kB</code>
+<code>VmExe:        16 kB</code>
+<code>VmLib:    140536 kB</code>
+<code>VmPTE:      1824 kB</code>
+<code>VmSwap:    24688 kB</code>
+<code>Threads:    211</code>
+<code>SigQ:   6/10397                         //size/limits</code>
+<code>SigPnd: 0000000000000000              //挂起，等待处理的信号（本线程专属）</code>
+<code>ShdPnd: 0000000000000000              //挂起，等待处理的信号（线程组公用）</code>
+<code>SigBlk: 0000000000001204              //被sigwait注册处理的信号， 这里 3) SIGQUIT, 10) SIGUSR1, 13) SIGPIPE被上层通过系统调用等待</code>
+<code>SigIgn: 0000000000000001              //忽略的信号</code>
+<code>SigCgt: 20000002000084f8              //被上层通过sigaction注册捕捉的信号，这个地方SIGABRT， SIGBUS， SIGSEGV等异常信号都被捕捉，用以输出tomestone</code>
+<code>CapInh: 0000000000000000</code>
+<code>CapPrm: 0000001007897c20</code>
+<code>CapEff: 0000001007897c20</code>
+<code>CapBnd: 0000000000000000</code>
+<code>Seccomp:    0</code>
+<code>Cpus_allowed:   d7</code>
+<code>Cpus_allowed_list:  0-2,4,6-7</code>
+<code>Mems_allowed:   1</code>
+<code>Mems_allowed_list:  0</code>
+<code>voluntary_ctxt_switches:    69902</code>
+<code>nonvoluntary_ctxt_switches: 3480</code>
 </pre>
 </div>
 </li>

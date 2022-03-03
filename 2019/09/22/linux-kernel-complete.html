@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2021-10-12 二 19:35 -->
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- 2022-03-03 Thu 11:48 -->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Linux Kernel Source Auto Complete</title>
-<meta name="generator" content="Org mode">
-<meta name="author" content="schspa">
+<meta name="author" content="schspa" />
+<meta name="generator" content="Org Mode" />
 <link rel="shortcut icon" href="/images/rose-red.png" type="image/x-icon" />
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" integrity="sha256-sAcc18zvMnaJZrNT4v8J0T4HqzEUiUTlVFgDIywjQek=" crossorigin="anonymous">
 <link rel="stylesheet" href="/css/animate.min.css" />
@@ -54,49 +54,50 @@
   </nav>
 </header>
 </div>
-<div id="content">
+<div id="content" class="content">
 <h1 class="title">Linux Kernel Source Auto Complete</h1>
-<div id="table-of-contents">
+<div id="table-of-contents" role="doc-toc">
 <h2>Table of Contents</h2>
-<div id="text-table-of-contents">
+<div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#org75b8a26">lsp</a>
+<li><a href="#org6873860">lsp</a>
 <ul>
-<li><a href="#orgcf9ad07">Generate compile_commands.json</a></li>
-<li><a href="#org037e144">auto complete setup for Emacs</a></li>
+<li><a href="#org69f7eb2">Generate compile_commands.json</a></li>
+<li><a href="#org6012deb">auto complete setup for Emacs</a></li>
 </ul>
 </li>
-<li><a href="#orgf74aa3f">enjoy codeing with emacs</a></li>
+<li><a href="#org8576b2d">clangd</a></li>
+<li><a href="#orge826669">enjoy codeing with emacs</a></li>
 </ul>
 </div>
 </div>
-<div id="outline-container-org75b8a26" class="outline-2">
-<h2 id="org75b8a26">lsp</h2>
-<div class="outline-text-2" id="text-org75b8a26">
+<div id="outline-container-org6873860" class="outline-2">
+<h2 id="org6873860">lsp</h2>
+<div class="outline-text-2" id="text-org6873860">
 <p>
 To use lsp mode, we can use a file called compile_commands.json to tell lsp backends about file compile information.<br>
 </p>
 </div>
 
-<div id="outline-container-orgcf9ad07" class="outline-3">
-<h3 id="orgcf9ad07">Generate compile_commands.json</h3>
-<div class="outline-text-3" id="text-orgcf9ad07">
+<div id="outline-container-org69f7eb2" class="outline-3">
+<h3 id="org69f7eb2">Generate compile_commands.json</h3>
+<div class="outline-text-3" id="text-org69f7eb2">
 <p>
 Either of following methods can generate compile_commands.json, Select as you like.<br>
 </p>
 </div>
 <ul class="org-ul">
-<li><a id="orgb964727"></a>kernel script from scripts directory<br>
-<div class="outline-text-4" id="text-orgb964727">
+<li><a id="orgf82a2c2"></a>kernel script from scripts directory<br>
+<div class="outline-text-4" id="text-orgf82a2c2">
 <div class="org-src-container">
-<pre class="src src-bash"><span style="color: #5B6268;"># </span><span style="color: #5B6268;">after build kernel</span>
-curl -fsSL https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/plain/scripts/gen_compile_commands.py<span style="color: #98be65;">\?</span>h<span style="color: #98be65;">\=</span>v5.3 | python
+<pre class="src src-bash"><code><span style="color: #5B6268;"># </span><span style="color: #5B6268;">after build kernel</span></code>
+<code>curl -fsSL https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/plain/scripts/gen_compile_commands.py<span style="color: #98be65;">\?</span>h<span style="color: #98be65;">\=</span>v5.3 | python</code>
 </pre>
 </div>
 </div>
 </li>
-<li><a id="org1c9c8ad"></a>make bear<br>
-<div class="outline-text-4" id="text-org1c9c8ad">
+<li><a id="org62381a6"></a>make bear<br>
+<div class="outline-text-4" id="text-org62381a6">
 <ol class="org-ol">
 <li>install bear (Build EAR)<br>
 <ul class="org-ul">
@@ -108,28 +109,28 @@ curl -fsSL https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/pl
 </ul></li>
 </ol>
 <div class="org-src-container">
-<pre class="src src-sh">bear make -C kernel/msm-4.9 <span style="color: #dcaeea;">O</span>=../../out/target/product/grus/obj/kernel/msm-4.9 <span style="color: #dcaeea;">DTC_EXT</span>=dtc  <span style="color: #dcaeea;">ARCH</span>=arm64 <span style="color: #dcaeea;">CROSS_COMPILE</span>=aarch64-linux-android- <span style="color: #dcaeea;">KCFLAGS</span>=-mno-android grus_debug_defconfig
-sed <span style="color: #98be65;">'s/..\/..\/..\/..\/..\/..\/..\/kernel\/msm-4.9\///g'</span> compile_commands.json &gt; kernel/msm-4.9/compile_commands.json
+<pre class="src src-sh"><code>bear make -C kernel/msm-4.9 <span style="color: #dcaeea;">O</span>=../../out/target/product/grus/obj/kernel/msm-4.9 <span style="color: #dcaeea;">DTC_EXT</span>=dtc  <span style="color: #dcaeea;">ARCH</span>=arm64 <span style="color: #dcaeea;">CROSS_COMPILE</span>=aarch64-linux-android- <span style="color: #dcaeea;">KCFLAGS</span>=-mno-android grus_debug_defconfig</code>
+<code>sed <span style="color: #98be65;">'s/..\/..\/..\/..\/..\/..\/..\/kernel\/msm-4.9\///g'</span> compile_commands.json &gt; kernel/msm-4.9/compile_commands.json</code>
 </pre>
 </div>
 </div>
 </li>
 </ul>
 </div>
-<div id="outline-container-org037e144" class="outline-3">
-<h3 id="org037e144">auto complete setup for Emacs</h3>
-<div class="outline-text-3" id="text-org037e144">
+<div id="outline-container-org6012deb" class="outline-3">
+<h3 id="org6012deb">auto complete setup for Emacs</h3>
+<div class="outline-text-3" id="text-org6012deb">
 </div>
 <ul class="org-ul">
-<li><a id="org4f2d21a"></a>install ccls from<br>
-<div class="outline-text-4" id="text-org4f2d21a">
+<li><a id="org0d88a3c"></a>install ccls from<br>
+<div class="outline-text-4" id="text-org0d88a3c">
 <ul class="org-ul">
 <li><a href="https://github.com/MaskRay/ccls/wiki/Build">https://github.com/MaskRay/ccls/wiki/Build</a><br></li>
 </ul>
 </div>
 </li>
-<li><a id="orgf6556bd"></a>setup your emacs<br>
-<div class="outline-text-4" id="text-orgf6556bd">
+<li><a id="orgdb1c771"></a>setup your emacs<br>
+<div class="outline-text-4" id="text-orgdb1c771">
 <ul class="org-ul">
 <li>default c-mode-hook will execute before local-variables loaded.<br></li>
 <li>In the fellowing settings, we use hack-local-variables-hook to execute lsp-mode setting after local variables setting.<br></li>
@@ -137,72 +138,72 @@ sed <span style="color: #98be65;">'s/..\/..\/..\/..\/..\/..\/..\/kernel\/msm-4.9
 </ul>
 
 <div class="org-src-container">
-<pre class="src src-lisp">(use-package ccls
-  <span style="color: #c678dd;">:ensure</span> t
-  <span style="color: #c678dd;">:config</span>
-  <span style="color: #5B6268;">;; </span><span style="color: #5B6268;">https://github.com/maskray/ccls/blob/master/src/config.h</span>
-  (setq
-   ccls-initialization-options
-   `(<span style="color: #c678dd;">:clang</span>
-     (<span style="color: #c678dd;">:excludeArgs</span>
-      <span style="color: #5B6268;">;; </span><span style="color: #5B6268;">Linux's gcc options. See ccls/wiki</span>
-      [<span style="color: #98be65;">"--param=allow-store-data-races=0"</span> <span style="color: #98be65;">"-W*"</span> <span style="color: #98be65;">"-f*"</span> <span style="color: #98be65;">"-m*"</span>]
-      <span style="color: #c678dd;">:extraArgs</span> [<span style="color: #98be65;">"--gcc-toolchain=/usr"</span>])
-     <span style="color: #c678dd;">:completion</span>
-     (<span style="color: #c678dd;">:include</span>
-      (<span style="color: #c678dd;">:blacklist</span>
-       [<span style="color: #98be65;">"^/usr/(local/)?include/c\\+\\+/[0-9\\.]+/(bits|tr1|tr2|profile|ext|debug)/"</span>
-       <span style="color: #98be65;">"^/usr/(local/)?include/c\\+\\+/v1/"</span>
-       ]))))
-  )
-
-(use-package lsp-mode
-  <span style="color: #c678dd;">:commands</span> lsp
-  <span style="color: #c678dd;">:init</span>
-  (setq lsp-auto-guess-root t)    <span style="color: #5B6268;">; &#25105;&#32722;&#24931;&#33258;&#21205;&#36984;project root</span>
-  (setq lsp-enable-indentation nil)
-  (setq lsp-enable-file-watchers nil)
-  <span style="color: #5B6268;">;; </span><span style="color: #5B6268;">(setq lsp-prefer-flymake t)  ; &#38928;&#35373;t&#12290;flymake&#26367;&#20195;flycheck</span>
-  <span style="color: #c678dd;">:config</span>
-  (<span style="color: #51afef;">require</span> '<span style="color: #a9a1e1;">lsp-clients</span>)          <span style="color: #5B6268;">; ocaml,css,python,bash,...</span>
-  <span style="color: #c678dd;">:hook</span>
-  (hack-local-variables . (<span style="color: #51afef;">lambda</span> ()
-                            (<span style="color: #51afef;">cond</span> ((derived-mode-p 'c-mode 'c++-mode 'objc-mode)
-                                   (<span style="color: #51afef;">progn</span>
-                                     (<span style="color: #51afef;">require</span> '<span style="color: #a9a1e1;">ccls</span>)
-                                     (lsp)))
-                                  ))))
-(use-package lsp-ui
-  <span style="color: #c678dd;">:commands</span> lsp-ui-mode
-  <span style="color: #c678dd;">:ensure</span> t
-  <span style="color: #c678dd;">:config</span>
-  <span style="color: #c678dd;">:hook</span> (lsp-mode . lsp-ui-mode))
-
-(use-package company-lsp
-  <span style="color: #c678dd;">:ensure</span> t
-  <span style="color: #c678dd;">:config</span>
-  <span style="color: #5B6268;">;; </span><span style="color: #5B6268;">&#35774;&#32622; company-lsp &#20026;&#21518;&#31471;</span>
-  (push 'company-lsp company-backends))
-
+<pre class="src src-lisp"><code>(use-package ccls</code>
+<code>  <span style="color: #c678dd;">:ensure</span> t</code>
+<code>  <span style="color: #c678dd;">:config</span></code>
+<code>  <span style="color: #5B6268;">;; </span><span style="color: #5B6268;">https://github.com/maskray/ccls/blob/master/src/config.h</span></code>
+<code>  (setq</code>
+<code>   ccls-initialization-options</code>
+<code>   `(<span style="color: #c678dd;">:clang</span></code>
+<code>     (<span style="color: #c678dd;">:excludeArgs</span></code>
+<code>      <span style="color: #5B6268;">;; </span><span style="color: #5B6268;">Linux's gcc options. See ccls/wiki</span></code>
+<code>      [<span style="color: #98be65;">"--param=allow-store-data-races=0"</span> <span style="color: #98be65;">"-W*"</span> <span style="color: #98be65;">"-f*"</span> <span style="color: #98be65;">"-m*"</span>]</code>
+<code>      <span style="color: #c678dd;">:extraArgs</span> [<span style="color: #98be65;">"--gcc-toolchain=/usr"</span>])</code>
+<code>     <span style="color: #c678dd;">:completion</span></code>
+<code>     (<span style="color: #c678dd;">:include</span></code>
+<code>      (<span style="color: #c678dd;">:blacklist</span></code>
+<code>       [<span style="color: #98be65;">"^/usr/(local/)?include/c\\+\\+/[0-9\\.]+/(bits|tr1|tr2|profile|ext|debug)/"</span></code>
+<code>       <span style="color: #98be65;">"^/usr/(local/)?include/c\\+\\+/v1/"</span></code>
+<code>       ]))))</code>
+<code>  )</code>
+<code></code>
+<code>(use-package lsp-mode</code>
+<code>  <span style="color: #c678dd;">:commands</span> lsp</code>
+<code>  <span style="color: #c678dd;">:init</span></code>
+<code>  (setq lsp-auto-guess-root t)    <span style="color: #5B6268;">; &#25105;&#32722;&#24931;&#33258;&#21205;&#36984;project root</span></code>
+<code>  (setq lsp-enable-indentation nil)</code>
+<code>  (setq lsp-enable-file-watchers nil)</code>
+<code>  <span style="color: #5B6268;">;; </span><span style="color: #5B6268;">(setq lsp-prefer-flymake t)  ; &#38928;&#35373;t&#12290;flymake&#26367;&#20195;flycheck</span></code>
+<code>  <span style="color: #c678dd;">:config</span></code>
+<code>  (<span style="color: #51afef;">require</span> '<span style="color: #a9a1e1;">lsp-clients</span>)          <span style="color: #5B6268;">; ocaml,css,python,bash,...</span></code>
+<code>  <span style="color: #c678dd;">:hook</span></code>
+<code>  (hack-local-variables . (<span style="color: #51afef;">lambda</span> ()</code>
+<code>                            (<span style="color: #51afef;">cond</span> ((derived-mode-p 'c-mode 'c++-mode 'objc-mode)</code>
+<code>                                   (<span style="color: #51afef;">progn</span></code>
+<code>                                     (<span style="color: #51afef;">require</span> '<span style="color: #a9a1e1;">ccls</span>)</code>
+<code>                                     (lsp)))</code>
+<code>                                  ))))</code>
+<code>(use-package lsp-ui</code>
+<code>  <span style="color: #c678dd;">:commands</span> lsp-ui-mode</code>
+<code>  <span style="color: #c678dd;">:ensure</span> t</code>
+<code>  <span style="color: #c678dd;">:config</span></code>
+<code>  <span style="color: #c678dd;">:hook</span> (lsp-mode . lsp-ui-mode))</code>
+<code></code>
+<code>(use-package company-lsp</code>
+<code>  <span style="color: #c678dd;">:ensure</span> t</code>
+<code>  <span style="color: #c678dd;">:config</span></code>
+<code>  <span style="color: #5B6268;">;; </span><span style="color: #5B6268;">&#35774;&#32622; company-lsp &#20026;&#21518;&#31471;</span></code>
+<code>  (push 'company-lsp company-backends))</code>
+<code></code>
 </pre>
 </div>
 </div>
 </li>
 
-<li><a id="org721a477"></a>dir-locals setting<br>
-<div class="outline-text-4" id="text-org721a477">
+<li><a id="org2487ea2"></a>dir-locals setting<br>
+<div class="outline-text-4" id="text-org2487ea2">
 <div class="org-src-container">
-<pre class="src src-lisp"><span style="color: #5B6268;">;;; </span><span style="color: #5B6268;">Directory Local Variables</span>
-<span style="color: #5B6268;">;;; </span><span style="color: #5B6268;">For more information see (info "(emacs) Directory Variables")</span>
-((nil .
-      ((ccls-initialization-options . (<span style="color: #c678dd;">:clang</span>
-                                       (<span style="color: #c678dd;">:excludeArgs</span>
-                                        <span style="color: #5B6268;">;; </span><span style="color: #5B6268;">Linux's gcc options. See ccls/wiki</span>
-                                        [<span style="color: #98be65;">"--param=allow-store-data-races=0"</span> <span style="color: #98be65;">"-W*"</span> <span style="color: #98be65;">"-f*"</span> <span style="color: #98be65;">"-m*"</span>])
-                                       <span style="color: #c678dd;">:compilationDatabaseDirectory</span> <span style="color: #98be65;">"../out/target/product/qemu/KERNEL_OBJ"</span>
-                                       )))
-      ))
-
+<pre class="src src-lisp"><code><span style="color: #5B6268;">;;; </span><span style="color: #5B6268;">Directory Local Variables</span></code>
+<code><span style="color: #5B6268;">;;; </span><span style="color: #5B6268;">For more information see (info "(emacs) Directory Variables")</span></code>
+<code>((nil .</code>
+<code>      ((ccls-initialization-options . (<span style="color: #c678dd;">:clang</span></code>
+<code>                                       (<span style="color: #c678dd;">:excludeArgs</span></code>
+<code>                                        <span style="color: #5B6268;">;; </span><span style="color: #5B6268;">Linux's gcc options. See ccls/wiki</span></code>
+<code>                                        [<span style="color: #98be65;">"--param=allow-store-data-races=0"</span> <span style="color: #98be65;">"-W*"</span> <span style="color: #98be65;">"-f*"</span> <span style="color: #98be65;">"-m*"</span>])</code>
+<code>                                       <span style="color: #c678dd;">:compilationDatabaseDirectory</span> <span style="color: #98be65;">"../out/target/product/qemu/KERNEL_OBJ"</span></code>
+<code>                                       )))</code>
+<code>      ))</code>
+<code></code>
 </pre>
 </div>
 </div>
@@ -210,9 +211,76 @@ sed <span style="color: #98be65;">'s/..\/..\/..\/..\/..\/..\/..\/kernel\/msm-4.9
 </ul>
 </div>
 </div>
-<div id="outline-container-orgf74aa3f" class="outline-2">
-<h2 id="orgf74aa3f">enjoy codeing with emacs</h2>
-<div class="outline-text-2" id="text-orgf74aa3f">
+<div id="outline-container-org8576b2d" class="outline-2">
+<h2 id="org8576b2d">clangd</h2>
+<div class="outline-text-2" id="text-org8576b2d">
+<p>
+~/.config/clangd/config.yaml<br>
+</p>
+<div class="org-src-container">
+<pre class="src src-yaml"><code><span style="color: #dcaeea;">CompileFlags</span>:</code>
+<code>  <span style="color: #dcaeea;">Add</span>: [ -Wall, -Wunused-function, -Wno-unknown-warning-option]</code>
+<code>  <span style="color: #dcaeea;">Remove</span>: [-w, -fmax-errors, -mabi=lp64, -W, -f*, -m*]</code>
+<code></code>
+<code><span style="color: #dcaeea;">If</span>:</code>
+<code>  <span style="color: #dcaeea;">PathMatch</span>: [.*\.h, .*\.c, .*\.cc, .*\.cpp]</code>
+<code>  <span style="color: #dcaeea;">PathExclude</span>: []</code>
+<code></code>
+<code><span style="color: #dcaeea;">Diagnostics</span>:</code>
+<code>  <span style="color: #dcaeea;">ClangTidy</span>:</code>
+<code>    <span style="color: #dcaeea;">Add</span>: [misc-*,modernize*,bugprone*, clang-analyzer*]</code>
+<code>    <span style="color: #dcaeea;">Remove</span>: [modernize-use-trailing-return-type]</code>
+<code>    <span style="color: #dcaeea;">CheckOptions</span>:</code>
+<code>      <span style="color: #dcaeea;">readability-identifier-naming.NamespaceCase</span>: lower_case</code>
+<code>      <span style="color: #dcaeea;">readability-identifier-naming.ClassCase</span>: CamelCase</code>
+<code>      <span style="color: #dcaeea;">readability-identifier-naming.StructCase</span>: CamelCase</code>
+<code>      <span style="color: #dcaeea;">readability-identifier-naming.TemplateParameterCase</span>: CamelCase</code>
+<code>      <span style="color: #dcaeea;">readability-identifier-naming.FunctionCase</span>: CamelCase</code>
+<code>      <span style="color: #dcaeea;">readability-identifier-naming.VariableCase</span>: lower_case</code>
+<code>      <span style="color: #dcaeea;">readability-identifier-naming.ClassMemberCase</span>: lower_case</code>
+<code>      <span style="color: #dcaeea;">readability-identifier-naming.ClassMemberSuffix</span>: _</code>
+<code>      <span style="color: #dcaeea;">readability-identifier-naming.PrivateMemberSuffix</span>: _</code>
+<code>      <span style="color: #dcaeea;">readability-identifier-naming.ProtectedMemberSuffix</span>: _</code>
+<code>      <span style="color: #dcaeea;">readability-identifier-naming.EnumConstantCase</span>: CamelCase</code>
+<code>      <span style="color: #dcaeea;">readability-identifier-naming.EnumConstantPrefix</span>: k</code>
+<code>      <span style="color: #dcaeea;">readability-identifier-naming.ConstexprVariableCase</span>: CamelCase</code>
+<code>      <span style="color: #dcaeea;">readability-identifier-naming.ConstexprVariablePrefix</span>: k</code>
+<code>      <span style="color: #dcaeea;">readability-identifier-naming.GlobalConstantCase</span>: CamelCase</code>
+<code>      <span style="color: #dcaeea;">readability-identifier-naming.GlobalConstantPrefix</span>: k</code>
+<code>      <span style="color: #dcaeea;">readability-identifier-naming.MemberConstantCase</span>: CamelCase</code>
+<code>      <span style="color: #dcaeea;">readability-identifier-naming.MemberConstantPrefix</span>: k</code>
+<code>      <span style="color: #dcaeea;">readability-identifier-naming.StaticConstantCase</span>: CamelCase</code>
+<code>      <span style="color: #dcaeea;">readability-identifier-naming.StaticConstantPrefix</span>: k</code>
+<code>      <span style="color: #dcaeea;">readability-implicit-bool-conversion.AllowIntegerConditions</span>: 1</code>
+<code>      <span style="color: #dcaeea;">readability-implicit-bool-conversion.AllowPointerConditions</span>: 1</code>
+</pre>
+</div>
+
+<p>
+<a href="https://github.com/clangd/clangd/issues/662">https://github.com/clangd/clangd/issues/662</a><br>
+</p>
+<div class="org-src-container">
+<pre class="src src-emacs-lisp"><code>(<span style="color: #51afef;">use-package</span> <span style="color: #a9a1e1;">lsp-mode</span></code>
+<code>  <span style="color: #c678dd;">:commands</span> lsp</code>
+<code>  <span style="color: #c678dd;">:init</span></code>
+<code>  (<span style="color: #51afef;">setq</span> lsp-auto-guess-root t)    <span style="color: #5B6268;">; </span><span style="color: #5B6268;">&#25105;&#32722;&#24931;&#33258;&#21205;&#36984;project root</span></code>
+<code>  (<span style="color: #51afef;">setq</span> lsp-enable-indentation nil)</code>
+<code>  (<span style="color: #51afef;">setq</span> lsp-enable-file-watchers nil)</code>
+<code>  <span style="color: #5B6268;">;; </span><span style="color: #5B6268;">(setq lsp-prefer-flymake t)  ; &#38928;&#35373;t&#12290;flymake&#26367;&#20195;flycheck</span></code>
+<code>  <span style="color: #c678dd;">:hook</span></code>
+<code>  (hack-local-variables</code>
+<code>   . (<span style="color: #51afef;">lambda</span> ()</code>
+<code>       (<span style="color: #51afef;">cond</span> ((derived-mode-p 'c-mode 'c++-mode 'objc-mode)</code>
+<code>              (<span style="color: #51afef;">progn</span></code>
+<code>                (lsp)))</code>
+<code>             ))))</code>
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-orge826669" class="outline-2">
+<h2 id="orge826669">enjoy codeing with emacs</h2>
+<div class="outline-text-2" id="text-orge826669">
 </div>
 </div>
 </div>

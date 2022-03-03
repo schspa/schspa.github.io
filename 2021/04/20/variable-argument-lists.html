@@ -1,14 +1,13 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2021-10-12 二 19:35 -->
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- 2022-03-03 Thu 11:48 -->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>variable-argument-lists in AARCH64</title>
-<meta name="generator" content="Org mode">
-<meta name="author" content="Schspa">
-<meta name="description" content="variable-argument-lists.org"
->
+<meta name="author" content="Schspa" />
+<meta name="description" content="variable-argument-lists.org" />
+<meta name="generator" content="Org Mode" />
 <link rel="shortcut icon" href="/images/rose-red.png" type="image/x-icon" />
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" integrity="sha256-sAcc18zvMnaJZrNT4v8J0T4HqzEUiUTlVFgDIywjQek=" crossorigin="anonymous">
 <link rel="stylesheet" href="/css/animate.min.css" />
@@ -56,39 +55,39 @@
   </nav>
 </header>
 </div>
-<div id="content">
+<div id="content" class="content">
 <h1 class="title">variable-argument-lists in AARCH64</h1>
-<div id="table-of-contents">
+<div id="table-of-contents" role="doc-toc">
 <h2>Table of Contents</h2>
-<div id="text-table-of-contents">
+<div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#org0f19034">Variadic functions</a></li>
-<li><a href="#org4876180">资料</a></li>
-<li><a href="#org0e510af">例子</a>
+<li><a href="#orgc3644a4">Variadic functions</a></li>
+<li><a href="#orgee9c8cc">资料</a></li>
+<li><a href="#org3de9a70">例子</a>
 <ul>
-<li><a href="#org3e80f06">&lt; 7个参数, 以两个参数为例</a>
+<li><a href="#org1d4ce2c">&lt; 7个参数, 以两个参数为例</a>
 <ul>
-<li><a href="#org7e7524b">Caller代码</a></li>
-<li><a href="#orga788af1">Caller disassemble</a></li>
-<li><a href="#org688c979">Callee disassemble</a></li>
+<li><a href="#orgfd9eaf7">Caller代码</a></li>
+<li><a href="#org207e912">Caller disassemble</a></li>
+<li><a href="#org4c35687">Callee disassemble</a></li>
 </ul>
 </li>
-<li><a href="#org310a529">参数个数大于7</a>
+<li><a href="#orgffedb4b">参数个数大于7</a>
 <ul>
-<li><a href="#org25ecc54">Caller 代码</a></li>
-<li><a href="#org6d50dc6">Callee va_list</a></li>
+<li><a href="#orga9e32e0">Caller 代码</a></li>
+<li><a href="#org1455ff6">Callee va_list</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li><a href="#org3581c30">refs</a></li>
+<li><a href="#org4fa646b">refs</a></li>
 </ul>
 </div>
 </div>
 
-<div id="outline-container-org0f19034" class="outline-2">
-<h2 id="org0f19034">Variadic functions</h2>
-<div class="outline-text-2" id="text-org0f19034">
+<div id="outline-container-orgc3644a4" class="outline-2">
+<h2 id="orgc3644a4">Variadic functions</h2>
+<div class="outline-text-2" id="text-orgc3644a4">
 <p>
 定义: <a href="https://en.cppreference.com/w/c/variadic">https://en.cppreference.com/w/c/variadic</a><br>
 这类函数，的特点在于，参数的个数是不固定的，具体有多少个参数，实际上是通过调用者来决定的。被调用的函数是不知道具体会传递多少个参数.<br>
@@ -96,9 +95,9 @@
 </div>
 </div>
 
-<div id="outline-container-org4876180" class="outline-2">
-<h2 id="org4876180">资料</h2>
-<div class="outline-text-2" id="text-org4876180">
+<div id="outline-container-orgee9c8cc" class="outline-2">
+<h2 id="orgee9c8cc">资料</h2>
+<div class="outline-text-2" id="text-orgee9c8cc">
 <p>
 AARCH64 APCS规范中已经对可变参数函数做了详细的说明，下面就以一个实际的例子来看一下，具体的过程<br>
 </p>
@@ -108,115 +107,115 @@ AARCH64 APCS规范中已经对可变参数函数做了详细的说明，下面�
 下边是va_arg的伪代码<br>
 </p>
 <div class="org-src-container">
-<pre class="src src-C"><span style="color: #ECBE7B;">type</span> <span style="color: #c678dd;">va_arg</span> (<span style="color: #ECBE7B;">va_list</span> <span style="color: #dcaeea;">ap</span>, <span style="color: #ECBE7B;">type</span>)
-{
-    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">nreg</span>, <span style="color: #dcaeea;">offs</span>;
-    <span style="color: #51afef;">if</span> (<span style="color: #ECBE7B;">type</span> passed in <span style="color: #ECBE7B;">general</span> <span style="color: #dcaeea;">registers</span>) {
-        offs = ap.__gr_offs;
-        <span style="color: #51afef;">if</span> (offs &gt;= 0)
-            <span style="color: #51afef;">goto</span> <span style="color: #a9a1e1;">on_stack</span>;              <span style="color: #5B6268;">// </span><span style="color: #5B6268;">reg save area empty</span>
-        <span style="color: #51afef;">if</span> (alignof(type) &gt; 8)
-            offs = (offs + 15) &amp; -16;   <span style="color: #5B6268;">// </span><span style="color: #5B6268;">round up</span>
-        nreg = (<span style="color: #51afef;">sizeof</span>(type) + 7) / 8;
-        ap.__gr_offs = offs + (nreg * 8);
-        <span style="color: #51afef;">if</span> (ap.__gr_offs &gt; 0)
-            <span style="color: #51afef;">goto</span> <span style="color: #a9a1e1;">on_stack</span>;              <span style="color: #5B6268;">// </span><span style="color: #5B6268;">overflowed reg save area</span>
-<span style="color: #51afef; font-weight: bold;">#ifdef</span> BIG_ENDIAN
-        <span style="color: #51afef;">if</span> (classof(type) != <span style="color: #98be65;">"aggregate"</span> &amp;&amp; <span style="color: #51afef;">sizeof</span>(type) &lt; 8)
-            offs += 8 - <span style="color: #51afef;">sizeof</span>(type);
-<span style="color: #51afef; font-weight: bold;">#endif</span>
-        <span style="color: #51afef;">return</span> *(<span style="color: #ECBE7B;">type</span> *)(ap.__gr_top + offs);
-    } <span style="color: #51afef;">else</span> <span style="color: #51afef;">if</span> (<span style="color: #ECBE7B;">type</span> is an HFA or <span style="color: #ECBE7B;">an</span> <span style="color: #dcaeea;">HVA</span>) {
-        <span style="color: #ECBE7B;">type</span> <span style="color: #dcaeea;">ha</span>;       <span style="color: #5B6268;">// </span><span style="color: #5B6268;">treat as "struct {ftype field[n];}"</span>
-        offs = ap.__vr_offs;
-        <span style="color: #51afef;">if</span> (offs &gt;= 0)
-            <span style="color: #51afef;">goto</span> <span style="color: #a9a1e1;">on_stack</span>;              <span style="color: #5B6268;">// </span><span style="color: #5B6268;">reg save area empty</span>
-        nreg = <span style="color: #51afef;">sizeof</span>(type) / <span style="color: #51afef;">sizeof</span>(ftype);
-        ap.__vr_offs = offs + (nreg * 16);
-        <span style="color: #51afef;">if</span> (ap.__vr_offs &gt; 0)
-            <span style="color: #51afef;">goto</span> <span style="color: #a9a1e1;">on_stack</span>;              <span style="color: #5B6268;">// </span><span style="color: #5B6268;">overflowed reg save area</span>
-<span style="color: #51afef; font-weight: bold;">#ifdef</span> BIG_ENDIAN
-        <span style="color: #51afef;">if</span> (<span style="color: #51afef;">sizeof</span>(ftype) &lt; 16)
-            offs += 16 - <span style="color: #51afef;">sizeof</span>(ftype);
-<span style="color: #51afef; font-weight: bold;">#endif</span>
-        <span style="color: #51afef;">for</span> (i = 0; i &lt; nreg; i++, offs += 16)
-            ha.field[i] = *((ftype *)(ap.__vr_top + offs));
-        <span style="color: #51afef;">return</span> ha;
-    } <span style="color: #51afef;">else</span> <span style="color: #51afef;">if</span> (<span style="color: #ECBE7B;">type</span> passed <span style="color: #ECBE7B;">in</span> <span style="color: #dcaeea;">fp</span>/simd registers) {
-        offs = ap.__vr_offs;
-        <span style="color: #51afef;">if</span> (offs &gt;= 0)
-            <span style="color: #51afef;">goto</span> <span style="color: #a9a1e1;">on_stack</span>;              <span style="color: #5B6268;">// </span><span style="color: #5B6268;">reg save area empty</span>
-        nreg = (<span style="color: #51afef;">sizeof</span>(type) + 15) / 16;
-        ap.__vr_offs = offs + (nreg * 16);
-        <span style="color: #51afef;">if</span> (ap.__vr_offs &gt; 0)
-            <span style="color: #51afef;">goto</span> <span style="color: #a9a1e1;">on_stack</span>;              <span style="color: #5B6268;">// </span><span style="color: #5B6268;">overflowed reg save area</span>
-<span style="color: #51afef; font-weight: bold;">#ifdef</span> BIG_ENDIAN
-        <span style="color: #51afef;">if</span> (classof(type) != <span style="color: #98be65;">"aggregate"</span> &amp;&amp; <span style="color: #51afef;">sizeof</span>(type) &lt; 16)
-            offs += 16 - <span style="color: #51afef;">sizeof</span>(type);
-<span style="color: #51afef; font-weight: bold;">#endif</span>
-        <span style="color: #51afef;">return</span> *(<span style="color: #ECBE7B;">type</span> *)(ap.__vr_top + offs);
-    }
-<span style="color: #a9a1e1;">on_stack</span>:
-    <span style="color: #ECBE7B;">intptr_t</span> <span style="color: #dcaeea;">arg</span> = ap.__stack;
-    <span style="color: #51afef;">if</span> (alignof(type) &gt; 8)
-        arg = (arg + 15) &amp; -16;
-    ap.__stack = (<span style="color: #ECBE7B;">void</span> *)((arg + <span style="color: #51afef;">sizeof</span>(type) + 7) &amp; -8);
-<span style="color: #51afef; font-weight: bold;">#ifdef</span> BIG_ENDIAN
-    <span style="color: #51afef;">if</span> (classof(type) != <span style="color: #98be65;">"aggregate"</span> &amp;&amp; <span style="color: #51afef;">sizeof</span>(type) &lt; 8)
-        arg += 8 - <span style="color: #51afef;">sizeof</span>(type);
-<span style="color: #51afef; font-weight: bold;">#endif</span>
-    <span style="color: #51afef;">return</span> *(<span style="color: #ECBE7B;">type</span> *)arg;
-}
+<pre class="src src-C"><code><span style="color: #ECBE7B;">type</span> <span style="color: #c678dd;">va_arg</span> (<span style="color: #ECBE7B;">va_list</span> <span style="color: #dcaeea;">ap</span>, <span style="color: #ECBE7B;">type</span>)</code>
+<code>{</code>
+<code>    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">nreg</span>, <span style="color: #dcaeea;">offs</span>;</code>
+<code>    <span style="color: #51afef;">if</span> (<span style="color: #ECBE7B;">type</span> passed in <span style="color: #ECBE7B;">general</span> <span style="color: #dcaeea;">registers</span>) {</code>
+<code>        offs = ap.__gr_offs;</code>
+<code>        <span style="color: #51afef;">if</span> (offs &gt;= 0)</code>
+<code>            <span style="color: #51afef;">goto</span> <span style="color: #a9a1e1;">on_stack</span>;              <span style="color: #5B6268;">// </span><span style="color: #5B6268;">reg save area empty</span></code>
+<code>        <span style="color: #51afef;">if</span> (alignof(type) &gt; 8)</code>
+<code>            offs = (offs + 15) &amp; -16;   <span style="color: #5B6268;">// </span><span style="color: #5B6268;">round up</span></code>
+<code>        nreg = (<span style="color: #51afef;">sizeof</span>(type) + 7) / 8;</code>
+<code>        ap.__gr_offs = offs + (nreg * 8);</code>
+<code>        <span style="color: #51afef;">if</span> (ap.__gr_offs &gt; 0)</code>
+<code>            <span style="color: #51afef;">goto</span> <span style="color: #a9a1e1;">on_stack</span>;              <span style="color: #5B6268;">// </span><span style="color: #5B6268;">overflowed reg save area</span></code>
+<code><span style="color: #51afef; font-weight: bold;">#ifdef</span> BIG_ENDIAN</code>
+<code>        <span style="color: #51afef;">if</span> (classof(type) != <span style="color: #98be65;">"aggregate"</span> &amp;&amp; <span style="color: #51afef;">sizeof</span>(type) &lt; 8)</code>
+<code>            offs += 8 - <span style="color: #51afef;">sizeof</span>(type);</code>
+<code><span style="color: #51afef; font-weight: bold;">#endif</span></code>
+<code>        <span style="color: #51afef;">return</span> *(<span style="color: #ECBE7B;">type</span> *)(ap.__gr_top + offs);</code>
+<code>    } <span style="color: #51afef;">else</span> <span style="color: #51afef;">if</span> (<span style="color: #ECBE7B;">type</span> is an HFA or <span style="color: #ECBE7B;">an</span> <span style="color: #dcaeea;">HVA</span>) {</code>
+<code>        <span style="color: #ECBE7B;">type</span> <span style="color: #dcaeea;">ha</span>;       <span style="color: #5B6268;">// </span><span style="color: #5B6268;">treat as "struct {ftype field[n];}"</span></code>
+<code>        offs = ap.__vr_offs;</code>
+<code>        <span style="color: #51afef;">if</span> (offs &gt;= 0)</code>
+<code>            <span style="color: #51afef;">goto</span> <span style="color: #a9a1e1;">on_stack</span>;              <span style="color: #5B6268;">// </span><span style="color: #5B6268;">reg save area empty</span></code>
+<code>        nreg = <span style="color: #51afef;">sizeof</span>(type) / <span style="color: #51afef;">sizeof</span>(ftype);</code>
+<code>        ap.__vr_offs = offs + (nreg * 16);</code>
+<code>        <span style="color: #51afef;">if</span> (ap.__vr_offs &gt; 0)</code>
+<code>            <span style="color: #51afef;">goto</span> <span style="color: #a9a1e1;">on_stack</span>;              <span style="color: #5B6268;">// </span><span style="color: #5B6268;">overflowed reg save area</span></code>
+<code><span style="color: #51afef; font-weight: bold;">#ifdef</span> BIG_ENDIAN</code>
+<code>        <span style="color: #51afef;">if</span> (<span style="color: #51afef;">sizeof</span>(ftype) &lt; 16)</code>
+<code>            offs += 16 - <span style="color: #51afef;">sizeof</span>(ftype);</code>
+<code><span style="color: #51afef; font-weight: bold;">#endif</span></code>
+<code>        <span style="color: #51afef;">for</span> (i = 0; i &lt; nreg; i++, offs += 16)</code>
+<code>            ha.field[i] = *((ftype *)(ap.__vr_top + offs));</code>
+<code>        <span style="color: #51afef;">return</span> ha;</code>
+<code>    } <span style="color: #51afef;">else</span> <span style="color: #51afef;">if</span> (<span style="color: #ECBE7B;">type</span> passed <span style="color: #ECBE7B;">in</span> <span style="color: #dcaeea;">fp</span>/simd registers) {</code>
+<code>        offs = ap.__vr_offs;</code>
+<code>        <span style="color: #51afef;">if</span> (offs &gt;= 0)</code>
+<code>            <span style="color: #51afef;">goto</span> <span style="color: #a9a1e1;">on_stack</span>;              <span style="color: #5B6268;">// </span><span style="color: #5B6268;">reg save area empty</span></code>
+<code>        nreg = (<span style="color: #51afef;">sizeof</span>(type) + 15) / 16;</code>
+<code>        ap.__vr_offs = offs + (nreg * 16);</code>
+<code>        <span style="color: #51afef;">if</span> (ap.__vr_offs &gt; 0)</code>
+<code>            <span style="color: #51afef;">goto</span> <span style="color: #a9a1e1;">on_stack</span>;              <span style="color: #5B6268;">// </span><span style="color: #5B6268;">overflowed reg save area</span></code>
+<code><span style="color: #51afef; font-weight: bold;">#ifdef</span> BIG_ENDIAN</code>
+<code>        <span style="color: #51afef;">if</span> (classof(type) != <span style="color: #98be65;">"aggregate"</span> &amp;&amp; <span style="color: #51afef;">sizeof</span>(type) &lt; 16)</code>
+<code>            offs += 16 - <span style="color: #51afef;">sizeof</span>(type);</code>
+<code><span style="color: #51afef; font-weight: bold;">#endif</span></code>
+<code>        <span style="color: #51afef;">return</span> *(<span style="color: #ECBE7B;">type</span> *)(ap.__vr_top + offs);</code>
+<code>    }</code>
+<code><span style="color: #a9a1e1;">on_stack</span>:</code>
+<code>    <span style="color: #ECBE7B;">intptr_t</span> <span style="color: #dcaeea;">arg</span> = ap.__stack;</code>
+<code>    <span style="color: #51afef;">if</span> (alignof(type) &gt; 8)</code>
+<code>        arg = (arg + 15) &amp; -16;</code>
+<code>    ap.__stack = (<span style="color: #ECBE7B;">void</span> *)((arg + <span style="color: #51afef;">sizeof</span>(type) + 7) &amp; -8);</code>
+<code><span style="color: #51afef; font-weight: bold;">#ifdef</span> BIG_ENDIAN</code>
+<code>    <span style="color: #51afef;">if</span> (classof(type) != <span style="color: #98be65;">"aggregate"</span> &amp;&amp; <span style="color: #51afef;">sizeof</span>(type) &lt; 8)</code>
+<code>        arg += 8 - <span style="color: #51afef;">sizeof</span>(type);</code>
+<code><span style="color: #51afef; font-weight: bold;">#endif</span></code>
+<code>    <span style="color: #51afef;">return</span> *(<span style="color: #ECBE7B;">type</span> *)arg;</code>
+<code>}</code>
 </pre>
 </div>
 </div>
 </div>
-<div id="outline-container-org0e510af" class="outline-2">
-<h2 id="org0e510af">例子</h2>
-<div class="outline-text-2" id="text-org0e510af">
+<div id="outline-container-org3de9a70" class="outline-2">
+<h2 id="org3de9a70">例子</h2>
+<div class="outline-text-2" id="text-org3de9a70">
 <p>
 本文章使用Linux Kernel中的printk为研究对象<br>
 </p>
 </div>
 
-<div id="outline-container-org3e80f06" class="outline-3">
-<h3 id="org3e80f06">&lt; 7个参数, 以两个参数为例</h3>
-<div class="outline-text-3" id="text-org3e80f06">
+<div id="outline-container-org1d4ce2c" class="outline-3">
+<h3 id="org1d4ce2c">&lt; 7个参数, 以两个参数为例</h3>
+<div class="outline-text-3" id="text-org1d4ce2c">
 </div>
-<div id="outline-container-org7e7524b" class="outline-4">
-<h4 id="org7e7524b">Caller代码</h4>
-<div class="outline-text-4" id="text-org7e7524b">
+<div id="outline-container-orgfd9eaf7" class="outline-4">
+<h4 id="orgfd9eaf7">Caller代码</h4>
+<div class="outline-text-4" id="text-orgfd9eaf7">
 <div class="org-src-container">
-<pre class="src src-C"><span style="color: #ECBE7B;">__mdiobus_register</span>
-     <span style="color: #dcaeea;">bus</span>-&gt;state = MDIOBUS_REGISTERED;
-     pr_info(<span style="color: #98be65;">"%s: probed\n"</span>, bus-&gt;name);
+<pre class="src src-C"><code><span style="color: #ECBE7B;">__mdiobus_register</span></code>
+<code>     <span style="color: #dcaeea;">bus</span>-&gt;state = MDIOBUS_REGISTERED;</code>
+<code>     pr_info(<span style="color: #98be65;">"%s: probed\n"</span>, bus-&gt;name);</code>
 </pre>
 </div>
 </div>
 </div>
 
-<div id="outline-container-orga788af1" class="outline-4">
-<h4 id="orga788af1">Caller disassemble</h4>
-<div class="outline-text-4" id="text-orga788af1">
+<div id="outline-container-org207e912" class="outline-4">
+<h4 id="org207e912">Caller disassemble</h4>
+<div class="outline-text-4" id="text-org207e912">
 <p>
 下面就是调用的地方，从汇编代码上来看，这个地方并没有什么特别之处，这个东西在调用之前，x0为格式化输出字符串，x1是bus-&gt;name的参数，和普通的参数传递方法完全一致.<br>
 </p>
 <div class="org-src-container">
-<pre class="src src-C">     419
-     420             bus-&gt;state = MDIOBUS_REGISTERED;
-     0xffff0000086bb8d0 &lt;+432&gt;:   ldr     x1, [x20, #8]
-         0xffff0000086bb8d4 &lt;+436&gt;:   mov     w0, #0x2                        <span style="color: #5B6268;">// </span><span style="color: #5B6268;">#2</span>
-         0xffff0000086bb8d8 &lt;+440&gt;:   str     w0, [x20, #152]
-
-         421             pr_info(<span style="color: #98be65;">"%s: probed\n"</span>, bus-&gt;name);
-     0xffff0000086bb8dc &lt;+444&gt;:   adrp    x0, 0xffff000008e97000
-         0xffff0000086bb8e0 &lt;+448&gt;:   add     x0, x0, #0xaf0
-         0xffff0000086bb8e4 &lt;+452&gt;:   bl      0xffff000008127454 &lt;printk&gt;
-    (<span style="color: #ECBE7B;">gdb</span>) x/s $x0
-0xffff000008e97af0:     <span style="color: #98be65;">"\001\066libphy: %s: probed\n"</span>
-(<span style="color: #ECBE7B;">gdb</span>) x/s $x1
-0xffff000008e98080:     <span style="color: #98be65;">"Fixed MDIO Bus"</span>
-(gdb)
+<pre class="src src-C"><code>     419</code>
+<code>     420             bus-&gt;state = MDIOBUS_REGISTERED;</code>
+<code>     0xffff0000086bb8d0 &lt;+432&gt;:   ldr     x1, [x20, #8]</code>
+<code>         0xffff0000086bb8d4 &lt;+436&gt;:   mov     w0, #0x2                        <span style="color: #5B6268;">// </span><span style="color: #5B6268;">#2</span></code>
+<code>         0xffff0000086bb8d8 &lt;+440&gt;:   str     w0, [x20, #152]</code>
+<code></code>
+<code>         421             pr_info(<span style="color: #98be65;">"%s: probed\n"</span>, bus-&gt;name);</code>
+<code>     0xffff0000086bb8dc &lt;+444&gt;:   adrp    x0, 0xffff000008e97000</code>
+<code>         0xffff0000086bb8e0 &lt;+448&gt;:   add     x0, x0, #0xaf0</code>
+<code>         0xffff0000086bb8e4 &lt;+452&gt;:   bl      0xffff000008127454 &lt;printk&gt;</code>
+<code>    (<span style="color: #ECBE7B;">gdb</span>) x/s $x0</code>
+<code>0xffff000008e97af0:     <span style="color: #98be65;">"\001\066libphy: %s: probed\n"</span></code>
+<code>(<span style="color: #ECBE7B;">gdb</span>) x/s $x1</code>
+<code>0xffff000008e98080:     <span style="color: #98be65;">"Fixed MDIO Bus"</span></code>
+<code>(gdb)</code>
 </pre>
 </div>
 
@@ -226,61 +225,61 @@ AARCH64 APCS规范中已经对可变参数函数做了详细的说明，下面�
 </div>
 </div>
 
-<div id="outline-container-org688c979" class="outline-4">
-<h4 id="org688c979">Callee disassemble</h4>
-<div class="outline-text-4" id="text-org688c979">
+<div id="outline-container-org4c35687" class="outline-4">
+<h4 id="org4c35687">Callee disassemble</h4>
+<div class="outline-text-4" id="text-org4c35687">
 <div class="org-src-container">
-<pre class="src src-text">(gdb) disassemble /s
-Dump of assembler code for function printk:
-kernel/printk/printk.c:
-1990    {
-   =&gt; 0xffff000008127454 &lt;+0&gt;:     stp     x29, x30, [sp, #-176]!                     sp = 0xffff00000805bcf0
-   0xffff000008127458 &lt;+4&gt;:     mov     w8, #0xffffffc8                 // #-56       sp = 0xFFFF00000805bc40
-   0xffff00000812745c &lt;+8&gt;:     mov     x29, sp                                       x29 = sp, fp = 0xFFFF00000805bc40
-   0xffff000008127460 &lt;+12&gt;:    add     x9, sp, #0x70                                 x9= 0xFFFF00000805bcb0
-   0xffff000008127464 &lt;+16&gt;:    add     x10, sp, #0xb0                                x10 = 0xffff00000805bcf0  i.e. stack_top
-   0xffff000008127468 &lt;+20&gt;:    str     x19, [sp, #16]                                backup x19 to stack Local Variables
-   0xffff00000812746c &lt;+24&gt;:    adrp    x19, 0xffff0000092b9000 &lt;page_wait_table+5376&gt;
-   0xffff000008127470 &lt;+28&gt;:    add     x19, x19, #0x6c8                              x19 = address of __stack_chk_guard
-   0xffff000008127474 &lt;+32&gt;:    stp     x10, x10, [sp, #72]                           prepare va_list args
-   0xffff000008127478 &lt;+36&gt;:    str     x9, [sp, #88]                                 save x9 to 0xFFFF00000805BC98
-   0xffff00000812747c &lt;+40&gt;:    ldr     x9, [x19]                                     load stack guard magic value to x9.
-   0xffff000008127480 &lt;+44&gt;:    str     x9, [sp, #104]                                store stack guard magic value to stack on 0xFFFF00000805BCA8.
-   0xffff000008127484 &lt;+48&gt;:    mov     x9, #0x0                        // #0
-   0xffff000008127488 &lt;+52&gt;:    stp     w8, wzr, [sp, #96]                           &#35774;&#32622;&#21021;&#22987;&#30340;__gr_offs
-   0xffff00000812748c &lt;+56&gt;:    ldp     x8, x9, [sp, #72]
-   0xffff000008127490 &lt;+60&gt;:    stp     x8, x9, [sp, #32]
-   0xffff000008127494 &lt;+64&gt;:    ldp     x8, x9, [sp, #88]
-   0xffff000008127498 &lt;+68&gt;:    stp     x1, x2, [sp, #120]                           &#23558;x1 ~ x7&#25918;&#20837;GP Arg Save Area&#30340;&#21306;&#22495;
-   0xffff00000812749c &lt;+72&gt;:    add     x1, sp, #0x20
-   0xffff0000081274a0 &lt;+76&gt;:    stp     x8, x9, [sp, #48]
-   0xffff0000081274a4 &lt;+80&gt;:    stp     x3, x4, [sp, #136]
-   0xffff0000081274a8 &lt;+84&gt;:    stp     x5, x6, [sp, #152]
-   0xffff0000081274ac &lt;+88&gt;:    str     x7, [sp, #168]                               &#24050;&#32463;&#23558;GP Arg Save Area&#35774;&#32622;&#22909;,va_list args&#21442;&#25968;&#24050;&#32463;&#22788;&#29702;&#22909;&#20102;&#12290;
-(gdb) i r pc
-pc             0xffff0000081274b0  0xffff0000081274b0 &lt;printk+92&gt;
-(gdb) p args
-$6 = {
-  __stack = 0xffff00000805bcf0,
-  __gr_top = 0xffff00000805bcf0,
-  __vr_top = 0xffff00000805bcb0,
-  __gr_offs = -56,
-  __vr_offs = 0
-}
-   0xffff0000081274b0 &lt;+92&gt;:    bl      0xffff000008127e28 &lt;vprintk_func&gt;
-
-1996            va_end(args);
-1997
-1998            return r;
-   0xffff0000081274b4 &lt;+96&gt;:    ldr     x2, [sp, #104]
-   0xffff0000081274b8 &lt;+100&gt;:   ldr     x1, [x19]
-   0xffff0000081274bc &lt;+104&gt;:   eor     x1, x2, x1
-   0xffff0000081274c0 &lt;+108&gt;:   cbz     x1, 0xffff0000081274c8 &lt;printk+116&gt;
-   0xffff0000081274c4 &lt;+112&gt;:   bl      0xffff0000080d3d48 &lt;__stack_chk_fail&gt;
-   0xffff0000081274c8 &lt;+116&gt;:   ldr     x19, [sp, #16]
-   0xffff0000081274cc &lt;+120&gt;:   ldp     x29, x30, [sp], #176
-   0xffff0000081274d0 &lt;+124&gt;:   ret
-End of assembler dump.
+<pre class="src src-text"><code>(gdb) disassemble /s</code>
+<code>Dump of assembler code for function printk:</code>
+<code>kernel/printk/printk.c:</code>
+<code>1990    {</code>
+<code>   =&gt; 0xffff000008127454 &lt;+0&gt;:     stp     x29, x30, [sp, #-176]!                     sp = 0xffff00000805bcf0</code>
+<code>   0xffff000008127458 &lt;+4&gt;:     mov     w8, #0xffffffc8                 // #-56       sp = 0xFFFF00000805bc40</code>
+<code>   0xffff00000812745c &lt;+8&gt;:     mov     x29, sp                                       x29 = sp, fp = 0xFFFF00000805bc40</code>
+<code>   0xffff000008127460 &lt;+12&gt;:    add     x9, sp, #0x70                                 x9= 0xFFFF00000805bcb0</code>
+<code>   0xffff000008127464 &lt;+16&gt;:    add     x10, sp, #0xb0                                x10 = 0xffff00000805bcf0  i.e. stack_top</code>
+<code>   0xffff000008127468 &lt;+20&gt;:    str     x19, [sp, #16]                                backup x19 to stack Local Variables</code>
+<code>   0xffff00000812746c &lt;+24&gt;:    adrp    x19, 0xffff0000092b9000 &lt;page_wait_table+5376&gt;</code>
+<code>   0xffff000008127470 &lt;+28&gt;:    add     x19, x19, #0x6c8                              x19 = address of __stack_chk_guard</code>
+<code>   0xffff000008127474 &lt;+32&gt;:    stp     x10, x10, [sp, #72]                           prepare va_list args</code>
+<code>   0xffff000008127478 &lt;+36&gt;:    str     x9, [sp, #88]                                 save x9 to 0xFFFF00000805BC98</code>
+<code>   0xffff00000812747c &lt;+40&gt;:    ldr     x9, [x19]                                     load stack guard magic value to x9.</code>
+<code>   0xffff000008127480 &lt;+44&gt;:    str     x9, [sp, #104]                                store stack guard magic value to stack on 0xFFFF00000805BCA8.</code>
+<code>   0xffff000008127484 &lt;+48&gt;:    mov     x9, #0x0                        // #0</code>
+<code>   0xffff000008127488 &lt;+52&gt;:    stp     w8, wzr, [sp, #96]                           &#35774;&#32622;&#21021;&#22987;&#30340;__gr_offs</code>
+<code>   0xffff00000812748c &lt;+56&gt;:    ldp     x8, x9, [sp, #72]</code>
+<code>   0xffff000008127490 &lt;+60&gt;:    stp     x8, x9, [sp, #32]</code>
+<code>   0xffff000008127494 &lt;+64&gt;:    ldp     x8, x9, [sp, #88]</code>
+<code>   0xffff000008127498 &lt;+68&gt;:    stp     x1, x2, [sp, #120]                           &#23558;x1 ~ x7&#25918;&#20837;GP Arg Save Area&#30340;&#21306;&#22495;</code>
+<code>   0xffff00000812749c &lt;+72&gt;:    add     x1, sp, #0x20</code>
+<code>   0xffff0000081274a0 &lt;+76&gt;:    stp     x8, x9, [sp, #48]</code>
+<code>   0xffff0000081274a4 &lt;+80&gt;:    stp     x3, x4, [sp, #136]</code>
+<code>   0xffff0000081274a8 &lt;+84&gt;:    stp     x5, x6, [sp, #152]</code>
+<code>   0xffff0000081274ac &lt;+88&gt;:    str     x7, [sp, #168]                               &#24050;&#32463;&#23558;GP Arg Save Area&#35774;&#32622;&#22909;,va_list args&#21442;&#25968;&#24050;&#32463;&#22788;&#29702;&#22909;&#20102;&#12290;</code>
+<code>(gdb) i r pc</code>
+<code>pc             0xffff0000081274b0  0xffff0000081274b0 &lt;printk+92&gt;</code>
+<code>(gdb) p args</code>
+<code>$6 = {</code>
+<code>  __stack = 0xffff00000805bcf0,</code>
+<code>  __gr_top = 0xffff00000805bcf0,</code>
+<code>  __vr_top = 0xffff00000805bcb0,</code>
+<code>  __gr_offs = -56,</code>
+<code>  __vr_offs = 0</code>
+<code>}</code>
+<code>   0xffff0000081274b0 &lt;+92&gt;:    bl      0xffff000008127e28 &lt;vprintk_func&gt;</code>
+<code></code>
+<code>1996            va_end(args);</code>
+<code>1997</code>
+<code>1998            return r;</code>
+<code>   0xffff0000081274b4 &lt;+96&gt;:    ldr     x2, [sp, #104]</code>
+<code>   0xffff0000081274b8 &lt;+100&gt;:   ldr     x1, [x19]</code>
+<code>   0xffff0000081274bc &lt;+104&gt;:   eor     x1, x2, x1</code>
+<code>   0xffff0000081274c0 &lt;+108&gt;:   cbz     x1, 0xffff0000081274c8 &lt;printk+116&gt;</code>
+<code>   0xffff0000081274c4 &lt;+112&gt;:   bl      0xffff0000080d3d48 &lt;__stack_chk_fail&gt;</code>
+<code>   0xffff0000081274c8 &lt;+116&gt;:   ldr     x19, [sp, #16]</code>
+<code>   0xffff0000081274cc &lt;+120&gt;:   ldp     x29, x30, [sp], #176</code>
+<code>   0xffff0000081274d0 &lt;+124&gt;:   ret</code>
+<code>End of assembler dump.</code>
 </pre>
 </div>
 
@@ -293,35 +292,35 @@ End of assembler dump.
 </div>
 
 
-<div id="outline-container-org310a529" class="outline-3">
-<h3 id="org310a529">参数个数大于7</h3>
-<div class="outline-text-3" id="text-org310a529">
+<div id="outline-container-orgffedb4b" class="outline-3">
+<h3 id="orgffedb4b">参数个数大于7</h3>
+<div class="outline-text-3" id="text-orgffedb4b">
 <p>
 同样的，取内核中的例子：<br>
 </p>
 </div>
-<div id="outline-container-org25ecc54" class="outline-4">
-<h4 id="org25ecc54">Caller 代码</h4>
-<div class="outline-text-4" id="text-org25ecc54">
+<div id="outline-container-orga9e32e0" class="outline-4">
+<h4 id="orga9e32e0">Caller 代码</h4>
+<div class="outline-text-4" id="text-orga9e32e0">
 <div class="org-src-container">
-<pre class="src src-C"><span style="color: #ECBE7B;">void</span> <span style="color: #c678dd;">__init</span> mem_init_print_info(<span style="color: #51afef;">const</span> <span style="color: #ECBE7B;">char</span> *<span style="color: #dcaeea;">str</span>)
-{
-    pr_info(<span style="color: #98be65;">"Memory: %luK/%luK available (%luK kernel code, %luK rwdata, %luK rodata, %luK init, %luK bss, %luK reserved, %luK cma-reserved"</span>
-<span style="color: #51afef; font-weight: bold;">#ifdef</span>  CONFIG_HIGHMEM
-        <span style="color: #98be65;">", %luK highmem"</span>
-<span style="color: #51afef; font-weight: bold;">#endif</span>
-        <span style="color: #98be65;">"%s%s)\n"</span>,
-        nr_free_pages() &lt;&lt; (PAGE_SHIFT - 10),
-        physpages &lt;&lt; (PAGE_SHIFT - 10),
-        codesize &gt;&gt; 10, datasize &gt;&gt; 10, rosize &gt;&gt; 10,
-        (init_data_size + init_code_size) &gt;&gt; 10, bss_size &gt;&gt; 10,
-        (physpages - totalram_pages - totalcma_pages) &lt;&lt; (PAGE_SHIFT - 10),
-        totalcma_pages &lt;&lt; (PAGE_SHIFT - 10),
-<span style="color: #51afef; font-weight: bold;">#ifdef</span>  CONFIG_HIGHMEM
-        totalhigh_pages &lt;&lt; (PAGE_SHIFT - 10),
-<span style="color: #51afef; font-weight: bold;">#endif</span>
-        str ? <span style="color: #98be65;">", "</span> : <span style="color: #98be65;">""</span>, str ? str : <span style="color: #98be65;">""</span>);
-}
+<pre class="src src-C"><code><span style="color: #ECBE7B;">void</span> <span style="color: #c678dd;">__init</span> mem_init_print_info(<span style="color: #51afef;">const</span> <span style="color: #ECBE7B;">char</span> *<span style="color: #dcaeea;">str</span>)</code>
+<code>{</code>
+<code>    pr_info(<span style="color: #98be65;">"Memory: %luK/%luK available (%luK kernel code, %luK rwdata, %luK rodata, %luK init, %luK bss, %luK reserved, %luK cma-reserved"</span></code>
+<code><span style="color: #51afef; font-weight: bold;">#ifdef</span>  CONFIG_HIGHMEM</code>
+<code>        <span style="color: #98be65;">", %luK highmem"</span></code>
+<code><span style="color: #51afef; font-weight: bold;">#endif</span></code>
+<code>        <span style="color: #98be65;">"%s%s)\n"</span>,</code>
+<code>        nr_free_pages() &lt;&lt; (PAGE_SHIFT - 10),</code>
+<code>        physpages &lt;&lt; (PAGE_SHIFT - 10),</code>
+<code>        codesize &gt;&gt; 10, datasize &gt;&gt; 10, rosize &gt;&gt; 10,</code>
+<code>        (init_data_size + init_code_size) &gt;&gt; 10, bss_size &gt;&gt; 10,</code>
+<code>        (physpages - totalram_pages - totalcma_pages) &lt;&lt; (PAGE_SHIFT - 10),</code>
+<code>        totalcma_pages &lt;&lt; (PAGE_SHIFT - 10),</code>
+<code><span style="color: #51afef; font-weight: bold;">#ifdef</span>  CONFIG_HIGHMEM</code>
+<code>        totalhigh_pages &lt;&lt; (PAGE_SHIFT - 10),</code>
+<code><span style="color: #51afef; font-weight: bold;">#endif</span></code>
+<code>        str ? <span style="color: #98be65;">", "</span> : <span style="color: #98be65;">""</span>, str ? str : <span style="color: #98be65;">""</span>);</code>
+<code>}</code>
 </pre>
 </div>
 
@@ -331,51 +330,51 @@ End of assembler dump.
 </div>
 </div>
 
-<div id="outline-container-org6d50dc6" class="outline-4">
-<h4 id="org6d50dc6">Callee va_list</h4>
-<div class="outline-text-4" id="text-org6d50dc6">
+<div id="outline-container-org1455ff6" class="outline-4">
+<h4 id="org1455ff6">Callee va_list</h4>
+<div class="outline-text-4" id="text-org1455ff6">
 <p>
 上面的例子中已经简单的分析过printk的汇编代码，这里不再赘述，直接去看va_list的值<br>
 </p>
 <div class="org-src-container">
-<pre class="src src-text">#0  0xffff0000081274b0 in printk (fmt=0xffff000008e04b68 "\001\066Memory: %luK/%luK available (%luK kernel code, %luK rwdata, %luK rodata, %luK init, %luK bss, %luK reserved, %luK cma-reserved%s%s)\n") at kernel/printk/printk.c:1995
-        args = {
-          __stack = 0xffff0000092b3f00,
-          __gr_top = 0xffff0000092b3f00,
-          __vr_top = 0xffff0000092b3ec0,
-          __gr_offs = -56,
-          __vr_offs = 0
-        }
-        r = &lt;optimized out&gt;
-#1  0xffff000009196994 in mem_init_print_info (str=0xffff000008e0e090 "") at ./include/linux/vmstat.h:184
-        physpages = &lt;optimized out&gt;
-        codesize = &lt;optimized out&gt;
-        datasize = &lt;optimized out&gt;
-        rosize = &lt;optimized out&gt;
-        bss_size = &lt;optimized out&gt;
-        init_code_size = &lt;optimized out&gt;
-        init_data_size = &lt;optimized out&gt;
-#2  0xffff000009185e9c in mem_init () at arch/arm64/mm/init.c:608
-No locals.
-#3  0xffff000009180b90 in mm_init () at init/main.c:520
-No locals.
-#4  start_kernel () at init/main.c:590
-        command_line = 0xffff000009226028 &lt;boot_command_line&gt; "root=/dev/ram0 console=ttyAMA0"
-        after_dashes = &lt;optimized out&gt;
-#5  0x0000000000000000 in ?? ()
-(gdb) i r pc
-pc             0xffff0000081274b0  0xffff0000081274b0 &lt;printk+92&gt;
-(gdb) x/16gx args.__stack
-0xffff0000092b3f00:     0x000000000000c848      0x0000000000008000 &#20998;&#21035;&#26159;&#31532;8&#21644;&#31532;9&#20010;&#21442;&#25968;
-0xffff0000092b3f10:     0xffff000008e0e090      0xffff000008e0e090 &#31532;10&#21644;&#31532;11&#20010;&#21442;&#25968;
-0xffff0000092b3f20:     0xffff0000092b3f70      0xffff000009185e9c
-0xffff0000092b3f30:     0xffff000009407000      0xffff0000092d55b8
-0xffff0000092b3f40:     0xffff0000092b96c8      0xffff0000092b96c0
-0xffff0000092b3f50:     0xffff800005fffe00      0xffff000009226028
-0xffff0000092b3f60:     0x0000000000000000      0x07bd33f332224500
-0xffff0000092b3f70:     0xffff0000092b3fa0      0xffff000009180b90
-(gdb) x/s 0xffff000008e0e090
-0xffff000008e0e090:     ""
+<pre class="src src-text"><code>#0  0xffff0000081274b0 in printk (fmt=0xffff000008e04b68 "\001\066Memory: %luK/%luK available (%luK kernel code, %luK rwdata, %luK rodata, %luK init, %luK bss, %luK reserved, %luK cma-reserved%s%s)\n") at kernel/printk/printk.c:1995</code>
+<code>        args = {</code>
+<code>          __stack = 0xffff0000092b3f00,</code>
+<code>          __gr_top = 0xffff0000092b3f00,</code>
+<code>          __vr_top = 0xffff0000092b3ec0,</code>
+<code>          __gr_offs = -56,</code>
+<code>          __vr_offs = 0</code>
+<code>        }</code>
+<code>        r = &lt;optimized out&gt;</code>
+<code>#1  0xffff000009196994 in mem_init_print_info (str=0xffff000008e0e090 "") at ./include/linux/vmstat.h:184</code>
+<code>        physpages = &lt;optimized out&gt;</code>
+<code>        codesize = &lt;optimized out&gt;</code>
+<code>        datasize = &lt;optimized out&gt;</code>
+<code>        rosize = &lt;optimized out&gt;</code>
+<code>        bss_size = &lt;optimized out&gt;</code>
+<code>        init_code_size = &lt;optimized out&gt;</code>
+<code>        init_data_size = &lt;optimized out&gt;</code>
+<code>#2  0xffff000009185e9c in mem_init () at arch/arm64/mm/init.c:608</code>
+<code>No locals.</code>
+<code>#3  0xffff000009180b90 in mm_init () at init/main.c:520</code>
+<code>No locals.</code>
+<code>#4  start_kernel () at init/main.c:590</code>
+<code>        command_line = 0xffff000009226028 &lt;boot_command_line&gt; "root=/dev/ram0 console=ttyAMA0"</code>
+<code>        after_dashes = &lt;optimized out&gt;</code>
+<code>#5  0x0000000000000000 in ?? ()</code>
+<code>(gdb) i r pc</code>
+<code>pc             0xffff0000081274b0  0xffff0000081274b0 &lt;printk+92&gt;</code>
+<code>(gdb) x/16gx args.__stack</code>
+<code>0xffff0000092b3f00:     0x000000000000c848      0x0000000000008000 &#20998;&#21035;&#26159;&#31532;8&#21644;&#31532;9&#20010;&#21442;&#25968;</code>
+<code>0xffff0000092b3f10:     0xffff000008e0e090      0xffff000008e0e090 &#31532;10&#21644;&#31532;11&#20010;&#21442;&#25968;</code>
+<code>0xffff0000092b3f20:     0xffff0000092b3f70      0xffff000009185e9c</code>
+<code>0xffff0000092b3f30:     0xffff000009407000      0xffff0000092d55b8</code>
+<code>0xffff0000092b3f40:     0xffff0000092b96c8      0xffff0000092b96c0</code>
+<code>0xffff0000092b3f50:     0xffff800005fffe00      0xffff000009226028</code>
+<code>0xffff0000092b3f60:     0x0000000000000000      0x07bd33f332224500</code>
+<code>0xffff0000092b3f70:     0xffff0000092b3fa0      0xffff000009180b90</code>
+<code>(gdb) x/s 0xffff000008e0e090</code>
+<code>0xffff000008e0e090:     ""</code>
 </pre>
 </div>
 
@@ -384,12 +383,12 @@ pc             0xffff0000081274b0  0xffff0000081274b0 &lt;printk+92&gt;
 打印出来的log<br>
 </p>
 <div class="org-src-container">
-<pre class="src src-text">[    0.000000] Kernel command line: root=/dev/ram0 console=ttyAMA0
-[    0.000000] Memory: 47032K/131072K available (10236K kernel code, 1352K rwdata, 7112K rodata, 1216K init, 379K bss, 51272K reserved, 32768K cma-reserved)
-[    0.000000] SLUB: HWalign=64, Order=0-3, MinObjects=0, CPUs=2, Nodes=1
-[    0.000000] Preemptible hierarchical RCU implementation.
-[    0.000000]  RCU restricting CPUs from NR_CPUS=64 to nr_cpu_ids=2.
-[    0.000000]  Tasks RCU enabled.
+<pre class="src src-text"><code>[    0.000000] Kernel command line: root=/dev/ram0 console=ttyAMA0</code>
+<code>[    0.000000] Memory: 47032K/131072K available (10236K kernel code, 1352K rwdata, 7112K rodata, 1216K init, 379K bss, 51272K reserved, 32768K cma-reserved)</code>
+<code>[    0.000000] SLUB: HWalign=64, Order=0-3, MinObjects=0, CPUs=2, Nodes=1</code>
+<code>[    0.000000] Preemptible hierarchical RCU implementation.</code>
+<code>[    0.000000]  RCU restricting CPUs from NR_CPUS=64 to nr_cpu_ids=2.</code>
+<code>[    0.000000]  Tasks RCU enabled.</code>
 </pre>
 </div>
 <p>
@@ -400,9 +399,9 @@ pc             0xffff0000081274b0  0xffff0000081274b0 &lt;printk+92&gt;
 </div>
 </div>
 
-<div id="outline-container-org3581c30" class="outline-2">
-<h2 id="org3581c30">refs</h2>
-<div class="outline-text-2" id="text-org3581c30">
+<div id="outline-container-org4fa646b" class="outline-2">
+<h2 id="org4fa646b">refs</h2>
+<div class="outline-text-2" id="text-org4fa646b">
 <p>
 <a href="https://developer.arm.com/documentation/ihi0055/latest/">Procedure Call Standard for the Arm® 64-bit Architecture</a><br>
 </p>

@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2021-11-11 四 20:55 -->
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- 2022-03-03 Thu 11:48 -->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>SuDump: Exploiting suid binaries through the kernel笔记</title>
-<meta name="generator" content="Org mode">
-<meta name="author" content="Schspa">
+<meta name="author" content="Schspa" />
+<meta name="generator" content="Org Mode" />
 <link rel="shortcut icon" href="/images/rose-red.png" type="image/x-icon" />
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" integrity="sha256-sAcc18zvMnaJZrNT4v8J0T4HqzEUiUTlVFgDIywjQek=" crossorigin="anonymous">
 <link rel="stylesheet" href="/css/animate.min.css" />
@@ -54,21 +54,21 @@
   </nav>
 </header>
 </div>
-<div id="content">
+<div id="content" class="content">
 <h1 class="title">SuDump: Exploiting suid binaries through the kernel笔记</h1>
-<div id="table-of-contents">
+<div id="table-of-contents" role="doc-toc">
 <h2>Table of Contents</h2>
-<div id="text-table-of-contents">
+<div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#org6849b6a">简介</a></li>
-<li><a href="#org4f27345">实现原理</a>
+<li><a href="#org2cfc649">简介</a></li>
+<li><a href="#org3f166d3">实现原理</a>
 <ul>
-<li><a href="#org435cb6e">在任意目录升成coredump文件</a></li>
-<li><a href="#orgee5f8fe">在coredump中加入可以自定义的脚本</a></li>
-<li><a href="#org6b07377">执行coredump中的脚本</a></li>
+<li><a href="#org2d89d66">在任意目录升成coredump文件</a></li>
+<li><a href="#org11f5c1b">在coredump中加入可以自定义的脚本</a></li>
+<li><a href="#org6a3465f">执行coredump中的脚本</a></li>
 </ul>
 </li>
-<li><a href="#org648adef">总结</a></li>
+<li><a href="#org13239f9">总结</a></li>
 </ul>
 </div>
 </div>
@@ -78,22 +78,22 @@
 <a href="https://www.openwall.com/lists/oss-security/2021/10/20/2">https://www.openwall.com/lists/oss-security/2021/10/20/2</a><br>
 </p>
 
-<div id="outline-container-org6849b6a" class="outline-2">
-<h2 id="org6849b6a">简介</h2>
-<div class="outline-text-2" id="text-org6849b6a">
+<div id="outline-container-org2cfc649" class="outline-2">
+<h2 id="org2cfc649">简介</h2>
+<div class="outline-text-2" id="text-org2cfc649">
 <p>
 这个案例通过suid以及coredump来达到向任意目录写入coredump文件的目的.<br>
 </p>
 </div>
 </div>
 
-<div id="outline-container-org4f27345" class="outline-2">
-<h2 id="org4f27345">实现原理</h2>
-<div class="outline-text-2" id="text-org4f27345">
+<div id="outline-container-org3f166d3" class="outline-2">
+<h2 id="org3f166d3">实现原理</h2>
+<div class="outline-text-2" id="text-org3f166d3">
 </div>
-<div id="outline-container-org435cb6e" class="outline-3">
-<h3 id="org435cb6e">在任意目录升成coredump文件</h3>
-<div class="outline-text-3" id="text-org435cb6e">
+<div id="outline-container-org2d89d66" class="outline-3">
+<h3 id="org2d89d66">在任意目录升成coredump文件</h3>
+<div class="outline-text-3" id="text-org2d89d66">
 <ol class="org-ol">
 <li>suid的root用户可执行文件<br></li>
 <li>该可执行文件会调用 setuid(0) and setgid(0)<br></li>
@@ -105,18 +105,18 @@
 </p>
 </div>
 </div>
-<div id="outline-container-orgee5f8fe" class="outline-3">
-<h3 id="orgee5f8fe">在coredump中加入可以自定义的脚本</h3>
-<div class="outline-text-3" id="text-orgee5f8fe">
+<div id="outline-container-org11f5c1b" class="outline-3">
+<h3 id="org11f5c1b">在coredump中加入可以自定义的脚本</h3>
+<div class="outline-text-3" id="text-org11f5c1b">
 <p>
 XAUTHORITY这个环境变量，在sudo中可以原封不动的通过带到子进程中, 通过设置这个环境变量，就可以在coredump中带入任意的字符串<br>
 </p>
 </div>
 </div>
 
-<div id="outline-container-org6b07377" class="outline-3">
-<h3 id="org6b07377">执行coredump中的脚本</h3>
-<div class="outline-text-3" id="text-org6b07377">
+<div id="outline-container-org6a3465f" class="outline-3">
+<h3 id="org6a3465f">执行coredump中的脚本</h3>
+<div class="outline-text-3" id="text-org6a3465f">
 <ol class="org-ol">
 <li>需要有其他的程序来执行我们生成的coredump中的shell脚本/其他命令<br>
 Logrotate刚好可以满足要求.<br>
@@ -130,9 +130,9 @@ Logrotate刚好可以满足要求.<br>
 </div>
 </div>
 
-<div id="outline-container-org648adef" class="outline-2">
-<h2 id="org648adef">总结</h2>
-<div class="outline-text-2" id="text-org648adef">
+<div id="outline-container-org13239f9" class="outline-2">
+<h2 id="org13239f9">总结</h2>
+<div class="outline-text-2" id="text-org13239f9">
 <p>
 在这个例子中，通过一些小组合就可以成功获取到root权限. 漏洞中可能的解决方案是在内核中将suid进程的RLIMIT_CORE设置成0，但是这样会有很多之前能正常产生coredump的地方就无法再升成coredump了。<br>
 </p>

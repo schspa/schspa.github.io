@@ -1,14 +1,13 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2021-11-04 四 11:09 -->
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- 2022-03-03 Thu 11:48 -->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>AARCH64 ERET</title>
-<meta name="generator" content="Org mode">
-<meta name="author" content="Schspa">
-<meta name="description" content="AARCH64 ERET"
->
+<meta name="author" content="Schspa" />
+<meta name="description" content="AARCH64 ERET" />
+<meta name="generator" content="Org Mode" />
 <link rel="shortcut icon" href="/images/rose-red.png" type="image/x-icon" />
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" integrity="sha256-sAcc18zvMnaJZrNT4v8J0T4HqzEUiUTlVFgDIywjQek=" crossorigin="anonymous">
 <link rel="stylesheet" href="/css/animate.min.css" />
@@ -56,27 +55,27 @@
   </nav>
 </header>
 </div>
-<div id="content">
+<div id="content" class="content">
 <h1 class="title">AARCH64 ERET</h1>
-<div id="table-of-contents">
+<div id="table-of-contents" role="doc-toc">
 <h2>Table of Contents</h2>
-<div id="text-table-of-contents">
+<div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#orge177650">Exception &amp; ERET的使用场景</a></li>
-<li><a href="#org2a0ee34">ERET返回后代码从何处开始执行？</a>
+<li><a href="#org96a6211">Exception &amp; ERET的使用场景</a></li>
+<li><a href="#org9751686">ERET返回后代码从何处开始执行？</a>
 <ul>
-<li><a href="#orgf776a6c">先看ERET的伪代码</a></li>
-<li><a href="#org214a8a8">再看Exception产生的伪代码</a></li>
+<li><a href="#org55e92b2">先看ERET的伪代码</a></li>
+<li><a href="#orge5dc4a9">再看Exception产生的伪代码</a></li>
 </ul>
 </li>
-<li><a href="#org37ac314">总结</a></li>
+<li><a href="#org3a41d8b">总结</a></li>
 </ul>
 </div>
 </div>
 
-<div id="outline-container-orge177650" class="outline-2">
-<h2 id="orge177650">Exception &amp; ERET的使用场景</h2>
-<div class="outline-text-2" id="text-orge177650">
+<div id="outline-container-org96a6211" class="outline-2">
+<h2 id="org96a6211">Exception &amp; ERET的使用场景</h2>
+<div class="outline-text-2" id="text-org96a6211">
 <p>
 ERET用来在系统异常处理完成后返回原来的执行流程并继续运行下去<br>
 看似简单的功能，实现却并不简单，需要考虑很多场景,不同场景下行为也会有些差异<br>
@@ -105,52 +104,52 @@ IRQ/FIQ／System Error返回<br>
 </div>
 </div>
 
-<div id="outline-container-org2a0ee34" class="outline-2">
-<h2 id="org2a0ee34">ERET返回后代码从何处开始执行？</h2>
-<div class="outline-text-2" id="text-org2a0ee34">
+<div id="outline-container-org9751686" class="outline-2">
+<h2 id="org9751686">ERET返回后代码从何处开始执行？</h2>
+<div class="outline-text-2" id="text-org9751686">
 </div>
-<div id="outline-container-orgf776a6c" class="outline-3">
-<h3 id="orgf776a6c">先看ERET的伪代码</h3>
-<div class="outline-text-3" id="text-orgf776a6c">
+<div id="outline-container-org55e92b2" class="outline-3">
+<h3 id="org55e92b2">先看ERET的伪代码</h3>
+<div class="outline-text-3" id="text-org55e92b2">
 <p>
 伪代码:<br>
 </p>
 <div class="org-src-container">
-<pre class="src src-C"><span style="color: #5B6268;">// </span><span style="color: #5B6268;">AArch64.ExceptionReturn()</span>
-<span style="color: #5B6268;">// </span><span style="color: #5B6268;">=========================</span>
-AArch64.ExceptionReturn(bits(64) new_pc, bits(32) spsr)
-    <span style="color: #c678dd;">SynchronizeContext</span>();
-    sync_errors = HaveIESB() &amp;&amp; SCTLR[].IESB == <span style="color: #98be65;">'1'</span>;
-    <span style="color: #51afef;">if</span> HaveDoubleFaultExt() <span style="color: #ECBE7B;">then</span>
-        <span style="color: #dcaeea;">sync_errors</span> = sync_errors || (SCR_EL3.EA == <span style="color: #98be65;">'1'</span> &amp;&amp; SCR_EL3.NMEA == <span style="color: #98be65;">'1'</span> &amp;&amp; PSTATE.EL == EL3);
-    <span style="color: #51afef;">if</span> sync_errors then
-        SynchronizeErrors();
-        iesb_req = TRUE;
-        <span style="color: #c678dd;">TakeUnmaskedPhysicalSErrorInterrupts</span>(iesb_req);
-    <span style="color: #5B6268;">// </span><span style="color: #5B6268;">Attempts to change to an illegal state will invoke the Illegal Execution state mechanism</span>
-    <span style="color: #c678dd;">SetPSTATEFromPSR</span>(spsr);
-    <span style="color: #c678dd;">ClearExclusiveLocal</span>(<span style="color: #ECBE7B;">ProcessorID</span>());
-    <span style="color: #c678dd;">SendEventLocal</span>();
-
-    <span style="color: #51afef;">if</span> PSTATE.IL == <span style="color: #98be65;">'1'</span> &amp;&amp; spsr&lt;4&gt; == <span style="color: #98be65;">'1'</span> &amp;&amp; spsr&lt;20&gt; == <span style="color: #98be65;">'0'</span> then
-        <span style="color: #5B6268;">// </span><span style="color: #5B6268;">If the exception return is illegal, PC[63:32,1:0] are UNKNOWN</span>
-        new_pc&lt;63:32&gt; = bits(32) UNKNOWN;
-        new_pc&lt;1:0&gt; = bits(2) UNKNOWN;
-    <span style="color: #ECBE7B;">elsif</span> <span style="color: #c678dd;">UsingAArch32</span>() then
-        <span style="color: #5B6268;">// </span><span style="color: #5B6268;">Return to AArch32</span>
-        <span style="color: #5B6268;">// </span><span style="color: #5B6268;">ELR_ELx[1:0] or ELR_ELx[0] are treated as being 0, depending on the target instruction set state</span>
-        <span style="color: #51afef;">if</span> PSTATE.T == <span style="color: #98be65;">'1'</span> then
-            new_pc&lt;0&gt; = <span style="color: #98be65;">'0'</span>;      <span style="color: #5B6268;">// </span><span style="color: #5B6268;">T32</span>
-        <span style="color: #51afef;">else</span>
-            new_pc&lt;1:0&gt; = <span style="color: #ECBE7B;">'</span>00<span style="color: #ECBE7B;">'</span>;   <span style="color: #5B6268;">// </span><span style="color: #5B6268;">A32</span>
-    <span style="color: #51afef;">else</span>                                  <span style="color: #5B6268;">// </span><span style="color: #5B6268;">Return to AArch64</span>
-        <span style="color: #5B6268;">// </span><span style="color: #5B6268;">ELR_ELx[63:56] might include a tag</span>
-        new_pc = AArch64.BranchAddr(new_pc);
-    <span style="color: #51afef;">if</span> UsingAArch32() <span style="color: #ECBE7B;">then</span>
-        <span style="color: #5B6268;">// </span><span style="color: #5B6268;">32 most significant bits are ignored.</span>
-        <span style="color: #c678dd;">BranchTo</span>(new_pc&lt;31:0&gt;, BranchType_ERET);
-    <span style="color: #51afef;">else</span>
-        BranchToAddr(new_pc, BranchType_ERET);
+<pre class="src src-C"><code><span style="color: #5B6268;">// </span><span style="color: #5B6268;">AArch64.ExceptionReturn()</span></code>
+<code><span style="color: #5B6268;">// </span><span style="color: #5B6268;">=========================</span></code>
+<code>AArch64.ExceptionReturn(bits(64) new_pc, bits(32) spsr)</code>
+<code>    <span style="color: #c678dd;">SynchronizeContext</span>();</code>
+<code>    sync_errors = HaveIESB() &amp;&amp; SCTLR[].IESB == <span style="color: #98be65;">'1'</span>;</code>
+<code>    <span style="color: #51afef;">if</span> HaveDoubleFaultExt() <span style="color: #ECBE7B;">then</span></code>
+<code>        <span style="color: #dcaeea;">sync_errors</span> = sync_errors || (SCR_EL3.EA == <span style="color: #98be65;">'1'</span> &amp;&amp; SCR_EL3.NMEA == <span style="color: #98be65;">'1'</span> &amp;&amp; PSTATE.EL == EL3);</code>
+<code>    <span style="color: #51afef;">if</span> sync_errors then</code>
+<code>        SynchronizeErrors();</code>
+<code>        iesb_req = TRUE;</code>
+<code>        <span style="color: #c678dd;">TakeUnmaskedPhysicalSErrorInterrupts</span>(iesb_req);</code>
+<code>    <span style="color: #5B6268;">// </span><span style="color: #5B6268;">Attempts to change to an illegal state will invoke the Illegal Execution state mechanism</span></code>
+<code>    <span style="color: #c678dd;">SetPSTATEFromPSR</span>(spsr);</code>
+<code>    <span style="color: #c678dd;">ClearExclusiveLocal</span>(<span style="color: #ECBE7B;">ProcessorID</span>());</code>
+<code>    <span style="color: #c678dd;">SendEventLocal</span>();</code>
+<code></code>
+<code>    <span style="color: #51afef;">if</span> PSTATE.IL == <span style="color: #98be65;">'1'</span> &amp;&amp; spsr&lt;4&gt; == <span style="color: #98be65;">'1'</span> &amp;&amp; spsr&lt;20&gt; == <span style="color: #98be65;">'0'</span> then</code>
+<code>        <span style="color: #5B6268;">// </span><span style="color: #5B6268;">If the exception return is illegal, PC[63:32,1:0] are UNKNOWN</span></code>
+<code>        new_pc&lt;63:32&gt; = bits(32) UNKNOWN;</code>
+<code>        new_pc&lt;1:0&gt; = bits(2) UNKNOWN;</code>
+<code>    <span style="color: #ECBE7B;">elsif</span> <span style="color: #c678dd;">UsingAArch32</span>() then</code>
+<code>        <span style="color: #5B6268;">// </span><span style="color: #5B6268;">Return to AArch32</span></code>
+<code>        <span style="color: #5B6268;">// </span><span style="color: #5B6268;">ELR_ELx[1:0] or ELR_ELx[0] are treated as being 0, depending on the target instruction set state</span></code>
+<code>        <span style="color: #51afef;">if</span> PSTATE.T == <span style="color: #98be65;">'1'</span> then</code>
+<code>            new_pc&lt;0&gt; = <span style="color: #98be65;">'0'</span>;      <span style="color: #5B6268;">// </span><span style="color: #5B6268;">T32</span></code>
+<code>        <span style="color: #51afef;">else</span></code>
+<code>            new_pc&lt;1:0&gt; = <span style="color: #ECBE7B;">'</span>00<span style="color: #ECBE7B;">'</span>;   <span style="color: #5B6268;">// </span><span style="color: #5B6268;">A32</span></code>
+<code>    <span style="color: #51afef;">else</span>                                  <span style="color: #5B6268;">// </span><span style="color: #5B6268;">Return to AArch64</span></code>
+<code>        <span style="color: #5B6268;">// </span><span style="color: #5B6268;">ELR_ELx[63:56] might include a tag</span></code>
+<code>        new_pc = AArch64.BranchAddr(new_pc);</code>
+<code>    <span style="color: #51afef;">if</span> UsingAArch32() <span style="color: #ECBE7B;">then</span></code>
+<code>        <span style="color: #5B6268;">// </span><span style="color: #5B6268;">32 most significant bits are ignored.</span></code>
+<code>        <span style="color: #c678dd;">BranchTo</span>(new_pc&lt;31:0&gt;, BranchType_ERET);</code>
+<code>    <span style="color: #51afef;">else</span></code>
+<code>        BranchToAddr(new_pc, BranchType_ERET);</code>
 </pre>
 </div>
 
@@ -164,39 +163,39 @@ AArch64.ExceptionReturn(bits(64) new_pc, bits(32) spsr)
 
 
 
-<div id="outline-container-org214a8a8" class="outline-3">
-<h3 id="org214a8a8">再看Exception产生的伪代码</h3>
-<div class="outline-text-3" id="text-org214a8a8">
+<div id="outline-container-orge5dc4a9" class="outline-3">
+<h3 id="orge5dc4a9">再看Exception产生的伪代码</h3>
+<div class="outline-text-3" id="text-orge5dc4a9">
 <dl class="org-dl">
 <dt>DataAbort</dt><dd>da<br></dd>
 </dl>
 <div class="org-src-container">
-<pre class="src src-C"><span style="color: #5B6268;">// </span><span style="color: #5B6268;">AArch64.DataAbort()</span>
-<span style="color: #5B6268;">// </span><span style="color: #5B6268;">===================</span>
-
-AArch64.DataAbort(bits(64) vaddress, <span style="color: #ECBE7B;">FaultRecord</span> <span style="color: #dcaeea;">fault</span>)
-   route_to_el3 = HaveEL(EL3) &amp;&amp; SCR_EL3.EA == <span style="color: #98be65;">'1'</span> &amp;&amp; IsExternalAbort(fault);
-   route_to_el2 = (PSTATE.EL IN {EL0, EL1} &amp;&amp; EL2Enabled() &amp;&amp; (HCR_EL2.TGE == <span style="color: #98be65;">'1'</span> ||
-           (HaveRASExt() &amp;&amp; HCR_EL2.TEA == <span style="color: #98be65;">'1'</span> &amp;&amp; IsExternalAbort(fault)) ||
-           (HaveNV2Ext() &amp;&amp; fault.acctype == AccType_NV2REGISTER) ||
-           IsSecondStage(fault)));
-
-   bits(64) preferred_exception_return = ThisInstrAddr();
-   <span style="color: #51afef;">if</span> (HaveDoubleFaultExt() &amp;&amp; (PSTATE.EL == EL3 || route_to_el3) &amp;&amp;
-       IsExternalAbort(fault) &amp;&amp; SCR_EL3.EASE == <span style="color: #98be65;">'1'</span>) <span style="color: #ECBE7B;">then</span>
-       <span style="color: #dcaeea;">vect_offset</span> = 0x180;
-   <span style="color: #51afef;">else</span>
-       vect_offset = 0x0;
-   <span style="color: #51afef;">if</span> HaveNV2Ext() &amp;&amp; fault.acctype == AccType_NV2REGISTER then
-       exception = AArch64.AbortSyndrome(Exception_NV2DataAbort, fault, vaddress);
-   <span style="color: #51afef;">else</span>
-       exception = AArch64.AbortSyndrome(Exception_DataAbort, fault, vaddress);
-   <span style="color: #51afef;">if</span> PSTATE.EL == EL3 || route_to_el3 then
-       AArch64.TakeException(EL3, exception, preferred_exception_return, vect_offset);
-   <span style="color: #ECBE7B;">elsif</span> <span style="color: #dcaeea;">PSTATE</span>.EL == EL2 || route_to_el2 then
-       AArch64.TakeException(EL2, exception, preferred_exception_return, vect_offset);
-   <span style="color: #51afef;">else</span>
-       AArch64.TakeException(EL1, exception, preferred_exception_return, vect_offset); 
+<pre class="src src-C"><code><span style="color: #5B6268;">// </span><span style="color: #5B6268;">AArch64.DataAbort()</span></code>
+<code><span style="color: #5B6268;">// </span><span style="color: #5B6268;">===================</span></code>
+<code></code>
+<code>AArch64.DataAbort(bits(64) vaddress, <span style="color: #ECBE7B;">FaultRecord</span> <span style="color: #dcaeea;">fault</span>)</code>
+<code>   route_to_el3 = HaveEL(EL3) &amp;&amp; SCR_EL3.EA == <span style="color: #98be65;">'1'</span> &amp;&amp; IsExternalAbort(fault);</code>
+<code>   route_to_el2 = (PSTATE.EL IN {EL0, EL1} &amp;&amp; EL2Enabled() &amp;&amp; (HCR_EL2.TGE == <span style="color: #98be65;">'1'</span> ||</code>
+<code>           (HaveRASExt() &amp;&amp; HCR_EL2.TEA == <span style="color: #98be65;">'1'</span> &amp;&amp; IsExternalAbort(fault)) ||</code>
+<code>           (HaveNV2Ext() &amp;&amp; fault.acctype == AccType_NV2REGISTER) ||</code>
+<code>           IsSecondStage(fault)));</code>
+<code></code>
+<code>   bits(64) preferred_exception_return = ThisInstrAddr();</code>
+<code>   <span style="color: #51afef;">if</span> (HaveDoubleFaultExt() &amp;&amp; (PSTATE.EL == EL3 || route_to_el3) &amp;&amp;</code>
+<code>       IsExternalAbort(fault) &amp;&amp; SCR_EL3.EASE == <span style="color: #98be65;">'1'</span>) <span style="color: #ECBE7B;">then</span></code>
+<code>       <span style="color: #dcaeea;">vect_offset</span> = 0x180;</code>
+<code>   <span style="color: #51afef;">else</span></code>
+<code>       vect_offset = 0x0;</code>
+<code>   <span style="color: #51afef;">if</span> HaveNV2Ext() &amp;&amp; fault.acctype == AccType_NV2REGISTER then</code>
+<code>       exception = AArch64.AbortSyndrome(Exception_NV2DataAbort, fault, vaddress);</code>
+<code>   <span style="color: #51afef;">else</span></code>
+<code>       exception = AArch64.AbortSyndrome(Exception_DataAbort, fault, vaddress);</code>
+<code>   <span style="color: #51afef;">if</span> PSTATE.EL == EL3 || route_to_el3 then</code>
+<code>       AArch64.TakeException(EL3, exception, preferred_exception_return, vect_offset);</code>
+<code>   <span style="color: #ECBE7B;">elsif</span> <span style="color: #dcaeea;">PSTATE</span>.EL == EL2 || route_to_el2 then</code>
+<code>       AArch64.TakeException(EL2, exception, preferred_exception_return, vect_offset);</code>
+<code>   <span style="color: #51afef;">else</span></code>
+<code>       AArch64.TakeException(EL1, exception, preferred_exception_return, vect_offset); </code>
 </pre>
 </div>
 
@@ -208,29 +207,29 @@ AArch64.DataAbort(bits(64) vaddress, <span style="color: #ECBE7B;">FaultRecord</
 svc<br>
 </p>
 <div class="org-src-container">
-<pre class="src src-C">aarch64/exceptions/syscalls/AArch64.CallSupervisor
-<span style="color: #5B6268;">// </span><span style="color: #5B6268;">AArch64.CallSupervisor()</span>
-<span style="color: #5B6268;">// </span><span style="color: #5B6268;">========================</span>
-<span style="color: #5B6268;">// </span><span style="color: #5B6268;">Calls the Supervisor</span>
-
-AArch64.CallSupervisor(bits(16) immediate)
-
-    <span style="color: #51afef;">if</span> UsingAArch32() <span style="color: #ECBE7B;">then</span> <span style="color: #c678dd;">AArch32</span>.ITAdvance();
-    <span style="color: #c678dd;">SSAdvance</span>();
-    route_to_el2 = PSTATE.EL == EL0 &amp;&amp; EL2Enabled() &amp;&amp; HCR_EL2.TGE == <span style="color: #98be65;">'1'</span>;
-
-    bits(64) preferred_exception_return = NextInstrAddr();
-    vect_offset = 0x0;
-
-    exception = ExceptionSyndrome(Exception_SupervisorCall);
-    exception.syndrome&lt;15:0&gt; = immediate;
-
-    <span style="color: #51afef;">if</span> UInt(PSTATE.EL) &gt; UInt(EL1) <span style="color: #ECBE7B;">then</span>
-        <span style="color: #c678dd;">AArch64</span>.TakeException(PSTATE.EL, exception, preferred_exception_return, vect_offset);
-    elsif route_to_el2 <span style="color: #ECBE7B;">then</span>
-        <span style="color: #c678dd;">AArch64</span>.TakeException(EL2, exception, preferred_exception_return, vect_offset);
-    <span style="color: #51afef;">else</span>
-        AArch64.TakeException(EL1, exception, preferred_exception_return, vect_offset);
+<pre class="src src-C"><code>aarch64/exceptions/syscalls/AArch64.CallSupervisor</code>
+<code><span style="color: #5B6268;">// </span><span style="color: #5B6268;">AArch64.CallSupervisor()</span></code>
+<code><span style="color: #5B6268;">// </span><span style="color: #5B6268;">========================</span></code>
+<code><span style="color: #5B6268;">// </span><span style="color: #5B6268;">Calls the Supervisor</span></code>
+<code></code>
+<code>AArch64.CallSupervisor(bits(16) immediate)</code>
+<code></code>
+<code>    <span style="color: #51afef;">if</span> UsingAArch32() <span style="color: #ECBE7B;">then</span> <span style="color: #c678dd;">AArch32</span>.ITAdvance();</code>
+<code>    <span style="color: #c678dd;">SSAdvance</span>();</code>
+<code>    route_to_el2 = PSTATE.EL == EL0 &amp;&amp; EL2Enabled() &amp;&amp; HCR_EL2.TGE == <span style="color: #98be65;">'1'</span>;</code>
+<code></code>
+<code>    bits(64) preferred_exception_return = NextInstrAddr();</code>
+<code>    vect_offset = 0x0;</code>
+<code></code>
+<code>    exception = ExceptionSyndrome(Exception_SupervisorCall);</code>
+<code>    exception.syndrome&lt;15:0&gt; = immediate;</code>
+<code></code>
+<code>    <span style="color: #51afef;">if</span> UInt(PSTATE.EL) &gt; UInt(EL1) <span style="color: #ECBE7B;">then</span></code>
+<code>        <span style="color: #c678dd;">AArch64</span>.TakeException(PSTATE.EL, exception, preferred_exception_return, vect_offset);</code>
+<code>    elsif route_to_el2 <span style="color: #ECBE7B;">then</span></code>
+<code>        <span style="color: #c678dd;">AArch64</span>.TakeException(EL2, exception, preferred_exception_return, vect_offset);</code>
+<code>    <span style="color: #51afef;">else</span></code>
+<code>        AArch64.TakeException(EL1, exception, preferred_exception_return, vect_offset);</code>
 </pre>
 </div>
 
@@ -242,9 +241,9 @@ AArch64.CallSupervisor(bits(16) immediate)
 </div>
 </div>
 
-<div id="outline-container-org37ac314" class="outline-2">
-<h2 id="org37ac314">总结</h2>
-<div class="outline-text-2" id="text-org37ac314">
+<div id="outline-container-org3a41d8b" class="outline-2">
+<h2 id="org3a41d8b">总结</h2>
+<div class="outline-text-2" id="text-org3a41d8b">
 <p>
 AARCH64 CPU在发生异常的时候，会根据异常的Class来将ELR设置为不同的地址，所以，ELR寄存器存储的是异常处理之后需要返回的地址，而不是发生异常的指令地址.<br>
 </p>

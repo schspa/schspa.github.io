@@ -1,14 +1,13 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2021-10-12 二 19:35 -->
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- 2022-03-03 Thu 11:48 -->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>SSHFS behind NAT</title>
-<meta name="generator" content="Org mode">
-<meta name="author" content="Schspa">
-<meta name="description" content="SSHFS behind NAT"
->
+<meta name="author" content="Schspa" />
+<meta name="description" content="SSHFS behind NAT" />
+<meta name="generator" content="Org Mode" />
 <link rel="shortcut icon" href="/images/rose-red.png" type="image/x-icon" />
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" integrity="sha256-sAcc18zvMnaJZrNT4v8J0T4HqzEUiUTlVFgDIywjQek=" crossorigin="anonymous">
 <link rel="stylesheet" href="/css/animate.min.css" />
@@ -56,29 +55,29 @@
   </nav>
 </header>
 </div>
-<div id="content">
+<div id="content" class="content">
 <h1 class="title">SSHFS behind NAT</h1>
-<div id="table-of-contents">
+<div id="table-of-contents" role="doc-toc">
 <h2>Table of Contents</h2>
-<div id="text-table-of-contents">
+<div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#orgfc4bbed">system diagram</a></li>
-<li><a href="#org1e82d05">Mount local directory to remote server</a>
+<li><a href="#orgff85b99">system diagram</a></li>
+<li><a href="#orgde2f8f9">Mount local directory to remote server</a>
 <ul>
-<li><a href="#orgd429792">open a portforward when connect via ssh</a></li>
-<li><a href="#org5e397f9">test ssh connect via unixsocket</a></li>
-<li><a href="#orgbb5a57a">mount sshfs via unixsocket</a></li>
+<li><a href="#orgd908edb">open a portforward when connect via ssh</a></li>
+<li><a href="#orgdbe074c">test ssh connect via unixsocket</a></li>
+<li><a href="#orga822372">mount sshfs via unixsocket</a></li>
 </ul>
 </li>
 </ul>
 </div>
 </div>
 
-<div id="outline-container-orgfc4bbed" class="outline-2">
-<h2 id="orgfc4bbed">system diagram</h2>
-<div class="outline-text-2" id="text-orgfc4bbed">
+<div id="outline-container-orgff85b99" class="outline-2">
+<h2 id="orgff85b99">system diagram</h2>
+<div class="outline-text-2" id="text-orgff85b99">
 
-<div id="orgc95e29d" class="figure">
+<div id="org07343dc" class="figure">
 <p><img src="assets/sshfs-behind-nat.png" alt="sshfs-behind-nat.png"><br>
 </p>
 <p><span class="figure-number">Figure 1: </span>System Diagram</p>
@@ -86,36 +85,36 @@
 </div>
 </div>
 
-<div id="outline-container-org1e82d05" class="outline-2">
-<h2 id="org1e82d05">Mount local directory to remote server</h2>
-<div class="outline-text-2" id="text-org1e82d05">
+<div id="outline-container-orgde2f8f9" class="outline-2">
+<h2 id="orgde2f8f9">Mount local directory to remote server</h2>
+<div class="outline-text-2" id="text-orgde2f8f9">
 </div>
-<div id="outline-container-orgd429792" class="outline-3">
-<h3 id="orgd429792">open a portforward when connect via ssh</h3>
-<div class="outline-text-3" id="text-orgd429792">
+<div id="outline-container-orgd908edb" class="outline-3">
+<h3 id="orgd908edb">open a portforward when connect via ssh</h3>
+<div class="outline-text-3" id="text-orgd908edb">
 <div class="org-src-container">
-<pre class="src src-bash">ssh -R /tmp/$(id -n -u)_local.socket:localhost:22 schspa@remote.com
+<pre class="src src-bash"><code>ssh -o <span style="color: #dcaeea;">StreamLocalBindUnlink</span>=yes -R /tmp/$(id -n -u)_local.socket:localhost:22 schspa@remote.com</code>
 </pre>
 </div>
 </div>
 </div>
 
-<div id="outline-container-org5e397f9" class="outline-3">
-<h3 id="org5e397f9">test ssh connect via unixsocket</h3>
-<div class="outline-text-3" id="text-org5e397f9">
+<div id="outline-container-orgdbe074c" class="outline-3">
+<h3 id="orgdbe074c">test ssh connect via unixsocket</h3>
+<div class="outline-text-3" id="text-orgdbe074c">
 <div class="org-src-container">
-<pre class="src src-bash">ssh -o <span style="color: #98be65;">"ProxyCommand socat - UNIX-CLIENT:/tmp/$(id -n -u)_local.socket"</span> schspa@remote.com
+<pre class="src src-bash"><code>ssh -o <span style="color: #dcaeea;">UserKnownHostsFile</span>=/dev/null -o <span style="color: #dcaeea;">StrictHostKeyChecking</span>=no -o <span style="color: #98be65;">"ProxyCommand socat - UNIX-CLIENT:/tmp/$(id -n -u)_local.socket"</span> schspa@localhost</code>
 </pre>
 </div>
 </div>
 </div>
 
 
-<div id="outline-container-orgbb5a57a" class="outline-3">
-<h3 id="orgbb5a57a">mount sshfs via unixsocket</h3>
-<div class="outline-text-3" id="text-orgbb5a57a">
+<div id="outline-container-orga822372" class="outline-3">
+<h3 id="orga822372">mount sshfs via unixsocket</h3>
+<div class="outline-text-3" id="text-orga822372">
 <div class="org-src-container">
-<pre class="src src-bash">sshfs -o <span style="color: #dcaeea;">ProxyCommand</span>=<span style="color: #98be65;">"socat - UNIX-CLIENT:/tmp/%r_local.socket"</span> -o <span style="color: #dcaeea;">idmap</span>=user,<span style="color: #dcaeea;">uid</span>=$(id -u),<span style="color: #dcaeea;">gid</span>=$(id -g) -o auto_unmount  schspa@localhost:/Volumes/work ~/work
+<pre class="src src-bash"><code>sshfs -o <span style="color: #dcaeea;">UserKnownHostsFile</span>=/dev/null -o <span style="color: #dcaeea;">StrictHostKeyChecking</span>=no -o <span style="color: #dcaeea;">ProxyCommand</span>=<span style="color: #98be65;">"socat - UNIX-CLIENT:/tmp/%r_local.socket"</span> -o <span style="color: #dcaeea;">idmap</span>=user,<span style="color: #dcaeea;">uid</span>=$(id -u),<span style="color: #dcaeea;">gid</span>=$(id -g) -o auto_unmount  schspa@localhost:/Volumes/work ~/work</code>
 </pre>
 </div>
 </div>

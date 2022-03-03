@@ -1,14 +1,13 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2021-10-12 二 19:35 -->
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- 2022-03-03 Thu 11:47 -->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>QEMU virtio-9p-device assert failed</title>
-<meta name="generator" content="Org mode">
-<meta name="author" content="Schspa">
-<meta name="description" content="QEMU virtio-9p-device assert failed"
->
+<meta name="author" content="Schspa" />
+<meta name="description" content="QEMU virtio-9p-device assert failed" />
+<meta name="generator" content="Org Mode" />
 <link rel="shortcut icon" href="/images/rose-red.png" type="image/x-icon" />
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" integrity="sha256-sAcc18zvMnaJZrNT4v8J0T4HqzEUiUTlVFgDIywjQek=" crossorigin="anonymous">
 <link rel="stylesheet" href="/css/animate.min.css" />
@@ -56,44 +55,44 @@
   </nav>
 </header>
 </div>
-<div id="content">
+<div id="content" class="content">
 <h1 class="title">QEMU virtio-9p-device assert failed</h1>
-<div id="table-of-contents">
+<div id="table-of-contents" role="doc-toc">
 <h2>Table of Contents</h2>
-<div id="text-table-of-contents">
+<div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#orgabb1f4e">Problems</a></li>
-<li><a href="#orgc746f93">Problem analyse</a>
+<li><a href="#orgc24a055">Problems</a></li>
+<li><a href="#orgee77eb0">Problem analyse</a>
 <ul>
-<li><a href="#orgc03d2e4">google it.</a></li>
-<li><a href="#org5f45998">查一下本地仓库的提交记录</a></li>
-<li><a href="#org4caffcd">稍微调试一下</a>
+<li><a href="#org5b15f46">google it.</a></li>
+<li><a href="#orga8a938e">查一下本地仓库的提交记录</a></li>
+<li><a href="#org111bbc1">稍微调试一下</a>
 <ul>
-<li><a href="#orga772ee0">看看之前已经合入的修复patch</a></li>
-<li><a href="#org735fa9a">回过头看我们的设备名称</a></li>
-<li><a href="#orgf51a8f6">调试以下修复的patch</a></li>
-<li><a href="#org9128cf1">看看这个地址为什么不对</a></li>
-<li><a href="#org6e16b9b">看一看virtio-mmio的创建代码</a></li>
-<li><a href="#orga57b6ec">看看其他平台</a></li>
+<li><a href="#orge05aef3">看看之前已经合入的修复patch</a></li>
+<li><a href="#org972c216">回过头看我们的设备名称</a></li>
+<li><a href="#org2c9e530">调试以下修复的patch</a></li>
+<li><a href="#orgc3ff066">看看这个地址为什么不对</a></li>
+<li><a href="#org076d3af">看一看virtio-mmio的创建代码</a></li>
+<li><a href="#org586e857">看看其他平台</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li><a href="#org449fe01">修复方案</a>
+<li><a href="#orgeae34f9">修复方案</a>
 <ul>
-<li><a href="#org81fed80">添加sysbus_mmio_map的调用</a></li>
-<li><a href="#org9bd53a9">使用arm virt平台上的初始化</a></li>
-<li><a href="#orgc5df3b8">不太OK的解决方案</a></li>
-<li><a href="#org6239fa7">提交的qemu中的解决方案</a></li>
+<li><a href="#orgc31bb68">添加sysbus_mmio_map的调用</a></li>
+<li><a href="#org8d42c4b">使用arm virt平台上的初始化</a></li>
+<li><a href="#orga47b973">不太OK的解决方案</a></li>
+<li><a href="#orgbad9264">提交的qemu中的解决方案</a></li>
 </ul>
 </li>
 </ul>
 </div>
 </div>
 
-<div id="outline-container-orgabb1f4e" class="outline-2">
-<h2 id="orgabb1f4e">Problems</h2>
-<div class="outline-text-2" id="text-orgabb1f4e">
+<div id="outline-container-orgc24a055" class="outline-2">
+<h2 id="orgc24a055">Problems</h2>
+<div class="outline-text-2" id="text-orgc24a055">
 <p>
 在xlnx-versal-virt平台上，创建多个相同类型的virtio设备时，会报错<br>
 </p>
@@ -101,32 +100,32 @@
 <li>启动命令<br></li>
 </ul>
 <div class="org-src-container">
-<pre class="src src-bash">qemu-system-aarch64 <span style="color: #98be65;">\</span>
-    -machine xlnx-versal-virt -nographic -smp 2 -m 128 <span style="color: #98be65;">\</span>
-    -fsdev local,<span style="color: #dcaeea;">id</span>=shareid,<span style="color: #dcaeea;">path</span>=${<span style="color: #dcaeea;">HOME</span>}/work,<span style="color: #dcaeea;">security_model</span>=none <span style="color: #98be65;">\</span>
-    -device virtio-9p-device,<span style="color: #dcaeea;">fsdev</span>=shareid,<span style="color: #dcaeea;">mount_tag</span>=share <span style="color: #98be65;">\</span>
-    -fsdev local,<span style="color: #dcaeea;">id</span>=shareid1,<span style="color: #dcaeea;">path</span>=${<span style="color: #dcaeea;">HOME</span>}/Music,<span style="color: #dcaeea;">security_model</span>=none <span style="color: #98be65;">\</span>
-    -device virtio-9p-device,<span style="color: #dcaeea;">fsdev</span>=shareid1,<span style="color: #dcaeea;">mount_tag</span>=share1
+<pre class="src src-bash"><code>qemu-system-aarch64 <span style="color: #98be65;">\</span></code>
+<code>    -machine xlnx-versal-virt -nographic -smp 2 -m 128 <span style="color: #98be65;">\</span></code>
+<code>    -fsdev local,<span style="color: #dcaeea;">id</span>=shareid,<span style="color: #dcaeea;">path</span>=${<span style="color: #dcaeea;">HOME</span>}/work,<span style="color: #dcaeea;">security_model</span>=none <span style="color: #98be65;">\</span></code>
+<code>    -device virtio-9p-device,<span style="color: #dcaeea;">fsdev</span>=shareid,<span style="color: #dcaeea;">mount_tag</span>=share <span style="color: #98be65;">\</span></code>
+<code>    -fsdev local,<span style="color: #dcaeea;">id</span>=shareid1,<span style="color: #dcaeea;">path</span>=${<span style="color: #dcaeea;">HOME</span>}/Music,<span style="color: #dcaeea;">security_model</span>=none <span style="color: #98be65;">\</span></code>
+<code>    -device virtio-9p-device,<span style="color: #dcaeea;">fsdev</span>=shareid1,<span style="color: #dcaeea;">mount_tag</span>=share1</code>
 </pre>
 </div>
 <ul class="org-ul">
 <li>错误信息<br></li>
 </ul>
 <div class="org-src-container">
-<pre class="src src-bash">qemu-system-aarch64: ../migration/savevm.c:860: vmstate_register_with_alias_id: Assertion <span style="color: #51afef; font-weight: bold;">`!se-&gt;compat || se-&gt;instance_id == 0' failed.</span>
-<span style="color: #51afef; font-weight: bold;">[1]    999094 abort (core dumped)</span>
+<pre class="src src-bash"><code>qemu-system-aarch64: ../migration/savevm.c:860: vmstate_register_with_alias_id: Assertion <span style="color: #51afef; font-weight: bold;">`!se-&gt;compat || se-&gt;instance_id == 0' failed.</span></code>
+<code><span style="color: #51afef; font-weight: bold;">[1]    999094 abort (core dumped)</span></code>
 </pre>
 </div>
 </div>
 </div>
 
-<div id="outline-container-orgc746f93" class="outline-2">
-<h2 id="orgc746f93">Problem analyse</h2>
-<div class="outline-text-2" id="text-orgc746f93">
+<div id="outline-container-orgee77eb0" class="outline-2">
+<h2 id="orgee77eb0">Problem analyse</h2>
+<div class="outline-text-2" id="text-orgee77eb0">
 </div>
-<div id="outline-container-orgc03d2e4" class="outline-3">
-<h3 id="orgc03d2e4">google it.</h3>
-<div class="outline-text-3" id="text-orgc03d2e4">
+<div id="outline-container-org5b15f46" class="outline-3">
+<h3 id="org5b15f46">google it.</h3>
+<div class="outline-text-3" id="text-org5b15f46">
 <ul class="org-ul">
 <li>bug report<br>
 <a href="https://bugs.launchpad.net/qemu/+bug/1594239">https://bugs.launchpad.net/qemu/+bug/1594239</a><br></li>
@@ -137,9 +136,9 @@
 </div>
 </div>
 
-<div id="outline-container-org5f45998" class="outline-3">
-<h3 id="org5f45998">查一下本地仓库的提交记录</h3>
-<div class="outline-text-3" id="text-org5f45998">
+<div id="outline-container-orga8a938e" class="outline-3">
+<h3 id="orga8a938e">查一下本地仓库的提交记录</h3>
+<div class="outline-text-3" id="text-orga8a938e">
 <p>
 <img src="assets/2021-02-03_16-27-59_screenshot.png" alt="2021-02-03_16-27-59_screenshot.png"><br>
 这个提交好好的躺在这里呢, 2333.<br>
@@ -147,77 +146,77 @@
 </div>
 </div>
 
-<div id="outline-container-org4caffcd" class="outline-3">
-<h3 id="org4caffcd">稍微调试一下</h3>
-<div class="outline-text-3" id="text-org4caffcd">
+<div id="outline-container-org111bbc1" class="outline-3">
+<h3 id="org111bbc1">稍微调试一下</h3>
+<div class="outline-text-3" id="text-org111bbc1">
 <p>
 gdb调试一下<br>
 </p>
 <div class="org-src-container">
-<pre class="src src-bash">Reading symbols from ./qemu-system<span style="color: #98be65;">\-</span>aarch64...                                                                                                                                                  
-(gdb) <span style="color: #c678dd;">r</span>                                                                                                                                                                                        
-Starting program: /home/schspa/work/qemu-master/build/qemu-system-aarch64 -machine xlnx-versal-virt -nographic -smp 2 -m 128 -fsdev local,<span style="color: #dcaeea;">id</span>=shareid,<span style="color: #dcaeea;">path</span>=/home/schspa/work,<span style="color: #dcaeea;">security_model</span>=none
- -device virtio-9p-device,<span style="color: #dcaeea;">fsdev</span>=shareid,<span style="color: #dcaeea;">mount_tag</span>=share -fsdev local,<span style="color: #dcaeea;">id</span>=shareid1,<span style="color: #dcaeea;">path</span>=/home/schspa/Music,<span style="color: #dcaeea;">security_model</span>=none -device virtio-9p-device,<span style="color: #dcaeea;">fsdev</span>=shareid1,<span style="color: #dcaeea;">mount_tag</span>=share1          
-[Thread debugging using libthread_db enabled]                                                                                                                                                  
-Using host libthread_db library <span style="color: #98be65;">"/usr/lib/libthread_db.so.1"</span>.                                                                                                                                  
-[New Thread 0x7ffff270c640 (LWP 1002865)]                                                                                                                                                      
-[New Thread 0x7ffff19c0640 (LWP 1002870)]                                                                                                                                                      
-[New Thread 0x7ffff11bf640 (LWP 1002871)]                                                                                                                                                      
-qemu-system-aarch64: ../migration/savevm.c:860: vmstate_register_with_alias_id: Assertion <span style="color: #51afef; font-weight: bold;">`!se-&gt;compat || se-&gt;instance_id == 0' failed.                                                        </span>
-
-<span style="color: #51afef; font-weight: bold;">Thread 1 "qemu-system-aar" received signal SIGABRT, Aborted.                                                                                                                                   </span>
-<span style="color: #51afef; font-weight: bold;">0x00007ffff5e5f615 in raise () from /usr/lib/libc.so.6                                                                                                                                         </span>
-<span style="color: #51afef; font-weight: bold;">(gdb) bt                                                                                                                                                                                       </span>
-<span style="color: #51afef; font-weight: bold;">#0  0x00007ffff5e5f615 in raise () at /usr/lib/libc.so.6                                                                                                                                       </span>
-<span style="color: #51afef; font-weight: bold;">#1  0x00007ffff5e48862 in abort () at /usr/lib/libc.so.6                                                                                                                                       </span>
-<span style="color: #51afef; font-weight: bold;">#2  0x00007ffff5e48747 in _nl_load_domain.cold () at /usr/lib/libc.so.6                                                                                                                        </span>
-<span style="color: #51afef; font-weight: bold;">#3  0x00007ffff5e57bf6 in  () at /usr/lib/libc.so.6</span>
-<span style="color: #51afef; font-weight: bold;">#4  0x000055555590595c in vmstate_register_with_alias_id (obj=&lt;optimized out&gt;, instance_id=&lt;optimized out&gt;, instance_id@entry=4294967295, vmsd=vmsd@entry=0x555556834c00 &lt;vmstate_virtio_9p&gt;, opaque=opaque@entry=0x555557b459b0, alias_id=alias_id@entry=-1, required_for_version=required_for_version@entry=0, errp=0x7fffffffd4c0) at ../migration/savevm.c:860</span>
-<span style="color: #51afef; font-weight: bold;">#5  0x0000555555f06b7f in device_set_realized (obj=&lt;optimized out&gt;, value=&lt;optimized out&gt;, errp=0x7fffffffd540) at ../hw/core/qdev.c:784</span>
-<span style="color: #51afef; font-weight: bold;">#6  0x0000555555e4cc66 in property_set_bool (obj=0x555557b459b0, v=&lt;optimized out&gt;, name=&lt;optimized out&gt;, opaque=0x555556a96150, errp=0x7fffffffd540) at ../qom/object.c:2255</span>
-<span style="color: #51afef; font-weight: bold;">#7  0x0000555555e4fb18 in object_property_set (obj=obj@entry=0x555557b459b0, name=name@entry=0x5555561eecfd "realized", v=v@entry=0x555557b47e40, errp=errp@entry=0x5555569c6ae8 &lt;error_fatal&gt;) at ../qom/object.c:1400</span>
-<span style="color: #51afef; font-weight: bold;">#8  0x0000555555e4bc30 in object_property_set_qobject (obj=obj@entry=0x555557b459b0, name=name@entry=0x5555561eecfd "realized", value=value@entry=0x555557b47d80, errp=errp@entry=0x5555569c6ae8 &lt;error_fatal&gt;) at ../qom/qom-qobject.c:28</span>
-<span style="color: #51afef; font-weight: bold;">#9  0x0000555555e50105 in object_property_set_bool (obj=0x555557b459b0, name=name@entry=0x5555561eecfd "realized", value=value@entry=true, errp=errp@entry=0x5555569c6ae8 &lt;error_fatal&gt;) at ../qom/object.c:1470</span>
-<span style="color: #51afef; font-weight: bold;">#10 0x0000555555f0706e in qdev_realize (dev=&lt;optimized out&gt;, bus=bus@entry=0x5555578cfbb8, errp=errp@entry=0x5555569c6ae8 &lt;error_fatal&gt;) at ../hw/core/qdev.c:389</span>
-<span style="color: #51afef; font-weight: bold;">#11 0x0000555555a0c420 in qdev_device_add (opts=0x555556a946b0, errp=errp@entry=0x5555569c6ae8 &lt;error_fatal&gt;) at ../softmmu/qdev-monitor.c:665</span>
-<span style="color: #51afef; font-weight: bold;">#12 0x0000555555daf81f in device_init_func (opaque=&lt;optimized out&gt;, opts=&lt;optimized out&gt;, errp=0x5555569c6ae8 &lt;error_fatal&gt;) at ../softmmu/vl.c:1201</span>
-<span style="color: #51afef; font-weight: bold;">#13 0x0000555555ffba2a in qemu_opts_foreach (list=&lt;optimized out&gt;, func=func@entry=0x555555daf810 &lt;device_init_func&gt;, opaque=opaque@entry=0x0, errp=0x5555569c6ae8 &lt;error_fatal&gt;) at ../util/qemu-option.c:1163</span>
-<span style="color: #51afef; font-weight: bold;">#14 0x0000555555db20fe in qemu_create_cli_devices () at ../softmmu/vl.c:2488</span>
-<span style="color: #51afef; font-weight: bold;">#15 qmp_x_exit_preconfig (errp=&lt;optimized out&gt;) at ../softmmu/vl.c:2527</span>
-<span style="color: #51afef; font-weight: bold;">#16 0x0000555555db5b7b in qmp_x_exit_preconfig (errp=&lt;optimized out&gt;) at ../softmmu/vl.c:2521</span>
-<span style="color: #51afef; font-weight: bold;">#17 qemu_init (argc=&lt;optimized out&gt;, argv=&lt;optimized out&gt;, envp=&lt;optimized out&gt;) at ../softmmu/vl.c:3533</span>
-<span style="color: #51afef; font-weight: bold;">#18 0x000055555589d219 in main (argc=&lt;optimized out&gt;, argv=&lt;optimized out&gt;, envp=&lt;optimized out&gt;) at ../softmmu/main.c:49</span>
-<span style="color: #51afef; font-weight: bold;">(gdb) f 4</span>
-<span style="color: #51afef; font-weight: bold;">#4  0x000055555590595c in vmstate_register_with_alias_id (obj=&lt;optimized out&gt;, instance_id=&lt;optimized out&gt;, instance_id@entry=4294967295, vmsd=vmsd@entry=0x555556834c00 &lt;vmstate_virtio_9p&gt;, opaque=opaque@entry=0x555557b459b0, alias_id=alias_id@entry=-1, required_for_version=required_for_version@entry=0, errp=0x7fffffffd4c0) at ../migration/savevm.c:860</span>
-<span style="color: #51afef; font-weight: bold;">860         assert(!se-&gt;compat || se-&gt;instance_id == 0);</span>
-<span style="color: #51afef; font-weight: bold;">(gdb) info locals </span>
-<span style="color: #51afef; font-weight: bold;">se = 0x555557c6fe60</span>
-<span style="color: #51afef; font-weight: bold;">__PRETTY_FUNCTION__ = "vmstate_register_with_alias_id"</span>
-<span style="color: #51afef; font-weight: bold;">__func__ = "vmstate_register_with_alias_id"</span>
-<span style="color: #51afef; font-weight: bold;">(gdb) p se</span>
-<span style="color: #51afef; font-weight: bold;">$1 = (SaveStateEntry *) 0x555557c6fe60</span>
-<span style="color: #51afef; font-weight: bold;">(gdb) p *se</span>
-<span style="color: #51afef; font-weight: bold;">$2 = {</span>
-<span style="color: #51afef; font-weight: bold;">  entry = {</span>
-<span style="color: #51afef; font-weight: bold;">    tqe_next = 0x0,</span>
-<span style="color: #51afef; font-weight: bold;">    tqe_circ = {</span>
-<span style="color: #51afef; font-weight: bold;">      tql_next = 0x0,</span>
-<span style="color: #51afef; font-weight: bold;">      tql_prev = 0x0</span>
-<span style="color: #51afef; font-weight: bold;">    }</span>
-<span style="color: #51afef; font-weight: bold;">  },</span>
-<span style="color: #51afef; font-weight: bold;">  idstr = "virtio-mmio@", 'f' &lt;repeats 16 times&gt;, "/virtio-9p", '\000' &lt;repeats 217 times&gt;,</span>
-<span style="color: #51afef; font-weight: bold;">  instance_id = 1,</span>
-<span style="color: #51afef; font-weight: bold;">  alias_id = -1,</span>
-<span style="color: #51afef; font-weight: bold;">  version_id = 1,</span>
-<span style="color: #51afef; font-weight: bold;">  load_version_id = 0,</span>
-<span style="color: #51afef; font-weight: bold;">  section_id = 31,</span>
-<span style="color: #51afef; font-weight: bold;">  load_section_id = 0,</span>
-<span style="color: #51afef; font-weight: bold;">  ops = 0x0,</span>
-<span style="color: #51afef; font-weight: bold;">  vmsd = 0x555556834c00 &lt;vmstate_virtio_9p&gt;,</span>
-<span style="color: #51afef; font-weight: bold;">  opaque = 0x555557b459b0,</span>
-<span style="color: #51afef; font-weight: bold;">  compat = 0x555557c6ffc0,</span>
-<span style="color: #51afef; font-weight: bold;">  is_ram = 0</span>
-<span style="color: #51afef; font-weight: bold;">}</span>
+<pre class="src src-bash"><code>Reading symbols from ./qemu-system<span style="color: #98be65;">\-</span>aarch64...                                                                                                                                                  </code>
+<code>(gdb) <span style="color: #c678dd;">r</span>                                                                                                                                                                                        </code>
+<code>Starting program: /home/schspa/work/qemu-master/build/qemu-system-aarch64 -machine xlnx-versal-virt -nographic -smp 2 -m 128 -fsdev local,<span style="color: #dcaeea;">id</span>=shareid,<span style="color: #dcaeea;">path</span>=/home/schspa/work,<span style="color: #dcaeea;">security_model</span>=none</code>
+<code> -device virtio-9p-device,<span style="color: #dcaeea;">fsdev</span>=shareid,<span style="color: #dcaeea;">mount_tag</span>=share -fsdev local,<span style="color: #dcaeea;">id</span>=shareid1,<span style="color: #dcaeea;">path</span>=/home/schspa/Music,<span style="color: #dcaeea;">security_model</span>=none -device virtio-9p-device,<span style="color: #dcaeea;">fsdev</span>=shareid1,<span style="color: #dcaeea;">mount_tag</span>=share1          </code>
+<code>[Thread debugging using libthread_db enabled]                                                                                                                                                  </code>
+<code>Using host libthread_db library <span style="color: #98be65;">"/usr/lib/libthread_db.so.1"</span>.                                                                                                                                  </code>
+<code>[New Thread 0x7ffff270c640 (LWP 1002865)]                                                                                                                                                      </code>
+<code>[New Thread 0x7ffff19c0640 (LWP 1002870)]                                                                                                                                                      </code>
+<code>[New Thread 0x7ffff11bf640 (LWP 1002871)]                                                                                                                                                      </code>
+<code>qemu-system-aarch64: ../migration/savevm.c:860: vmstate_register_with_alias_id: Assertion <span style="color: #51afef; font-weight: bold;">`!se-&gt;compat || se-&gt;instance_id == 0' failed.                                                        </span></code>
+<code></code>
+<code><span style="color: #51afef; font-weight: bold;">Thread 1 "qemu-system-aar" received signal SIGABRT, Aborted.                                                                                                                                   </span></code>
+<code><span style="color: #51afef; font-weight: bold;">0x00007ffff5e5f615 in raise () from /usr/lib/libc.so.6                                                                                                                                         </span></code>
+<code><span style="color: #51afef; font-weight: bold;">(gdb) bt                                                                                                                                                                                       </span></code>
+<code><span style="color: #51afef; font-weight: bold;">#0  0x00007ffff5e5f615 in raise () at /usr/lib/libc.so.6                                                                                                                                       </span></code>
+<code><span style="color: #51afef; font-weight: bold;">#1  0x00007ffff5e48862 in abort () at /usr/lib/libc.so.6                                                                                                                                       </span></code>
+<code><span style="color: #51afef; font-weight: bold;">#2  0x00007ffff5e48747 in _nl_load_domain.cold () at /usr/lib/libc.so.6                                                                                                                        </span></code>
+<code><span style="color: #51afef; font-weight: bold;">#3  0x00007ffff5e57bf6 in  () at /usr/lib/libc.so.6</span></code>
+<code><span style="color: #51afef; font-weight: bold;">#4  0x000055555590595c in vmstate_register_with_alias_id (obj=&lt;optimized out&gt;, instance_id=&lt;optimized out&gt;, instance_id@entry=4294967295, vmsd=vmsd@entry=0x555556834c00 &lt;vmstate_virtio_9p&gt;, opaque=opaque@entry=0x555557b459b0, alias_id=alias_id@entry=-1, required_for_version=required_for_version@entry=0, errp=0x7fffffffd4c0) at ../migration/savevm.c:860</span></code>
+<code><span style="color: #51afef; font-weight: bold;">#5  0x0000555555f06b7f in device_set_realized (obj=&lt;optimized out&gt;, value=&lt;optimized out&gt;, errp=0x7fffffffd540) at ../hw/core/qdev.c:784</span></code>
+<code><span style="color: #51afef; font-weight: bold;">#6  0x0000555555e4cc66 in property_set_bool (obj=0x555557b459b0, v=&lt;optimized out&gt;, name=&lt;optimized out&gt;, opaque=0x555556a96150, errp=0x7fffffffd540) at ../qom/object.c:2255</span></code>
+<code><span style="color: #51afef; font-weight: bold;">#7  0x0000555555e4fb18 in object_property_set (obj=obj@entry=0x555557b459b0, name=name@entry=0x5555561eecfd "realized", v=v@entry=0x555557b47e40, errp=errp@entry=0x5555569c6ae8 &lt;error_fatal&gt;) at ../qom/object.c:1400</span></code>
+<code><span style="color: #51afef; font-weight: bold;">#8  0x0000555555e4bc30 in object_property_set_qobject (obj=obj@entry=0x555557b459b0, name=name@entry=0x5555561eecfd "realized", value=value@entry=0x555557b47d80, errp=errp@entry=0x5555569c6ae8 &lt;error_fatal&gt;) at ../qom/qom-qobject.c:28</span></code>
+<code><span style="color: #51afef; font-weight: bold;">#9  0x0000555555e50105 in object_property_set_bool (obj=0x555557b459b0, name=name@entry=0x5555561eecfd "realized", value=value@entry=true, errp=errp@entry=0x5555569c6ae8 &lt;error_fatal&gt;) at ../qom/object.c:1470</span></code>
+<code><span style="color: #51afef; font-weight: bold;">#10 0x0000555555f0706e in qdev_realize (dev=&lt;optimized out&gt;, bus=bus@entry=0x5555578cfbb8, errp=errp@entry=0x5555569c6ae8 &lt;error_fatal&gt;) at ../hw/core/qdev.c:389</span></code>
+<code><span style="color: #51afef; font-weight: bold;">#11 0x0000555555a0c420 in qdev_device_add (opts=0x555556a946b0, errp=errp@entry=0x5555569c6ae8 &lt;error_fatal&gt;) at ../softmmu/qdev-monitor.c:665</span></code>
+<code><span style="color: #51afef; font-weight: bold;">#12 0x0000555555daf81f in device_init_func (opaque=&lt;optimized out&gt;, opts=&lt;optimized out&gt;, errp=0x5555569c6ae8 &lt;error_fatal&gt;) at ../softmmu/vl.c:1201</span></code>
+<code><span style="color: #51afef; font-weight: bold;">#13 0x0000555555ffba2a in qemu_opts_foreach (list=&lt;optimized out&gt;, func=func@entry=0x555555daf810 &lt;device_init_func&gt;, opaque=opaque@entry=0x0, errp=0x5555569c6ae8 &lt;error_fatal&gt;) at ../util/qemu-option.c:1163</span></code>
+<code><span style="color: #51afef; font-weight: bold;">#14 0x0000555555db20fe in qemu_create_cli_devices () at ../softmmu/vl.c:2488</span></code>
+<code><span style="color: #51afef; font-weight: bold;">#15 qmp_x_exit_preconfig (errp=&lt;optimized out&gt;) at ../softmmu/vl.c:2527</span></code>
+<code><span style="color: #51afef; font-weight: bold;">#16 0x0000555555db5b7b in qmp_x_exit_preconfig (errp=&lt;optimized out&gt;) at ../softmmu/vl.c:2521</span></code>
+<code><span style="color: #51afef; font-weight: bold;">#17 qemu_init (argc=&lt;optimized out&gt;, argv=&lt;optimized out&gt;, envp=&lt;optimized out&gt;) at ../softmmu/vl.c:3533</span></code>
+<code><span style="color: #51afef; font-weight: bold;">#18 0x000055555589d219 in main (argc=&lt;optimized out&gt;, argv=&lt;optimized out&gt;, envp=&lt;optimized out&gt;) at ../softmmu/main.c:49</span></code>
+<code><span style="color: #51afef; font-weight: bold;">(gdb) f 4</span></code>
+<code><span style="color: #51afef; font-weight: bold;">#4  0x000055555590595c in vmstate_register_with_alias_id (obj=&lt;optimized out&gt;, instance_id=&lt;optimized out&gt;, instance_id@entry=4294967295, vmsd=vmsd@entry=0x555556834c00 &lt;vmstate_virtio_9p&gt;, opaque=opaque@entry=0x555557b459b0, alias_id=alias_id@entry=-1, required_for_version=required_for_version@entry=0, errp=0x7fffffffd4c0) at ../migration/savevm.c:860</span></code>
+<code><span style="color: #51afef; font-weight: bold;">860         assert(!se-&gt;compat || se-&gt;instance_id == 0);</span></code>
+<code><span style="color: #51afef; font-weight: bold;">(gdb) info locals </span></code>
+<code><span style="color: #51afef; font-weight: bold;">se = 0x555557c6fe60</span></code>
+<code><span style="color: #51afef; font-weight: bold;">__PRETTY_FUNCTION__ = "vmstate_register_with_alias_id"</span></code>
+<code><span style="color: #51afef; font-weight: bold;">__func__ = "vmstate_register_with_alias_id"</span></code>
+<code><span style="color: #51afef; font-weight: bold;">(gdb) p se</span></code>
+<code><span style="color: #51afef; font-weight: bold;">$1 = (SaveStateEntry *) 0x555557c6fe60</span></code>
+<code><span style="color: #51afef; font-weight: bold;">(gdb) p *se</span></code>
+<code><span style="color: #51afef; font-weight: bold;">$2 = {</span></code>
+<code><span style="color: #51afef; font-weight: bold;">  entry = {</span></code>
+<code><span style="color: #51afef; font-weight: bold;">    tqe_next = 0x0,</span></code>
+<code><span style="color: #51afef; font-weight: bold;">    tqe_circ = {</span></code>
+<code><span style="color: #51afef; font-weight: bold;">      tql_next = 0x0,</span></code>
+<code><span style="color: #51afef; font-weight: bold;">      tql_prev = 0x0</span></code>
+<code><span style="color: #51afef; font-weight: bold;">    }</span></code>
+<code><span style="color: #51afef; font-weight: bold;">  },</span></code>
+<code><span style="color: #51afef; font-weight: bold;">  idstr = "virtio-mmio@", 'f' &lt;repeats 16 times&gt;, "/virtio-9p", '\000' &lt;repeats 217 times&gt;,</span></code>
+<code><span style="color: #51afef; font-weight: bold;">  instance_id = 1,</span></code>
+<code><span style="color: #51afef; font-weight: bold;">  alias_id = -1,</span></code>
+<code><span style="color: #51afef; font-weight: bold;">  version_id = 1,</span></code>
+<code><span style="color: #51afef; font-weight: bold;">  load_version_id = 0,</span></code>
+<code><span style="color: #51afef; font-weight: bold;">  section_id = 31,</span></code>
+<code><span style="color: #51afef; font-weight: bold;">  load_section_id = 0,</span></code>
+<code><span style="color: #51afef; font-weight: bold;">  ops = 0x0,</span></code>
+<code><span style="color: #51afef; font-weight: bold;">  vmsd = 0x555556834c00 &lt;vmstate_virtio_9p&gt;,</span></code>
+<code><span style="color: #51afef; font-weight: bold;">  opaque = 0x555557b459b0,</span></code>
+<code><span style="color: #51afef; font-weight: bold;">  compat = 0x555557c6ffc0,</span></code>
+<code><span style="color: #51afef; font-weight: bold;">  is_ram = 0</span></code>
+<code><span style="color: #51afef; font-weight: bold;">}</span></code>
 </pre>
 </div>
 <p>
@@ -229,9 +228,9 @@ qemu-system-aarch64: ../migration/savevm.c:860: vmstate_register_with_alias_id: 
 </p>
 </div>
 
-<div id="outline-container-orga772ee0" class="outline-4">
-<h4 id="orga772ee0">看看之前已经合入的修复patch</h4>
-<div class="outline-text-4" id="text-orga772ee0">
+<div id="outline-container-orge05aef3" class="outline-4">
+<h4 id="orge05aef3">看看之前已经合入的修复patch</h4>
+<div class="outline-text-4" id="text-orge05aef3">
 <blockquote>
 <p>
 (1) The virtio device whose devpath is to be formatted resides on a<br>
@@ -256,12 +255,12 @@ qemu-system-aarch64: ../migration/savevm.c:860: vmstate_register_with_alias_id: 
 </div>
 </div>
 
-<div id="outline-container-org735fa9a" class="outline-4">
-<h4 id="org735fa9a">回过头看我们的设备名称</h4>
-<div class="outline-text-4" id="text-org735fa9a">
+<div id="outline-container-org972c216" class="outline-4">
+<h4 id="org972c216">回过头看我们的设备名称</h4>
+<div class="outline-text-4" id="text-org972c216">
 <div class="org-src-container">
-<pre class="src src-bash">(gdb) <span style="color: #c678dd;">print</span> se-&gt;idstr 
-$<span style="color: #dcaeea;">6</span> = <span style="color: #98be65;">"virtio-mmio@"</span>, <span style="color: #98be65;">'f'</span> &lt;repeats 16 times&gt;, <span style="color: #98be65;">"/virtio-9p"</span>, <span style="color: #98be65;">'\000'</span> &lt;repeats 217 times&gt;
+<pre class="src src-bash"><code>(gdb) <span style="color: #c678dd;">print</span> se-&gt;idstr </code>
+<code>$<span style="color: #dcaeea;">6</span> = <span style="color: #98be65;">"virtio-mmio@"</span>, <span style="color: #98be65;">'f'</span> &lt;repeats 16 times&gt;, <span style="color: #98be65;">"/virtio-9p"</span>, <span style="color: #98be65;">'\000'</span> &lt;repeats 217 times&gt;</code>
 </pre>
 </div>
 <p>
@@ -270,48 +269,48 @@ $<span style="color: #dcaeea;">6</span> = <span style="color: #98be65;">"virtio-
 </div>
 </div>
 
-<div id="outline-container-orgf51a8f6" class="outline-4">
-<h4 id="orgf51a8f6">调试以下修复的patch</h4>
-<div class="outline-text-4" id="text-orgf51a8f6">
+<div id="outline-container-org2c9e530" class="outline-4">
+<h4 id="org2c9e530">调试以下修复的patch</h4>
+<div class="outline-text-4" id="text-org2c9e530">
 <ul class="org-ul">
 <li><p>
 这里我们看一下virtio_mmio_bus_get_dev_path的执行情况:<br>
 打上断点，go<br>
 </p>
 <div class="org-src-container">
-<pre class="src src-bash">Thread 1 <span style="color: #98be65;">"qemu-system-aar"</span> hit Breakpoint 1, virtio_mmio_bus_get_dev_path (<span style="color: #dcaeea;">dev</span>=0x555557a1b0d0) at ../hw/virtio/virtio-mmio.c:735
-735         <span style="color: #dcaeea;">virtio_mmio_bus</span> = qdev_get_parent_bus(dev);
-(gdb) n
-736         <span style="color: #dcaeea;">virtio_mmio_proxy</span> = VIRTIO_MMIO(virtio_mmio_bus-&gt;parent);
-(gdb) 
-737         <span style="color: #dcaeea;">proxy_path</span> = qdev_get_dev_path(DEVICE(virtio_mmio_proxy));
-(gdb) 
-736         <span style="color: #dcaeea;">virtio_mmio_proxy</span> = VIRTIO_MMIO(virtio_mmio_bus-&gt;parent);
-(gdb) 
-737         <span style="color: #dcaeea;">proxy_path</span> = qdev_get_dev_path(DEVICE(virtio_mmio_proxy));
-(gdb) 
-747         if (<span style="color: #51afef; font-weight: bold;">!</span>virtio_mmio_proxy-&gt;format_transport_address) {
-(gdb) 
-752         <span style="color: #dcaeea;">proxy_sbd</span> = SYS_BUS_DEVICE(virtio_mmio_proxy);
-(gdb) 
-753         assert(proxy_sbd-&gt;<span style="color: #dcaeea;">num_mmio</span> == 1);
-(gdb) p proxy_sbd-&gt;mmio
-$<span style="color: #dcaeea;">1</span> = {{
-    <span style="color: #dcaeea;">addr</span> = 18446744073709551615,
-    <span style="color: #dcaeea;">memory</span> = 0x5555579404c0
-  }, {
-    <span style="color: #dcaeea;">addr</span> = 0,
-    <span style="color: #dcaeea;">memory</span> = 0x0
-  } &lt;repeats 31 times&gt;}
-(gdb) p /x proxy_sbd-&gt;mmio
-$<span style="color: #dcaeea;">2</span> = {{
-    <span style="color: #dcaeea;">addr</span> = 0xffffffffffffffff,
-    <span style="color: #dcaeea;">memory</span> = 0x5555579404c0
-  }, {
-    <span style="color: #dcaeea;">addr</span> = 0x0,
-    <span style="color: #dcaeea;">memory</span> = 0x0
-  } &lt;repeats 31 times&gt;}
-(gdb) 
+<pre class="src src-bash"><code>Thread 1 <span style="color: #98be65;">"qemu-system-aar"</span> hit Breakpoint 1, virtio_mmio_bus_get_dev_path (<span style="color: #dcaeea;">dev</span>=0x555557a1b0d0) at ../hw/virtio/virtio-mmio.c:735</code>
+<code>735         <span style="color: #dcaeea;">virtio_mmio_bus</span> = qdev_get_parent_bus(dev);</code>
+<code>(gdb) n</code>
+<code>736         <span style="color: #dcaeea;">virtio_mmio_proxy</span> = VIRTIO_MMIO(virtio_mmio_bus-&gt;parent);</code>
+<code>(gdb) </code>
+<code>737         <span style="color: #dcaeea;">proxy_path</span> = qdev_get_dev_path(DEVICE(virtio_mmio_proxy));</code>
+<code>(gdb) </code>
+<code>736         <span style="color: #dcaeea;">virtio_mmio_proxy</span> = VIRTIO_MMIO(virtio_mmio_bus-&gt;parent);</code>
+<code>(gdb) </code>
+<code>737         <span style="color: #dcaeea;">proxy_path</span> = qdev_get_dev_path(DEVICE(virtio_mmio_proxy));</code>
+<code>(gdb) </code>
+<code>747         if (<span style="color: #51afef; font-weight: bold;">!</span>virtio_mmio_proxy-&gt;format_transport_address) {</code>
+<code>(gdb) </code>
+<code>752         <span style="color: #dcaeea;">proxy_sbd</span> = SYS_BUS_DEVICE(virtio_mmio_proxy);</code>
+<code>(gdb) </code>
+<code>753         assert(proxy_sbd-&gt;<span style="color: #dcaeea;">num_mmio</span> == 1);</code>
+<code>(gdb) p proxy_sbd-&gt;mmio</code>
+<code>$<span style="color: #dcaeea;">1</span> = {{</code>
+<code>    <span style="color: #dcaeea;">addr</span> = 18446744073709551615,</code>
+<code>    <span style="color: #dcaeea;">memory</span> = 0x5555579404c0</code>
+<code>  }, {</code>
+<code>    <span style="color: #dcaeea;">addr</span> = 0,</code>
+<code>    <span style="color: #dcaeea;">memory</span> = 0x0</code>
+<code>  } &lt;repeats 31 times&gt;}</code>
+<code>(gdb) p /x proxy_sbd-&gt;mmio</code>
+<code>$<span style="color: #dcaeea;">2</span> = {{</code>
+<code>    <span style="color: #dcaeea;">addr</span> = 0xffffffffffffffff,</code>
+<code>    <span style="color: #dcaeea;">memory</span> = 0x5555579404c0</code>
+<code>  }, {</code>
+<code>    <span style="color: #dcaeea;">addr</span> = 0x0,</code>
+<code>    <span style="color: #dcaeea;">memory</span> = 0x0</code>
+<code>  } &lt;repeats 31 times&gt;}</code>
+<code>(gdb) </code>
 </pre>
 </div>
 <p>
@@ -320,49 +319,49 @@ $<span style="color: #dcaeea;">2</span> = {{
 </ul>
 </div>
 </div>
-<div id="outline-container-org9128cf1" class="outline-4">
-<h4 id="org9128cf1">看看这个地址为什么不对</h4>
-<div class="outline-text-4" id="text-org9128cf1">
+<div id="outline-container-orgc3ff066" class="outline-4">
+<h4 id="orgc3ff066">看看这个地址为什么不对</h4>
+<div class="outline-text-4" id="text-orgc3ff066">
 <p>
 首先se的类型是SysBusDevice *, 对应的相关代码是sysbus.c<br>
 </p>
 <div class="org-src-container">
-<pre class="src src-C"><span style="color: #51afef;">static</span> <span style="color: #ECBE7B;">void</span> <span style="color: #c678dd;">sysbus_mmio_map_common</span>(<span style="color: #ECBE7B;">SysBusDevice</span> *<span style="color: #dcaeea;">dev</span>, <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">n</span>, <span style="color: #ECBE7B;">hwaddr</span> <span style="color: #dcaeea;">addr</span>,
-                                   <span style="color: #ECBE7B;">bool</span> <span style="color: #dcaeea;">may_overlap</span>, <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">priority</span>)
-{
-    assert(n &gt;= 0 &amp;&amp; n &lt; dev-&gt;num_mmio);
-
-    <span style="color: #51afef;">if</span> (dev-&gt;mmio[n].addr == addr) {
-        <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">??? region already mapped here.</span><span style="color: #5B6268;">  */</span>
-        <span style="color: #51afef;">return</span>;
-    }
-    <span style="color: #51afef;">if</span> (dev-&gt;mmio[n].addr != (<span style="color: #ECBE7B;">hwaddr</span>)-1) {
-        <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">Unregister previous mapping.</span><span style="color: #5B6268;">  */</span>
-        memory_region_del_subregion(get_system_memory(), dev-&gt;mmio[n].memory);
-    }
-    dev-&gt;mmio[n].addr = addr;
-    <span style="color: #51afef;">if</span> (may_overlap) {
-        memory_region_add_subregion_overlap(get_system_memory(),
-                                            addr,
-                                            dev-&gt;mmio[n].memory,
-                                            priority);
-    }
-    <span style="color: #51afef;">else</span> {
-        memory_region_add_subregion(get_system_memory(),
-                                    addr,
-                                    dev-&gt;mmio[n].memory);
-    }
-}
-
-<span style="color: #ECBE7B;">void</span> <span style="color: #c678dd;">sysbus_mmio_unmap</span>(<span style="color: #ECBE7B;">SysBusDevice</span> *<span style="color: #dcaeea;">dev</span>, <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">n</span>)
-{
-    assert(n &gt;= 0 &amp;&amp; n &lt; dev-&gt;num_mmio);
-
-    <span style="color: #51afef;">if</span> (dev-&gt;mmio[n].addr != (<span style="color: #ECBE7B;">hwaddr</span>)-1) {
-        memory_region_del_subregion(get_system_memory(), dev-&gt;mmio[n].memory);
-        dev-&gt;mmio[n].addr = (<span style="color: #ECBE7B;">hwaddr</span>)-1;
-    }
-}
+<pre class="src src-C"><code><span style="color: #51afef;">static</span> <span style="color: #ECBE7B;">void</span> <span style="color: #c678dd;">sysbus_mmio_map_common</span>(<span style="color: #ECBE7B;">SysBusDevice</span> *<span style="color: #dcaeea;">dev</span>, <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">n</span>, <span style="color: #ECBE7B;">hwaddr</span> <span style="color: #dcaeea;">addr</span>,</code>
+<code>                                   <span style="color: #ECBE7B;">bool</span> <span style="color: #dcaeea;">may_overlap</span>, <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">priority</span>)</code>
+<code>{</code>
+<code>    assert(n &gt;= 0 &amp;&amp; n &lt; dev-&gt;num_mmio);</code>
+<code></code>
+<code>    <span style="color: #51afef;">if</span> (dev-&gt;mmio[n].addr == addr) {</code>
+<code>        <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">??? region already mapped here.</span><span style="color: #5B6268;">  */</span></code>
+<code>        <span style="color: #51afef;">return</span>;</code>
+<code>    }</code>
+<code>    <span style="color: #51afef;">if</span> (dev-&gt;mmio[n].addr != (<span style="color: #ECBE7B;">hwaddr</span>)-1) {</code>
+<code>        <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">Unregister previous mapping.</span><span style="color: #5B6268;">  */</span></code>
+<code>        memory_region_del_subregion(get_system_memory(), dev-&gt;mmio[n].memory);</code>
+<code>    }</code>
+<code>    dev-&gt;mmio[n].addr = addr;</code>
+<code>    <span style="color: #51afef;">if</span> (may_overlap) {</code>
+<code>        memory_region_add_subregion_overlap(get_system_memory(),</code>
+<code>                                            addr,</code>
+<code>                                            dev-&gt;mmio[n].memory,</code>
+<code>                                            priority);</code>
+<code>    }</code>
+<code>    <span style="color: #51afef;">else</span> {</code>
+<code>        memory_region_add_subregion(get_system_memory(),</code>
+<code>                                    addr,</code>
+<code>                                    dev-&gt;mmio[n].memory);</code>
+<code>    }</code>
+<code>}</code>
+<code></code>
+<code><span style="color: #ECBE7B;">void</span> <span style="color: #c678dd;">sysbus_mmio_unmap</span>(<span style="color: #ECBE7B;">SysBusDevice</span> *<span style="color: #dcaeea;">dev</span>, <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">n</span>)</code>
+<code>{</code>
+<code>    assert(n &gt;= 0 &amp;&amp; n &lt; dev-&gt;num_mmio);</code>
+<code></code>
+<code>    <span style="color: #51afef;">if</span> (dev-&gt;mmio[n].addr != (<span style="color: #ECBE7B;">hwaddr</span>)-1) {</code>
+<code>        memory_region_del_subregion(get_system_memory(), dev-&gt;mmio[n].memory);</code>
+<code>        dev-&gt;mmio[n].addr = (<span style="color: #ECBE7B;">hwaddr</span>)-1;</code>
+<code>    }</code>
+<code>}</code>
 </pre>
 </div>
 <p>
@@ -371,38 +370,38 @@ $<span style="color: #dcaeea;">2</span> = {{
 </div>
 </div>
 
-<div id="outline-container-org6e16b9b" class="outline-4">
-<h4 id="org6e16b9b">看一看virtio-mmio的创建代码</h4>
-<div class="outline-text-4" id="text-org6e16b9b">
+<div id="outline-container-org076d3af" class="outline-4">
+<h4 id="org076d3af">看一看virtio-mmio的创建代码</h4>
+<div class="outline-text-4" id="text-org076d3af">
 <p>
 平台xlnx-versal-virt的相关代码为:<br>
 </p>
 <div class="org-src-container">
-<pre class="src src-C"><span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #dcaeea;">NUM_VIRTIO_TRANSPORT</span> 8
-<span style="color: #51afef;">static</span> <span style="color: #ECBE7B;">void</span> <span style="color: #c678dd;">create_virtio_regions</span>(<span style="color: #ECBE7B;">VersalVirt</span> *<span style="color: #dcaeea;">s</span>)
-{
-    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">virtio_mmio_size</span> = 0x200;
-    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">i</span>;
-
-    <span style="color: #51afef;">for</span> (i = 0; i &lt; NUM_VIRTIO_TRANSPORT; i++) {
-        <span style="color: #ECBE7B;">char</span> *<span style="color: #dcaeea;">name</span> = g_strdup_printf(<span style="color: #98be65;">"virtio%d"</span>, i);
-        <span style="color: #ECBE7B;">hwaddr</span> <span style="color: #dcaeea;">base</span> = MM_TOP_RSVD + i * virtio_mmio_size;
-        <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">irq</span> = VERSAL_RSVD_IRQ_FIRST + i;
-        <span style="color: #ECBE7B;">MemoryRegion</span> *<span style="color: #dcaeea;">mr</span>;
-        <span style="color: #ECBE7B;">DeviceState</span> *<span style="color: #dcaeea;">dev</span>;
-        <span style="color: #ECBE7B;">qemu_irq</span> <span style="color: #dcaeea;">pic_irq</span>;
-
-        pic_irq = qdev_get_gpio_in(DEVICE(&amp;s-&gt;soc.fpd.apu.gic), irq);
-        dev = qdev_new(<span style="color: #98be65;">"virtio-mmio"</span>);
-        object_property_add_child(OBJECT(&amp;s-&gt;soc), name, OBJECT(dev));
-        sysbus_realize_and_unref(SYS_BUS_DEVICE(dev), &amp;error_fatal);
-        sysbus_connect_irq(SYS_BUS_DEVICE(dev), 0, pic_irq);
-        mr = sysbus_mmio_get_region(SYS_BUS_DEVICE(dev), 0);
-        memory_region_add_subregion(&amp;s-&gt;soc.mr_ps, base, mr);
-        g_free(name);
-    }
-...
-}
+<pre class="src src-C"><code><span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #dcaeea;">NUM_VIRTIO_TRANSPORT</span> 8</code>
+<code><span style="color: #51afef;">static</span> <span style="color: #ECBE7B;">void</span> <span style="color: #c678dd;">create_virtio_regions</span>(<span style="color: #ECBE7B;">VersalVirt</span> *<span style="color: #dcaeea;">s</span>)</code>
+<code>{</code>
+<code>    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">virtio_mmio_size</span> = 0x200;</code>
+<code>    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">i</span>;</code>
+<code></code>
+<code>    <span style="color: #51afef;">for</span> (i = 0; i &lt; NUM_VIRTIO_TRANSPORT; i++) {</code>
+<code>        <span style="color: #ECBE7B;">char</span> *<span style="color: #dcaeea;">name</span> = g_strdup_printf(<span style="color: #98be65;">"virtio%d"</span>, i);</code>
+<code>        <span style="color: #ECBE7B;">hwaddr</span> <span style="color: #dcaeea;">base</span> = MM_TOP_RSVD + i * virtio_mmio_size;</code>
+<code>        <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">irq</span> = VERSAL_RSVD_IRQ_FIRST + i;</code>
+<code>        <span style="color: #ECBE7B;">MemoryRegion</span> *<span style="color: #dcaeea;">mr</span>;</code>
+<code>        <span style="color: #ECBE7B;">DeviceState</span> *<span style="color: #dcaeea;">dev</span>;</code>
+<code>        <span style="color: #ECBE7B;">qemu_irq</span> <span style="color: #dcaeea;">pic_irq</span>;</code>
+<code></code>
+<code>        pic_irq = qdev_get_gpio_in(DEVICE(&amp;s-&gt;soc.fpd.apu.gic), irq);</code>
+<code>        dev = qdev_new(<span style="color: #98be65;">"virtio-mmio"</span>);</code>
+<code>        object_property_add_child(OBJECT(&amp;s-&gt;soc), name, OBJECT(dev));</code>
+<code>        sysbus_realize_and_unref(SYS_BUS_DEVICE(dev), &amp;error_fatal);</code>
+<code>        sysbus_connect_irq(SYS_BUS_DEVICE(dev), 0, pic_irq);</code>
+<code>        mr = sysbus_mmio_get_region(SYS_BUS_DEVICE(dev), 0);</code>
+<code>        memory_region_add_subregion(&amp;s-&gt;soc.mr_ps, base, mr);</code>
+<code>        g_free(name);</code>
+<code>    }</code>
+<code>...</code>
+<code>}</code>
 </pre>
 </div>
 <p>
@@ -411,20 +410,20 @@ $<span style="color: #dcaeea;">2</span> = {{
 </div>
 </div>
 
-<div id="outline-container-orga57b6ec" class="outline-4">
-<h4 id="orga57b6ec">看看其他平台</h4>
-<div class="outline-text-4" id="text-orga57b6ec">
+<div id="outline-container-org586e857" class="outline-4">
+<h4 id="org586e857">看看其他平台</h4>
+<div class="outline-text-4" id="text-org586e857">
 <p>
 下边是arm virt平台的初始化代码.<br>
 </p>
 <div class="org-src-container">
-<pre class="src src-C"><span style="color: #51afef;">for</span> (i = 0; i &lt; NUM_VIRTIO_TRANSPORTS; i++) {
-    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">irq</span> = vms-&gt;irqmap[VIRT_MMIO] + i;
-    <span style="color: #ECBE7B;">hwaddr</span> <span style="color: #dcaeea;">base</span> = vms-&gt;memmap[VIRT_MMIO].base + i * size;
-
-    sysbus_create_simple(<span style="color: #98be65;">"virtio-mmio"</span>, base,
-                        qdev_get_gpio_in(vms-&gt;gic, irq));
-}
+<pre class="src src-C"><code><span style="color: #51afef;">for</span> (i = 0; i &lt; NUM_VIRTIO_TRANSPORTS; i++) {</code>
+<code>    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">irq</span> = vms-&gt;irqmap[VIRT_MMIO] + i;</code>
+<code>    <span style="color: #ECBE7B;">hwaddr</span> <span style="color: #dcaeea;">base</span> = vms-&gt;memmap[VIRT_MMIO].base + i * size;</code>
+<code></code>
+<code>    sysbus_create_simple(<span style="color: #98be65;">"virtio-mmio"</span>, base,</code>
+<code>                        qdev_get_gpio_in(vms-&gt;gic, irq));</code>
+<code>}</code>
 </pre>
 </div>
 
@@ -432,34 +431,34 @@ $<span style="color: #dcaeea;">2</span> = {{
 在sysbus_create_simple的实现中,系统会调用sysbus_mmio_map来初始化设备地址<br>
 </p>
 <div class="org-src-container">
-<pre class="src src-C"><span style="color: #ECBE7B;">DeviceState</span> *<span style="color: #c678dd;">sysbus_create_varargs</span>(<span style="color: #51afef;">const</span> <span style="color: #ECBE7B;">char</span> *<span style="color: #dcaeea;">name</span>,
-                <span style="color: #ECBE7B;">hwaddr</span> <span style="color: #dcaeea;">addr</span>, ...)
-{
-    <span style="color: #ECBE7B;">DeviceState</span> *<span style="color: #dcaeea;">dev</span>;
-    <span style="color: #ECBE7B;">SysBusDevice</span> *<span style="color: #dcaeea;">s</span>;
-    <span style="color: #ECBE7B;">va_list</span> <span style="color: #dcaeea;">va</span>;
-    <span style="color: #ECBE7B;">qemu_irq</span> <span style="color: #dcaeea;">irq</span>;
-    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">n</span>;
-
-    dev = qdev_create(<span style="color: #a9a1e1;">NULL</span>, name);
-    s = SYS_BUS_DEVICE(dev);
-    qdev_init_nofail(dev);
-    <span style="color: #51afef;">if</span> (addr != (<span style="color: #ECBE7B;">hwaddr</span>)-1) {
-        sysbus_mmio_map(s, 0, addr);
-    }
-    va_start(va, addr);
-    n = 0;
-    <span style="color: #51afef;">while</span> (1) {
-        irq = va_arg(va, qemu_irq);
-        <span style="color: #51afef;">if</span> (<span style="color: #51afef; font-weight: bold;">!</span>irq) {
-            <span style="color: #51afef;">break</span>;
-        }
-        sysbus_connect_irq(s, n, irq);
-        n++;
-    }
-    va_end(va);
-    <span style="color: #51afef;">return</span> dev;
-}
+<pre class="src src-C"><code><span style="color: #ECBE7B;">DeviceState</span> *<span style="color: #c678dd;">sysbus_create_varargs</span>(<span style="color: #51afef;">const</span> <span style="color: #ECBE7B;">char</span> *<span style="color: #dcaeea;">name</span>,</code>
+<code>                <span style="color: #ECBE7B;">hwaddr</span> <span style="color: #dcaeea;">addr</span>, ...)</code>
+<code>{</code>
+<code>    <span style="color: #ECBE7B;">DeviceState</span> *<span style="color: #dcaeea;">dev</span>;</code>
+<code>    <span style="color: #ECBE7B;">SysBusDevice</span> *<span style="color: #dcaeea;">s</span>;</code>
+<code>    <span style="color: #ECBE7B;">va_list</span> <span style="color: #dcaeea;">va</span>;</code>
+<code>    <span style="color: #ECBE7B;">qemu_irq</span> <span style="color: #dcaeea;">irq</span>;</code>
+<code>    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">n</span>;</code>
+<code></code>
+<code>    dev = qdev_create(<span style="color: #a9a1e1;">NULL</span>, name);</code>
+<code>    s = SYS_BUS_DEVICE(dev);</code>
+<code>    qdev_init_nofail(dev);</code>
+<code>    <span style="color: #51afef;">if</span> (addr != (<span style="color: #ECBE7B;">hwaddr</span>)-1) {</code>
+<code>        sysbus_mmio_map(s, 0, addr);</code>
+<code>    }</code>
+<code>    va_start(va, addr);</code>
+<code>    n = 0;</code>
+<code>    <span style="color: #51afef;">while</span> (1) {</code>
+<code>        irq = va_arg(va, qemu_irq);</code>
+<code>        <span style="color: #51afef;">if</span> (<span style="color: #51afef; font-weight: bold;">!</span>irq) {</code>
+<code>            <span style="color: #51afef;">break</span>;</code>
+<code>        }</code>
+<code>        sysbus_connect_irq(s, n, irq);</code>
+<code>        n++;</code>
+<code>    }</code>
+<code>    va_end(va);</code>
+<code>    <span style="color: #51afef;">return</span> dev;</code>
+<code>}</code>
 </pre>
 </div>
 <p>
@@ -470,37 +469,37 @@ $<span style="color: #dcaeea;">2</span> = {{
 </div>
 </div>
 
-<div id="outline-container-org449fe01" class="outline-2">
-<h2 id="org449fe01">修复方案</h2>
-<div class="outline-text-2" id="text-org449fe01">
+<div id="outline-container-orgeae34f9" class="outline-2">
+<h2 id="orgeae34f9">修复方案</h2>
+<div class="outline-text-2" id="text-orgeae34f9">
 <p>
 下边是尝试的几个解决方案:<br>
 </p>
 </div>
-<div id="outline-container-org81fed80" class="outline-3">
-<h3 id="org81fed80">添加sysbus_mmio_map的调用</h3>
-<div class="outline-text-3" id="text-org81fed80">
+<div id="outline-container-orgc31bb68" class="outline-3">
+<h3 id="orgc31bb68">添加sysbus_mmio_map的调用</h3>
+<div class="outline-text-3" id="text-orgc31bb68">
 <p>
 在xlnx-versal-virt平台的virtio-mmio初始化时调用sysbus_mmio_map<br>
 </p>
 <div class="org-src-container">
-<pre class="src src-diff"><span style="color: #a4aab6;">modified</span><span style="color: #3f444a;">   </span><span style="color: #a4aab6;">hw/arm/xlnx-versal-virt.c</span>
-<span style="color: #a9a1e1;">@@</span><span style="color: #3f444a;"> </span><span style="color: #a9a1e1;">-490,6</span><span style="color: #3f444a;"> </span><span style="color: #a9a1e1;">+490,7</span><span style="color: #3f444a;"> </span><span style="color: #a9a1e1;">@@</span><span style="color: #3f444a;"> </span><span style="color: #46D9FF;">static</span><span style="color: #3f444a;"> </span><span style="color: #46D9FF;">void</span><span style="color: #3f444a;"> </span><span style="color: #46D9FF;">create_virtio_regions(VersalVirt</span><span style="color: #3f444a;"> </span><span style="color: #46D9FF;">*s)</span>
-<span style="color: #a4aab6;">object_property_add_child(OBJECT(&amp;s-&gt;soc),</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">name,</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">OBJECT(dev));</span>
-<span style="color: #a4aab6;">sysbus_realize_and_unref(SYS_BUS_DEVICE(dev),</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">&amp;error_fatal);</span>
-<span style="color: #a4aab6;">sysbus_connect_irq(SYS_BUS_DEVICE(dev),</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">0,</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">pic_irq);</span>
-<span style="color: #22aa22; background-color: #21242b;">+</span><span style="color: #3f444a;">        </span><span style="color: #98be65; background-color: #21242b;">sysbus_mmio_map(SYS_BUS_DEVICE(dev),</span><span style="color: #3f444a;"> </span><span style="color: #98be65; background-color: #21242b;">0,</span><span style="color: #3f444a;"> </span><span style="color: #98be65; background-color: #21242b;">base);</span>
-<span style="color: #a4aab6;">mr</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">=</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">sysbus_mmio_get_region(SYS_BUS_DEVICE(dev),</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">0);</span>
-<span style="color: #a4aab6;">memory_region_add_subregion(&amp;s-&gt;soc.mr_ps,</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">base,</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">mr);</span>
-<span style="color: #a4aab6;">g_free(name);</span>
-
+<pre class="src src-diff"><code><span style="color: #a4aab6;">modified</span><span style="color: #3f444a;">   </span><span style="color: #a4aab6;">hw/arm/xlnx-versal-virt.c</span></code>
+<code><span style="color: #a9a1e1;">@@</span><span style="color: #3f444a;"> </span><span style="color: #a9a1e1;">-490,6</span><span style="color: #3f444a;"> </span><span style="color: #a9a1e1;">+490,7</span><span style="color: #3f444a;"> </span><span style="color: #a9a1e1;">@@</span><span style="color: #3f444a;"> </span><span style="color: #46D9FF;">static</span><span style="color: #3f444a;"> </span><span style="color: #46D9FF;">void</span><span style="color: #3f444a;"> </span><span style="color: #46D9FF;">create_virtio_regions(VersalVirt</span><span style="color: #3f444a;"> </span><span style="color: #46D9FF;">*s)</span></code>
+<code><span style="color: #a4aab6;">object_property_add_child(OBJECT(&amp;s-&gt;soc),</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">name,</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">OBJECT(dev));</span></code>
+<code><span style="color: #a4aab6;">sysbus_realize_and_unref(SYS_BUS_DEVICE(dev),</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">&amp;error_fatal);</span></code>
+<code><span style="color: #a4aab6;">sysbus_connect_irq(SYS_BUS_DEVICE(dev),</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">0,</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">pic_irq);</span></code>
+<code><span style="color: #22aa22; background-color: #21242b;">+</span><span style="color: #3f444a;">        </span><span style="color: #98be65; background-color: #21242b;">sysbus_mmio_map(SYS_BUS_DEVICE(dev),</span><span style="color: #3f444a;"> </span><span style="color: #98be65; background-color: #21242b;">0,</span><span style="color: #3f444a;"> </span><span style="color: #98be65; background-color: #21242b;">base);</span></code>
+<code><span style="color: #a4aab6;">mr</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">=</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">sysbus_mmio_get_region(SYS_BUS_DEVICE(dev),</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">0);</span></code>
+<code><span style="color: #a4aab6;">memory_region_add_subregion(&amp;s-&gt;soc.mr_ps,</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">base,</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">mr);</span></code>
+<code><span style="color: #a4aab6;">g_free(name);</span></code>
+<code></code>
 </pre>
 </div>
 <p>
 很不幸，这个方案是行不同的，因为系统会出现另外一个问题<br>
 </p>
 <div class="org-src-container">
-<pre class="src src-bash">qemu-system-aarch64: ../softmmu/memory.c:2440: memory_region_add_subregion_common: Assertion <span style="color: #51afef; font-weight: bold;">`!subregion-&gt;container' failed.</span>
+<pre class="src src-bash"><code>qemu-system-aarch64: ../softmmu/memory.c:2440: memory_region_add_subregion_common: Assertion <span style="color: #51afef; font-weight: bold;">`!subregion-&gt;container' failed.</span></code>
 </pre>
 </div>
 <p>
@@ -509,37 +508,37 @@ $<span style="color: #dcaeea;">2</span> = {{
 </div>
 </div>
 
-<div id="outline-container-org9bd53a9" class="outline-3">
-<h3 id="org9bd53a9">使用arm virt平台上的初始化</h3>
-<div class="outline-text-3" id="text-org9bd53a9">
+<div id="outline-container-org8d42c4b" class="outline-3">
+<h3 id="org8d42c4b">使用arm virt平台上的初始化</h3>
+<div class="outline-text-3" id="text-org8d42c4b">
 <p>
 将xlnx-versal-virt平台的virtio-mmio也使用与arm virt相同的方法来初始化，patch如下<br>
 </p>
 <div class="org-src-container">
-<pre class="src src-diff"><span style="color: #a4aab6;">modified</span><span style="color: #3f444a;">   </span><span style="color: #a4aab6;">hw/arm/xlnx-versal-virt.c</span>
-<span style="color: #a9a1e1;">@@</span><span style="color: #3f444a;"> </span><span style="color: #a9a1e1;">-478,21</span><span style="color: #3f444a;"> </span><span style="color: #a9a1e1;">+478,12</span><span style="color: #3f444a;"> </span><span style="color: #a9a1e1;">@@</span><span style="color: #3f444a;"> </span><span style="color: #46D9FF;">static</span><span style="color: #3f444a;"> </span><span style="color: #46D9FF;">void</span><span style="color: #3f444a;"> </span><span style="color: #46D9FF;">create_virtio_regions(VersalVirt</span><span style="color: #3f444a;"> </span><span style="color: #46D9FF;">*s)</span>
-<span style="color: #3f444a; background-color: #23272e;">    </span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">int</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">i;</span>
-
-<span style="color: #3f444a; background-color: #23272e;">    </span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">for</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">(i</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">=</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">0;</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">i</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">&lt;</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">NUM_VIRTIO_TRANSPORT;</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">i++)</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">{</span>
-<span style="color: #aa2222; background-color: #23272e;">-</span><span style="color: #3f444a;">        </span><span style="color: #ff6c6b; background-color: #23272e;">char</span><span style="color: #3f444a;"> </span><span style="color: #ff6c6b; background-color: #23272e;">*name</span><span style="color: #3f444a;"> </span><span style="color: #ff6c6b; background-color: #23272e;">=</span><span style="color: #3f444a;"> </span><span style="color: #ff6c6b; background-color: #23272e;">g_strdup_printf("virtio%d",</span><span style="color: #3f444a;"> </span><span style="color: #ff6c6b; background-color: #23272e;">i);</span>
-<span style="color: #3f444a; background-color: #23272e;">        </span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">hwaddr</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">base</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">=</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">MM_TOP_RSVD</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">+</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">i</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">*</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">virtio_mmio_size;</span>
-<span style="color: #3f444a; background-color: #23272e;">        </span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">int</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">irq</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">=</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">VERSAL_RSVD_IRQ_FIRST</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">+</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">i;</span>
-<span style="color: #aa2222; background-color: #23272e;">-</span><span style="color: #3f444a;">        </span><span style="color: #ff6c6b; background-color: #23272e;">MemoryRegion</span><span style="color: #3f444a;"> </span><span style="color: #ff6c6b; background-color: #23272e;">*mr;</span>
-<span style="color: #aa2222; background-color: #23272e;">-</span><span style="color: #3f444a;">        </span><span style="color: #ff6c6b; background-color: #23272e;">DeviceState</span><span style="color: #3f444a;"> </span><span style="color: #ff6c6b; background-color: #23272e;">*dev;</span>
-<span style="color: #3f444a; background-color: #23272e;">        </span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">qemu_irq</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">pic_irq;</span>
-
-<span style="color: #3f444a; background-color: #23272e;">        </span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">pic_irq</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">=</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">qdev_get_gpio_in(DEVICE(&amp;s-&gt;soc.fpd.apu.gic),</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">irq);</span>
-<span style="color: #aa2222; background-color: #23272e;">-</span><span style="color: #3f444a;">        </span><span style="color: #ff6c6b; background-color: #23272e;">dev</span><span style="color: #ff6c6b; background-color: #23272e;"> </span><span style="color: #ff6c6b; background-color: #23272e;">=</span><span style="color: #ff6c6b; background-color: #23272e;"> </span><span style="color: #ff6c6b; background-color: #23272e;">qdev</span><span style="color: #ff6c6b; background-color: #23272e;">_</span><span style="color: #ff6c6b; background-color: #23272e;">new</span><span style="color: #ff6c6b; background-color: #23272e;">("virtio-mmio"</span><span style="color: #ff6c6b; background-color: #23272e;">);</span><span style="color: #ff6c6b; background-color: #23272e;">
-</span><span style="color: #ff6c6b; background-color: #23272e;">-</span><span style="color: #ff6c6b; background-color: #23272e;">        </span><span style="color: #ff6c6b; background-color: #23272e;">object_property_add_child(OBJECT(&amp;s-&gt;soc)</span><span style="color: #ff6c6b; background-color: #23272e;">,</span><span style="color: #3f444a;"> </span><span style="color: #ff6c6b; background-color: #23272e;">name,</span><span style="color: #ff6c6b; background-color: #23272e;"> </span><span style="color: #ff6c6b; background-color: #23272e;">OBJECT(dev));</span><span style="color: #ff6c6b; background-color: #23272e;">
-</span><span style="color: #ff6c6b; background-color: #23272e;">-</span><span style="color: #ff6c6b; background-color: #23272e;">        </span><span style="color: #ff6c6b; background-color: #23272e;">sysbus_realize_and_unref(SYS_BUS_DEVICE(dev),</span><span style="color: #ff6c6b; background-color: #23272e;"> </span><span style="color: #ff6c6b; background-color: #23272e;">&amp;error_fatal);</span><span style="color: #ff6c6b; background-color: #23272e;">
-</span><span style="color: #ff6c6b; background-color: #23272e;">-</span><span style="color: #ff6c6b; background-color: #23272e;">        </span><span style="color: #ff6c6b; background-color: #23272e;">sysbus_connect_irq(SYS_BUS_DEVICE(dev),</span><span style="color: #ff6c6b; background-color: #23272e;"> </span><span style="color: #ff6c6b; background-color: #23272e;">0</span><span style="color: #ff6c6b; background-color: #23272e;">,</span><span style="color: #3f444a;"> </span><span style="color: #ff6c6b; background-color: #23272e;">pic_irq</span><span style="color: #ff6c6b; background-color: #23272e;">);</span><span style="color: #ff6c6b; background-color: #23272e;">
-</span><span style="color: #ff6c6b; background-color: #23272e;">-</span><span style="color: #ff6c6b; background-color: #23272e;">        </span><span style="color: #ff6c6b; background-color: #23272e;">mr</span><span style="color: #ff6c6b; background-color: #23272e;"> </span><span style="color: #ff6c6b; background-color: #23272e;">=</span><span style="color: #ff6c6b; background-color: #23272e;"> </span><span style="color: #ff6c6b; background-color: #23272e;">sysbus_mmio_get_region(SYS_BUS_DEVICE(dev),</span><span style="color: #ff6c6b; background-color: #23272e;"> </span><span style="color: #ff6c6b; background-color: #23272e;">0);</span><span style="color: #ff6c6b; background-color: #23272e;">
-</span><span style="color: #ff6c6b; background-color: #23272e;">-</span><span style="color: #ff6c6b; background-color: #23272e;">        </span><span style="color: #ff6c6b; background-color: #23272e;">memory_region_add_subregion(&amp;s-&gt;soc.mr_ps,</span><span style="color: #ff6c6b; background-color: #23272e;"> </span><span style="color: #ff6c6b; background-color: #23272e;">base,</span><span style="color: #ff6c6b; background-color: #23272e;"> </span><span style="color: #ff6c6b; background-color: #23272e;">mr);</span><span style="color: #ff6c6b; background-color: #23272e;">
-</span><span style="color: #ff6c6b; background-color: #23272e;">-</span><span style="color: #ff6c6b; background-color: #23272e;">        </span><span style="color: #ff6c6b; background-color: #23272e;">g_free(name</span><span style="color: #ff6c6b; background-color: #23272e;">);</span>
-<span style="color: #22aa22; background-color: #21242b;">+</span><span style="color: #3f444a;">        </span><span style="color: #98be65; background-color: #21242b;">sysbus</span><span style="color: #98be65; background-color: #21242b;">_</span><span style="color: #98be65; background-color: #21242b;">create_simple</span><span style="color: #98be65; background-color: #21242b;">("virtio-mmio",</span><span style="color: #3f444a;"> </span><span style="color: #98be65; background-color: #21242b;">base</span><span style="color: #98be65; background-color: #21242b;">,</span><span style="color: #3f444a;"> </span><span style="color: #98be65; background-color: #21242b;">pic_irq);</span>
-<span style="color: #3f444a; background-color: #23272e;">    </span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">}</span>
-
-<span style="color: #3f444a; background-color: #23272e;">    </span><span style="color: #3f444a;"> </span>for<span style="color: #3f444a;"> </span>(i<span style="color: #3f444a;"> </span>=<span style="color: #3f444a;"> </span>0;<span style="color: #3f444a;"> </span>i<span style="color: #3f444a;"> </span>&lt;<span style="color: #3f444a;"> </span>NUM_VIRTIO_TRANSPORT;<span style="color: #3f444a;"> </span>i++)<span style="color: #3f444a;"> </span>{
+<pre class="src src-diff"><code><span style="color: #a4aab6;">modified</span><span style="color: #3f444a;">   </span><span style="color: #a4aab6;">hw/arm/xlnx-versal-virt.c</span></code>
+<code><span style="color: #a9a1e1;">@@</span><span style="color: #3f444a;"> </span><span style="color: #a9a1e1;">-478,21</span><span style="color: #3f444a;"> </span><span style="color: #a9a1e1;">+478,12</span><span style="color: #3f444a;"> </span><span style="color: #a9a1e1;">@@</span><span style="color: #3f444a;"> </span><span style="color: #46D9FF;">static</span><span style="color: #3f444a;"> </span><span style="color: #46D9FF;">void</span><span style="color: #3f444a;"> </span><span style="color: #46D9FF;">create_virtio_regions(VersalVirt</span><span style="color: #3f444a;"> </span><span style="color: #46D9FF;">*s)</span></code>
+<code><span style="color: #3f444a; background-color: #23272e;">    </span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">int</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">i;</span></code>
+<code></code>
+<code><span style="color: #3f444a; background-color: #23272e;">    </span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">for</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">(i</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">=</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">0;</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">i</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">&lt;</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">NUM_VIRTIO_TRANSPORT;</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">i++)</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">{</span></code>
+<code><span style="color: #aa2222; background-color: #23272e;">-</span><span style="color: #3f444a;">        </span><span style="color: #ff6c6b; background-color: #23272e;">char</span><span style="color: #3f444a;"> </span><span style="color: #ff6c6b; background-color: #23272e;">*name</span><span style="color: #3f444a;"> </span><span style="color: #ff6c6b; background-color: #23272e;">=</span><span style="color: #3f444a;"> </span><span style="color: #ff6c6b; background-color: #23272e;">g_strdup_printf("virtio%d",</span><span style="color: #3f444a;"> </span><span style="color: #ff6c6b; background-color: #23272e;">i);</span></code>
+<code><span style="color: #3f444a; background-color: #23272e;">        </span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">hwaddr</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">base</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">=</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">MM_TOP_RSVD</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">+</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">i</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">*</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">virtio_mmio_size;</span></code>
+<code><span style="color: #3f444a; background-color: #23272e;">        </span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">int</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">irq</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">=</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">VERSAL_RSVD_IRQ_FIRST</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">+</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">i;</span></code>
+<code><span style="color: #aa2222; background-color: #23272e;">-</span><span style="color: #3f444a;">        </span><span style="color: #ff6c6b; background-color: #23272e;">MemoryRegion</span><span style="color: #3f444a;"> </span><span style="color: #ff6c6b; background-color: #23272e;">*mr;</span></code>
+<code><span style="color: #aa2222; background-color: #23272e;">-</span><span style="color: #3f444a;">        </span><span style="color: #ff6c6b; background-color: #23272e;">DeviceState</span><span style="color: #3f444a;"> </span><span style="color: #ff6c6b; background-color: #23272e;">*dev;</span></code>
+<code><span style="color: #3f444a; background-color: #23272e;">        </span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">qemu_irq</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">pic_irq;</span></code>
+<code></code>
+<code><span style="color: #3f444a; background-color: #23272e;">        </span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">pic_irq</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">=</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">qdev_get_gpio_in(DEVICE(&amp;s-&gt;soc.fpd.apu.gic),</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">irq);</span></code>
+<code><span style="color: #aa2222; background-color: #23272e;">-</span><span style="color: #3f444a;">        </span><span style="color: #ff6c6b; background-color: #23272e;">dev</span><span style="color: #ff6c6b; background-color: #23272e;"> </span><span style="color: #ff6c6b; background-color: #23272e;">=</span><span style="color: #ff6c6b; background-color: #23272e;"> </span><span style="color: #ff6c6b; background-color: #23272e;">qdev</span><span style="color: #ff6c6b; background-color: #23272e;">_</span><span style="color: #ff6c6b; background-color: #23272e;">new</span><span style="color: #ff6c6b; background-color: #23272e;">("virtio-mmio"</span><span style="color: #ff6c6b; background-color: #23272e;">);</span><span style="color: #ff6c6b; background-color: #23272e;"></code>
+<code></span><span style="color: #ff6c6b; background-color: #23272e;">-</span><span style="color: #ff6c6b; background-color: #23272e;">        </span><span style="color: #ff6c6b; background-color: #23272e;">object_property_add_child(OBJECT(&amp;s-&gt;soc)</span><span style="color: #ff6c6b; background-color: #23272e;">,</span><span style="color: #3f444a;"> </span><span style="color: #ff6c6b; background-color: #23272e;">name,</span><span style="color: #ff6c6b; background-color: #23272e;"> </span><span style="color: #ff6c6b; background-color: #23272e;">OBJECT(dev));</span><span style="color: #ff6c6b; background-color: #23272e;"></code>
+<code></span><span style="color: #ff6c6b; background-color: #23272e;">-</span><span style="color: #ff6c6b; background-color: #23272e;">        </span><span style="color: #ff6c6b; background-color: #23272e;">sysbus_realize_and_unref(SYS_BUS_DEVICE(dev),</span><span style="color: #ff6c6b; background-color: #23272e;"> </span><span style="color: #ff6c6b; background-color: #23272e;">&amp;error_fatal);</span><span style="color: #ff6c6b; background-color: #23272e;"></code>
+<code></span><span style="color: #ff6c6b; background-color: #23272e;">-</span><span style="color: #ff6c6b; background-color: #23272e;">        </span><span style="color: #ff6c6b; background-color: #23272e;">sysbus_connect_irq(SYS_BUS_DEVICE(dev),</span><span style="color: #ff6c6b; background-color: #23272e;"> </span><span style="color: #ff6c6b; background-color: #23272e;">0</span><span style="color: #ff6c6b; background-color: #23272e;">,</span><span style="color: #3f444a;"> </span><span style="color: #ff6c6b; background-color: #23272e;">pic_irq</span><span style="color: #ff6c6b; background-color: #23272e;">);</span><span style="color: #ff6c6b; background-color: #23272e;"></code>
+<code></span><span style="color: #ff6c6b; background-color: #23272e;">-</span><span style="color: #ff6c6b; background-color: #23272e;">        </span><span style="color: #ff6c6b; background-color: #23272e;">mr</span><span style="color: #ff6c6b; background-color: #23272e;"> </span><span style="color: #ff6c6b; background-color: #23272e;">=</span><span style="color: #ff6c6b; background-color: #23272e;"> </span><span style="color: #ff6c6b; background-color: #23272e;">sysbus_mmio_get_region(SYS_BUS_DEVICE(dev),</span><span style="color: #ff6c6b; background-color: #23272e;"> </span><span style="color: #ff6c6b; background-color: #23272e;">0);</span><span style="color: #ff6c6b; background-color: #23272e;"></code>
+<code></span><span style="color: #ff6c6b; background-color: #23272e;">-</span><span style="color: #ff6c6b; background-color: #23272e;">        </span><span style="color: #ff6c6b; background-color: #23272e;">memory_region_add_subregion(&amp;s-&gt;soc.mr_ps,</span><span style="color: #ff6c6b; background-color: #23272e;"> </span><span style="color: #ff6c6b; background-color: #23272e;">base,</span><span style="color: #ff6c6b; background-color: #23272e;"> </span><span style="color: #ff6c6b; background-color: #23272e;">mr);</span><span style="color: #ff6c6b; background-color: #23272e;"></code>
+<code></span><span style="color: #ff6c6b; background-color: #23272e;">-</span><span style="color: #ff6c6b; background-color: #23272e;">        </span><span style="color: #ff6c6b; background-color: #23272e;">g_free(name</span><span style="color: #ff6c6b; background-color: #23272e;">);</span></code>
+<code><span style="color: #22aa22; background-color: #21242b;">+</span><span style="color: #3f444a;">        </span><span style="color: #98be65; background-color: #21242b;">sysbus</span><span style="color: #98be65; background-color: #21242b;">_</span><span style="color: #98be65; background-color: #21242b;">create_simple</span><span style="color: #98be65; background-color: #21242b;">("virtio-mmio",</span><span style="color: #3f444a;"> </span><span style="color: #98be65; background-color: #21242b;">base</span><span style="color: #98be65; background-color: #21242b;">,</span><span style="color: #3f444a;"> </span><span style="color: #98be65; background-color: #21242b;">pic_irq);</span></code>
+<code><span style="color: #3f444a; background-color: #23272e;">    </span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">}</span></code>
+<code></code>
+<code><span style="color: #3f444a; background-color: #23272e;">    </span><span style="color: #3f444a;"> </span>for<span style="color: #3f444a;"> </span>(i<span style="color: #3f444a;"> </span>=<span style="color: #3f444a;"> </span>0;<span style="color: #3f444a;"> </span>i<span style="color: #3f444a;"> </span>&lt;<span style="color: #3f444a;"> </span>NUM_VIRTIO_TRANSPORT;<span style="color: #3f444a;"> </span>i++)<span style="color: #3f444a;"> </span>{</code>
 </pre>
 </div>
 
@@ -559,63 +558,63 @@ xlnx-versal-virt在cpu初始化时，系统设置cpu访问到的内存空间为<
 Versal.fpd.apu.mr这个自定义的memory region, 见下面的代码片段.<br>
 </p>
 <div class="org-src-container">
-<pre class="src src-C"><span style="color: #51afef;">static</span> <span style="color: #ECBE7B;">void</span> <span style="color: #c678dd;">versal_create_apu_cpus</span>(<span style="color: #ECBE7B;">Versal</span> *<span style="color: #dcaeea;">s</span>)
-{
-    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">i</span>;
-
-    <span style="color: #51afef;">for</span> (i = 0; i &lt; ARRAY_SIZE(s-&gt;fpd.apu.cpu); i++) {
-        <span style="color: #ECBE7B;">Object</span> *<span style="color: #dcaeea;">obj</span>;
-
-        object_initialize_child(OBJECT(s), <span style="color: #98be65;">"apu-cpu[*]"</span>, &amp;s-&gt;fpd.apu.cpu[i],
-                    XLNX_VERSAL_ACPU_TYPE);
-        obj = OBJECT(&amp;s-&gt;fpd.apu.cpu[i]);
-        object_property_set_int(obj, <span style="color: #98be65;">"psci-conduit"</span>, s-&gt;cfg.psci_conduit,
-                    &amp;error_abort);
-        <span style="color: #51afef;">if</span> (i) {
-            <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">Secondary CPUs start in PSCI powered-down state</span><span style="color: #5B6268;"> */</span>
-            object_property_set_bool(obj, <span style="color: #98be65;">"start-powered-off"</span>, <span style="color: #a9a1e1;">true</span>,
-                        &amp;error_abort);
-        }
-
-        object_property_set_int(obj, <span style="color: #98be65;">"core-count"</span>, ARRAY_SIZE(s-&gt;fpd.apu.cpu),
-                    &amp;error_abort);
-        object_property_set_link(obj, <span style="color: #98be65;">"memory"</span>, OBJECT(&amp;s-&gt;fpd.apu.mr),
-                    &amp;error_abort);
-        qdev_realize(DEVICE(obj), <span style="color: #a9a1e1;">NULL</span>, &amp;error_fatal);
-    }
-}
+<pre class="src src-C"><code><span style="color: #51afef;">static</span> <span style="color: #ECBE7B;">void</span> <span style="color: #c678dd;">versal_create_apu_cpus</span>(<span style="color: #ECBE7B;">Versal</span> *<span style="color: #dcaeea;">s</span>)</code>
+<code>{</code>
+<code>    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">i</span>;</code>
+<code></code>
+<code>    <span style="color: #51afef;">for</span> (i = 0; i &lt; ARRAY_SIZE(s-&gt;fpd.apu.cpu); i++) {</code>
+<code>        <span style="color: #ECBE7B;">Object</span> *<span style="color: #dcaeea;">obj</span>;</code>
+<code></code>
+<code>        object_initialize_child(OBJECT(s), <span style="color: #98be65;">"apu-cpu[*]"</span>, &amp;s-&gt;fpd.apu.cpu[i],</code>
+<code>                    XLNX_VERSAL_ACPU_TYPE);</code>
+<code>        obj = OBJECT(&amp;s-&gt;fpd.apu.cpu[i]);</code>
+<code>        object_property_set_int(obj, <span style="color: #98be65;">"psci-conduit"</span>, s-&gt;cfg.psci_conduit,</code>
+<code>                    &amp;error_abort);</code>
+<code>        <span style="color: #51afef;">if</span> (i) {</code>
+<code>            <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">Secondary CPUs start in PSCI powered-down state</span><span style="color: #5B6268;"> */</span></code>
+<code>            object_property_set_bool(obj, <span style="color: #98be65;">"start-powered-off"</span>, <span style="color: #a9a1e1;">true</span>,</code>
+<code>                        &amp;error_abort);</code>
+<code>        }</code>
+<code></code>
+<code>        object_property_set_int(obj, <span style="color: #98be65;">"core-count"</span>, ARRAY_SIZE(s-&gt;fpd.apu.cpu),</code>
+<code>                    &amp;error_abort);</code>
+<code>        object_property_set_link(obj, <span style="color: #98be65;">"memory"</span>, OBJECT(&amp;s-&gt;fpd.apu.mr),</code>
+<code>                    &amp;error_abort);</code>
+<code>        qdev_realize(DEVICE(obj), <span style="color: #a9a1e1;">NULL</span>, &amp;error_fatal);</code>
+<code>    }</code>
+<code>}</code>
 </pre>
 </div></li>
 <li><p>
 xlnx-versal-virt在处理system_memory时，将Versal.fpd.apu.mr设置为system_memory的子region.<br>
-从xlnx的代码中可知，在这个平台上,Versal.fpd.apu.mr是system_memory的子region，这样，aarch64的CPU自然就没有办法访问到system_memory中的virtio外设<sup><a id="fnr.1" class="footref" href="#fn.1">1</a></sup>了<br>
+从xlnx的代码中可知，在这个平台上,Versal.fpd.apu.mr是system_memory的子region，这样，aarch64的CPU自然就没有办法访问到system_memory中的virtio外设<sup><a id="fnr.1" class="footref" href="#fn.1" role="doc-backlink">1</a></sup>了<br>
 </p>
 <div class="org-src-container">
-<pre class="src src-C"><span style="color: #5B6268;">/* </span><span style="color: #5B6268;">Make the APU cpu address space visible to virtio and other</span>
-<span style="color: #5B6268;"> * modules unaware of muliple address-spaces.</span><span style="color: #5B6268;">  */</span>
-<span style="color: #c678dd;">memory_region_add_subregion_overlap</span>(<span style="color: #ECBE7B;">get_system_memory</span>(),
-                0, &amp;s-&gt;soc.fpd.apu.mr, 0);
+<pre class="src src-C"><code><span style="color: #5B6268;">/* </span><span style="color: #5B6268;">Make the APU cpu address space visible to virtio and other</span></code>
+<code><span style="color: #5B6268;"> * modules unaware of muliple address-spaces.</span><span style="color: #5B6268;">  */</span></code>
+<code><span style="color: #c678dd;">memory_region_add_subregion_overlap</span>(<span style="color: #ECBE7B;">get_system_memory</span>(),</code>
+<code>                0, &amp;s-&gt;soc.fpd.apu.mr, 0);</code>
 </pre>
 </div></li>
 </ol>
 </div>
 </div>
-<div id="outline-container-orgc5df3b8" class="outline-3">
-<h3 id="orgc5df3b8">不太OK的解决方案</h3>
-<div class="outline-text-3" id="text-orgc5df3b8">
+<div id="outline-container-orga47b973" class="outline-3">
+<h3 id="orga47b973">不太OK的解决方案</h3>
+<div class="outline-text-3" id="text-orga47b973">
 <p>
 既然上边两个看起来ok的解决方案都有问题，那么就用个不太好的解决方案吧。<br>
 </p>
 <div class="org-src-container">
-<pre class="src src-diff"><span style="color: #a4aab6;">modified</span><span style="color: #3f444a;">   </span><span style="color: #a4aab6;">hw/arm/xlnx-versal-virt.c</span>
-<span style="color: #a9a1e1;">@@</span><span style="color: #3f444a;"> </span><span style="color: #a9a1e1;">-490,6</span><span style="color: #3f444a;"> </span><span style="color: #a9a1e1;">+490,7</span><span style="color: #3f444a;"> </span><span style="color: #a9a1e1;">@@</span><span style="color: #3f444a;"> </span><span style="color: #46D9FF;">static</span><span style="color: #3f444a;"> </span><span style="color: #46D9FF;">void</span><span style="color: #3f444a;"> </span><span style="color: #46D9FF;">create_virtio_regions(VersalVirt</span><span style="color: #3f444a;"> </span><span style="color: #46D9FF;">*s)</span>
-<span style="color: #3f444a; background-color: #23272e;">        </span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">object_property_add_child(OBJECT(&amp;s-&gt;soc),</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">name,</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">OBJECT(dev));</span>
-<span style="color: #3f444a; background-color: #23272e;">        </span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">sysbus_realize_and_unref(SYS_BUS_DEVICE(dev),</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">&amp;error_fatal);</span>
-<span style="color: #3f444a; background-color: #23272e;">        </span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">sysbus_connect_irq(SYS_BUS_DEVICE(dev),</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">0,</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">pic_irq);</span>
-<span style="color: #22aa22; background-color: #21242b;">+</span><span style="color: #3f444a;">        </span><span style="color: #98be65; background-color: #21242b;">SYS_BUS_DEVICE(dev)-&gt;mmio[0].addr</span><span style="color: #3f444a;"> </span><span style="color: #98be65; background-color: #21242b;">=</span><span style="color: #3f444a;"> </span><span style="color: #98be65; background-color: #21242b;">base;</span>
-<span style="color: #3f444a; background-color: #23272e;">        </span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">mr</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">=</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">sysbus_mmio_get_region(SYS_BUS_DEVICE(dev),</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">0);</span>
-<span style="color: #3f444a; background-color: #23272e;">        </span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">memory_region_add_subregion(&amp;s-&gt;soc.mr_ps,</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">base,</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">mr);</span>
-<span style="color: #3f444a; background-color: #23272e;">        </span><span style="color: #3f444a;"> </span>g_free(name);
+<pre class="src src-diff"><code><span style="color: #a4aab6;">modified</span><span style="color: #3f444a;">   </span><span style="color: #a4aab6;">hw/arm/xlnx-versal-virt.c</span></code>
+<code><span style="color: #a9a1e1;">@@</span><span style="color: #3f444a;"> </span><span style="color: #a9a1e1;">-490,6</span><span style="color: #3f444a;"> </span><span style="color: #a9a1e1;">+490,7</span><span style="color: #3f444a;"> </span><span style="color: #a9a1e1;">@@</span><span style="color: #3f444a;"> </span><span style="color: #46D9FF;">static</span><span style="color: #3f444a;"> </span><span style="color: #46D9FF;">void</span><span style="color: #3f444a;"> </span><span style="color: #46D9FF;">create_virtio_regions(VersalVirt</span><span style="color: #3f444a;"> </span><span style="color: #46D9FF;">*s)</span></code>
+<code><span style="color: #3f444a; background-color: #23272e;">        </span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">object_property_add_child(OBJECT(&amp;s-&gt;soc),</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">name,</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">OBJECT(dev));</span></code>
+<code><span style="color: #3f444a; background-color: #23272e;">        </span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">sysbus_realize_and_unref(SYS_BUS_DEVICE(dev),</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">&amp;error_fatal);</span></code>
+<code><span style="color: #3f444a; background-color: #23272e;">        </span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">sysbus_connect_irq(SYS_BUS_DEVICE(dev),</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">0,</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">pic_irq);</span></code>
+<code><span style="color: #22aa22; background-color: #21242b;">+</span><span style="color: #3f444a;">        </span><span style="color: #98be65; background-color: #21242b;">SYS_BUS_DEVICE(dev)-&gt;mmio[0].addr</span><span style="color: #3f444a;"> </span><span style="color: #98be65; background-color: #21242b;">=</span><span style="color: #3f444a;"> </span><span style="color: #98be65; background-color: #21242b;">base;</span></code>
+<code><span style="color: #3f444a; background-color: #23272e;">        </span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">mr</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">=</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">sysbus_mmio_get_region(SYS_BUS_DEVICE(dev),</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">0);</span></code>
+<code><span style="color: #3f444a; background-color: #23272e;">        </span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">memory_region_add_subregion(&amp;s-&gt;soc.mr_ps,</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">base,</span><span style="color: #3f444a;"> </span><span style="color: #a4aab6;">mr);</span></code>
+<code><span style="color: #3f444a; background-color: #23272e;">        </span><span style="color: #3f444a;"> </span>g_free(name);</code>
 </pre>
 </div>
 <p>
@@ -624,9 +623,9 @@ xlnx-versal-virt在处理system_memory时，将Versal.fpd.apu.mr设置为system_
 </div>
 </div>
 
-<div id="outline-container-org6239fa7" class="outline-3">
-<h3 id="org6239fa7">提交的qemu中的解决方案</h3>
-<div class="outline-text-3" id="text-org6239fa7">
+<div id="outline-container-orgbad9264" class="outline-3">
+<h3 id="orgbad9264">提交的qemu中的解决方案</h3>
+<div class="outline-text-3" id="text-orgbad9264">
 <p>
 经过一番交流，终于提交了合适的解决方案<br>
 <a href="https://lists.nongnu.org/archive/html/qemu-devel/2021-02/msg07826.html">https://lists.nongnu.org/archive/html/qemu-devel/2021-02/msg07826.html</a><br>
@@ -639,7 +638,7 @@ xlnx-versal-virt在处理system_memory时，将Versal.fpd.apu.mr设置为system_
 <h2 class="footnotes">Footnotes: </h2>
 <div id="text-footnotes">
 
-<div class="footdef"><sup><a id="fn.1" class="footnum" href="#fnr.1">1</a></sup> <div class="footpara"><p class="footpara">sysbus_create_simple将virtio的内存区域注册到了system_memory中了</p></div></div>
+<div class="footdef"><sup><a id="fn.1" class="footnum" href="#fnr.1" role="doc-backlink">1</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">sysbus_create_simple将virtio的内存区域注册到了system_memory中了</p></div></div>
 
 
 </div>

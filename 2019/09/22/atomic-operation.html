@@ -1,15 +1,14 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2021-11-15 一 14:01 -->
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- 2022-03-03 Thu 11:48 -->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Atomic operation in aarch64</title>
-<meta name="generator" content="Org mode">
-<meta name="author" content="Schspa">
-<meta name="description" content="Atomic operation in aarch64"
->
-<meta name="keywords" content=":atomic operation:">
+<meta name="author" content="Schspa" />
+<meta name="description" content="Atomic operation in aarch64" />
+<meta name="keywords" content=":atomic operation:" />
+<meta name="generator" content="Org Mode" />
 <link rel="shortcut icon" href="/images/rose-red.png" type="image/x-icon" />
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" integrity="sha256-sAcc18zvMnaJZrNT4v8J0T4HqzEUiUTlVFgDIywjQek=" crossorigin="anonymous">
 <link rel="stylesheet" href="/css/animate.min.css" />
@@ -57,36 +56,36 @@
   </nav>
 </header>
 </div>
-<div id="content">
+<div id="content" class="content">
 <h1 class="title">Atomic operation in aarch64</h1>
-<div id="table-of-contents">
+<div id="table-of-contents" role="doc-toc">
 <h2>Table of Contents</h2>
-<div id="text-table-of-contents">
+<div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#orgd3d6602">在Linux内核中看到下面这句话:</a></li>
-<li><a href="#org4a2bcdd">先看看ARM64平台原子操作实现原理</a>
+<li><a href="#org3ae0d65">在Linux内核中看到下面这句话:</a></li>
+<li><a href="#org9519055">先看看ARM64平台原子操作实现原理</a>
 <ul>
-<li><a href="#orgf810d5a">linux</a></li>
-<li><a href="#org0e5e96b">ARM64平台原子操作指令</a></li>
+<li><a href="#org9532ed4">linux</a></li>
+<li><a href="#orgacbbfea">ARM64平台原子操作指令</a></li>
 </ul>
 </li>
-<li><a href="#org921b556">ARMV8a中的设置</a>
+<li><a href="#org4ec3ecb">ARMV8a中的设置</a>
 <ul>
-<li><a href="#org9a6d2c0">ARMv8a手册</a></li>
-<li><a href="#org72fbc95">Crotex A55手册</a></li>
-<li><a href="#org7767aac">CPUECTLR.ATOM</a></li>
+<li><a href="#org43eb0e5">ARMv8a手册</a></li>
+<li><a href="#org23693f0">Crotex A55手册</a></li>
+<li><a href="#orgc36d129">CPUECTLR.ATOM</a></li>
 </ul>
 </li>
-<li><a href="#org8bf72ef">总线的设置</a></li>
-<li><a href="#org550476f">对于内核注释中提到的omap平台，硬件上使用了哪种互连网络，最终导致了系统无法在non-cached内存中使用原子操作？</a></li>
-<li><a href="#org68d8a06"><span class="done DONE">DONE</span> 对于上述平台，如果软件上去使用原子操作指令访问non-cached内存，会有什么后果？</a></li>
+<li><a href="#org0dcb094">总线的设置</a></li>
+<li><a href="#orgedc72ed">对于内核注释中提到的omap平台，硬件上使用了哪种互连网络，最终导致了系统无法在non-cached内存中使用原子操作？</a></li>
+<li><a href="#org373001f"><span class="done DONE">DONE</span> 对于上述平台，如果软件上去使用原子操作指令访问non-cached内存，会有什么后果？</a></li>
 </ul>
 </div>
 </div>
 
-<div id="outline-container-orgd3d6602" class="outline-2">
-<h2 id="orgd3d6602">在Linux内核中看到下面这句话:</h2>
-<div class="outline-text-2" id="text-orgd3d6602">
+<div id="outline-container-org3ae0d65" class="outline-2">
+<h2 id="org3ae0d65">在Linux内核中看到下面这句话:</h2>
+<div class="outline-text-2" id="text-org3ae0d65">
 <blockquote>
 <p>
 At least on ARM, pgprot_noncached causes the<br>
@@ -99,23 +98,23 @@ memory are implementation defined, and won't work on many ARMs such as omaps.<br
 </p>
 </div>
 </div>
-<div id="outline-container-org4a2bcdd" class="outline-2">
-<h2 id="org4a2bcdd">先看看ARM64平台原子操作实现原理</h2>
-<div class="outline-text-2" id="text-org4a2bcdd">
+<div id="outline-container-org9519055" class="outline-2">
+<h2 id="org9519055">先看看ARM64平台原子操作实现原理</h2>
+<div class="outline-text-2" id="text-org9519055">
 <p>
 先看看Linux内核中的实现。<br>
 </p>
 </div>
-<div id="outline-container-orgf810d5a" class="outline-3">
-<h3 id="orgf810d5a">linux</h3>
-<div class="outline-text-3" id="text-orgf810d5a">
+<div id="outline-container-org9532ed4" class="outline-3">
+<h3 id="org9532ed4">linux</h3>
+<div class="outline-text-3" id="text-org9532ed4">
 <ul class="org-ul">
 <li><p>
 atomic_read &amp; atomic_set<br>
 </p>
 <div class="org-src-container">
-<pre class="src src-C"><span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #c678dd;">atomic_read</span>(<span style="color: #dcaeea;">v</span>)                  READ_ONCE((v)-&gt;counter)
-<span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #c678dd;">atomic_set</span>(<span style="color: #dcaeea;">v</span>, <span style="color: #dcaeea;">i</span>)                WRITE_ONCE(((v)-&gt;counter), (i))
+<pre class="src src-C"><code><span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #c678dd;">atomic_read</span>(<span style="color: #dcaeea;">v</span>)                  READ_ONCE((v)-&gt;counter)</code>
+<code><span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #c678dd;">atomic_set</span>(<span style="color: #dcaeea;">v</span>, <span style="color: #dcaeea;">i</span>)                WRITE_ONCE(((v)-&gt;counter), (i))</code>
 </pre>
 </div>
 <p>
@@ -126,65 +125,65 @@ atomic_add &amp; atomic_dec<br>
 对于加减的原子操作，由于需要执行读，改，写三步，需要使用特殊的指令才可以实现。<br>
 </p>
 <div class="org-src-container">
-<pre class="src src-C"><span style="color: #51afef;">static</span> <span style="color: #51afef;">inline</span> <span style="color: #ECBE7B;">void</span>
-     <span style="color: #c678dd;">atomic_add</span>(<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">i</span>, <span style="color: #ECBE7B;">atomic_t</span> *<span style="color: #dcaeea;">v</span>)
-{
-     kasan_check_write(v, <span style="color: #51afef;">sizeof</span>(*v));
-     arch_atomic_add(i, v);
-}
-<span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #dcaeea;">atomic_add</span> atomic_add
-
-<span style="color: #c678dd;">ATOMIC_OP</span>(atomic_add)
-
-<span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #c678dd;">ATOMIC_OP</span>(<span style="color: #dcaeea;">op</span>)                                                                   \
-     <span style="color: #51afef;">static</span> <span style="color: #51afef;">inline</span> <span style="color: #ECBE7B;">void</span> <span style="color: #c678dd;">arch_</span>##op(<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">i</span>, <span style="color: #ECBE7B;">atomic_t</span> *<span style="color: #dcaeea;">v</span>)   \
-     {                                                                                                  \
-          __lse_ll_sc_body(op, i, v);                                   \
-     }
-
-<span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #c678dd;">__lse_ll_sc_body</span>(<span style="color: #dcaeea;">op</span>, ...)                               \
-     ({                                                                                 \
-          system_uses_lse_atomics() ?                   \
-               __lse_##op(__VA_ARGS__) :                \
-               __ll_sc_##op(__VA_ARGS__);               \
-     })
-
+<pre class="src src-C"><code><span style="color: #51afef;">static</span> <span style="color: #51afef;">inline</span> <span style="color: #ECBE7B;">void</span></code>
+<code>     <span style="color: #c678dd;">atomic_add</span>(<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">i</span>, <span style="color: #ECBE7B;">atomic_t</span> *<span style="color: #dcaeea;">v</span>)</code>
+<code>{</code>
+<code>     kasan_check_write(v, <span style="color: #51afef;">sizeof</span>(*v));</code>
+<code>     arch_atomic_add(i, v);</code>
+<code>}</code>
+<code><span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #dcaeea;">atomic_add</span> atomic_add</code>
+<code></code>
+<code><span style="color: #c678dd;">ATOMIC_OP</span>(atomic_add)</code>
+<code></code>
+<code><span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #c678dd;">ATOMIC_OP</span>(<span style="color: #dcaeea;">op</span>)                                                                   \</code>
+<code>     <span style="color: #51afef;">static</span> <span style="color: #51afef;">inline</span> <span style="color: #ECBE7B;">void</span> <span style="color: #c678dd;">arch_</span>##op(<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">i</span>, <span style="color: #ECBE7B;">atomic_t</span> *<span style="color: #dcaeea;">v</span>)   \</code>
+<code>     {                                                                                                  \</code>
+<code>          __lse_ll_sc_body(op, i, v);                                   \</code>
+<code>     }</code>
+<code></code>
+<code><span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #c678dd;">__lse_ll_sc_body</span>(<span style="color: #dcaeea;">op</span>, ...)                               \</code>
+<code>     ({                                                                                 \</code>
+<code>          system_uses_lse_atomics() ?                   \</code>
+<code>               __lse_##op(__VA_ARGS__) :                \</code>
+<code>               __ll_sc_##op(__VA_ARGS__);               \</code>
+<code>     })</code>
+<code></code>
 </pre>
 </div></li>
 </ul>
 </div>
 <ul class="org-ul">
-<li><a id="org6f64001"></a>Linux atomic指令的两种实现<br>
+<li><a id="orga3ac709"></a>Linux atomic指令的两种实现<br>
 <ul class="org-ul">
-<li><a id="org86fd216"></a>LSE<br>
-<div class="outline-text-5" id="text-org86fd216">
+<li><a id="orgb21e37a"></a>LSE<br>
+<div class="outline-text-5" id="text-orgb21e37a">
 <p>
 使用ARMv8.1中新增加的原子操作指令<br>
 </p>
 <div class="org-src-container">
-<pre class="src src-C"><span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #c678dd;">ATOMIC_OP</span>(<span style="color: #dcaeea;">op</span>, <span style="color: #dcaeea;">asm_op</span>)                                                                   \
-    <span style="color: #51afef;">static</span> <span style="color: #51afef;">inline</span> <span style="color: #ECBE7B;">void</span> <span style="color: #c678dd;">__lse_atomic_</span>##op(<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">i</span>, <span style="color: #ECBE7B;">atomic_t</span> *<span style="color: #dcaeea;">v</span>)    \
-    {                                                                                                                   \
-        <span style="color: #51afef;">asm</span> <span style="color: #51afef;">volatile</span>(                                                                                   \
-                     <span style="color: #98be65;">"  "</span> #asm_op <span style="color: #98be65;">"     %w[i], %[v]\n"</span>                          \
-                     : [i] <span style="color: #98be65;">"+r"</span> (i), [v] <span style="color: #98be65;">"+Q"</span> (v-&gt;counter)              \
-                     : <span style="color: #98be65;">"r"</span> (v));                                                                \
-    }
-
-    <span style="color: #c678dd;">ATOMIC_OP</span>(andnot, stclr)
-    <span style="color: #c678dd;">ATOMIC_OP</span>(or, stset)
-    <span style="color: #c678dd;">ATOMIC_OP</span>(xor, steor)
-    <span style="color: #c678dd;">ATOMIC_OP</span>(add, stadd)
-
-    <span style="color: #51afef;">static</span> <span style="color: #51afef;">inline</span> <span style="color: #ECBE7B;">void</span> <span style="color: #c678dd;">__lse_atomic64_sub</span>(<span style="color: #ECBE7B;">s64</span> <span style="color: #dcaeea;">i</span>, <span style="color: #ECBE7B;">atomic64_t</span> *<span style="color: #dcaeea;">v</span>)
-{
-    <span style="color: #51afef;">asm</span> <span style="color: #51afef;">volatile</span>(
-                 <span style="color: #98be65;">"      neg     %[i], %[i]\n"</span>
-                 <span style="color: #98be65;">"      stadd   %[i], %[v]"</span>
-                 : [i] <span style="color: #98be65;">"+&amp;r"</span> (i), [v] <span style="color: #98be65;">"+Q"</span> (v-&gt;counter)
-                 : <span style="color: #98be65;">"r"</span> (v));
-}
-
+<pre class="src src-C"><code><span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #c678dd;">ATOMIC_OP</span>(<span style="color: #dcaeea;">op</span>, <span style="color: #dcaeea;">asm_op</span>)                                                                   \</code>
+<code>    <span style="color: #51afef;">static</span> <span style="color: #51afef;">inline</span> <span style="color: #ECBE7B;">void</span> <span style="color: #c678dd;">__lse_atomic_</span>##op(<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">i</span>, <span style="color: #ECBE7B;">atomic_t</span> *<span style="color: #dcaeea;">v</span>)    \</code>
+<code>    {                                                                                                                   \</code>
+<code>        <span style="color: #51afef;">asm</span> <span style="color: #51afef;">volatile</span>(                                                                                   \</code>
+<code>                     <span style="color: #98be65;">"  "</span> #asm_op <span style="color: #98be65;">"     %w[i], %[v]\n"</span>                          \</code>
+<code>                     : [i] <span style="color: #98be65;">"+r"</span> (i), [v] <span style="color: #98be65;">"+Q"</span> (v-&gt;counter)              \</code>
+<code>                     : <span style="color: #98be65;">"r"</span> (v));                                                                \</code>
+<code>    }</code>
+<code></code>
+<code>    <span style="color: #c678dd;">ATOMIC_OP</span>(andnot, stclr)</code>
+<code>    <span style="color: #c678dd;">ATOMIC_OP</span>(or, stset)</code>
+<code>    <span style="color: #c678dd;">ATOMIC_OP</span>(xor, steor)</code>
+<code>    <span style="color: #c678dd;">ATOMIC_OP</span>(add, stadd)</code>
+<code></code>
+<code>    <span style="color: #51afef;">static</span> <span style="color: #51afef;">inline</span> <span style="color: #ECBE7B;">void</span> <span style="color: #c678dd;">__lse_atomic64_sub</span>(<span style="color: #ECBE7B;">s64</span> <span style="color: #dcaeea;">i</span>, <span style="color: #ECBE7B;">atomic64_t</span> *<span style="color: #dcaeea;">v</span>)</code>
+<code>{</code>
+<code>    <span style="color: #51afef;">asm</span> <span style="color: #51afef;">volatile</span>(</code>
+<code>                 <span style="color: #98be65;">"      neg     %[i], %[i]\n"</span></code>
+<code>                 <span style="color: #98be65;">"      stadd   %[i], %[v]"</span></code>
+<code>                 : [i] <span style="color: #98be65;">"+&amp;r"</span> (i), [v] <span style="color: #98be65;">"+Q"</span> (v-&gt;counter)</code>
+<code>                 : <span style="color: #98be65;">"r"</span> (v));</code>
+<code>}</code>
+<code></code>
 </pre>
 </div>
 <p>
@@ -193,41 +192,41 @@ atomic_add &amp; atomic_dec<br>
 </div>
 </li>
 
-<li><a id="orgdb77a68"></a>LL_SC]] Load-link/store-condiitional<br>
-<div class="outline-text-5" id="text-orgdb77a68">
+<li><a id="orgda68e58"></a>LL_SC]] Load-link/store-condiitional<br>
+<div class="outline-text-5" id="text-orgda68e58">
 <div class="org-src-container">
-<pre class="src src-C"><span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #c678dd;">ATOMIC_OP</span>(<span style="color: #dcaeea;">op</span>, <span style="color: #dcaeea;">asm_op</span>, <span style="color: #dcaeea;">constraint</span>)                                                               \
-    <span style="color: #51afef;">static</span> <span style="color: #51afef;">inline</span> <span style="color: #ECBE7B;">void</span>                                                                                                  \
-    <span style="color: #c678dd;">__ll_sc_atomic_</span>##op(<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">i</span>, <span style="color: #ECBE7B;">atomic_t</span> *<span style="color: #dcaeea;">v</span>)                                                             \
-    {                                                                                                                                   \
-        <span style="color: #ECBE7B;">unsigned</span> <span style="color: #ECBE7B;">long</span> <span style="color: #dcaeea;">tmp</span>;                                                                                              \
-        <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">result</span>;                                                                                                             \
-                                                                        \
-        <span style="color: #51afef;">asm</span> <span style="color: #51afef;">volatile</span>(<span style="color: #98be65;">"// atomic_"</span> #op <span style="color: #98be65;">"\n"</span>                                                              \
-                     __LL_SC_FALLBACK(                                                                  \
-                                      <span style="color: #98be65;">" prfm    pstl1strm, %2\n"</span>                \
-                                      <span style="color: #98be65;">"1:       ldxr    %w0, %2\n"</span>                      \
-                                      <span style="color: #98be65;">" "</span> #asm_op <span style="color: #98be65;">"     %w0, %w0, %w3\n"</span>        \
-                                      <span style="color: #98be65;">" stxr    %w1, %w0, %2\n"</span>                 \
-                                      <span style="color: #98be65;">" cbnz    %w1, 1b\n"</span>)                             \
-                     : <span style="color: #98be65;">"=&amp;r"</span> (result), <span style="color: #98be65;">"=&amp;r"</span> (tmp), <span style="color: #98be65;">"+Q"</span> (v-&gt;counter)   \
-                     : __stringify(constraint) <span style="color: #98be65;">"r"</span> (i));                                \
-    }
-
-<span style="color: #51afef; font-weight: bold;">    #define</span> <span style="color: #c678dd;">ATOMIC_OPS</span>(...)                                                     \
-ATOMIC_OP(__VA_ARGS__)                                          \
-    ATOMIC_OP_RETURN(        , <span style="color: #ECBE7B;">dmb</span> <span style="color: #dcaeea;">ish</span>,  , l, <span style="color: #98be65;">"memory"</span>, __VA_ARGS__)\
-    ATOMIC_OP_RETURN(_relaxed,        ,  ,  ,         , __VA_ARGS__)\
-    ATOMIC_OP_RETURN(_acquire,        , a,  , <span style="color: #98be65;">"memory"</span>, __VA_ARGS__)\
-    ATOMIC_OP_RETURN(_release,        ,  , l, <span style="color: #98be65;">"memory"</span>, __VA_ARGS__)\
-    ATOMIC_FETCH_OP (        , <span style="color: #ECBE7B;">dmb</span> <span style="color: #dcaeea;">ish</span>,  , l, <span style="color: #98be65;">"memory"</span>, __VA_ARGS__)\
-    ATOMIC_FETCH_OP (_relaxed,        ,  ,  ,         , __VA_ARGS__)\
-    ATOMIC_FETCH_OP (_acquire,        , a,  , <span style="color: #98be65;">"memory"</span>, __VA_ARGS__)\
-    ATOMIC_FETCH_OP (_release,        ,  , l, <span style="color: #98be65;">"memory"</span>, __VA_ARGS__)
-
-<span style="color: #c678dd;">ATOMIC_OPS</span>(add, add, I)
-    <span style="color: #c678dd;">ATOMIC_OPS</span>(sub, sub, J)
-
+<pre class="src src-C"><code><span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #c678dd;">ATOMIC_OP</span>(<span style="color: #dcaeea;">op</span>, <span style="color: #dcaeea;">asm_op</span>, <span style="color: #dcaeea;">constraint</span>)                                                               \</code>
+<code>    <span style="color: #51afef;">static</span> <span style="color: #51afef;">inline</span> <span style="color: #ECBE7B;">void</span>                                                                                                  \</code>
+<code>    <span style="color: #c678dd;">__ll_sc_atomic_</span>##op(<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">i</span>, <span style="color: #ECBE7B;">atomic_t</span> *<span style="color: #dcaeea;">v</span>)                                                             \</code>
+<code>    {                                                                                                                                   \</code>
+<code>        <span style="color: #ECBE7B;">unsigned</span> <span style="color: #ECBE7B;">long</span> <span style="color: #dcaeea;">tmp</span>;                                                                                              \</code>
+<code>        <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">result</span>;                                                                                                             \</code>
+<code>                                                                        \</code>
+<code>        <span style="color: #51afef;">asm</span> <span style="color: #51afef;">volatile</span>(<span style="color: #98be65;">"// atomic_"</span> #op <span style="color: #98be65;">"\n"</span>                                                              \</code>
+<code>                     __LL_SC_FALLBACK(                                                                  \</code>
+<code>                                      <span style="color: #98be65;">" prfm    pstl1strm, %2\n"</span>                \</code>
+<code>                                      <span style="color: #98be65;">"1:       ldxr    %w0, %2\n"</span>                      \</code>
+<code>                                      <span style="color: #98be65;">" "</span> #asm_op <span style="color: #98be65;">"     %w0, %w0, %w3\n"</span>        \</code>
+<code>                                      <span style="color: #98be65;">" stxr    %w1, %w0, %2\n"</span>                 \</code>
+<code>                                      <span style="color: #98be65;">" cbnz    %w1, 1b\n"</span>)                             \</code>
+<code>                     : <span style="color: #98be65;">"=&amp;r"</span> (result), <span style="color: #98be65;">"=&amp;r"</span> (tmp), <span style="color: #98be65;">"+Q"</span> (v-&gt;counter)   \</code>
+<code>                     : __stringify(constraint) <span style="color: #98be65;">"r"</span> (i));                                \</code>
+<code>    }</code>
+<code></code>
+<code><span style="color: #51afef; font-weight: bold;">    #define</span> <span style="color: #c678dd;">ATOMIC_OPS</span>(...)                                                     \</code>
+<code>ATOMIC_OP(__VA_ARGS__)                                          \</code>
+<code>    ATOMIC_OP_RETURN(        , <span style="color: #ECBE7B;">dmb</span> <span style="color: #dcaeea;">ish</span>,  , l, <span style="color: #98be65;">"memory"</span>, __VA_ARGS__)\</code>
+<code>    ATOMIC_OP_RETURN(_relaxed,        ,  ,  ,         , __VA_ARGS__)\</code>
+<code>    ATOMIC_OP_RETURN(_acquire,        , a,  , <span style="color: #98be65;">"memory"</span>, __VA_ARGS__)\</code>
+<code>    ATOMIC_OP_RETURN(_release,        ,  , l, <span style="color: #98be65;">"memory"</span>, __VA_ARGS__)\</code>
+<code>    ATOMIC_FETCH_OP (        , <span style="color: #ECBE7B;">dmb</span> <span style="color: #dcaeea;">ish</span>,  , l, <span style="color: #98be65;">"memory"</span>, __VA_ARGS__)\</code>
+<code>    ATOMIC_FETCH_OP (_relaxed,        ,  ,  ,         , __VA_ARGS__)\</code>
+<code>    ATOMIC_FETCH_OP (_acquire,        , a,  , <span style="color: #98be65;">"memory"</span>, __VA_ARGS__)\</code>
+<code>    ATOMIC_FETCH_OP (_release,        ,  , l, <span style="color: #98be65;">"memory"</span>, __VA_ARGS__)</code>
+<code></code>
+<code><span style="color: #c678dd;">ATOMIC_OPS</span>(add, add, I)</code>
+<code>    <span style="color: #c678dd;">ATOMIC_OPS</span>(sub, sub, J)</code>
+<code></code>
 </pre>
 </div>
 <p>
@@ -240,9 +239,9 @@ ATOMIC_OP(__VA_ARGS__)                                          \
 </ul>
 </div>
 
-<div id="outline-container-org0e5e96b" class="outline-3">
-<h3 id="org0e5e96b">ARM64平台原子操作指令</h3>
-<div class="outline-text-3" id="text-org0e5e96b">
+<div id="outline-container-orgacbbfea" class="outline-3">
+<h3 id="orgacbbfea">ARM64平台原子操作指令</h3>
+<div class="outline-text-3" id="text-orgacbbfea">
 <p>
 A64: ldx, ldax,stx,stlx<br>
 A32/T32: ldrex, strex, ldaex, stlex<br>
@@ -253,22 +252,22 @@ A32/T32: ldrex, strex, ldaex, stlex<br>
 </div>
 </div>
 </div>
-<div id="outline-container-org921b556" class="outline-2">
-<h2 id="org921b556">ARMV8a中的设置</h2>
-<div class="outline-text-2" id="text-org921b556">
+<div id="outline-container-org4ec3ecb" class="outline-2">
+<h2 id="org4ec3ecb">ARMV8a中的设置</h2>
+<div class="outline-text-2" id="text-org4ec3ecb">
 </div>
-<div id="outline-container-org9a6d2c0" class="outline-3">
-<h3 id="org9a6d2c0">ARMv8a手册</h3>
-<div class="outline-text-3" id="text-org9a6d2c0">
+<div id="outline-container-org43eb0e5" class="outline-3">
+<h3 id="org43eb0e5">ARMv8a手册</h3>
+<div class="outline-text-3" id="text-org43eb0e5">
 <p>
 <a href="assets/screenshot_20191004_112725.png">ARMV8a中对于原子操作的描述</a><br>
 以上地方仅仅描述了原子操作指令使用时需要注意的地方，并无法找到我们的答案，下面去看看CPU手册吧。<br>
 </p>
 </div>
 </div>
-<div id="outline-container-org72fbc95" class="outline-3">
-<h3 id="org72fbc95">Crotex A55手册</h3>
-<div class="outline-text-3" id="text-org72fbc95">
+<div id="outline-container-org23693f0" class="outline-3">
+<h3 id="org23693f0">Crotex A55手册</h3>
+<div class="outline-text-3" id="text-org23693f0">
 <p>
 <a href="assets/screenshot_20191004_120904.png">Crotex-A55-Atomic-Operation</a><br>
 </p>
@@ -285,15 +284,15 @@ A32/T32: ldrex, strex, ldaex, stlex<br>
 </ul>
 </div>
 <ul class="org-ul">
-<li><a id="orgca31ce1"></a><span class="todo TODO">TODO</span> 为什么store atomics会引发异步的异常? 而不是同步异常?<br></li>
+<li><a id="orgad1bb07"></a><span class="todo TODO">TODO</span> 为什么store atomics会引发异步的异常? 而不是同步异常?<br></li>
 </ul>
 </div>
 
-<div id="outline-container-org7767aac" class="outline-3">
-<h3 id="org7767aac">CPUECTLR.ATOM</h3>
-<div class="outline-text-3" id="text-org7767aac">
+<div id="outline-container-orgc36d129" class="outline-3">
+<h3 id="orgc36d129">CPUECTLR.ATOM</h3>
+<div class="outline-text-3" id="text-orgc36d129">
 
-<div id="org4790712" class="figure">
+<div id="orgd025ff2" class="figure">
 <p><img src="assets/CPUECTLR-ATOM.png" alt="CPUECTLR-ATOM.png"><br>
 </p>
 </div>
@@ -305,9 +304,9 @@ A32/T32: ldrex, strex, ldaex, stlex<br>
 </div>
 </div>
 
-<div id="outline-container-org8bf72ef" class="outline-2">
-<h2 id="org8bf72ef">总线的设置</h2>
-<div class="outline-text-2" id="text-org8bf72ef">
+<div id="outline-container-org0dcb094" class="outline-2">
+<h2 id="org0dcb094">总线的设置</h2>
+<div class="outline-text-2" id="text-org0dcb094">
 <p>
 关于AMBA总线:<br>
 参考 `代码改变世界ctw` 的文章，可以对AMBA总线有个大概的了解<br>
@@ -320,25 +319,25 @@ A32/T32: ldrex, strex, ldaex, stlex<br>
 </div>
 </div>
 
-<div id="outline-container-org550476f" class="outline-2">
-<h2 id="org550476f">对于内核注释中提到的omap平台，硬件上使用了哪种互连网络，最终导致了系统无法在non-cached内存中使用原子操作？</h2>
-<div class="outline-text-2" id="text-org550476f">
+<div id="outline-container-orgedc72ed" class="outline-2">
+<h2 id="orgedc72ed">对于内核注释中提到的omap平台，硬件上使用了哪种互连网络，最终导致了系统无法在non-cached内存中使用原子操作？</h2>
+<div class="outline-text-2" id="text-orgedc72ed">
 <p>
 由于没有具体的OMAP平台资料，由上述的信息可以得知，这个是由于SOC内部的总线，或者最后端内存的硬件实现而造成的。不光是OMAP，很多ARM平台的SOC都有相同的问题. 但是一般cache都是打开的状态，所以软件一般不需要关心这个问题。<br>
 </p>
 </div>
 </div>
 
-<div id="outline-container-org68d8a06" class="outline-2">
-<h2 id="org68d8a06"><span class="done DONE">DONE</span> 对于上述平台，如果软件上去使用原子操作指令访问non-cached内存，会有什么后果？</h2>
-<div class="outline-text-2" id="text-org68d8a06">
+<div id="outline-container-org373001f" class="outline-2">
+<h2 id="org373001f"><span class="done DONE">DONE</span> 对于上述平台，如果软件上去使用原子操作指令访问non-cached内存，会有什么后果？</h2>
+<div class="outline-text-2" id="text-org373001f">
 <p>
 出现问题之后cpu会进入同步异常<br>
 Data abort with DFSC:<br>
 0b110101 implementation defined fault (Unsupported Exclusive or Atomic access).<br>
 </p>
 <div class="org-src-container">
-<pre class="src src-bash"><span style="color: #dcaeea;">esr_el3</span>        = 0x0000000096000035
+<pre class="src src-bash"><code><span style="color: #dcaeea;">esr_el3</span>        = 0x0000000096000035</code>
 </pre>
 </div>
 </div>

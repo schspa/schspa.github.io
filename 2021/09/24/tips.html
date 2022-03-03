@@ -1,14 +1,13 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2021-11-05 五 13:33 -->
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- 2022-03-03 Thu 11:48 -->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>ASM language tips</title>
-<meta name="generator" content="Org mode">
-<meta name="author" content="Schspa">
-<meta name="description" content="ASM language tips"
->
+<meta name="author" content="Schspa" />
+<meta name="description" content="ASM language tips" />
+<meta name="generator" content="Org Mode" />
 <link rel="shortcut icon" href="/images/rose-red.png" type="image/x-icon" />
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" integrity="sha256-sAcc18zvMnaJZrNT4v8J0T4HqzEUiUTlVFgDIywjQek=" crossorigin="anonymous">
 <link rel="stylesheet" href="/css/animate.min.css" />
@@ -56,104 +55,123 @@
   </nav>
 </header>
 </div>
-<div id="content">
+<div id="content" class="content">
 <h1 class="title">ASM language tips</h1>
-<div id="table-of-contents">
+<div id="table-of-contents" role="doc-toc">
 <h2>Table of Contents</h2>
-<div id="text-table-of-contents">
+<div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#org00258ad">Position-independent Call</a></li>
-<li><a href="#org65c930a">inline asm</a>
+<li><a href="#orgcbe7554">Position-independent Call</a></li>
+<li><a href="#orgfa5cb66">inline asm</a>
 <ul>
-<li><a href="#org539ebb8">assembler template</a></li>
-<li><a href="#org0c2dd48">output operands</a></li>
-<li><a href="#orge206529">refs</a></li>
+<li><a href="#org8248998">assembler template</a></li>
+<li><a href="#org41bcecc">output operands</a></li>
+<li><a href="#org32109c5">input operands</a></li>
+<li><a href="#org8ad62a3">list of clobbered registers</a></li>
 </ul>
 </li>
+<li><a href="#org489c847">refs</a></li>
 </ul>
 </div>
 </div>
 
-<div id="outline-container-org00258ad" class="outline-2">
-<h2 id="org00258ad">Position-independent Call</h2>
-<div class="outline-text-2" id="text-org00258ad">
+<div id="outline-container-orgcbe7554" class="outline-2">
+<h2 id="orgcbe7554">Position-independent Call</h2>
+<div class="outline-text-2" id="text-orgcbe7554">
 <p>
 下面这个片段很有意思，利用ldr指令来调整pc指针位置，来曲线实现PIE<br>
 <a href="https://github.com/OP-TEE/optee_os/tree/1c832d7c41cdb2f617bffa74c3d70f7c4a5667fc/core/arch/arm/kernel/generic_entry_a64.S#L28">https://github.com/OP-TEE/optee_os/tree/1c832d7c41cdb2f617bffa74c3d70f7c4a5667fc/core/arch/arm/kernel/generic_entry_a64.S#L28</a><br>
 </p>
 <div class="org-src-container">
-<pre class="src src-asm"><span style="color: #51afef;">.macro</span> readjust_pc
-<span style="color: #51afef; font-weight: bold;">#ifdef</span> <span style="color: #dcaeea;">CFG_CORE_ASLR</span>
-<span style="color: #c678dd;">ldr</span> <span style="color: #51afef;">x16</span>, =1111f
-<span style="color: #c678dd;">br</span>  <span style="color: #51afef;">x16</span>
-<span style="color: #c678dd;">1111</span>:
-<span style="color: #51afef; font-weight: bold;">#endif</span>
-<span style="color: #51afef;">.endm</span>
-
-<span style="color: #c678dd;">LOCAL_FUNC</span> <span style="color: #51afef;">vector</span>_std_smc_entry , : , .identity_map
-<span style="color: #c678dd;">readjust_pc</span>
-<span style="color: #c678dd;">bl</span>  <span style="color: #51afef;">thread</span>_handle_std_smc
-<span style="color: #5B6268;">/*</span>
-<span style="color: #5B6268;"> * Normally thread_handle_std_smc() should return via</span>
-<span style="color: #5B6268;"> * thread_exit(), thread_rpc(), but if thread_handle_std_smc()</span>
-<span style="color: #5B6268;"> * hasn't switched stack (error detected) it will do a normal "C"</span>
-<span style="color: #5B6268;"> * return.</span>
-<span style="color: #5B6268;"> */</span>
-<span style="color: #c678dd;">mov</span> <span style="color: #51afef;">w1</span>, w0
-<span style="color: #c678dd;">ldr</span> <span style="color: #51afef;">x0</span>, =TEESMC_OPTEED_RETURN_CALL_DONE
-<span style="color: #c678dd;">smc</span> #0
-<span style="color: #c678dd;">b</span>   .   <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">SMC should not return */</span>
-<span style="color: #c678dd;">END_FUNC</span> <span style="color: #51afef;">vector</span>_std_smc_entry
+<pre class="src src-asm"><code><span style="color: #51afef;">.macro</span> readjust_pc</code>
+<code><span style="color: #51afef; font-weight: bold;">#ifdef</span> <span style="color: #dcaeea;">CFG_CORE_ASLR</span></code>
+<code><span style="color: #c678dd;">ldr</span> <span style="color: #51afef;">x16</span>, =1111f</code>
+<code><span style="color: #c678dd;">br</span>  <span style="color: #51afef;">x16</span></code>
+<code><span style="color: #c678dd;">1111</span>:</code>
+<code><span style="color: #51afef; font-weight: bold;">#endif</span></code>
+<code><span style="color: #51afef;">.endm</span></code>
+<code></code>
+<code><span style="color: #c678dd;">LOCAL_FUNC</span> <span style="color: #51afef;">vector</span>_std_smc_entry , : , .identity_map</code>
+<code><span style="color: #c678dd;">readjust_pc</span></code>
+<code><span style="color: #c678dd;">bl</span>  <span style="color: #51afef;">thread</span>_handle_std_smc</code>
+<code><span style="color: #5B6268;">/*</span></code>
+<code><span style="color: #5B6268;"> * Normally thread_handle_std_smc() should return via</span></code>
+<code><span style="color: #5B6268;"> * thread_exit(), thread_rpc(), but if thread_handle_std_smc()</span></code>
+<code><span style="color: #5B6268;"> * hasn't switched stack (error detected) it will do a normal "C"</span></code>
+<code><span style="color: #5B6268;"> * return.</span></code>
+<code><span style="color: #5B6268;"> */</span></code>
+<code><span style="color: #c678dd;">mov</span> <span style="color: #51afef;">w1</span>, w0</code>
+<code><span style="color: #c678dd;">ldr</span> <span style="color: #51afef;">x0</span>, =TEESMC_OPTEED_RETURN_CALL_DONE</code>
+<code><span style="color: #c678dd;">smc</span> #0</code>
+<code><span style="color: #c678dd;">b</span>   .   <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">SMC should not return */</span></code>
+<code><span style="color: #c678dd;">END_FUNC</span> <span style="color: #51afef;">vector</span>_std_smc_entry</code>
 </pre>
 </div>
 </div>
 </div>
 
-<div id="outline-container-org65c930a" class="outline-2">
-<h2 id="org65c930a">inline asm</h2>
-<div class="outline-text-2" id="text-org65c930a">
+<div id="outline-container-orgfa5cb66" class="outline-2">
+<h2 id="orgfa5cb66">inline asm</h2>
+<div class="outline-text-2" id="text-orgfa5cb66">
 <p>
 下面就是内联汇编的原型定义了，共由4部份组成，见如下<br>
 </p>
 <div class="org-src-container">
-<pre class="src src-C"><span style="color: #51afef;">asm</span> ( <span style="color: #ECBE7B;">assembler</span> <span style="color: #dcaeea;">template</span>
-    : output operands                  <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">optional</span><span style="color: #5B6268;"> */</span>
-    : input operands                   <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">optional</span><span style="color: #5B6268;"> */</span>
-    : list of clobbered registers      <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">optional</span><span style="color: #5B6268;"> */</span>
-);
+<pre class="src src-C"><code><span style="color: #51afef;">asm</span> ( <span style="color: #ECBE7B;">assembler</span> <span style="color: #dcaeea;">template</span></code>
+<code>    : output operands                  <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">optional</span><span style="color: #5B6268;"> */</span></code>
+<code>    : input operands                   <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">optional</span><span style="color: #5B6268;"> */</span></code>
+<code>    : list of clobbered registers      <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">optional</span><span style="color: #5B6268;"> */</span></code>
+<code>);</code>
 </pre>
 </div>
 </div>
 
-<div id="outline-container-org539ebb8" class="outline-3">
-<h3 id="org539ebb8">assembler template</h3>
-<div class="outline-text-3" id="text-org539ebb8">
+<div id="outline-container-org8248998" class="outline-3">
+<h3 id="org8248998">assembler template</h3>
+<div class="outline-text-3" id="text-org8248998">
 <p>
-这个部份用来写汇编代码的模板, 编写的模板会用来给汇编器升成最终的代码<br>
+这个部份用来写汇编代码的模板, 编写的模板会用来给汇编器生成最终的代码<br>
 </p>
 </div>
 </div>
 
-<div id="outline-container-org0c2dd48" class="outline-3">
-<h3 id="org0c2dd48">output operands</h3>
-<div class="outline-text-3" id="text-org0c2dd48">
+<div id="outline-container-org41bcecc" class="outline-3">
+<h3 id="org41bcecc">output operands</h3>
+<div class="outline-text-3" id="text-org41bcecc">
 <p>
-输出参数劣别<br>
+输出参数列表<br>
 </p>
 </div>
 </div>
 
+<div id="outline-container-org32109c5" class="outline-3">
+<h3 id="org32109c5">input operands</h3>
+<div class="outline-text-3" id="text-org32109c5">
+<p>
+输入参数列表<br>
+</p>
+</div>
+</div>
 
-<div id="outline-container-orge206529" class="outline-3">
-<h3 id="orge206529">refs</h3>
-<div class="outline-text-3" id="text-orge206529">
+<div id="outline-container-org8ad62a3" class="outline-3">
+<h3 id="org8ad62a3">list of clobbered registers</h3>
+<div class="outline-text-3" id="text-org8ad62a3">
+<p>
+在汇编代码中使用到的临时寄存器需要在此处列出来, 用来告诉C编译器汇编代码中会使用到列表中的寄存器。<br>
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org489c847" class="outline-2">
+<h2 id="org489c847">refs</h2>
+<div class="outline-text-2" id="text-org489c847">
 <p>
 <a href="http://www.ethernut.de/en/documents/arm-inline-asm.html">http://www.ethernut.de/en/documents/arm-inline-asm.html</a><br>
 <a href="https://www.ibiblio.org/gferg/ldp/GCC-Inline-Assembly-HOWTO.html">https://www.ibiblio.org/gferg/ldp/GCC-Inline-Assembly-HOWTO.html</a><br>
 <a href="https://github.com/llvm-mirror/clang/blob/master/test/CodeGen/aarch64-inline-asm.c">https://github.com/llvm-mirror/clang/blob/master/test/CodeGen/aarch64-inline-asm.c</a><br>
 <a href="https://developer.arm.com/documentation/100067/0610/armclang-Inline-Assembler/Inline-assembly-statements-within-a-function/Clobber-list">https://developer.arm.com/documentation/100067/0610/armclang-Inline-Assembler/Inline-assembly-statements-within-a-function/Clobber-list</a><br>
 </p>
-</div>
 </div>
 </div>
 </div>

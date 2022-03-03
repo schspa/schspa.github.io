@@ -1,14 +1,13 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2021-10-12 二 19:35 -->
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- 2022-03-03 Thu 11:47 -->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>qemu使用踩坑</title>
-<meta name="generator" content="Org mode">
-<meta name="author" content="schspa">
-<meta name="description" content="qemu.org"
->
+<meta name="author" content="schspa" />
+<meta name="description" content="qemu.org" />
+<meta name="generator" content="Org Mode" />
 <link rel="shortcut icon" href="/images/rose-red.png" type="image/x-icon" />
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" integrity="sha256-sAcc18zvMnaJZrNT4v8J0T4HqzEUiUTlVFgDIywjQek=" crossorigin="anonymous">
 <link rel="stylesheet" href="/css/animate.min.css" />
@@ -56,37 +55,39 @@
   </nav>
 </header>
 </div>
-<div id="content">
+<div id="content" class="content">
 <h1 class="title">qemu使用踩坑</h1>
-<div id="table-of-contents">
+<div id="table-of-contents" role="doc-toc">
 <h2>Table of Contents</h2>
-<div id="text-table-of-contents">
+<div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#org85623cf">编译qemu</a></li>
-<li><a href="#org69a5981">运行</a></li>
-<li><a href="#org19f0886">文件共享</a>
+<li><a href="#org3b3d36e">编译qemu</a></li>
+<li><a href="#orgb47d46f">运行</a></li>
+<li><a href="#org7f0e372">推出</a></li>
+<li><a href="#org70f77a9">文件共享</a>
 <ul>
-<li><a href="#org557f2a5">9P over virtiofs</a></li>
+<li><a href="#orgf35502d">9P over virtiofs</a></li>
 </ul>
 </li>
-<li><a href="#orgc68db97">网络设置</a>
+<li><a href="#org5b27791">网络设置</a>
 <ul>
-<li><a href="#org40edf1b">linux Host</a></li>
-<li><a href="#orgee248f4"><span class="todo TODO">TODO</span> Macos Host</a></li>
-<li><a href="#org5eebb60">qemu command line</a></li>
+<li><a href="#orgd586e15">linux Host</a></li>
+<li><a href="#orgd4d7f0f"><span class="todo TODO">TODO</span> Macos Host</a></li>
+<li><a href="#org84e6246">qemu command line</a></li>
 </ul>
 </li>
-<li><a href="#org0c5c331">参考文档</a></li>
+<li><a href="#org181cd94">QMP (QEMU Machine Protocol)</a></li>
+<li><a href="#org484d865">参考文档</a></li>
 </ul>
 </div>
 </div>
 
-<div id="outline-container-org85623cf" class="outline-2">
-<h2 id="org85623cf">编译qemu</h2>
-<div class="outline-text-2" id="text-org85623cf">
+<div id="outline-container-org3b3d36e" class="outline-2">
+<h2 id="org3b3d36e">编译qemu</h2>
+<div class="outline-text-2" id="text-org3b3d36e">
 <div class="org-src-container">
-<pre class="src src-bash">./configure --target-list=aarch64-softmmu --enable-virtfs
-make -j8
+<pre class="src src-bash"><code>./configure --target-list=aarch64-softmmu --enable-virtfs</code>
+<code>make -j8</code>
 </pre>
 </div>
 <p>
@@ -95,23 +96,32 @@ make -j8
 </div>
 </div>
 
-<div id="outline-container-org69a5981" class="outline-2">
-<h2 id="org69a5981">运行</h2>
-<div class="outline-text-2" id="text-org69a5981">
+<div id="outline-container-orgb47d46f" class="outline-2">
+<h2 id="orgb47d46f">运行</h2>
+<div class="outline-text-2" id="text-orgb47d46f">
 <div class="org-src-container">
-<pre class="src src-bash">qemu-system-aarch64 -machine virt -cpu cortex-a57 -machine <span style="color: #dcaeea;">type</span>=virt -nographic -smp 4 -m 2048 --append <span style="color: #98be65;">"console=ttyAMA0"</span> --kernel ~/work/src/linux.git/arch/arm64/boot/Image --initrd ~/work/buildroot-2018.05/output/images/rootfs.cpio.bz2
+<pre class="src src-bash"><code>qemu-system-aarch64 -machine virt -cpu cortex-a57 -machine <span style="color: #dcaeea;">type</span>=virt -nographic -smp 4 -m 2048 --append <span style="color: #98be65;">"console=ttyAMA0"</span> --kernel ~/work/src/linux.git/arch/arm64/boot/Image --initrd ~/work/buildroot-2018.05/output/images/rootfs.cpio.bz2</code>
 </pre>
 </div>
 </div>
 </div>
 
-<div id="outline-container-org19f0886" class="outline-2">
-<h2 id="org19f0886">文件共享</h2>
-<div class="outline-text-2" id="text-org19f0886">
+<div id="outline-container-org7f0e372" class="outline-2">
+<h2 id="org7f0e372">推出</h2>
+<div class="outline-text-2" id="text-org7f0e372">
+<div class="org-src-container">
+<pre class="src src-bash"><code>Ctrl-A x</code>
+</pre>
 </div>
-<div id="outline-container-org557f2a5" class="outline-3">
-<h3 id="org557f2a5"><a href="https://wiki.qemu.org/Documentation/9psetup">9P over virtiofs</a></h3>
-<div class="outline-text-3" id="text-org557f2a5">
+</div>
+</div>
+<div id="outline-container-org70f77a9" class="outline-2">
+<h2 id="org70f77a9">文件共享</h2>
+<div class="outline-text-2" id="text-org70f77a9">
+</div>
+<div id="outline-container-orgf35502d" class="outline-3">
+<h3 id="orgf35502d"><a href="https://wiki.qemu.org/Documentation/9psetup">9P over virtiofs</a></h3>
+<div class="outline-text-3" id="text-orgf35502d">
 <p>
 9pfs是基于网络的文件共享协议，qemu中的软件可以通过此种方法来访问宿主机中的文件。详见Plan 9 9p remote filesystem protocol<br>
 <b>qemu在Mac OS上不支持virtio，故无法使用以下的方法</b><br>
@@ -146,14 +156,14 @@ make -j8
 挂载命令<br>
 </p>
 <div class="org-src-container">
-<pre class="src src-bash">mount -t 9p -o <span style="color: #dcaeea;">trans</span>=virtio share /mnt/share
+<pre class="src src-bash"><code>mount -t 9p -o <span style="color: #dcaeea;">trans</span>=virtio share /mnt/share</code>
 </pre>
 </div>
 <p>
 mount tag也可以通过sysfs来查看<br>
 </p>
 <div class="org-src-container">
-<pre class="src src-bash">/sys/bus/virtio/drivers/9pnet_virtio/virtio&lt;n&gt;/mount_tag         
+<pre class="src src-bash"><code>/sys/bus/virtio/drivers/9pnet_virtio/virtio&lt;n&gt;/mount_tag         </code>
 </pre>
 </div></li>
 </ul>
@@ -161,68 +171,90 @@ mount tag也可以通过sysfs来查看<br>
 </div>
 </div>
 
-<div id="outline-container-orgc68db97" class="outline-2">
-<h2 id="orgc68db97">网络设置</h2>
-<div class="outline-text-2" id="text-orgc68db97">
+<div id="outline-container-org5b27791" class="outline-2">
+<h2 id="org5b27791">网络设置</h2>
+<div class="outline-text-2" id="text-org5b27791">
 </div>
-<div id="outline-container-org40edf1b" class="outline-3">
-<h3 id="org40edf1b">linux Host</h3>
-<div class="outline-text-3" id="text-org40edf1b">
+<div id="outline-container-orgd586e15" class="outline-3">
+<h3 id="orgd586e15">linux Host</h3>
+<div class="outline-text-3" id="text-orgd586e15">
 <ul class="org-ul">
 <li><p>
 设置网络设备<br>
 </p>
 <div class="org-src-container">
-<pre class="src src-bash"><span style="color: #5B6268;">#</span><span style="color: #5B6268;">!/usr/bin/</span><span style="color: #51afef;">env</span><span style="color: #5B6268;"> bash</span>
-
-sudo ip link add br0 type bridge
-sudo ip link set br0 up
-sudo ip addr add 192.168.123.1/24 broadcast 192.168.123.255 dev br0
-sudo dnsmasq  --strict-order --except-interface=lo --interface=br0 --listen-addr=192.168.123.1 --bind-interfaces --dhcp-range=192.168.123.101,192.168.123.254 --pid-file=/var/run/qemu-dhcp-br0.pid
-
-sudo ip tuntap add tap0 mod tap user $<span style="color: #dcaeea;">UID</span>
-sudo ip link set dev tap0 up
-sudo ip link set dev tap0 master br0
+<pre class="src src-bash"><code><span style="color: #5B6268;">#</span><span style="color: #5B6268;">!/usr/bin/</span><span style="color: #51afef;">env</span><span style="color: #5B6268;"> bash</span></code>
+<code></code>
+<code>sudo ip link add br0 type bridge</code>
+<code>sudo ip link set br0 up</code>
+<code>sudo ip addr add 192.168.123.1/24 broadcast 192.168.123.255 dev br0</code>
+<code>sudo dnsmasq  --strict-order --except-interface=lo --interface=br0 --listen-addr=192.168.123.1 --bind-interfaces --dhcp-range=192.168.123.101,192.168.123.254 --pid-file=/var/run/qemu-dhcp-br0.pid</code>
+<code></code>
+<code>sudo ip tuntap add tap0 mod tap user $<span style="color: #dcaeea;">UID</span></code>
+<code>sudo ip link set dev tap0 up</code>
+<code>sudo ip link set dev tap0 master br0</code>
 </pre>
 </div></li>
 <li><p>
 卸载网络设备<br>
 </p>
 <div class="org-src-container">
-<pre class="src src-bash"><span style="color: #5B6268;">#</span><span style="color: #5B6268;">!/usr/bin/</span><span style="color: #51afef;">env</span><span style="color: #5B6268;"> bash</span>
-
-sudo ip link set dev tap0 nomaster
-sudo ip link set tap0 down
-sudo ip tuntap del tap0 mod tap
-
-sudo ip link set br0 down
-sudo ip link delete br0 type bridge
-sudo kill $(cat /var/run/qemu-dhcp-br0.pid)
+<pre class="src src-bash"><code><span style="color: #5B6268;">#</span><span style="color: #5B6268;">!/usr/bin/</span><span style="color: #51afef;">env</span><span style="color: #5B6268;"> bash</span></code>
+<code></code>
+<code>sudo ip link set dev tap0 nomaster</code>
+<code>sudo ip link set tap0 down</code>
+<code>sudo ip tuntap del tap0 mod tap</code>
+<code></code>
+<code>sudo ip link set br0 down</code>
+<code>sudo ip link delete br0 type bridge</code>
+<code>sudo kill $(cat /var/run/qemu-dhcp-br0.pid)</code>
 </pre>
 </div>
 <p>
-上述脚本添加了一个tap设备<sup><a id="fnr.1" class="footref" href="#fn.1">1</a></sup>，并使用dnsmasq网桥桥开启了dhcp，客户端启动之后即可自动获取ip地址。由于没有将实体网卡加入到br0的网桥之中，目前客户机系统还无法联网。<br>
+上述脚本添加了一个tap设备<sup><a id="fnr.1" class="footref" href="#fn.1" role="doc-backlink">1</a></sup>，并使用dnsmasq网桥桥开启了dhcp，客户端启动之后即可自动获取ip地址。由于没有将实体网卡加入到br0的网桥之中，目前客户机系统还无法联网。<br>
 </p></li>
 </ul>
 </div>
 </div>
-<div id="outline-container-orgee248f4" class="outline-3">
-<h3 id="orgee248f4"><span class="todo TODO">TODO</span> Macos Host</h3>
+<div id="outline-container-orgd4d7f0f" class="outline-3">
+<h3 id="orgd4d7f0f"><span class="todo TODO">TODO</span> Macos Host</h3>
 </div>
-<div id="outline-container-org5eebb60" class="outline-3">
-<h3 id="org5eebb60">qemu command line</h3>
-<div class="outline-text-3" id="text-org5eebb60">
+<div id="outline-container-org84e6246" class="outline-3">
+<h3 id="org84e6246">qemu command line</h3>
+<div class="outline-text-3" id="text-org84e6246">
 <div class="org-src-container">
-<pre class="src src-bash">-netdev tap,<span style="color: #dcaeea;">ifname</span>=tap0,<span style="color: #dcaeea;">id</span>=net0,<span style="color: #dcaeea;">script</span>=no,<span style="color: #dcaeea;">downscript</span>=no -device virtio-net-device,<span style="color: #dcaeea;">netdev</span>=net0,<span style="color: #dcaeea;">mac</span>=52:55:00:fa:ee:10
+<pre class="src src-bash"><code>-netdev tap,<span style="color: #dcaeea;">ifname</span>=tap0,<span style="color: #dcaeea;">id</span>=net0,<span style="color: #dcaeea;">script</span>=no,<span style="color: #dcaeea;">downscript</span>=no -device virtio-net-device,<span style="color: #dcaeea;">netdev</span>=net0,<span style="color: #dcaeea;">mac</span>=52:55:00:fa:ee:10</code>
 </pre>
 </div>
 </div>
 </div>
 </div>
 
-<div id="outline-container-org0c5c331" class="outline-2">
-<h2 id="org0c5c331">参考文档</h2>
-<div class="outline-text-2" id="text-org0c5c331">
+<div id="outline-container-org181cd94" class="outline-2">
+<h2 id="org181cd94">QMP (QEMU Machine Protocol)</h2>
+<div class="outline-text-2" id="text-org181cd94">
+<p>
+<a href="https://wiki.qemu.org/Documentation/QMP">https://wiki.qemu.org/Documentation/QMP</a><br>
+</p>
+<div class="org-src-container">
+<pre class="src src-bash"><code>-qmp tcp:localhost:4444,server,nowait</code>
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-bash"><code>telnet localhost 4444</code>
+<code>Trying ::1...</code>
+<code>Connected to localhost.</code>
+<code>Escape character is <span style="color: #98be65;">'^]'</span>.</code>
+<code>{<span style="color: #98be65;">"QMP"</span>: {<span style="color: #98be65;">"version"</span>: {<span style="color: #98be65;">"qemu"</span>: {<span style="color: #98be65;">"micro"</span>: 1, <span style="color: #98be65;">"minor"</span>: 0, <span style="color: #98be65;">"major"</span>: 4}, <span style="color: #98be65;">"package"</span>: <span style="color: #98be65;">"v4.0.1-193-g8655781df2"</span>}, <span style="color: #98be65;">"capabilities"</span>: [<span style="color: #98be65;">"oob"</span>]}}</code>
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org484d865" class="outline-2">
+<h2 id="org484d865">参考文档</h2>
+<div class="outline-text-2" id="text-org484d865">
 <p>
 <a href="http://www.voidcn.com/article/p-xlgkygpv-p.html">http://www.voidcn.com/article/p-xlgkygpv-p.html</a><br>
 <a href="https://kennedy-han.github.io/2015/06/15/QEMU-arm64-guide.html">https://kennedy-han.github.io/2015/06/15/QEMU-arm64-guide.html</a><br>
@@ -233,7 +265,7 @@ sudo kill $(cat /var/run/qemu-dhcp-br0.pid)
 <h2 class="footnotes">Footnotes: </h2>
 <div id="text-footnotes">
 
-<div class="footdef"><sup><a id="fn.1" class="footnum" href="#fnr.1">1</a></sup> <div class="footpara"><p class="footpara">
+<div class="footdef"><sup><a id="fn.1" class="footnum" href="#fnr.1" role="doc-backlink">1</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">
 <a href="https://segmentfault.com/a/1190000009249039">Linux虚拟网络设备之tun/tap</a><br>
 </p></div></div>
 

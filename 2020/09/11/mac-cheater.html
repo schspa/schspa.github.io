@@ -1,14 +1,13 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2021-10-12 二 19:35 -->
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- 2022-03-03 Thu 11:48 -->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Cheate MAC address</title>
-<meta name="generator" content="Org mode">
-<meta name="author" content="Schspa">
-<meta name="description" content="Cheate MAC address"
->
+<meta name="author" content="Schspa" />
+<meta name="description" content="Cheate MAC address" />
+<meta name="generator" content="Org Mode" />
 <link rel="shortcut icon" href="/images/rose-red.png" type="image/x-icon" />
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" integrity="sha256-sAcc18zvMnaJZrNT4v8J0T4HqzEUiUTlVFgDIywjQek=" crossorigin="anonymous">
 <link rel="stylesheet" href="/css/animate.min.css" />
@@ -56,22 +55,22 @@
   </nav>
 </header>
 </div>
-<div id="content">
+<div id="content" class="content">
 <h1 class="title">Cheate MAC address</h1>
-<div id="table-of-contents">
+<div id="table-of-contents" role="doc-toc">
 <h2>Table of Contents</h2>
-<div id="text-table-of-contents">
+<div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#org9d13c80">背景</a></li>
-<li><a href="#org02d7ae3">使用命令修改IP地址</a></li>
-<li><a href="#orga5d7a18">使用HOOK来完成mac地址欺骗</a>
+<li><a href="#orge8d3f68">背景</a></li>
+<li><a href="#org2842f1b">使用命令修改IP地址</a></li>
+<li><a href="#orgf8841b6">使用HOOK来完成mac地址欺骗</a>
 <ul>
-<li><a href="#orgfd429d8">找出受害者获取MAC地址的方法</a>
+<li><a href="#org0ab7822">找出受害者获取MAC地址的方法</a>
 <ul>
-<li><a href="#orgea97d90">受害人信息 </a></li>
-<li><a href="#org032f874">找出受害人获取mac地址的方法</a></li>
-<li><a href="#org34f3147">使用LD_PRELOAD来完成hook</a></li>
-<li><a href="#org731c750">测试：</a></li>
+<li><a href="#org7bcfb93">受害人信息 </a></li>
+<li><a href="#org89c5cc7">找出受害人获取mac地址的方法</a></li>
+<li><a href="#org1c8a5f2">使用LD_PRELOAD来完成hook</a></li>
+<li><a href="#org97b673a">测试：</a></li>
 </ul>
 </li>
 </ul>
@@ -80,9 +79,9 @@
 </div>
 </div>
 
-<div id="outline-container-org9d13c80" class="outline-2">
-<h2 id="org9d13c80">背景</h2>
-<div class="outline-text-2" id="text-org9d13c80">
+<div id="outline-container-orge8d3f68" class="outline-2">
+<h2 id="orge8d3f68">背景</h2>
+<div class="outline-text-2" id="text-orge8d3f68">
 <p>
 由于一些原因，很多软件会绑定网卡MAC地址，这样就导致换了网卡之后，软件就无法使用了。<br>
 一般的解决方案是通过命令修改MAC地址，但是这样不够优雅，并且还有导致mac地址重复的风险。<br>
@@ -90,26 +89,26 @@
 </div>
 </div>
 
-<div id="outline-container-org02d7ae3" class="outline-2">
-<h2 id="org02d7ae3">使用命令修改IP地址</h2>
-<div class="outline-text-2" id="text-org02d7ae3">
+<div id="outline-container-org2842f1b" class="outline-2">
+<h2 id="org2842f1b">使用命令修改IP地址</h2>
+<div class="outline-text-2" id="text-org2842f1b">
 <div class="org-src-container">
-<pre class="src src-bash">ifconfig eth0 hw ether xx:xx:xx:xx:xx:xx
+<pre class="src src-bash"><code>ifconfig eth0 hw ether xx:xx:xx:xx:xx:xx</code>
 </pre>
 </div>
 </div>
 </div>
-<div id="outline-container-orga5d7a18" class="outline-2">
-<h2 id="orga5d7a18">使用HOOK来完成mac地址欺骗</h2>
-<div class="outline-text-2" id="text-orga5d7a18">
+<div id="outline-container-orgf8841b6" class="outline-2">
+<h2 id="orgf8841b6">使用HOOK来完成mac地址欺骗</h2>
+<div class="outline-text-2" id="text-orgf8841b6">
 </div>
-<div id="outline-container-orgfd429d8" class="outline-3">
-<h3 id="orgfd429d8">找出受害者获取MAC地址的方法</h3>
-<div class="outline-text-3" id="text-orgfd429d8">
+<div id="outline-container-org0ab7822" class="outline-3">
+<h3 id="org0ab7822">找出受害者获取MAC地址的方法</h3>
+<div class="outline-text-3" id="text-org0ab7822">
 </div>
-<div id="outline-container-orgea97d90" class="outline-4">
-<h4 id="orgea97d90">受害人信息 <sup><a id="fnr.1" class="footref" href="#fn.1">1</a></sup></h4>
-<div class="outline-text-4" id="text-orgea97d90">
+<div id="outline-container-org7bcfb93" class="outline-4">
+<h4 id="org7bcfb93">受害人信息 <sup><a id="fnr.1" class="footref" href="#fn.1" role="doc-backlink">1</a></sup></h4>
+<div class="outline-text-4" id="text-org7bcfb93">
 <table>
 
 
@@ -132,70 +131,70 @@
 </table>
 </div>
 </div>
-<div id="outline-container-org032f874" class="outline-4">
-<h4 id="org032f874">找出受害人获取mac地址的方法</h4>
-<div class="outline-text-4" id="text-org032f874">
+<div id="outline-container-org89c5cc7" class="outline-4">
+<h4 id="org89c5cc7">找出受害人获取mac地址的方法</h4>
+<div class="outline-text-4" id="text-org89c5cc7">
 <p>
 用strace抓一下log<br>
 </p>
 <div class="org-src-container">
-<pre class="src src-bash">strace ./lmhostid
-<span style="color: #c678dd;">execve</span>(<span style="color: #98be65;">"./lmhostid"</span>, [<span style="color: #98be65;">"./lmhostid"</span>], [/* 30 vars */]) = 0
-<span style="color: #c678dd;">brk</span>(NULL)                               = 0x828000
-<span style="color: #c678dd;">access</span>(<span style="color: #98be65;">"/etc/ld.so.nohwcap"</span>, F_OK)      = -1 ENOENT (No such file or directory)
-<span style="color: #c678dd;">access</span>(<span style="color: #98be65;">"/etc/ld.so.preload"</span>, R_OK)      = -1 ENOENT (No such file or directory)
-<span style="color: #c678dd;">openat</span>(AT_FDCWD, <span style="color: #98be65;">"/etc/ld.so.cache"</span>, O_RDONLY|O_CLOEXEC) = 3
-<span style="color: #c678dd;">fstat</span>(3, {<span style="color: #dcaeea;">st_mode</span>=S_IFREG|0644, <span style="color: #dcaeea;">st_size</span>=138880, ...}) = 0
-<span style="color: #c678dd;">mmap</span>(NULL, 138880, PROT_READ, MAP_PRIVATE, 3, 0) = 0x7f75775c6000
-<span style="color: #c678dd;">close</span>(3)                                = 0
-<span style="color: #c678dd;">access</span>(<span style="color: #98be65;">"/etc/ld.so.nohwcap"</span>, F_OK)      = -1 ENOENT (No such file or directory)
-<span style="color: #c678dd;">openat</span>(AT_FDCWD, <span style="color: #98be65;">"/lib/x86_64-linux-gnu/libpthread.so.0"</span>, O_RDONLY|O_CLOEXEC) = 3
-<span style="color: #c678dd;">read</span>(3, <span style="color: #98be65;">"\177ELF\2\1\1\0\0\0\0\0\0\0\0\0\3\0&gt;\0\1\0\0\0000b\0\0\0\0\0\0"</span>..., 832) = 832
-<span style="color: #c678dd;">fstat</span>(3, {<span style="color: #dcaeea;">st_mode</span>=S_IFREG|0755, <span style="color: #dcaeea;">st_size</span>=144976, ...}) = 0
-<span style="color: #c678dd;">mmap</span>(NULL, 8192, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0x7f75775
-<span style="color: #5B6268;"># </span><span style="color: #5B6268;">&#30465;&#30053;......</span>
-<span style="color: #c678dd;">close</span>(3)                                = 0
-<span style="color: #c678dd;">socket</span>(PF_INET, SOCK_DGRAM, IPPROTO_IP) = 3
-<span style="color: #c678dd;">openat</span>(AT_FDCWD, <span style="color: #98be65;">"/proc/net/dev"</span>, O_RDONLY) = 4
-<span style="color: #c678dd;">fstat</span>(4, {<span style="color: #dcaeea;">st_mode</span>=S_IFREG|0444, <span style="color: #dcaeea;">st_size</span>=0, ...}) = 0
-<span style="color: #c678dd;">read</span>(4, <span style="color: #98be65;">"Inter-|   Receive               "</span>..., 1024) = 718
-<span style="color: #c678dd;">read</span>(4, <span style="color: #98be65;">""</span>, 1024)                       = 0
-<span style="color: #c678dd;">close</span>(4)                                = 0
-<span style="color: #c678dd;">stat</span>(<span style="color: #98be65;">"/sys/devices/virtual/net/eno1"</span>, 0x7ffd14cf1d40) = -1 ENOENT (No such file or directory)
-<span style="color: #c678dd;">socket</span>(PF_INET, SOCK_DGRAM, IPPROTO_IP) = 4
-<span style="color: #c678dd;">ioctl</span>(4, SIOCGIFHWADDR, {<span style="color: #dcaeea;">ifr_name</span>=<span style="color: #98be65;">"eno1"</span>, <span style="color: #dcaeea;">ifr_hwaddr</span>=a8:83:3b:53:eb:35}) = 0
-<span style="color: #c678dd;">close</span>(4)                                = 0
-<span style="color: #c678dd;">stat</span>(<span style="color: #98be65;">"/sys/devices/virtual/net/virbr0"</span>, {<span style="color: #dcaeea;">st_mode</span>=S_IFDIR|0755, <span style="color: #dcaeea;">st_size</span>=0, ...}) = 0
-<span style="color: #c678dd;">stat</span>(<span style="color: #98be65;">"/sys/devices/virtual/net/lo"</span>, {<span style="color: #dcaeea;">st_mode</span>=S_IFDIR|0755, <span style="color: #dcaeea;">st_size</span>=0, ...}) = 0
-<span style="color: #c678dd;">ioctl</span>(3, SIOCGIFHWADDR, {<span style="color: #dcaeea;">ifr_name</span>=<span style="color: #98be65;">"eno1"</span>, <span style="color: #dcaeea;">ifr_hwaddr</span>=a8:83:3b:53:eb:35}) = 0
-<span style="color: #c678dd;">socket</span>(PF_INET, SOCK_DGRAM, IPPROTO_IP) = 4
-<span style="color: #c678dd;">ioctl</span>(4, SIOCGIFHWADDR, {<span style="color: #dcaeea;">ifr_name</span>=<span style="color: #98be65;">"eno1"</span>, <span style="color: #dcaeea;">ifr_hwaddr</span>=a8:83:3b:53:eb:35}) = 0
-<span style="color: #c678dd;">close</span>(4)                                = 0
-<span style="color: #c678dd;">ioctl</span>(3, SIOCGIFHWADDR, {<span style="color: #dcaeea;">ifr_name</span>=<span style="color: #98be65;">"bond0"</span>}) = -1 ENODEV (No such device)
-<span style="color: #c678dd;">ioctl</span>(3, SIOCGIFHWADDR, {<span style="color: #dcaeea;">ifr_name</span>=<span style="color: #98be65;">"bond1"</span>}) = -1 ENODEV (No such device)
-<span style="color: #c678dd;">ioctl</span>(3, SIOCGIFHWADDR, {<span style="color: #dcaeea;">ifr_name</span>=<span style="color: #98be65;">"bond2"</span>}) = -1 ENODEV (No such device)
-<span style="color: #c678dd;">ioctl</span>(3, SIOCGIFHWADDR, {<span style="color: #dcaeea;">ifr_name</span>=<span style="color: #98be65;">"bond3"</span>}) = -1 ENODEV (No such device)
-<span style="color: #c678dd;">ioctl</span>(3, SIOCGIFHWADDR, {<span style="color: #dcaeea;">ifr_name</span>=<span style="color: #98be65;">"bond4"</span>}) = -1 ENODEV (No such device)
-<span style="color: #c678dd;">ioctl</span>(3, SIOCGIFHWADDR, {<span style="color: #dcaeea;">ifr_name</span>=<span style="color: #98be65;">"bond5"</span>}) = -1 ENODEV (No such device)
-<span style="color: #c678dd;">ioctl</span>(3, SIOCGIFHWADDR, {<span style="color: #dcaeea;">ifr_name</span>=<span style="color: #98be65;">"bond6"</span>}) = -1 ENODEV (No such device)
-<span style="color: #c678dd;">ioctl</span>(3, SIOCGIFHWADDR, {<span style="color: #dcaeea;">ifr_name</span>=<span style="color: #98be65;">"bond7"</span>}) = -1 ENODEV (No such device)
-<span style="color: #c678dd;">ioctl</span>(3, SIOCGIFHWADDR, {<span style="color: #dcaeea;">ifr_name</span>=<span style="color: #98be65;">"bond8"</span>}) = -1 ENODEV (No such device)
-<span style="color: #c678dd;">ioctl</span>(3, SIOCGIFHWADDR, {<span style="color: #dcaeea;">ifr_name</span>=<span style="color: #98be65;">"bond9"</span>}) = -1 ENODEV (No such device)
-<span style="color: #c678dd;">ioctl</span>(3, SIOCGIFHWADDR, {<span style="color: #dcaeea;">ifr_name</span>=<span style="color: #98be65;">"vmnic0"</span>}) = -1 ENODEV (No such device)
-<span style="color: #c678dd;">ioctl</span>(3, SIOCGIFHWADDR, {<span style="color: #dcaeea;">ifr_name</span>=<span style="color: #98be65;">"vmnic1"</span>}) = -1 ENODEV (No such device)
-<span style="color: #c678dd;">ioctl</span>(3, SIOCGIFHWADDR, {<span style="color: #dcaeea;">ifr_name</span>=<span style="color: #98be65;">"vmnic2"</span>}) = -1 ENODEV (No such device)
-<span style="color: #c678dd;">ioctl</span>(3, SIOCGIFHWADDR, {<span style="color: #dcaeea;">ifr_name</span>=<span style="color: #98be65;">"vmnic3"</span>}) = -1 ENODEV (No such device)
-<span style="color: #c678dd;">ioctl</span>(3, SIOCGIFHWADDR, {<span style="color: #dcaeea;">ifr_name</span>=<span style="color: #98be65;">"vmnic4"</span>}) = -1 ENODEV (No such device)
-<span style="color: #c678dd;">ioctl</span>(3, SIOCGIFHWADDR, {<span style="color: #dcaeea;">ifr_name</span>=<span style="color: #98be65;">"vmnic5"</span>}) = -1 ENODEV (No such device)
-<span style="color: #c678dd;">ioctl</span>(3, SIOCGIFHWADDR, {<span style="color: #dcaeea;">ifr_name</span>=<span style="color: #98be65;">"vmnic6"</span>}) = -1 ENODEV (No such device)
-<span style="color: #c678dd;">ioctl</span>(3, SIOCGIFHWADDR, {<span style="color: #dcaeea;">ifr_name</span>=<span style="color: #98be65;">"vmnic7"</span>}) = -1 ENODEV (No such device)
-<span style="color: #c678dd;">ioctl</span>(3, SIOCGIFHWADDR, {<span style="color: #dcaeea;">ifr_name</span>=<span style="color: #98be65;">"vmnic8"</span>}) = -1 ENODEV (No such device)
-<span style="color: #c678dd;">ioctl</span>(3, SIOCGIFHWADDR, {<span style="color: #dcaeea;">ifr_name</span>=<span style="color: #98be65;">"vmnic9"</span>}) = -1 ENODEV (No such device)
-<span style="color: #c678dd;">close</span>(3)                                = 0
-<span style="color: #c678dd;">write</span>(1, <span style="color: #98be65;">"The FlexNet host ID of this mach"</span>..., 54The FlexNet host ID of this machine is <span style="color: #98be65;">"a8833b53eb35"</span>
-) = 54
-<span style="color: #c678dd;">exit_group</span>(0)                           = ?
-+++ exited with 0 +++
+<pre class="src src-bash"><code>strace ./lmhostid</code>
+<code><span style="color: #c678dd;">execve</span>(<span style="color: #98be65;">"./lmhostid"</span>, [<span style="color: #98be65;">"./lmhostid"</span>], [/* 30 vars */]) = 0</code>
+<code><span style="color: #c678dd;">brk</span>(NULL)                               = 0x828000</code>
+<code><span style="color: #c678dd;">access</span>(<span style="color: #98be65;">"/etc/ld.so.nohwcap"</span>, F_OK)      = -1 ENOENT (No such file or directory)</code>
+<code><span style="color: #c678dd;">access</span>(<span style="color: #98be65;">"/etc/ld.so.preload"</span>, R_OK)      = -1 ENOENT (No such file or directory)</code>
+<code><span style="color: #c678dd;">openat</span>(AT_FDCWD, <span style="color: #98be65;">"/etc/ld.so.cache"</span>, O_RDONLY|O_CLOEXEC) = 3</code>
+<code><span style="color: #c678dd;">fstat</span>(3, {<span style="color: #dcaeea;">st_mode</span>=S_IFREG|0644, <span style="color: #dcaeea;">st_size</span>=138880, ...}) = 0</code>
+<code><span style="color: #c678dd;">mmap</span>(NULL, 138880, PROT_READ, MAP_PRIVATE, 3, 0) = 0x7f75775c6000</code>
+<code><span style="color: #c678dd;">close</span>(3)                                = 0</code>
+<code><span style="color: #c678dd;">access</span>(<span style="color: #98be65;">"/etc/ld.so.nohwcap"</span>, F_OK)      = -1 ENOENT (No such file or directory)</code>
+<code><span style="color: #c678dd;">openat</span>(AT_FDCWD, <span style="color: #98be65;">"/lib/x86_64-linux-gnu/libpthread.so.0"</span>, O_RDONLY|O_CLOEXEC) = 3</code>
+<code><span style="color: #c678dd;">read</span>(3, <span style="color: #98be65;">"\177ELF\2\1\1\0\0\0\0\0\0\0\0\0\3\0&gt;\0\1\0\0\0000b\0\0\0\0\0\0"</span>..., 832) = 832</code>
+<code><span style="color: #c678dd;">fstat</span>(3, {<span style="color: #dcaeea;">st_mode</span>=S_IFREG|0755, <span style="color: #dcaeea;">st_size</span>=144976, ...}) = 0</code>
+<code><span style="color: #c678dd;">mmap</span>(NULL, 8192, PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0) = 0x7f75775</code>
+<code><span style="color: #5B6268;"># </span><span style="color: #5B6268;">&#30465;&#30053;......</span></code>
+<code><span style="color: #c678dd;">close</span>(3)                                = 0</code>
+<code><span style="color: #c678dd;">socket</span>(PF_INET, SOCK_DGRAM, IPPROTO_IP) = 3</code>
+<code><span style="color: #c678dd;">openat</span>(AT_FDCWD, <span style="color: #98be65;">"/proc/net/dev"</span>, O_RDONLY) = 4</code>
+<code><span style="color: #c678dd;">fstat</span>(4, {<span style="color: #dcaeea;">st_mode</span>=S_IFREG|0444, <span style="color: #dcaeea;">st_size</span>=0, ...}) = 0</code>
+<code><span style="color: #c678dd;">read</span>(4, <span style="color: #98be65;">"Inter-|   Receive               "</span>..., 1024) = 718</code>
+<code><span style="color: #c678dd;">read</span>(4, <span style="color: #98be65;">""</span>, 1024)                       = 0</code>
+<code><span style="color: #c678dd;">close</span>(4)                                = 0</code>
+<code><span style="color: #c678dd;">stat</span>(<span style="color: #98be65;">"/sys/devices/virtual/net/eno1"</span>, 0x7ffd14cf1d40) = -1 ENOENT (No such file or directory)</code>
+<code><span style="color: #c678dd;">socket</span>(PF_INET, SOCK_DGRAM, IPPROTO_IP) = 4</code>
+<code><span style="color: #c678dd;">ioctl</span>(4, SIOCGIFHWADDR, {<span style="color: #dcaeea;">ifr_name</span>=<span style="color: #98be65;">"eno1"</span>, <span style="color: #dcaeea;">ifr_hwaddr</span>=a8:83:3b:53:eb:35}) = 0</code>
+<code><span style="color: #c678dd;">close</span>(4)                                = 0</code>
+<code><span style="color: #c678dd;">stat</span>(<span style="color: #98be65;">"/sys/devices/virtual/net/virbr0"</span>, {<span style="color: #dcaeea;">st_mode</span>=S_IFDIR|0755, <span style="color: #dcaeea;">st_size</span>=0, ...}) = 0</code>
+<code><span style="color: #c678dd;">stat</span>(<span style="color: #98be65;">"/sys/devices/virtual/net/lo"</span>, {<span style="color: #dcaeea;">st_mode</span>=S_IFDIR|0755, <span style="color: #dcaeea;">st_size</span>=0, ...}) = 0</code>
+<code><span style="color: #c678dd;">ioctl</span>(3, SIOCGIFHWADDR, {<span style="color: #dcaeea;">ifr_name</span>=<span style="color: #98be65;">"eno1"</span>, <span style="color: #dcaeea;">ifr_hwaddr</span>=a8:83:3b:53:eb:35}) = 0</code>
+<code><span style="color: #c678dd;">socket</span>(PF_INET, SOCK_DGRAM, IPPROTO_IP) = 4</code>
+<code><span style="color: #c678dd;">ioctl</span>(4, SIOCGIFHWADDR, {<span style="color: #dcaeea;">ifr_name</span>=<span style="color: #98be65;">"eno1"</span>, <span style="color: #dcaeea;">ifr_hwaddr</span>=a8:83:3b:53:eb:35}) = 0</code>
+<code><span style="color: #c678dd;">close</span>(4)                                = 0</code>
+<code><span style="color: #c678dd;">ioctl</span>(3, SIOCGIFHWADDR, {<span style="color: #dcaeea;">ifr_name</span>=<span style="color: #98be65;">"bond0"</span>}) = -1 ENODEV (No such device)</code>
+<code><span style="color: #c678dd;">ioctl</span>(3, SIOCGIFHWADDR, {<span style="color: #dcaeea;">ifr_name</span>=<span style="color: #98be65;">"bond1"</span>}) = -1 ENODEV (No such device)</code>
+<code><span style="color: #c678dd;">ioctl</span>(3, SIOCGIFHWADDR, {<span style="color: #dcaeea;">ifr_name</span>=<span style="color: #98be65;">"bond2"</span>}) = -1 ENODEV (No such device)</code>
+<code><span style="color: #c678dd;">ioctl</span>(3, SIOCGIFHWADDR, {<span style="color: #dcaeea;">ifr_name</span>=<span style="color: #98be65;">"bond3"</span>}) = -1 ENODEV (No such device)</code>
+<code><span style="color: #c678dd;">ioctl</span>(3, SIOCGIFHWADDR, {<span style="color: #dcaeea;">ifr_name</span>=<span style="color: #98be65;">"bond4"</span>}) = -1 ENODEV (No such device)</code>
+<code><span style="color: #c678dd;">ioctl</span>(3, SIOCGIFHWADDR, {<span style="color: #dcaeea;">ifr_name</span>=<span style="color: #98be65;">"bond5"</span>}) = -1 ENODEV (No such device)</code>
+<code><span style="color: #c678dd;">ioctl</span>(3, SIOCGIFHWADDR, {<span style="color: #dcaeea;">ifr_name</span>=<span style="color: #98be65;">"bond6"</span>}) = -1 ENODEV (No such device)</code>
+<code><span style="color: #c678dd;">ioctl</span>(3, SIOCGIFHWADDR, {<span style="color: #dcaeea;">ifr_name</span>=<span style="color: #98be65;">"bond7"</span>}) = -1 ENODEV (No such device)</code>
+<code><span style="color: #c678dd;">ioctl</span>(3, SIOCGIFHWADDR, {<span style="color: #dcaeea;">ifr_name</span>=<span style="color: #98be65;">"bond8"</span>}) = -1 ENODEV (No such device)</code>
+<code><span style="color: #c678dd;">ioctl</span>(3, SIOCGIFHWADDR, {<span style="color: #dcaeea;">ifr_name</span>=<span style="color: #98be65;">"bond9"</span>}) = -1 ENODEV (No such device)</code>
+<code><span style="color: #c678dd;">ioctl</span>(3, SIOCGIFHWADDR, {<span style="color: #dcaeea;">ifr_name</span>=<span style="color: #98be65;">"vmnic0"</span>}) = -1 ENODEV (No such device)</code>
+<code><span style="color: #c678dd;">ioctl</span>(3, SIOCGIFHWADDR, {<span style="color: #dcaeea;">ifr_name</span>=<span style="color: #98be65;">"vmnic1"</span>}) = -1 ENODEV (No such device)</code>
+<code><span style="color: #c678dd;">ioctl</span>(3, SIOCGIFHWADDR, {<span style="color: #dcaeea;">ifr_name</span>=<span style="color: #98be65;">"vmnic2"</span>}) = -1 ENODEV (No such device)</code>
+<code><span style="color: #c678dd;">ioctl</span>(3, SIOCGIFHWADDR, {<span style="color: #dcaeea;">ifr_name</span>=<span style="color: #98be65;">"vmnic3"</span>}) = -1 ENODEV (No such device)</code>
+<code><span style="color: #c678dd;">ioctl</span>(3, SIOCGIFHWADDR, {<span style="color: #dcaeea;">ifr_name</span>=<span style="color: #98be65;">"vmnic4"</span>}) = -1 ENODEV (No such device)</code>
+<code><span style="color: #c678dd;">ioctl</span>(3, SIOCGIFHWADDR, {<span style="color: #dcaeea;">ifr_name</span>=<span style="color: #98be65;">"vmnic5"</span>}) = -1 ENODEV (No such device)</code>
+<code><span style="color: #c678dd;">ioctl</span>(3, SIOCGIFHWADDR, {<span style="color: #dcaeea;">ifr_name</span>=<span style="color: #98be65;">"vmnic6"</span>}) = -1 ENODEV (No such device)</code>
+<code><span style="color: #c678dd;">ioctl</span>(3, SIOCGIFHWADDR, {<span style="color: #dcaeea;">ifr_name</span>=<span style="color: #98be65;">"vmnic7"</span>}) = -1 ENODEV (No such device)</code>
+<code><span style="color: #c678dd;">ioctl</span>(3, SIOCGIFHWADDR, {<span style="color: #dcaeea;">ifr_name</span>=<span style="color: #98be65;">"vmnic8"</span>}) = -1 ENODEV (No such device)</code>
+<code><span style="color: #c678dd;">ioctl</span>(3, SIOCGIFHWADDR, {<span style="color: #dcaeea;">ifr_name</span>=<span style="color: #98be65;">"vmnic9"</span>}) = -1 ENODEV (No such device)</code>
+<code><span style="color: #c678dd;">close</span>(3)                                = 0</code>
+<code><span style="color: #c678dd;">write</span>(1, <span style="color: #98be65;">"The FlexNet host ID of this mach"</span>..., 54The FlexNet host ID of this machine is <span style="color: #98be65;">"a8833b53eb35"</span></code>
+<code>) = 54</code>
+<code><span style="color: #c678dd;">exit_group</span>(0)                           = ?</code>
+<code>+++ exited with 0 +++</code>
 </pre>
 </div>
 <p>
@@ -203,70 +202,70 @@
 </p>
 </div>
 </div>
-<div id="outline-container-org34f3147" class="outline-4">
-<h4 id="org34f3147">使用LD_PRELOAD来完成hook</h4>
-<div class="outline-text-4" id="text-org34f3147">
+<div id="outline-container-org1c8a5f2" class="outline-4">
+<h4 id="org1c8a5f2">使用LD_PRELOAD来完成hook</h4>
+<div class="outline-text-4" id="text-org1c8a5f2">
 <ul class="org-ul">
 <li>代码<br></li>
 </ul>
 <div class="org-src-container">
-<pre class="src src-c"><span style="color: #5B6268;">/*</span>
-<span style="color: #5B6268;"> * ifhwaddr hook - a hook SIOCGIFHWADDR ioctl to give a fake MAC address for apps</span>
-<span style="color: #5B6268;"> * LD_PRELOAD="hook.so" command</span>
-<span style="color: #5B6268;"> *</span>
-<span style="color: #5B6268;"> */</span>
-
-<span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;stdarg.h&gt;</span>
-<span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;stdlib.h&gt;</span>
-<span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;string.h&gt;</span>
-<span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;fcntl.h&gt;</span>
-<span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;stdio.h&gt;</span>
-<span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;dlfcn.h&gt;</span>
-<span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;sys/types.h&gt;</span>
-<span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;sys/stat.h&gt;</span>
-<span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;stdlib.h&gt;</span>
-<span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;signal.h&gt;</span>
-<span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;errno.h&gt;</span>
-<span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;sys/ioctl.h&gt;</span>
-<span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;net/if.h&gt;</span>
-<span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;net/if_arp.h&gt;</span>
-
-<span style="color: #51afef; font-weight: bold;">#if</span><span style="color: #51afef; font-weight: bold;">n</span><span style="color: #51afef; font-weight: bold;">def</span> RTLD_NEXT
-<span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #dcaeea;">RTLD_NEXT</span> ((<span style="color: #ECBE7B;">void</span> *) -1l)
-<span style="color: #51afef; font-weight: bold;">#endif</span>
-
-<span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #dcaeea;">REAL_LIBC</span> RTLD_NEXT
-
-<span style="color: #ECBE7B;">int</span> <span style="color: #c678dd;">ioctl</span> (<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">__fd</span>, <span style="color: #ECBE7B;">unsigned</span> <span style="color: #ECBE7B;">long</span> <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">__request</span>, ...) {
-    <span style="color: #51afef;">static</span> <span style="color: #ECBE7B;">int</span> (*<span style="color: #c678dd;">func_ioctl</span>) (<span style="color: #ECBE7B;">int</span>, <span style="color: #ECBE7B;">unsigned</span> <span style="color: #ECBE7B;">long</span> <span style="color: #ECBE7B;">int</span>, <span style="color: #ECBE7B;">void</span> *) = <span style="color: #a9a1e1;">NULL</span>;
-    <span style="color: #ECBE7B;">va_list</span> <span style="color: #dcaeea;">args</span>;
-    <span style="color: #ECBE7B;">void</span> *<span style="color: #dcaeea;">argp</span>;
-    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">retval</span>;
-
-    <span style="color: #51afef;">if</span> (<span style="color: #51afef; font-weight: bold;">!</span> func_ioctl) {
-        func_ioctl = (<span style="color: #ECBE7B;">int</span> (*) (<span style="color: #ECBE7B;">int</span>, <span style="color: #ECBE7B;">unsigned</span> <span style="color: #ECBE7B;">long</span> <span style="color: #ECBE7B;">int</span>, <span style="color: #ECBE7B;">void</span> *)) dlsym (REAL_LIBC, <span style="color: #98be65;">"ioctl"</span>);
-    }
-    va_start (args, __request);
-    argp = va_arg (args, <span style="color: #ECBE7B;">void</span> *);
-    va_end (args);
-    <span style="color: #51afef;">struct</span> <span style="color: #ECBE7B;">ifreq</span> *<span style="color: #dcaeea;">ifr</span> = argp;
-
-    retval = func_ioctl (__fd, __request, argp);
-
-    <span style="color: #51afef;">if</span> (SIOCGIFHWADDR == __request &amp;&amp; retval == 0) {
-
-        <span style="color: #ECBE7B;">unsigned</span> <span style="color: #ECBE7B;">char</span>* <span style="color: #dcaeea;">mac</span>=(<span style="color: #ECBE7B;">unsigned</span> <span style="color: #ECBE7B;">char</span>*)ifr-&gt;ifr_hwaddr.sa_data;
-        <span style="color: #5B6268;">// </span><span style="color: #5B6268;">set to b3:26:83:2c:73:ec</span>
-        mac[0] = 0xb3;
-        mac[1] = 0x26;
-        mac[2] = 0x83;
-        mac[3] = 0x2c;
-        mac[4] = 0x73;
-        mac[5] = 0xec;
-    }
-
-    <span style="color: #51afef;">return</span> retval;
-}
+<pre class="src src-c"><code><span style="color: #5B6268;">/*</span></code>
+<code><span style="color: #5B6268;"> * ifhwaddr hook - a hook SIOCGIFHWADDR ioctl to give a fake MAC address for apps</span></code>
+<code><span style="color: #5B6268;"> * LD_PRELOAD="hook.so" command</span></code>
+<code><span style="color: #5B6268;"> *</span></code>
+<code><span style="color: #5B6268;"> */</span></code>
+<code></code>
+<code><span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;stdarg.h&gt;</span></code>
+<code><span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;stdlib.h&gt;</span></code>
+<code><span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;string.h&gt;</span></code>
+<code><span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;fcntl.h&gt;</span></code>
+<code><span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;stdio.h&gt;</span></code>
+<code><span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;dlfcn.h&gt;</span></code>
+<code><span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;sys/types.h&gt;</span></code>
+<code><span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;sys/stat.h&gt;</span></code>
+<code><span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;stdlib.h&gt;</span></code>
+<code><span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;signal.h&gt;</span></code>
+<code><span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;errno.h&gt;</span></code>
+<code><span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;sys/ioctl.h&gt;</span></code>
+<code><span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;net/if.h&gt;</span></code>
+<code><span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;net/if_arp.h&gt;</span></code>
+<code></code>
+<code><span style="color: #51afef; font-weight: bold;">#if</span><span style="color: #51afef; font-weight: bold;">n</span><span style="color: #51afef; font-weight: bold;">def</span> RTLD_NEXT</code>
+<code><span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #dcaeea;">RTLD_NEXT</span> ((<span style="color: #ECBE7B;">void</span> *) -1l)</code>
+<code><span style="color: #51afef; font-weight: bold;">#endif</span></code>
+<code></code>
+<code><span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #dcaeea;">REAL_LIBC</span> RTLD_NEXT</code>
+<code></code>
+<code><span style="color: #ECBE7B;">int</span> <span style="color: #c678dd;">ioctl</span> (<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">__fd</span>, <span style="color: #ECBE7B;">unsigned</span> <span style="color: #ECBE7B;">long</span> <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">__request</span>, ...) {</code>
+<code>    <span style="color: #51afef;">static</span> <span style="color: #ECBE7B;">int</span> (*<span style="color: #c678dd;">func_ioctl</span>) (<span style="color: #ECBE7B;">int</span>, <span style="color: #ECBE7B;">unsigned</span> <span style="color: #ECBE7B;">long</span> <span style="color: #ECBE7B;">int</span>, <span style="color: #ECBE7B;">void</span> *) = <span style="color: #a9a1e1;">NULL</span>;</code>
+<code>    <span style="color: #ECBE7B;">va_list</span> <span style="color: #dcaeea;">args</span>;</code>
+<code>    <span style="color: #ECBE7B;">void</span> *<span style="color: #dcaeea;">argp</span>;</code>
+<code>    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">retval</span>;</code>
+<code></code>
+<code>    <span style="color: #51afef;">if</span> (<span style="color: #51afef; font-weight: bold;">!</span> func_ioctl) {</code>
+<code>        func_ioctl = (<span style="color: #ECBE7B;">int</span> (*) (<span style="color: #ECBE7B;">int</span>, <span style="color: #ECBE7B;">unsigned</span> <span style="color: #ECBE7B;">long</span> <span style="color: #ECBE7B;">int</span>, <span style="color: #ECBE7B;">void</span> *)) dlsym (REAL_LIBC, <span style="color: #98be65;">"ioctl"</span>);</code>
+<code>    }</code>
+<code>    va_start (args, __request);</code>
+<code>    argp = va_arg (args, <span style="color: #ECBE7B;">void</span> *);</code>
+<code>    va_end (args);</code>
+<code>    <span style="color: #51afef;">struct</span> <span style="color: #ECBE7B;">ifreq</span> *<span style="color: #dcaeea;">ifr</span> = argp;</code>
+<code></code>
+<code>    retval = func_ioctl (__fd, __request, argp);</code>
+<code></code>
+<code>    <span style="color: #51afef;">if</span> (SIOCGIFHWADDR == __request &amp;&amp; retval == 0) {</code>
+<code></code>
+<code>        <span style="color: #ECBE7B;">unsigned</span> <span style="color: #ECBE7B;">char</span>* <span style="color: #dcaeea;">mac</span>=(<span style="color: #ECBE7B;">unsigned</span> <span style="color: #ECBE7B;">char</span>*)ifr-&gt;ifr_hwaddr.sa_data;</code>
+<code>        <span style="color: #5B6268;">// </span><span style="color: #5B6268;">set to b3:26:83:2c:73:ec</span></code>
+<code>        mac[0] = 0xb3;</code>
+<code>        mac[1] = 0x26;</code>
+<code>        mac[2] = 0x83;</code>
+<code>        mac[3] = 0x2c;</code>
+<code>        mac[4] = 0x73;</code>
+<code>        mac[5] = 0xec;</code>
+<code>    }</code>
+<code></code>
+<code>    <span style="color: #51afef;">return</span> retval;</code>
+<code>}</code>
 </pre>
 </div>
 <ul class="org-ul">
@@ -274,31 +273,31 @@
 编译:<br>
 </p>
 <div class="org-src-container">
-<pre class="src src-bash">gcc -shared -o hook.so hook.c
+<pre class="src src-bash"><code>gcc -shared -o hook.so hook.c</code>
 </pre>
 </div></li>
 </ul>
 </div>
 </div>
-<div id="outline-container-org731c750" class="outline-4">
-<h4 id="org731c750">测试：</h4>
-<div class="outline-text-4" id="text-org731c750">
+<div id="outline-container-org97b673a" class="outline-4">
+<h4 id="org97b673a">测试：</h4>
+<div class="outline-text-4" id="text-org97b673a">
 <p>
 hook前：<br>
 </p>
 <div class="org-src-container">
-<pre class="src src-bash">./lmhostid
-lmhostid - Copyright (c) 1989-2017 Flexera Software LLC. All Rights Reserved.
-The FlexNet host ID of this machine is <span style="color: #98be65;">"a8833b53eb35"</span>
+<pre class="src src-bash"><code>./lmhostid</code>
+<code>lmhostid - Copyright (c) 1989-2017 Flexera Software LLC. All Rights Reserved.</code>
+<code>The FlexNet host ID of this machine is <span style="color: #98be65;">"a8833b53eb35"</span></code>
 </pre>
 </div>
 <p>
 hook后<br>
 </p>
 <div class="org-src-container">
-<pre class="src src-bash"><span style="color: #dcaeea;">LD_PRELOAD</span>=./hook.so ./lmhostid
-lmhostid - Copyright (c) 1989-2017 Flexera Software LLC. All Rights Reserved.
-The FlexNet host ID of this machine is <span style="color: #98be65;">"b326832c73ec"</span>
+<pre class="src src-bash"><code><span style="color: #dcaeea;">LD_PRELOAD</span>=./hook.so ./lmhostid</code>
+<code>lmhostid - Copyright (c) 1989-2017 Flexera Software LLC. All Rights Reserved.</code>
+<code>The FlexNet host ID of this machine is <span style="color: #98be65;">"b326832c73ec"</span></code>
 </pre>
 </div>
 </div>
@@ -309,7 +308,7 @@ The FlexNet host ID of this machine is <span style="color: #98be65;">"b326832c73
 <h2 class="footnotes">Footnotes: </h2>
 <div id="text-footnotes">
 
-<div class="footdef"><sup><a id="fn.1" class="footnum" href="#fnr.1">1</a></sup> <div class="footpara"><p class="footpara">
+<div class="footdef"><sup><a id="fn.1" class="footnum" href="#fnr.1" role="doc-backlink">1</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">
 本文中的MAC address都是随机数<br>
 </p></div></div>
 

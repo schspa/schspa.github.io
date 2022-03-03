@@ -1,14 +1,13 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2021-11-26 五 16:56 -->
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- 2022-03-03 Thu 11:48 -->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>setjmp/longjmp in C</title>
-<meta name="generator" content="Org mode">
-<meta name="author" content="Schspa">
-<meta name="description" content="Setjmp analysis"
->
+<meta name="author" content="Schspa" />
+<meta name="description" content="Setjmp analysis" />
+<meta name="generator" content="Org Mode" />
 <link rel="shortcut icon" href="/images/rose-red.png" type="image/x-icon" />
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" integrity="sha256-sAcc18zvMnaJZrNT4v8J0T4HqzEUiUTlVFgDIywjQek=" crossorigin="anonymous">
 <link rel="stylesheet" href="/css/animate.min.css" />
@@ -56,33 +55,33 @@
   </nav>
 </header>
 </div>
-<div id="content">
+<div id="content" class="content">
 <h1 class="title">setjmp/longjmp in C</h1>
-<div id="table-of-contents">
+<div id="table-of-contents" role="doc-toc">
 <h2>Table of Contents</h2>
-<div id="text-table-of-contents">
+<div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#org8dca8e8">Example Analysis</a></li>
-<li><a href="#org5f102e1">libc implement of setjmp/longjmp</a>
+<li><a href="#orgd762258">Example Analysis</a></li>
+<li><a href="#org843e490">libc implement of setjmp/longjmp</a>
 <ul>
-<li><a href="#orgb2d5a5c">setjmp</a></li>
-<li><a href="#org9679efe">longjmp</a></li>
+<li><a href="#org652f9ea">setjmp</a></li>
+<li><a href="#orgd2edb33">longjmp</a></li>
 </ul>
 </li>
-<li><a href="#orga7e1948">risk of setjmp/longjmp usage</a></li>
+<li><a href="#org90b4a3e">risk of setjmp/longjmp usage</a></li>
 </ul>
 </div>
 </div>
 
-<div id="outline-container-org8dca8e8" class="outline-2">
-<h2 id="org8dca8e8">Example Analysis</h2>
-<div class="outline-text-2" id="text-org8dca8e8">
+<div id="outline-container-orgd762258" class="outline-2">
+<h2 id="orgd762258">Example Analysis</h2>
+<div class="outline-text-2" id="text-orgd762258">
 <p>
 下面代码是setjmp以及longjmp的使用实例，以及其反汇编出来的结果，具体api的使用细节请参考man手册<br>
 </p>
 
 <div class="org-src-container">
-<pre class="src src-C" id="orge9fcd83"><code><span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;stdio.h&gt;</span></code>
+<pre class="src src-C" id="orge89ffb1"><code><span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;stdio.h&gt;</span></code>
 <code><span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;setjmp.h&gt;</span></code>
 <code></code>
 <code><span style="color: #51afef;">static</span> <span style="color: #ECBE7B;">jmp_buf</span> <span style="color: #dcaeea;">env</span>;</code>
@@ -122,94 +121,7 @@
 </p>
 
 <div class="org-src-container">
-<pre class="src src-asm"><code><span style="color: #c678dd;">Dump</span> <span style="color: #51afef;">of</span> assembler code for function divide:</code>
-<code>/tmp/ox-bash-Zoz37R5Hg/test.c:</code>
-<code><span style="color: #c678dd;">7</span>   {</code>
-<code><span style="color: #c678dd;">8</span>       <span style="color: #51afef;">const</span> double delta = 0.00000000001<span style="color: #5B6268;">;</span></code>
-<code><span style="color: #c678dd;">9</span>       <span style="color: #51afef;">if</span>(!((-delta &lt; b) &amp;&amp; (b &lt; delta)))</code>
-<code>   <span style="color: #51afef;">0x0000000000000894</span> &lt;+0&gt;: 00 00 00 90 adrp    x0, 0x0</code>
-<code>   <span style="color: #51afef;">0x0000000000000898</span> &lt;+4&gt;: 02 7c 44 fd ldr d2, [x0, #2296]</code>
-<code>   <span style="color: #51afef;">0x000000000000089c</span> &lt;+8&gt;: 30 20 62 1e fcmpe   d1, d2</code>
-<code>   <span style="color: #51afef;">0x00000000000008a0</span> &lt;+12&gt;:    6c 00 00 54 b.gt    0x8ac &lt;divide+24&gt;</code>
-<code></code>
-<code><span style="color: #c678dd;">10</span>      {</code>
-<code><span style="color: #c678dd;">11</span>          <span style="color: #51afef;">return</span>  a/b <span style="color: #5B6268;">;</span></code>
-<code>   <span style="color: #51afef;">0x00000000000008a4</span> &lt;+16&gt;:    00 18 61 1e fdiv    d0, d0, d1</code>
-<code></code>
-<code><span style="color: #c678dd;">16</span>          <span style="color: #51afef;">return</span> 0<span style="color: #5B6268;">;</span></code>
-<code><span style="color: #c678dd;">17</span>      }</code>
-<code><span style="color: #c678dd;">18</span>  }</code>
-<code>   <span style="color: #51afef;">0x00000000000008a8</span> &lt;+20&gt;:    c0 03 5f d6 ret</code>
-<code></code>
-<code><span style="color: #c678dd;">9</span>       <span style="color: #51afef;">if</span>(!((-delta &lt; b) &amp;&amp; (b &lt; delta)))</code>
-<code>   <span style="color: #51afef;">0x00000000000008ac</span> &lt;+24&gt;:    00 00 00 90 adrp    x0, 0x0</code>
-<code>   <span style="color: #51afef;">0x00000000000008b0</span> &lt;+28&gt;:    02 80 44 fd ldr d2, [x0, #2304]</code>
-<code>   <span style="color: #51afef;">0x00000000000008b4</span> &lt;+32&gt;:    30 20 62 1e fcmpe   d1, d2</code>
-<code>   <span style="color: #51afef;">0x00000000000008b8</span> &lt;+36&gt;:    44 00 00 54 b.mi    0x8c0 &lt;divide+44&gt;  <span style="color: #5B6268;">// </span><span style="color: #5B6268;">b.first</span></code>
-<code>   <span style="color: #51afef;">0x00000000000008bc</span> &lt;+40&gt;:    fa ff ff 17 b   0x8a4 &lt;divide+16&gt;</code>
-<code></code>
-<code><span style="color: #c678dd;">12</span>      }</code>
-<code><span style="color: #c678dd;">13</span>      <span style="color: #51afef;">else</span></code>
-<code><span style="color: #c678dd;">14</span>      {</code>
-<code><span style="color: #c678dd;">15</span>          <span style="color: #51afef;">longjmp</span>(env, 1)<span style="color: #5B6268;">;</span></code>
-<code>   <span style="color: #51afef;">0x00000000000008c0</span> &lt;+44&gt;:    fd 7b bf a9 stp x29, x30, [sp, #-16]!</code>
-<code>   <span style="color: #51afef;">0x00000000000008c4</span> &lt;+48&gt;:    80 00 00 b0 adrp    x0, 0x11000 <a href="mailto:_setjmp%40got.plt">&lt;_setjmp@got.plt&gt;</a></code>
-<code>   <span style="color: #51afef;">0x00000000000008c8</span> &lt;+52&gt;:    21 00 80 52 mov w1, #0x1                    <span style="color: #5B6268;">// </span><span style="color: #5B6268;">#1</span></code>
-<code></code>
-<code><span style="color: #c678dd;">7</span>   {</code>
-<code>   <span style="color: #51afef;">0x00000000000008cc</span> &lt;+56&gt;:    fd 03 00 91 mov x29, sp</code>
-<code></code>
-<code><span style="color: #c678dd;">12</span>      }</code>
-<code><span style="color: #c678dd;">13</span>      <span style="color: #51afef;">else</span></code>
-<code><span style="color: #c678dd;">14</span>      {</code>
-<code><span style="color: #c678dd;">15</span>          <span style="color: #51afef;">longjmp</span>(env, 1)<span style="color: #5B6268;">;</span></code>
-<code>   <span style="color: #51afef;">0x00000000000008d0</span> &lt;+60&gt;:    00 40 01 91 add x0, x0, #0x50</code>
-<code>   <span style="color: #51afef;">0x00000000000008d4</span> &lt;+64&gt;:    7f ff ff 97 bl  0x6d0 <a href="mailto:longjmp%40plt">&lt;longjmp@plt&gt;</a></code>
-<code><span style="color: #c678dd;">End</span> <span style="color: #51afef;">of</span> assembler dump.</code>
-<code><span style="color: #c678dd;">Dump</span> <span style="color: #51afef;">of</span> assembler code for function main:</code>
-<code>/tmp/ox-bash-Zoz37R5Hg/test.c:</code>
-<code><span style="color: #c678dd;">21</span>  {</code>
-<code><span style="color: #c678dd;">22</span>      <span style="color: #51afef;">int</span> ret<span style="color: #5B6268;">;</span></code>
-<code><span style="color: #c678dd;">23</span>  </code>
-<code><span style="color: #c678dd;">24</span>      <span style="color: #51afef;">ret</span> = setjmp(env)<span style="color: #5B6268;">;</span></code>
-<code>   <span style="color: #51afef;">0x0000000000000700</span> &lt;+0&gt;: fd 7b bf a9 stp x29, x30, [sp, #-16]!</code>
-<code>   <span style="color: #51afef;">0x0000000000000704</span> &lt;+4&gt;: 80 00 00 b0 adrp    x0, 0x11000 <a href="mailto:_setjmp%40got.plt">&lt;_setjmp@got.plt&gt;</a></code>
-<code>   <span style="color: #51afef;">0x0000000000000708</span> &lt;+8&gt;: 00 40 01 91 add x0, x0, #0x50</code>
-<code></code>
-<code><span style="color: #c678dd;">21</span>  {</code>
-<code>   <span style="color: #51afef;">0x000000000000070c</span> &lt;+12&gt;:    fd 03 00 91 mov x29, sp</code>
-<code></code>
-<code><span style="color: #c678dd;">22</span>      <span style="color: #51afef;">int</span> ret<span style="color: #5B6268;">;</span></code>
-<code><span style="color: #c678dd;">23</span>  </code>
-<code><span style="color: #c678dd;">24</span>      <span style="color: #51afef;">ret</span> = setjmp(env)<span style="color: #5B6268;">;</span></code>
-<code>   <span style="color: #51afef;">0x0000000000000710</span> &lt;+16&gt;:    d8 ff ff 97 bl  0x670 <a href="mailto:_setjmp%40plt">&lt;_setjmp@plt&gt;</a></code>
-<code></code>
-<code><span style="color: #c678dd;">25</span>  </code>
-<code><span style="color: #c678dd;">26</span>      <span style="color: #51afef;">if</span> (!ret) {</code>
-<code>   <span style="color: #51afef;">0x0000000000000714</span> &lt;+20&gt;:    a0 00 00 35 cbnz    w0, 0x728 &lt;main+40&gt;</code>
-<code></code>
-<code><span style="color: #c678dd;">15</span>          <span style="color: #51afef;">longjmp</span>(env, 1)<span style="color: #5B6268;">;</span></code>
-<code>   <span style="color: #51afef;">0x0000000000000718</span> &lt;+24&gt;:    80 00 00 b0 adrp    x0, 0x11000 <a href="mailto:_setjmp%40got.plt">&lt;_setjmp@got.plt&gt;</a></code>
-<code>   <span style="color: #51afef;">0x000000000000071c</span> &lt;+28&gt;:    21 00 80 52 mov w1, #0x1                    <span style="color: #5B6268;">// </span><span style="color: #5B6268;">#1</span></code>
-<code>   <span style="color: #51afef;">0x0000000000000720</span> &lt;+32&gt;:    00 40 01 91 add x0, x0, #0x50</code>
-<code>   <span style="color: #51afef;">0x0000000000000724</span> &lt;+36&gt;:    eb ff ff 97 bl  0x6d0 <a href="mailto:longjmp%40plt">&lt;longjmp@plt&gt;</a></code>
-<code></code>
-<code><span style="color: #c678dd;">27</span>          <span style="color: #51afef;">printf</span>(<span style="color: #98be65;">"5/0=%lf\n"</span>, divide(5,0))<span style="color: #5B6268;">;</span></code>
-<code><span style="color: #c678dd;">28</span>      } else  if (ret == 1) {</code>
-<code>   <span style="color: #51afef;">0x0000000000000728</span> &lt;+40&gt;:    1f 04 00 71 cmp w0, #0x1</code>
-<code>   <span style="color: #51afef;">0x000000000000072c</span> &lt;+44&gt;:    81 00 00 54 b.ne    0x73c &lt;main+60&gt;  <span style="color: #5B6268;">// </span><span style="color: #5B6268;">b.any</span></code>
-<code></code>
-<code><span style="color: #c678dd;">29</span>          <span style="color: #51afef;">printf</span>(<span style="color: #98be65;">"ERR\n"</span>)<span style="color: #5B6268;">;</span></code>
-<code>   <span style="color: #51afef;">0x0000000000000730</span> &lt;+48&gt;:    00 00 00 90 adrp    x0, 0x0</code>
-<code>   <span style="color: #51afef;">0x0000000000000734</span> &lt;+52&gt;:    00 d0 23 91 add x0, x0, #0x8f4</code>
-<code>   <span style="color: #51afef;">0x0000000000000738</span> &lt;+56&gt;:    e2 ff ff 97 bl  0x6c0 <a href="mailto:puts%40plt">&lt;puts@plt&gt;</a></code>
-<code></code>
-<code><span style="color: #c678dd;">30</span>      }</code>
-<code><span style="color: #c678dd;">31</span>      <span style="color: #51afef;">return</span> 0<span style="color: #5B6268;">;</span></code>
-<code>   <span style="color: #51afef;">0x000000000000073c</span> &lt;+60&gt;:    00 00 80 52 mov w0, #0x0                    <span style="color: #5B6268;">// </span><span style="color: #5B6268;">#0</span></code>
-<code>   <span style="color: #51afef;">0x0000000000000740</span> &lt;+64&gt;:    fd 7b c1 a8 ldp x29, x30, [sp], #16</code>
-<code>   <span style="color: #51afef;">0x0000000000000744</span> &lt;+68&gt;:    c0 03 5f d6 ret</code>
-<code><span style="color: #c678dd;">End</span> <span style="color: #51afef;">of</span> assembler dump.</code>
+<pre class="src src-asm"><code></code>
 </pre>
 </div>
 
@@ -219,17 +131,17 @@
 </div>
 </div>
 
-<div id="outline-container-org5f102e1" class="outline-2">
-<h2 id="org5f102e1">libc implement of setjmp/longjmp</h2>
-<div class="outline-text-2" id="text-org5f102e1">
+<div id="outline-container-org843e490" class="outline-2">
+<h2 id="org843e490">libc implement of setjmp/longjmp</h2>
+<div class="outline-text-2" id="text-org843e490">
 <p>
 <a href="https://github.com/lattera/glibc/blob/895ef79e04a953cac1493863bcae29ad85657ee1/sysdeps/aarch64/setjmp.S#L29">https://github.com/lattera/glibc/blob/895ef79e04a953cac1493863bcae29ad85657ee1/sysdeps/aarch64/setjmp.S#L29</a><br>
 </p>
 </div>
 
-<div id="outline-container-orgb2d5a5c" class="outline-3">
-<h3 id="orgb2d5a5c">setjmp</h3>
-<div class="outline-text-3" id="text-orgb2d5a5c">
+<div id="outline-container-org652f9ea" class="outline-3">
+<h3 id="org652f9ea">setjmp</h3>
+<div class="outline-text-3" id="text-org652f9ea">
 <div class="org-src-container">
 <pre class="src src-asm"><code><span style="color: #5B6268;">/* </span><span style="color: #5B6268;">Keep traditional entry points in with sigsetjmp(). */</span></code>
 <code><span style="color: #c678dd;">ENTRY</span> (setjmp)</code>
@@ -292,9 +204,9 @@
 </p>
 </div>
 </div>
-<div id="outline-container-org9679efe" class="outline-3">
-<h3 id="org9679efe">longjmp</h3>
-<div class="outline-text-3" id="text-org9679efe">
+<div id="outline-container-orgd2edb33" class="outline-3">
+<h3 id="orgd2edb33">longjmp</h3>
+<div class="outline-text-3" id="text-orgd2edb33">
 <p>
 <a href="https://github.com/lattera/glibc/blob/895ef79e04a953cac1493863bcae29ad85657ee1/sysdeps/aarch64/__longjmp.S#L25">https://github.com/lattera/glibc/blob/895ef79e04a953cac1493863bcae29ad85657ee1/sysdeps/aarch64/__longjmp.S#L25</a><br>
 </p>
@@ -403,9 +315,9 @@
 </div>
 
 
-<div id="outline-container-orga7e1948" class="outline-2">
-<h2 id="orga7e1948">risk of setjmp/longjmp usage</h2>
-<div class="outline-text-2" id="text-orga7e1948">
+<div id="outline-container-org90b4a3e" class="outline-2">
+<h2 id="org90b4a3e">risk of setjmp/longjmp usage</h2>
+<div class="outline-text-2" id="text-org90b4a3e">
 <p>
 由于setjmp/longjmp的实现，以及编译器的优化，会导致某些情况下出现局部变量的值被修改的情况<br>
 </p>

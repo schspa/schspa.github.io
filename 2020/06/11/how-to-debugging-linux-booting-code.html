@@ -1,14 +1,13 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2021-10-12 二 19:35 -->
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- 2022-03-03 Thu 11:48 -->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Debug linux kernel boot process</title>
-<meta name="generator" content="Org mode">
-<meta name="author" content="schspa">
-<meta name="description" content="how-to-debugging-linux-booting-code"
->
+<meta name="author" content="schspa" />
+<meta name="description" content="how-to-debugging-linux-booting-code" />
+<meta name="generator" content="Org Mode" />
 <link rel="shortcut icon" href="/images/rose-red.png" type="image/x-icon" />
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" integrity="sha256-sAcc18zvMnaJZrNT4v8J0T4HqzEUiUTlVFgDIywjQek=" crossorigin="anonymous">
 <link rel="stylesheet" href="/css/animate.min.css" />
@@ -56,32 +55,32 @@
   </nav>
 </header>
 </div>
-<div id="content">
+<div id="content" class="content">
 <h1 class="title">Debug linux kernel boot process</h1>
-<div id="table-of-contents">
+<div id="table-of-contents" role="doc-toc">
 <h2>Table of Contents</h2>
-<div id="text-table-of-contents">
+<div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#org100e5d4">目的</a></li>
-<li><a href="#orgdc88db3">初始化代码（MMU开启之前）</a>
+<li><a href="#orgac556f7">目的</a></li>
+<li><a href="#org19c26b1">初始化代码（MMU开启之前）</a>
 <ul>
-<li><a href="#org59762a4">获取加载地址</a>
+<li><a href="#org6da47cb">获取加载地址</a>
 <ul>
-<li><a href="#orgdba921e">正确加载uboot的symbol到运行位置</a></li>
-<li><a href="#org9a6a401">在跳入内核之前打上断点，获取内核运行地址</a></li>
-<li><a href="#org68cf34a">加载.head.text段，在内核第一条指令处打断点</a></li>
+<li><a href="#orgb9106ea">正确加载uboot的symbol到运行位置</a></li>
+<li><a href="#org5bf8562">在跳入内核之前打上断点，获取内核运行地址</a></li>
+<li><a href="#org0208ded">加载.head.text段，在内核第一条指令处打断点</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li><a href="#org7e7465d">初始代码（MMU开启之后)</a></li>
+<li><a href="#org14df6dc">初始代码（MMU开启之后)</a></li>
 </ul>
 </div>
 </div>
 
-<div id="outline-container-org100e5d4" class="outline-2">
-<h2 id="org100e5d4">目的</h2>
-<div class="outline-text-2" id="text-org100e5d4">
+<div id="outline-container-orgac556f7" class="outline-2">
+<h2 id="orgac556f7">目的</h2>
+<div class="outline-text-2" id="text-orgac556f7">
 <p>
 当linux内核在启动过程中出现bug时，可能需要适用gdb/ulink/ds5 debugger来进行debug，大多数的debug方法时在启动后，再连接上调试器，最后连接上调试器之后再加载symbol，打断点来完成debug。<br>
 对于大多数的情况，以上方法就足以应付，但是部分情况下（在内核初始化早期，可能还来不及连上调试器，内核就已经挂掉了），需要更加复杂的打断点方法。<br>
@@ -91,32 +90,32 @@
 </div>
 </div>
 
-<div id="outline-container-orgdc88db3" class="outline-2">
-<h2 id="orgdc88db3">初始化代码（MMU开启之前）</h2>
-<div class="outline-text-2" id="text-orgdc88db3">
+<div id="outline-container-org19c26b1" class="outline-2">
+<h2 id="org19c26b1">初始化代码（MMU开启之前）</h2>
+<div class="outline-text-2" id="text-org19c26b1">
 <p>
 由于Linux内核可以被bootloader加载到任意位置来执行，在mmu开启之前，内核代码运行地址是由bootloader来决定，此时需要在bootloader处打断点来获取加载地址，通过这个地址来调试。<br>
 </p>
 </div>
 
-<div id="outline-container-org59762a4" class="outline-3">
-<h3 id="org59762a4">获取加载地址</h3>
-<div class="outline-text-3" id="text-org59762a4">
+<div id="outline-container-org6da47cb" class="outline-3">
+<h3 id="org6da47cb">获取加载地址</h3>
+<div class="outline-text-3" id="text-org6da47cb">
 <p>
 由于需要获取bootloader的加载地址，可以在bootloader跳转到内核之前打上断点来获取加载地址，下面以uboot为例：<br>
 </p>
 </div>
-<div id="outline-container-orgdba921e" class="outline-4">
-<h4 id="orgdba921e">正确加载uboot的symbol到运行位置</h4>
-<div class="outline-text-4" id="text-orgdba921e">
+<div id="outline-container-orgb9106ea" class="outline-4">
+<h4 id="orgb9106ea">正确加载uboot的symbol到运行位置</h4>
+<div class="outline-text-4" id="text-orgb9106ea">
 <p>
 在uboot倒计时开始时停止，使用调试器连接上，由于uboot有relocaddr的过程，所以要先获取uboot实际运行的地址，在aarch64平台上x18寄存器保存了gd指针的地址，通过x18和symbol文件就可以获取到relocaddr<br>
 </p>
 <div class="org-src-container">
-<pre class="src src-bash">target remote:1234
-add-symbol-file ~/work/uboot/u-boot
-<span style="color: #c678dd;">set</span> $<span style="color: #dcaeea;">uboot_relocaddr</span> = ((gd_t *)$<span style="color: #dcaeea;">x18</span>)-&gt;relocaddr
-add-symbol-file ~/work/uboot/u-boot $<span style="color: #dcaeea;">uboot_relocaddr</span>
+<pre class="src src-bash"><code>target remote:1234</code>
+<code>add-symbol-file ~/work/uboot/u-boot</code>
+<code><span style="color: #c678dd;">set</span> $<span style="color: #dcaeea;">uboot_relocaddr</span> = ((gd_t *)$<span style="color: #dcaeea;">x18</span>)-&gt;relocaddr</code>
+<code>add-symbol-file ~/work/uboot/u-boot $<span style="color: #dcaeea;">uboot_relocaddr</span></code>
 </pre>
 </div>
 
@@ -124,149 +123,149 @@ add-symbol-file ~/work/uboot/u-boot $<span style="color: #dcaeea;">uboot_relocad
 在正确加载好symbol之后，适用bt命令接可以正确的获取到uboot当前执行位置，如下所示，uboot正在等待串口输入命令<br>
 </p>
 <div class="org-src-container">
-<pre class="src src-bash">(gdb) bt
-<span style="color: #5B6268;">#</span><span style="color: #5B6268;">0  pl01x_serial_pending (dev=&lt;optimized out&gt;, input=true)</span>
-    at drivers/serial/serial_pl01x.c:321
-<span style="color: #5B6268;">#</span><span style="color: #5B6268;">1  0x00000000bff316b8 in console_tstc (file=0) at common/console.c:328</span>
-<span style="color: #5B6268;">#</span><span style="color: #5B6268;">2  fgetc (file=0) at common/console.c:328</span>
-<span style="color: #5B6268;">#</span><span style="color: #5B6268;">3  0x00000000bff2fd9c in cread_line (timeout=0, len=&lt;synthetic pointer&gt;, </span>
-    <span style="color: #dcaeea;">buf</span>=0xbffd9d50 <span style="color: #98be65;">""</span>, <span style="color: #dcaeea;">prompt</span>=0xbff80a19 <span style="color: #98be65;">"Hobot# "</span>) at common/cli_readline.c:274
-<span style="color: #5B6268;">#</span><span style="color: #5B6268;">4  cli_readline_into_buffer (prompt=0xbff80a19 "Hobot# ", buffer=0xbffd9d50 "", </span>
-    <span style="color: #dcaeea;">timeout</span>=0) at common/cli_readline.c:549
-<span style="color: #5B6268;">#</span><span style="color: #5B6268;">5  0x00000000bff2b130 in uboot_cli_readline (i=0xbbe93e60)</span>
-    at common/cli_hush.c:1029
-<span style="color: #5B6268;">#</span><span style="color: #5B6268;">6  get_user_input (i=0xbbe93e60) at common/cli_hush.c:1029</span>
-<span style="color: #5B6268;">#</span><span style="color: #5B6268;">7  file_get (i=0xbbe93e60) at common/cli_hush.c:1108</span>
-
+<pre class="src src-bash"><code>(gdb) bt</code>
+<code><span style="color: #5B6268;">#</span><span style="color: #5B6268;">0  pl01x_serial_pending (dev=&lt;optimized out&gt;, input=true)</span></code>
+<code>    at drivers/serial/serial_pl01x.c:321</code>
+<code><span style="color: #5B6268;">#</span><span style="color: #5B6268;">1  0x00000000bff316b8 in console_tstc (file=0) at common/console.c:328</span></code>
+<code><span style="color: #5B6268;">#</span><span style="color: #5B6268;">2  fgetc (file=0) at common/console.c:328</span></code>
+<code><span style="color: #5B6268;">#</span><span style="color: #5B6268;">3  0x00000000bff2fd9c in cread_line (timeout=0, len=&lt;synthetic pointer&gt;, </span></code>
+<code>    <span style="color: #dcaeea;">buf</span>=0xbffd9d50 <span style="color: #98be65;">""</span>, <span style="color: #dcaeea;">prompt</span>=0xbff80a19 <span style="color: #98be65;">"Hobot# "</span>) at common/cli_readline.c:274</code>
+<code><span style="color: #5B6268;">#</span><span style="color: #5B6268;">4  cli_readline_into_buffer (prompt=0xbff80a19 "Hobot# ", buffer=0xbffd9d50 "", </span></code>
+<code>    <span style="color: #dcaeea;">timeout</span>=0) at common/cli_readline.c:549</code>
+<code><span style="color: #5B6268;">#</span><span style="color: #5B6268;">5  0x00000000bff2b130 in uboot_cli_readline (i=0xbbe93e60)</span></code>
+<code>    at common/cli_hush.c:1029</code>
+<code><span style="color: #5B6268;">#</span><span style="color: #5B6268;">6  get_user_input (i=0xbbe93e60) at common/cli_hush.c:1029</span></code>
+<code><span style="color: #5B6268;">#</span><span style="color: #5B6268;">7  file_get (i=0xbbe93e60) at common/cli_hush.c:1108</span></code>
+<code></code>
 </pre>
 </div>
 </div>
 </div>
-<div id="outline-container-org9a6a401" class="outline-4">
-<h4 id="org9a6a401">在跳入内核之前打上断点，获取内核运行地址</h4>
-<div class="outline-text-4" id="text-org9a6a401">
+<div id="outline-container-org5bf8562" class="outline-4">
+<h4 id="org5bf8562">在跳入内核之前打上断点，获取内核运行地址</h4>
+<div class="outline-text-4" id="text-org5bf8562">
 <div class="org-src-container">
-<pre class="src src-text">(gdb) tb boot_jump_linux
-Temporary breakpoint 1 at 0x880024e0: boot_jump_linux. (4 locations)
-(gdb) c
-Continuing.
-
-Thread 1 hit Temporary breakpoint 1, boot_jump_linux (images=0xbffd9b20, flag=1024)
-    at arch/arm/lib/bootm.c:323
-323 {
-(gdb) p images 
-$3 = (bootm_headers_t *) 0xbffd9b20
-(gdb) set print pretty 
-(gdb) p /x *images 
-$6 = {
-  legacy_hdr_os = 0x0,
-  legacy_hdr_os_copy = {
-    ih_magic = 0x0,
-    ih_hcrc = 0x0,
-    ih_time = 0x0,
-    ih_size = 0x0,
-    ih_load = 0x0,
-    ih_ep = 0x0,
-    ih_dcrc = 0x0,
-    ih_os = 0x0,
-    ih_arch = 0x0,
-    ih_type = 0x0,
-    ih_comp = 0x0,
-    ih_name = {0x0 &lt;repeats 32 times&gt;}
-  },
-  legacy_hdr_valid = 0x0,
-  os = {
-    start = 0x83000000,
-    end = 0x8390b000,
-    image_start = 0x83000800,
-    image_len = 0x8e9865,
-    load = 0x89080000,
-    comp = 0x1,
-    type = 0x2,
-    os = 0x5,
-    arch = 0x0
-  },
-  ep = 0x89080000,
-  rd_start = 0x0,
-  rd_end = 0x0,
-  ft_addr = 0x82000000,
-  ft_len = 0x6ede,
-  initrd_start = 0x0,
-  initrd_end = 0x0,
-  cmdline_start = 0x0,
-  cmdline_end = 0x0,
-  kbd = 0x0,
-  verify = 0xffffffff,
-  state = 0x1,
-  lmb = {
-    memory = {
-      cnt = 0x1,
-      size = 0x0,
---Type &lt;RET&gt; for more, q to quit, c to continue without paging--
-      region = {{
-          base = 0x80000000,
-          size = 0x40000000
-        }, {
-          base = 0x0,
-          size = 0x0
-        }, {
-          base = 0x0,
-          size = 0x0
-        }, {
-          base = 0x0,
-          size = 0x0
-        }, {
-          base = 0x0,
-          size = 0x0
-        }, {
-          base = 0x0,
-          size = 0x0
-        }, {
-          base = 0x0,
-          size = 0x0
-        }, {
-          base = 0x0,
-          size = 0x0
-        }, {
-          base = 0x0,
-          size = 0x0
-        }}
-    },
-    reserved = {
-      cnt = 0x4,
-      size = 0x0,
-      region = {{
-          base = 0x80000000,
-          size = 0x770000
-        }, {
-          base = 0x82000000,
-          size = 0x2000
-        }, {
-          base = 0x89080000,
-          size = 0x100c200
-        }, {
-          base = 0xbbe922c0,
-          size = 0x416dd40
---Type &lt;RET&gt; for more, q to quit, c to continue without paging--
-        }, {
-          base = 0x0,
-          size = 0x0
-        }, {
-          base = 0x0,
-          size = 0x0
-        }, {
-          base = 0x0,
-          size = 0x0
-        }, {
-          base = 0x0,
-          size = 0x0
-        }, {
-          base = 0x0,
-          size = 0x0
-        }}
-    }
-  }
-}
+<pre class="src src-text"><code>(gdb) tb boot_jump_linux</code>
+<code>Temporary breakpoint 1 at 0x880024e0: boot_jump_linux. (4 locations)</code>
+<code>(gdb) c</code>
+<code>Continuing.</code>
+<code></code>
+<code>Thread 1 hit Temporary breakpoint 1, boot_jump_linux (images=0xbffd9b20, flag=1024)</code>
+<code>    at arch/arm/lib/bootm.c:323</code>
+<code>323 {</code>
+<code>(gdb) p images </code>
+<code>$3 = (bootm_headers_t *) 0xbffd9b20</code>
+<code>(gdb) set print pretty </code>
+<code>(gdb) p /x *images </code>
+<code>$6 = {</code>
+<code>  legacy_hdr_os = 0x0,</code>
+<code>  legacy_hdr_os_copy = {</code>
+<code>    ih_magic = 0x0,</code>
+<code>    ih_hcrc = 0x0,</code>
+<code>    ih_time = 0x0,</code>
+<code>    ih_size = 0x0,</code>
+<code>    ih_load = 0x0,</code>
+<code>    ih_ep = 0x0,</code>
+<code>    ih_dcrc = 0x0,</code>
+<code>    ih_os = 0x0,</code>
+<code>    ih_arch = 0x0,</code>
+<code>    ih_type = 0x0,</code>
+<code>    ih_comp = 0x0,</code>
+<code>    ih_name = {0x0 &lt;repeats 32 times&gt;}</code>
+<code>  },</code>
+<code>  legacy_hdr_valid = 0x0,</code>
+<code>  os = {</code>
+<code>    start = 0x83000000,</code>
+<code>    end = 0x8390b000,</code>
+<code>    image_start = 0x83000800,</code>
+<code>    image_len = 0x8e9865,</code>
+<code>    load = 0x89080000,</code>
+<code>    comp = 0x1,</code>
+<code>    type = 0x2,</code>
+<code>    os = 0x5,</code>
+<code>    arch = 0x0</code>
+<code>  },</code>
+<code>  ep = 0x89080000,</code>
+<code>  rd_start = 0x0,</code>
+<code>  rd_end = 0x0,</code>
+<code>  ft_addr = 0x82000000,</code>
+<code>  ft_len = 0x6ede,</code>
+<code>  initrd_start = 0x0,</code>
+<code>  initrd_end = 0x0,</code>
+<code>  cmdline_start = 0x0,</code>
+<code>  cmdline_end = 0x0,</code>
+<code>  kbd = 0x0,</code>
+<code>  verify = 0xffffffff,</code>
+<code>  state = 0x1,</code>
+<code>  lmb = {</code>
+<code>    memory = {</code>
+<code>      cnt = 0x1,</code>
+<code>      size = 0x0,</code>
+<code>--Type &lt;RET&gt; for more, q to quit, c to continue without paging--</code>
+<code>      region = {{</code>
+<code>          base = 0x80000000,</code>
+<code>          size = 0x40000000</code>
+<code>        }, {</code>
+<code>          base = 0x0,</code>
+<code>          size = 0x0</code>
+<code>        }, {</code>
+<code>          base = 0x0,</code>
+<code>          size = 0x0</code>
+<code>        }, {</code>
+<code>          base = 0x0,</code>
+<code>          size = 0x0</code>
+<code>        }, {</code>
+<code>          base = 0x0,</code>
+<code>          size = 0x0</code>
+<code>        }, {</code>
+<code>          base = 0x0,</code>
+<code>          size = 0x0</code>
+<code>        }, {</code>
+<code>          base = 0x0,</code>
+<code>          size = 0x0</code>
+<code>        }, {</code>
+<code>          base = 0x0,</code>
+<code>          size = 0x0</code>
+<code>        }, {</code>
+<code>          base = 0x0,</code>
+<code>          size = 0x0</code>
+<code>        }}</code>
+<code>    },</code>
+<code>    reserved = {</code>
+<code>      cnt = 0x4,</code>
+<code>      size = 0x0,</code>
+<code>      region = {{</code>
+<code>          base = 0x80000000,</code>
+<code>          size = 0x770000</code>
+<code>        }, {</code>
+<code>          base = 0x82000000,</code>
+<code>          size = 0x2000</code>
+<code>        }, {</code>
+<code>          base = 0x89080000,</code>
+<code>          size = 0x100c200</code>
+<code>        }, {</code>
+<code>          base = 0xbbe922c0,</code>
+<code>          size = 0x416dd40</code>
+<code>--Type &lt;RET&gt; for more, q to quit, c to continue without paging--</code>
+<code>        }, {</code>
+<code>          base = 0x0,</code>
+<code>          size = 0x0</code>
+<code>        }, {</code>
+<code>          base = 0x0,</code>
+<code>          size = 0x0</code>
+<code>        }, {</code>
+<code>          base = 0x0,</code>
+<code>          size = 0x0</code>
+<code>        }, {</code>
+<code>          base = 0x0,</code>
+<code>          size = 0x0</code>
+<code>        }, {</code>
+<code>          base = 0x0,</code>
+<code>          size = 0x0</code>
+<code>        }}</code>
+<code>    }</code>
+<code>  }</code>
+<code>}</code>
 </pre>
 </div>
 <p>
@@ -279,36 +278,36 @@ hootm_headers_t中有几个变量需要注意一下，之后获取运行地址�
 </dl>
 </div>
 </div>
-<div id="outline-container-org68cf34a" class="outline-4">
-<h4 id="org68cf34a">加载.head.text段，在内核第一条指令处打断点</h4>
-<div class="outline-text-4" id="text-org68cf34a">
+<div id="outline-container-org0208ded" class="outline-4">
+<h4 id="org0208ded">加载.head.text段，在内核第一条指令处打断点</h4>
+<div class="outline-text-4" id="text-org0208ded">
 <p>
 由于symbol在加载时需要加载到物理地址上，所以可以通过下面的python脚本来辅助加载<br>
 </p>
 <div class="org-src-container">
-<pre class="src src-text">source  ~/src/gdb-script/load-linux-init.py
-load-linux-init ~/work/kernel/vmlinux images-&gt;ep
+<pre class="src src-text"><code>source  ~/src/gdb-script/load-linux-init.py</code>
+<code>load-linux-init ~/work/kernel/vmlinux images-&gt;ep</code>
 </pre>
 </div>
 <div class="org-src-container">
-<pre class="src src-text">(gdb) source  ~/src/gdb-script/load-linux-init.py 
-(gdb) load-linux-init ~/work/kernel/vmlinux images-&gt;ep 
-Loading linux init head to 0x0000000083080000
-Original linux text address at 0xffffff8008080000
-generate command
-add-symbol-file ~/work/kernel/vmlinux 0x83081000 -s .head.text 0x83080000 -s .init.text 0x83a00000
-load linux image to physical address with command add-symbol-file ~/work/kernel/vmlinux 0x83081000 -s .head.t0
-add symbol table from file "/home/schspa/work/kernel/vmlinux" at
-    .text_addr = 0x83081000
-    .head.text_addr = 0x83080000
-    .init.text_addr = 0x83a00000
-(gdb) b * 0x83080000
-Breakpoint 2 at 0x83080000: file arch/arm64/kernel/head.S, line 82.
-(gdb) c
-Continuing.
-
-Thread 1 hit Breakpoint 2, _text () at arch/arm64/kernel/head.S:82
-82      add x13, x18, #0x16
+<pre class="src src-text"><code>(gdb) source  ~/src/gdb-script/load-linux-init.py </code>
+<code>(gdb) load-linux-init ~/work/kernel/vmlinux images-&gt;ep </code>
+<code>Loading linux init head to 0x0000000083080000</code>
+<code>Original linux text address at 0xffffff8008080000</code>
+<code>generate command</code>
+<code>add-symbol-file ~/work/kernel/vmlinux 0x83081000 -s .head.text 0x83080000 -s .init.text 0x83a00000</code>
+<code>load linux image to physical address with command add-symbol-file ~/work/kernel/vmlinux 0x83081000 -s .head.t0</code>
+<code>add symbol table from file "/home/schspa/work/kernel/vmlinux" at</code>
+<code>    .text_addr = 0x83081000</code>
+<code>    .head.text_addr = 0x83080000</code>
+<code>    .init.text_addr = 0x83a00000</code>
+<code>(gdb) b * 0x83080000</code>
+<code>Breakpoint 2 at 0x83080000: file arch/arm64/kernel/head.S, line 82.</code>
+<code>(gdb) c</code>
+<code>Continuing.</code>
+<code></code>
+<code>Thread 1 hit Breakpoint 2, _text () at arch/arm64/kernel/head.S:82</code>
+<code>82      add x13, x18, #0x16</code>
 </pre>
 </div>
 </div>
@@ -316,16 +315,16 @@ Thread 1 hit Breakpoint 2, _text () at arch/arm64/kernel/head.S:82
 </div>
 </div>
 
-<div id="outline-container-org7e7465d" class="outline-2">
-<h2 id="org7e7465d">初始代码（MMU开启之后)</h2>
-<div class="outline-text-2" id="text-org7e7465d">
+<div id="outline-container-org14df6dc" class="outline-2">
+<h2 id="org14df6dc">初始代码（MMU开启之后)</h2>
+<div class="outline-text-2" id="text-org14df6dc">
 <p>
 MMU开启之后就不需要计算加载地址，可以直接打断点来调试<br>
 </p>
 <div class="org-src-container">
-<pre class="src src-text">add-symbol-file ~/work/kernel/vmlinux
-tb start_kernel
-# do whatever you want
+<pre class="src src-text"><code>add-symbol-file ~/work/kernel/vmlinux</code>
+<code>tb start_kernel</code>
+<code># do whatever you want</code>
 </pre>
 </div>
 </div>

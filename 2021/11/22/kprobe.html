@@ -1,14 +1,13 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2021-11-23 二 13:58 -->
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- 2022-03-03 Thu 11:48 -->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Kprobe in linux with aarch64</title>
-<meta name="generator" content="Org mode">
-<meta name="author" content="Schspa">
-<meta name="description" content="kprobe.org"
->
+<meta name="author" content="Schspa" />
+<meta name="description" content="kprobe.org" />
+<meta name="generator" content="Org Mode" />
 <link rel="shortcut icon" href="/images/rose-red.png" type="image/x-icon" />
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" integrity="sha256-sAcc18zvMnaJZrNT4v8J0T4HqzEUiUTlVFgDIywjQek=" crossorigin="anonymous">
 <link rel="stylesheet" href="/css/animate.min.css" />
@@ -56,47 +55,47 @@
   </nav>
 </header>
 </div>
-<div id="content">
+<div id="content" class="content">
 <h1 class="title">Kprobe in linux with aarch64</h1>
-<div id="table-of-contents">
+<div id="table-of-contents" role="doc-toc">
 <h2>Table of Contents</h2>
-<div id="text-table-of-contents">
+<div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#org31fa66a">Overview</a></li>
-<li><a href="#org39613fa">basic usage</a>
+<li><a href="#org7ee5e81">Overview</a></li>
+<li><a href="#org4836ab2">basic usage</a>
 <ul>
-<li><a href="#orgc246cf3">Kernel config</a></li>
-<li><a href="#orgc93d11f">kprobe</a></li>
-<li><a href="#org13c4f7f">kretprobe</a></li>
+<li><a href="#orgb2e3604">Kernel config</a></li>
+<li><a href="#org66b6e31">kprobe</a></li>
+<li><a href="#org9c3ec55">kretprobe</a></li>
 </ul>
 </li>
-<li><a href="#orgc40bb01">kprobe VS kretprobe</a></li>
-<li><a href="#org243415f">底层实现</a>
+<li><a href="#orgf7a764e">kprobe VS kretprobe</a></li>
+<li><a href="#orge89d951">底层实现</a>
 <ul>
-<li><a href="#orgc1c5776">kprobe</a>
+<li><a href="#org530066a">kprobe</a>
 <ul>
-<li><a href="#org531aec0">kprobe 相关关键代码</a></li>
-<li><a href="#orgdcd7043">kprobe执行流程</a></li>
+<li><a href="#org0e943cf">kprobe 相关关键代码</a></li>
+<li><a href="#org0b34674">kprobe执行流程</a></li>
 </ul>
 </li>
-<li><a href="#org8c47146">kretprobe</a>
+<li><a href="#orgfabb139">kretprobe</a>
 <ul>
-<li><a href="#orgb4310d8">注册</a></li>
-<li><a href="#org27db33c">pre_handler</a></li>
-<li><a href="#org21b64eb">kretprobe_trampoline</a></li>
-<li><a href="#org1acd11d">kretprobe summary</a></li>
+<li><a href="#org791f750">注册</a></li>
+<li><a href="#orge2a88b0">pre_handler</a></li>
+<li><a href="#org3914c4f">kretprobe_trampoline</a></li>
+<li><a href="#orgb027f0c">kretprobe summary</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li><a href="#orgbf6cb9d">Summary</a></li>
+<li><a href="#org58309ac">Summary</a></li>
 </ul>
 </div>
 </div>
 
-<div id="outline-container-org31fa66a" class="outline-2">
-<h2 id="org31fa66a">Overview</h2>
-<div class="outline-text-2" id="text-org31fa66a">
+<div id="outline-container-org7ee5e81" class="outline-2">
+<h2 id="org7ee5e81">Overview</h2>
+<div class="outline-text-2" id="text-org7ee5e81">
 <p>
 kprobe是Linux内核自带的调试机制，可以在内核的函数执行前后添加钩子来执行自定义函数来达到修改，调试内核的目的。<br>
 具体简介可以参考内核官方文档，这个文档已经有比较详细的记录.<br>
@@ -105,17 +104,17 @@ kprobe是Linux内核自带的调试机制，可以在内核的函数执行前后
 </div>
 </div>
 
-<div id="outline-container-org39613fa" class="outline-2">
-<h2 id="org39613fa">basic usage</h2>
-<div class="outline-text-2" id="text-org39613fa">
+<div id="outline-container-org4836ab2" class="outline-2">
+<h2 id="org4836ab2">basic usage</h2>
+<div class="outline-text-2" id="text-org4836ab2">
 <p>
 先来看一下这个功能的基础使用方法, 官方的两个例子很简单<br>
 </p>
 </div>
 
-<div id="outline-container-orgc246cf3" class="outline-3">
-<h3 id="orgc246cf3">Kernel config</h3>
-<div class="outline-text-3" id="text-orgc246cf3">
+<div id="outline-container-orgb2e3604" class="outline-3">
+<h3 id="orgb2e3604">Kernel config</h3>
+<div class="outline-text-3" id="text-orgb2e3604">
 <div class="org-src-container">
 <pre class="src src-text"><code>CONFIG_KPROBES=y</code>
 <code>CONFIG_SAMPLES=y</code>
@@ -126,9 +125,9 @@ kprobe是Linux内核自带的调试机制，可以在内核的函数执行前后
 </div>
 </div>
 
-<div id="outline-container-orgc93d11f" class="outline-3">
-<h3 id="orgc93d11f">kprobe</h3>
-<div class="outline-text-3" id="text-orgc93d11f">
+<div id="outline-container-org66b6e31" class="outline-3">
+<h3 id="org66b6e31">kprobe</h3>
+<div class="outline-text-3" id="text-org66b6e31">
 <div class="org-src-container">
 <pre class="src src-bash"><code>insmod kprobe_example.ko <span style="color: #dcaeea;">symbol</span>=cmdline_proc_open</code>
 </pre>
@@ -149,9 +148,9 @@ kprobe是Linux内核自带的调试机制，可以在内核的函数执行前后
 </div>
 </div>
 
-<div id="outline-container-org13c4f7f" class="outline-3">
-<h3 id="org13c4f7f">kretprobe</h3>
-<div class="outline-text-3" id="text-org13c4f7f">
+<div id="outline-container-org9c3ec55" class="outline-3">
+<h3 id="org9c3ec55">kretprobe</h3>
+<div class="outline-text-3" id="text-org9c3ec55">
 <div class="org-src-container">
 <pre class="src src-bash"><code>insmod kretprobe_example.ko <span style="color: #dcaeea;">func</span>=meminfo_proc_show</code>
 </pre>
@@ -174,9 +173,9 @@ kprobe是Linux内核自带的调试机制，可以在内核的函数执行前后
 </div>
 
 
-<div id="outline-container-orgc40bb01" class="outline-2">
-<h2 id="orgc40bb01">kprobe VS kretprobe</h2>
-<div class="outline-text-2" id="text-orgc40bb01">
+<div id="outline-container-orgf7a764e" class="outline-2">
+<h2 id="orgf7a764e">kprobe VS kretprobe</h2>
+<div class="outline-text-2" id="text-orgf7a764e">
 <p>
 kretprobe底层通过kprobe来实现，与kprobe的不同在于实现了一系列辅助的函数来支持instance的实例化，这样在每次运行到对应的函数/地址时会自动生成一个新的private data，从而实现并发和多实例.<br>
 </p>
@@ -203,13 +202,13 @@ kprobe的回调中，kprobe是全局共享的，所以没有简单的办法去�
 </div>
 
 
-<div id="outline-container-org243415f" class="outline-2">
-<h2 id="org243415f">底层实现</h2>
-<div class="outline-text-2" id="text-org243415f">
+<div id="outline-container-orge89d951" class="outline-2">
+<h2 id="orge89d951">底层实现</h2>
+<div class="outline-text-2" id="text-orge89d951">
 </div>
-<div id="outline-container-orgc1c5776" class="outline-3">
-<h3 id="orgc1c5776">kprobe</h3>
-<div class="outline-text-3" id="text-orgc1c5776">
+<div id="outline-container-org530066a" class="outline-3">
+<h3 id="org530066a">kprobe</h3>
+<div class="outline-text-3" id="text-org530066a">
 <p>
 kprobe_addr 用来获取需要patch的指令地址，目前可以通过指定add/symbol + offset的方法来指定.<br>
 check_kprobe_rereg 用来检查kprobe对象是否已经被注册过，如果已经被注册过，就返回-EINVAL的错误<br>
@@ -218,9 +217,9 @@ arm_kprobe 用来给text代码段打patch，将需要trap的指令替换成debug
 </p>
 </div>
 
-<div id="outline-container-org531aec0" class="outline-4">
-<h4 id="org531aec0">kprobe 相关关键代码</h4>
-<div class="outline-text-4" id="text-org531aec0">
+<div id="outline-container-org0e943cf" class="outline-4">
+<h4 id="org0e943cf">kprobe 相关关键代码</h4>
+<div class="outline-text-4" id="text-org0e943cf">
 <p>
 在注册kprobe时，系统将对应地址的指令替换成brk的指令，当系统运行到对应的地址时，系统会触发debug的异常<br>
 </p>
@@ -318,9 +317,9 @@ arm_kprobe 用来给text代码段打patch，将需要trap的指令替换成debug
 </div>
 </div>
 
-<div id="outline-container-orgdcd7043" class="outline-4">
-<h4 id="orgdcd7043">kprobe执行流程</h4>
-<div class="outline-text-4" id="text-orgdcd7043">
+<div id="outline-container-org0b34674" class="outline-4">
+<h4 id="org0b34674">kprobe执行流程</h4>
+<div class="outline-text-4" id="text-org0b34674">
 <p>
 流程图大致如下:<br>
 </p>
@@ -336,13 +335,13 @@ arm_kprobe 用来给text代码段打patch，将需要trap的指令替换成debug
 </div>
 </div>
 
-<div id="outline-container-org8c47146" class="outline-3">
-<h3 id="org8c47146">kretprobe</h3>
-<div class="outline-text-3" id="text-org8c47146">
+<div id="outline-container-orgfabb139" class="outline-3">
+<h3 id="orgfabb139">kretprobe</h3>
+<div class="outline-text-3" id="text-orgfabb139">
 </div>
-<div id="outline-container-orgb4310d8" class="outline-4">
-<h4 id="orgb4310d8">注册</h4>
-<div class="outline-text-4" id="text-orgb4310d8">
+<div id="outline-container-org791f750" class="outline-4">
+<h4 id="org791f750">注册</h4>
+<div class="outline-text-4" id="text-org791f750">
 <p>
 kretprobe在kprobe的基础上实现，注册函数很简单，参数检查，分配对象，以及注册kprobe<br>
 <a target="_blank" href="https://github.com/torvalds/linux/blob/b133f076639b918bb6ad157f6308b0f595058959/kernel/kprobes.c#L1983">kernel source for register_kretprobe</a><br>
@@ -356,9 +355,9 @@ kretprobe要求探测的函数位于行数开端，在注册时系统会检查�
 </div>
 </div>
 
-<div id="outline-container-org27db33c" class="outline-4">
-<h4 id="org27db33c">pre_handler</h4>
-<div class="outline-text-4" id="text-org27db33c">
+<div id="outline-container-orge2a88b0" class="outline-4">
+<h4 id="orge2a88b0">pre_handler</h4>
+<div class="outline-text-4" id="text-orge2a88b0">
 <p>
 <a target="_blank" href="https://github.com/torvalds/linux/blob/b133f076639b918bb6ad157f6308b0f595058959/kernel/kprobes.c#L1922">kernel source for pre_handler_kretprobe</a><br>
 </p>
@@ -373,9 +372,9 @@ kretprobe要求探测的函数位于行数开端，在注册时系统会检查�
 </div>
 </div>
 
-<div id="outline-container-org21b64eb" class="outline-4">
-<h4 id="org21b64eb">kretprobe_trampoline</h4>
-<div class="outline-text-4" id="text-org21b64eb">
+<div id="outline-container-org3914c4f" class="outline-4">
+<h4 id="org3914c4f">kretprobe_trampoline</h4>
+<div class="outline-text-4" id="text-org3914c4f">
 <p>
 <a target="_blank" href="https://github.com/torvalds/linux/blob/b133f076639b918bb6ad157f6308b0f595058959/arch/arm64/kernel/probes/kprobes_trampoline.S#L64">kretprobe_trampoline</a><br>
 <a target="_blank" href="https://github.com/torvalds/linux/blob/b133f076639b918bb6ad157f6308b0f595058959/kernel/kprobes.c#L1860">__kretprobe_trampoline_handler</a><br>
@@ -388,9 +387,9 @@ kretprobe要求探测的函数位于行数开端，在注册时系统会检查�
 </div>
 </div>
 
-<div id="outline-container-org1acd11d" class="outline-4">
-<h4 id="org1acd11d">kretprobe summary</h4>
-<div class="outline-text-4" id="text-org1acd11d">
+<div id="outline-container-orgb027f0c" class="outline-4">
+<h4 id="orgb027f0c">kretprobe summary</h4>
+<div class="outline-text-4" id="text-orgb027f0c">
 <p>
 根据上述的分析，kretprobe通过在函数的首地址放置kprobe探针，并通过修改lr指针的方式完成捕获整个函数的调用开始以及结束。<br>
 </p>
@@ -399,9 +398,9 @@ kretprobe要求探测的函数位于行数开端，在注册时系统会检查�
 </div>
 </div>
 
-<div id="outline-container-orgbf6cb9d" class="outline-2">
-<h2 id="orgbf6cb9d">Summary</h2>
-<div class="outline-text-2" id="text-orgbf6cb9d">
+<div id="outline-container-org58309ac" class="outline-2">
+<h2 id="org58309ac">Summary</h2>
+<div class="outline-text-2" id="text-org58309ac">
 <p>
 以上分析了kprobe和kretprobe的基本实现，由分析可得结论，kprobe只能分析单条指令，其两个callback函数会在指令执行的前后被调用。<br>
 而kretprobe能分析整个函数的执行，其两个callback会在函数调用前，以及函数运行返回后执行。<br>
