@@ -1,13 +1,14 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2022-03-03 Thu 11:48 -->
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<!-- 2022-03-23 Wed 17:05 -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>ASM language tips</title>
-<meta name="author" content="Schspa" />
-<meta name="description" content="ASM language tips" />
-<meta name="generator" content="Org Mode" />
+<meta name="generator" content="Org mode">
+<meta name="author" content="Schspa">
+<meta name="description" content="ASM language tips"
+>
 <link rel="shortcut icon" href="/images/rose-red.png" type="image/x-icon" />
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" integrity="sha256-sAcc18zvMnaJZrNT4v8J0T4HqzEUiUTlVFgDIywjQek=" crossorigin="anonymous">
 <link rel="stylesheet" href="/css/animate.min.css" />
@@ -55,11 +56,11 @@
   </nav>
 </header>
 </div>
-<div id="content" class="content">
+<div id="content">
 <h1 class="title">ASM language tips</h1>
-<div id="table-of-contents" role="doc-toc">
+<div id="table-of-contents">
 <h2>Table of Contents</h2>
-<div id="text-table-of-contents" role="doc-toc">
+<div id="text-table-of-contents">
 <ul>
 <li><a href="#orgcbe7554">Position-independent Call</a></li>
 <li><a href="#orgfa5cb66">inline asm</a>
@@ -70,6 +71,7 @@
 <li><a href="#org8ad62a3">list of clobbered registers</a></li>
 </ul>
 </li>
+<li><a href="#orgfdad0ab">inline asm example</a></li>
 <li><a href="#org489c847">refs</a></li>
 </ul>
 </div>
@@ -159,6 +161,53 @@
 <p>
 在汇编代码中使用到的临时寄存器需要在此处列出来, 用来告诉C编译器汇编代码中会使用到列表中的寄存器。<br>
 </p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgfdad0ab" class="outline-2">
+<h2 id="orgfdad0ab">inline asm example</h2>
+<div class="outline-text-2" id="text-orgfdad0ab">
+<div class="org-src-container">
+<pre class="src src-C" id="orgb3b1c11"><code><span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;stdint.h&gt;</span></code>
+<code></code>
+<code><span style="color: #ECBE7B;">void</span> <span style="color: #c678dd;">smc_writel</span>(<span style="color: #ECBE7B;">uint32_t</span> <span style="color: #dcaeea;">reg</span>, <span style="color: #ECBE7B;">uint32_t</span> <span style="color: #dcaeea;">value</span>)</code>
+<code>{</code>
+<code>    <span style="color: #51afef;">register</span> <span style="color: #ECBE7B;">unsigned</span> <span style="color: #ECBE7B;">long</span> <span style="color: #c678dd;">reg0</span> <span style="color: #51afef;">asm</span>(<span style="color: #98be65;">"r0"</span>) = 0x82000009;</code>
+<code>    <span style="color: #51afef;">register</span> <span style="color: #ECBE7B;">unsigned</span> <span style="color: #ECBE7B;">long</span> <span style="color: #c678dd;">reg1</span> <span style="color: #51afef;">asm</span>(<span style="color: #98be65;">"r1"</span>) = 1;</code>
+<code>    <span style="color: #51afef;">register</span> <span style="color: #ECBE7B;">unsigned</span> <span style="color: #ECBE7B;">long</span> <span style="color: #c678dd;">reg2</span> <span style="color: #51afef;">asm</span>(<span style="color: #98be65;">"r2"</span>) = reg;</code>
+<code>    <span style="color: #51afef;">register</span> <span style="color: #ECBE7B;">unsigned</span> <span style="color: #ECBE7B;">long</span> <span style="color: #c678dd;">reg3</span> <span style="color: #51afef;">asm</span>(<span style="color: #98be65;">"r3"</span>) = value;</code>
+<code>    <span style="color: #51afef;">asm</span> <span style="color: #51afef;">volatile</span>(<span style="color: #98be65;">"smc #0\n\t"</span> :<span style="color: #98be65;">"+r"</span> (reg0), <span style="color: #98be65;">"+r"</span> (reg1), <span style="color: #98be65;">"+r"</span> (reg2), <span style="color: #98be65;">"+r"</span> (reg3));</code>
+<code>}</code>
+<code></code>
+<code><span style="color: #ECBE7B;">int</span> <span style="color: #c678dd;">main</span>(<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">argc</span>, <span style="color: #ECBE7B;">char</span> *<span style="color: #dcaeea;">argv</span>[])</code>
+<code>{</code>
+<code>    smc_writel(0x40000000, 0x1);</code>
+<code>    <span style="color: #51afef;">return</span> 0;</code>
+<code>}</code>
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-c"><code>Dump of <span style="color: #ECBE7B;">assembler</span> <span style="color: #dcaeea;">code</span> <span style="color: #51afef;">for</span> function smc_writel:</code>
+<code>./test.c:</code>
+<code>4       {</code>
+<code>5           <span style="color: #51afef;">register</span> <span style="color: #ECBE7B;">unsigned</span> <span style="color: #ECBE7B;">long</span> reg0 <span style="color: #51afef;">asm</span>(<span style="color: #98be65;">"r0"</span>) = 0x82000009;</code>
+<code>   0x000000000040059c &lt;+0&gt;:     e2 03 00 2a     mov     w2, w0</code>
+<code>   0x00000000004005a0 &lt;+4&gt;:     20 01 80 d2     mov     x0, #0x9                        <span style="color: #5B6268;">// </span><span style="color: #5B6268;">#9</span></code>
+<code>   0x00000000004005a4 &lt;+8&gt;:     e3 03 01 2a     mov     w3, w1</code>
+<code>   0x00000000004005a8 &lt;+12&gt;:    00 40 b0 f2     movk    x0, #0x8200, lsl #16</code>
+<code></code>
+<code>6           <span style="color: #51afef;">register</span> <span style="color: #ECBE7B;">unsigned</span> <span style="color: #ECBE7B;">long</span> reg1 <span style="color: #51afef;">asm</span>(<span style="color: #98be65;">"r1"</span>) = 1;</code>
+<code>   0x00000000004005ac &lt;+16&gt;:    21 00 80 d2     mov     x1, #0x1                        <span style="color: #5B6268;">// </span><span style="color: #5B6268;">#1</span></code>
+<code></code>
+<code>7           <span style="color: #51afef;">register</span> <span style="color: #ECBE7B;">unsigned</span> <span style="color: #ECBE7B;">long</span> reg2 <span style="color: #51afef;">asm</span>(<span style="color: #98be65;">"r2"</span>) = reg;</code>
+<code>8           <span style="color: #51afef;">register</span> <span style="color: #ECBE7B;">unsigned</span> <span style="color: #ECBE7B;">long</span> reg3 <span style="color: #51afef;">asm</span>(<span style="color: #98be65;">"r3"</span>) = value;</code>
+<code>9           <span style="color: #51afef;">asm</span> <span style="color: #51afef;">volatile</span>(<span style="color: #98be65;">"smc #0\n\t"</span> :<span style="color: #98be65;">"+r"</span> (reg0), <span style="color: #98be65;">"+r"</span> (reg1), <span style="color: #98be65;">"+r"</span> (reg2), <span style="color: #98be65;">"+r"</span> (reg3));</code>
+<code>   0x00000000004005b0 &lt;+20&gt;:    03 00 00 d4     smc     #0x0</code>
+<code>   0x00000000004005b4 &lt;+24&gt;:    c0 03 5f d6     ret</code>
+<code>End of assembler dump.</code>
+</pre>
 </div>
 </div>
 </div>

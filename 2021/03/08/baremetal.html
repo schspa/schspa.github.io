@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<!-- 2022-03-23 Wed 17:05 -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BareMetal environment</title>
+<meta name="generator" content="Org mode">
+<meta name="author" content="Schspa">
+<meta name="description" content="BareMetal environment"
+>
+<link rel="shortcut icon" href="/images/rose-red.png" type="image/x-icon" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" integrity="sha256-sAcc18zvMnaJZrNT4v8J0T4HqzEUiUTlVFgDIywjQek=" crossorigin="anonymous">
+<link rel="stylesheet" href="/css/animate.min.css" />
+<link rel="stylesheet" href="/css/all.min.css" />
+<link rel="stylesheet" type="text/css" href="/css/style.css" />
+<link rel="stylesheet" type="text/css" href="/css/navbar.css" />
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/js/bootstrap.min.js" integrity="sha256-/hGxZHGQ57fXLp+NDusFZsZo/PG21Bp2+hXYV5a6w+g=" crossorigin="anonymous"></script>
+<script src="/js/jquery.min.js"></script>
+<script src="/js/darkreader.js"></script>
+<script src="/user.config.js"></script>
+<script src="/js/main.js"></script>
+</head>
+<body>
+<div id="preamble" class="status">
+<div class="mobile-container">
+  <!-- Top Navigation Menu -->
+  <div class="topnav">
+    <div id="header">
+      <a href="/" class="logo">Schspa's Blog</a>
+      <a href="javascript:void(0);" class="icon" onclick="toggleheader()">
+        <i class="fa fa-bars"></i>
+      </a>
+    </div>
+    <div id="nav_headers">
+      <a href="/sitemap.html" class="menu-item">Categories</a>
+    </div>
+  </div>
+  <!-- End smartphone / tablet look -->
+</div>
+
+<header id="header" class="header">
+  <div class="logo-wrapper">
+    <a href="/" class="logo">Schspa's Blogs</a>
+  </div>
+
+  <nav class="site-navbar">
+    <ul id="menu" class="menu">
+      <li class="menu-item">
+        <a class="menu-item-link" href="/">Home</a>
+      </li>
+      <li class="menu-item">
+        <a class="menu-item-link" href="/sitemap.html">Categories</a>
+      </li>
+    </ul>
+  </nav>
+</header>
+</div>
+<div id="content">
+<h1 class="title">BareMetal environment</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#org0100623">none-eabi gcc</a></li>
+<li><a href="#org6fba0a4">gcc flags</a>
+<ul>
+<li><a href="#org544214f">-ffreestanding</a></li>
+<li><a href="#org4e60abf">-specs=nosys.specs</a></li>
+</ul>
+</li>
+<li><a href="#orgae32945">libc</a>
+<ul>
+<li><a href="#org8213875">newlib</a></li>
+</ul>
+</li>
+<li><a href="#org7903f7e">refs</a></li>
+</ul>
+</div>
+</div>
+
+
+<div id="outline-container-org0100623" class="outline-2">
+<h2 id="org0100623">none-eabi gcc</h2>
+<div class="outline-text-2" id="text-org0100623">
+<p>
+<a href="https://stackoverflow.com/questions/38956680/difference-between-arm-none-eabi-and-arm-linux-gnueabi/38989869#38989869">https://stackoverflow.com/questions/38956680/difference-between-arm-none-eabi-and-arm-linux-gnueabi/38989869#38989869</a><br>
+</p>
+
+<blockquote>
+<p>
+The bare-metal ABI will assume a different C library (newlib for example, or even no C library) to the Linux ABI (which assumes glibc). Therefore, the compiler may make different function calls depending on what it believes is available above and beyond the Standard C library.<br>
+</p>
+</blockquote>
+</div>
+</div>
+
+<div id="outline-container-org6fba0a4" class="outline-2">
+<h2 id="org6fba0a4">gcc flags</h2>
+<div class="outline-text-2" id="text-org6fba0a4">
+</div>
+<div id="outline-container-org544214f" class="outline-3">
+<h3 id="org544214f">-ffreestanding</h3>
+<div class="outline-text-3" id="text-org544214f">
+<p>
+<a href="https://gcc.gnu.org/onlinedocs/gcc-10.2.0/gcc/C-Dialect-Options.html#index-ffreestanding-1">gcc docs</a><br>
+</p>
+<blockquote>
+<p>
+Assert that compilation targets a freestanding environment. This implies -fno-builtin. A freestanding environment is one in which the standard library may not exist, and program startup may not necessarily be at main. The most obvious example is an OS kernel. This is equivalent to -fno-hosted.<br>
+</p>
+
+<p>
+See Language Standards Supported by GCC, for details of freestanding and hosted environments.<br>
+</p>
+</blockquote>
+
+<p>
+这个选项告诉gcc，目标系统上可能没有标准库的实现，比如libc库.<br>
+</p>
+</div>
+</div>
+
+<div id="outline-container-org4e60abf" class="outline-3">
+<h3 id="org4e60abf">-specs=nosys.specs</h3>
+<div class="outline-text-3" id="text-org4e60abf">
+<p>
+<a href="https://gcc.gnu.org/onlinedocs/gcc-10.2.0/gcc/Overall-Options.html#index-specs">gcc docs</a><br>
+这个选项告诉gcc，读取nosys.specs这个文件来获得编译参数<br>
+<a href="https://gcc.gnu.org/onlinedocs/gcc-10.2.0/gcc/Spec-Files.html#Spec-Files">https://gcc.gnu.org/onlinedocs/gcc-10.2.0/gcc/Spec-Files.html#Spec-Files</a><br>
+</p>
+
+<p>
+/usr/aarch64-none-elf/lib/nosys.specs<br>
+</p>
+<div class="org-src-container">
+<pre class="src src-text"><code>%rename link_gcc_c_sequence                nosys_link_gcc_c_sequence</code>
+<code></code>
+<code>*nosys_libgloss:</code>
+<code>-lnosys</code>
+<code></code>
+<code>*nosys_libc:</code>
+<code>%{!specs=nano.specs:-lc} %{specs=nano.specs:-lc_nano}</code>
+<code></code>
+<code>*link_gcc_c_sequence:</code>
+<code>%(nosys_link_gcc_c_sequence) --start-group %G %(nosys_libc) %(nosys_libgloss) --end-group</code>
+</pre>
+</div>
+<ul class="org-ul">
+<li>link_gcc_c_sequence<br>
+默认值<a href="https://github.com/gcc-mirror/gcc/blob/16e2427f50c208dfe07d07f18009969502c25dc8/gcc/gcc.c#L953">link_gcc_c_sequence</a> <code>"%G %{!nolibc:%L %G}"</code> 默认选项为如果链接时没有使用-nolibc参数, 那么就将libgcc链接进去<br>
+这里将这个重命名为nosys_link_gcc_c_sequence, 而nosys版本中，将额外链接nosys库, nosys库中实现了空的_exit, _write等libc需要使用到的函数<br></li>
+<li>&#x2013;start-group<br>
+这个选项解决了循环依赖的问题<br>
+<a href="https://stackoverflow.com/questions/5651869/what-are-the-start-group-and-end-group-command-line-options">https://stackoverflow.com/questions/5651869/what-are-the-start-group-and-end-group-command-line-options</a><br>
+<a href="https://stackoverflow.com/questions/45135/why-does-the-order-in-which-libraries-are-linked-sometimes-cause-errors-in-gcc/409470#409470">https://stackoverflow.com/questions/45135/why-does-the-order-in-which-libraries-are-linked-sometimes-cause-errors-in-gcc/409470#409470</a><br></li>
+<li>libnosys.a<br>
+在baremetal种，系统会去链接libnosys.a这个静态库<br>
+这个库提供了libc所需要的几个操作函数,_exit, _write <sup><a id="fnr.1" class="footref" href="#fn.1">1</a></sup>, 其中有几个函数是必须要实现的，比如_close, <a href="https://github.com/bminor/newlib/blob/master/libgloss/libnosys/write.c">_write</a>, _read如果没有提供将会在链接时报出warning，并提供出一个空实现.<br></li>
+<li>根据specs的设置来选择使用libc或者libc_nano, nano版本更加小<br></li>
+</ul>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgae32945" class="outline-2">
+<h2 id="orgae32945">libc</h2>
+<div class="outline-text-2" id="text-orgae32945">
+<p>
+baremetal中，也可以选择多种不通的libc实现，比较常用的有newlib和nanolibc这两种<br>
+<a href="https://imagecraft.com/blog/2019/04/embedded-gcc-libraries-newlib-vs-nanolib/">newlib vs nanolibc</a><br>
+</p>
+</div>
+
+<div id="outline-container-org8213875" class="outline-3">
+<h3 id="org8213875">newlib</h3>
+<div class="outline-text-3" id="text-org8213875">
+<ul class="org-ul">
+<li><p>
+build<br>
+</p>
+<div class="org-src-container">
+<pre class="src src-bash"><code>mkdir build</code>
+<code><span style="color: #c678dd;">cd</span> build</code>
+<code>../configure --target=aarch64-none-elf --prefix=$(<span style="color: #c678dd;">pwd</span>)</code>
+<code>make -j8</code>
+<code>make install</code>
+</pre>
+</div></li>
+</ul>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org7903f7e" class="outline-2">
+<h2 id="org7903f7e">refs</h2>
+<div class="outline-text-2" id="text-org7903f7e">
+<p>
+<a href="https://alex-robenko.gitbook.io/bare_metal_cpp/">https://alex-robenko.gitbook.io/bare_metal_cpp/</a><br>
+<a href="https://interrupt.memfault.com/blog/boostrapping-libc-with-newlib">From Zero to main(): Bootstrapping libc with Newlib</a><br>
+<a href="https://stackoverflow.com/questions/65896336/how-to-compile-baremetal-hello-world-c-and-run-it-on-qemu-system-aarch64#comment116516445_65896336">stackoverflow: How to compile baremetal hello_world.c and run it on qemu-system-aarch64?</a><br>
+<a href="https://stackoverflow.com/questions/53614538/undefined-reference-to-posix-memalign-in-arm-gcc">https://stackoverflow.com/questions/53614538/undefined-reference-to-posix-memalign-in-arm-gcc</a><br>
+<a href="https://stackoverflow.com/questions/15316384/do-not-pass-build-id-to-linker-from-gcc">https://stackoverflow.com/questions/15316384/do-not-pass-build-id-to-linker-from-gcc</a><br>
+<a href="https://github.com/embeddedartistry/libc">https://github.com/embeddedartistry/libc</a><br>
+<a href="http://cs107e.github.io/guides/gcc/">http://cs107e.github.io/guides/gcc/</a><br>
+<a href="https://releases.linaro.org/components/toolchain/binaries/latest-7/aarch64-elf/">https://releases.linaro.org/components/toolchain/binaries/latest-7/aarch64-elf/</a><br>
+<a href="https://stackoverflow.com/questions/65896336/how-to-compile-baremetal-hello-world-c-and-run-it-on-qemu-system-aarch64">https://stackoverflow.com/questions/65896336/how-to-compile-baremetal-hello-world-c-and-run-it-on-qemu-system-aarch64</a><br>
+<a href="http://sourceware-org.1504.n7.nabble.com/MMU-Off-Strict-Alignment-td251601.html">http://sourceware-org.1504.n7.nabble.com/MMU-Off-Strict-Alignment-td251601.html</a><br>
+<a href="https://www.embecosm.com/appnotes/ean9/ean9-howto-newlib-1.0.html">Howto: Porting newlib A Simple Guide</a><br>
+<a href="https://stackoverflow.com/questions/38535738/does-aarch64-support-unaligned-access">https://stackoverflow.com/questions/38535738/does-aarch64-support-unaligned-access</a><br>
+</p>
+</div>
+</div>
+<div id="footnotes">
+<h2 class="footnotes">Footnotes: </h2>
+<div id="text-footnotes">
+
+<div class="footdef"><sup><a id="fn.1" class="footnum" href="#fnr.1">1</a></sup> <div class="footpara"><p class="footpara">
+<a href="http://ninjalj.blogspot.com/2011/11/your-own-linker-warnings-using-gnu.html">Your own linker warnings using the GNU toolchain</a><br>
+</p></div></div>
+
+
+</div>
+</div></div>
+<div id="postamble" class="status">
+<script src="https://utteranc.es/client.js"
+    repo="schspa/schspa.github.io"
+    issue-term="title"
+    label="✨💬✨"
+    theme="github-light"
+    crossorigin="anonymous"
+    async>
+</script>
+<div class="me">
+  <span><b>Contact me via :)</b><span>
+  <div class="contact">
+    <a id="email" href="mailto:schspa@gmail.com" target="_blank"><i class="fab fa-mailchimp animated heartBeat delay-2s slower"></i></a>
+    <a id="github" href="//github.com/schspa" target="_blank"><i class="fab fa-github animated heartBeat delay-2s slower"></i></a>
+  </div>
+</div>
+
+<div id="jinrishici-sentence" style="font-weight: 700;">虚怀乃若谷，水深则流缓。</div>
+<script src="https://sdk.jinrishici.com/v2/browser/jinrishici.js" charset="utf-8"></script>
+</div>
+</body>
+</html>

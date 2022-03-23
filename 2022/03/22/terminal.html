@@ -1,12 +1,14 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh">
 <head>
 <!-- 2022-03-23 Wed 17:08 -->
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Sitemap for project orgfiles</title>
+<title>Termial tips</title>
 <meta name="generator" content="Org mode">
 <meta name="author" content="Schspa">
+<meta name="description" content="Termial tips"
+>
 <link rel="shortcut icon" href="/images/rose-red.png" type="image/x-icon" />
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" integrity="sha256-sAcc18zvMnaJZrNT4v8J0T4HqzEUiUTlVFgDIywjQek=" crossorigin="anonymous">
 <link rel="stylesheet" href="/css/animate.min.css" />
@@ -55,41 +57,58 @@
 </header>
 </div>
 <div id="content">
-<h1 class="title">Sitemap for project orgfiles</h1>
-<ul class="org-ul">
-<li><a href="2019/09/22/atomic-operation.html">Atomic operation in aarch64</a></li>
-<li><a href="2020/12/04/eret.html">AARCH64 ERET</a></li>
-<li><a href="theindex.html">Index</a></li>
-<li><a href="index.html">My Blogs based on org mode</a></li>
-<li><a href="2021/04/27/AARCH64-native-debug.html">AARCH64 native problem debug.</a></li>
-<li><a href="2020/09/11/mac-cheater.html">Cheate MAC address</a></li>
-<li><a href="2021/01/31/linux-pinch-to-zoom.html">Pinch to zoom in Linux</a></li>
-<li><a href="2020/12/30/sshfs.html">SSHFS behind NAT</a></li>
-<li><a href="2022/03/22/terminal.html">Termial tips</a></li>
-<li><a href="2020/10/09/blogs-sync.html">Use Github Action to Sync blogs</a></li>
-<li><a href="2021/09/24/tips.html">ASM language tips</a></li>
-<li><a href="2021/03/08/baremetal.html">BareMetal environment</a></li>
-<li><a href="2020/12/24/aligned-access.html">Generate Aligned Access Code</a></li>
-<li><a href="2021/11/24/setjmp.html">setjmp/longjmp in C</a></li>
-<li><a href="2021/04/20/variable-argument-lists.html">variable-argument-lists in AARCH64</a></li>
-<li><a href="2019/09/22/linux-kernel-complete.html">Linux Kernel Source Auto Complete</a></li>
-<li><a href="2019/10/08/signal.html">Linux Signal Handle</a></li>
-<li><a href="2020/06/11/how-to-debugging-linux-booting-code.html">Debug linux kernel boot process</a></li>
-<li><a href="2020/09/23/clock-framework.html">Linux Clock Framework</a></li>
-<li><a href="2021/11/22/kprobe.html">Kprobe in linux with aarch64</a></li>
-<li><a href="2019/08/28/arm64-page-flags.html">ARM64 Page type</a></li>
-<li><a href="2020/07/10/irq_wakeup.html">irq wakeup in linux</a></li>
-<li><a href="2021/09/25/schdule_fetures.html">Linux scheduled features</a></li>
-<li><a href="2021/11/11/linux-suid-coredump.html">SuDump: Exploiting suid binaries through the kernel笔记</a></li>
-<li><a href="2020/08/08/nfs-rootsquash.html">利用nfs no<sub>root</sub><sub>squash获取root权限</sub></a></li>
-<li><a href="2021/02/02/qemu-9pfs-asserts-failed.html">QEMU virtio-9p-device assert failed</a></li>
-<li><a href="2019/11/25/qemu-usage.html">qemu使用踩坑</a></li>
-<li><a href="2021/09/24/optee-booting.html">Boot process for optee</a></li>
-<li><a href="2021/09/23/optee-usage.html">OPTEE Baisc usage</a></li>
-<li><a href="2020/01/10/persistent-object.html">OPTEE persistent-object</a></li>
-<li><a href="2021/10/08/optee-std-call.html">OPTEE std call process</a></li>
-<li><a href="2020/10/03/orgcaldav.html">Use org-caldav to sync calendars</a></li>
+<h1 class="title">Termial tips</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#orgd4e9299">简介</a></li>
+<li><a href="#org12ac6da">光标控制</a></li>
 </ul>
+</div>
+</div>
+
+
+<div id="outline-container-orgd4e9299" class="outline-2">
+<h2 id="orgd4e9299">简介</h2>
+<div class="outline-text-2" id="text-orgd4e9299">
+<p>
+各种不同的Terminal会有很多特殊的控制字符，用来控制界面，响铃等功能，详细可以参考一下man page.<br>
+<a href="https://man7.org/linux/man-pages/man4/console_codes.4.html">https://man7.org/linux/man-pages/man4/console_codes.4.html</a><br>
+</p>
+</div>
+</div>
+
+<div id="outline-container-org12ac6da" class="outline-2">
+<h2 id="org12ac6da">光标控制</h2>
+<div class="outline-text-2" id="text-org12ac6da">
+<div class="org-src-container">
+<pre class="src src-bash"><code>These are not described<span style="color: #51afef;"> in</span> ECMA-48.  We list the Set Mode</code>
+<code>sequences; the Reset Mode sequences are obtained by replacing the</code>
+<code>final <span style="color: #98be65;">'h'</span> by <span style="color: #98be65;">'l'</span>.</code>
+<code>ESC [ ? 25 h</code>
+<code>      DECTECM (default on): Make cursor visible.</code>
+</pre>
+</div>
+
+<ul class="org-ul">
+<li><p>
+显示光标<br>
+</p>
+<div class="org-src-container">
+<pre class="src src-bash"><code><span style="color: #c678dd;">echo</span> -e <span style="color: #98be65;">"\033[?25h"</span></code>
+</pre>
+</div></li>
+<li><p>
+隐藏光标<br>
+</p>
+<div class="org-src-container">
+<pre class="src src-bash"><code><span style="color: #c678dd;">echo</span> -e <span style="color: #98be65;">"\033[?25l"</span></code>
+</pre>
+</div></li>
+</ul>
+</div>
+</div>
 </div>
 <div id="postamble" class="status">
 <script src="https://utteranc.es/client.js"

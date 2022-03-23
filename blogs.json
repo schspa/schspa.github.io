@@ -246,6 +246,18 @@
     ]
   },
   {
+    "file-path": "~/org/lang/compile/baremetal.org",
+    "URL": "/2021/03/08/baremetal.html",
+    "TITLE": "BareMetal environment",
+    "DATE": "<2021-03-08 18:49:43>",
+    "CATEGORY": [
+      "lang"
+    ],
+    "FILETAGS": [
+      "blogs"
+    ]
+  },
+  {
     "file-path": "~/org/lang/compile/aligned-access.org",
     "URL": "/2020/12/24/aligned-access.html",
     "TITLE": "Generate Aligned Access Code",
@@ -269,6 +281,18 @@
     ],
     "CATEGORY": [
       "ASM"
+    ]
+  },
+  {
+    "file-path": "~/org/env/terminal.org",
+    "URL": "/2022/03/22/terminal.html",
+    "TITLE": "Termial tips",
+    "DATE": "<2022-03-22 15:07:59>",
+    "FILETAGS": [
+      "blogs"
+    ],
+    "CATEGORY": [
+      "Environment"
     ]
   },
   {
