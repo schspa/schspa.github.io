@@ -353,6 +353,18 @@
     ]
   },
   {
+    "file-path": "~/org/arm/scmi.org",
+    "URL": "/2022/01/18/scmi.html",
+    "TITLE": "Arm Scmi Archicture",
+    "DATE": "<2022-01-18 11:20:11>",
+    "FILETAGS": [
+      "blogs"
+    ],
+    "CATEGORY": [
+      "AARCH64"
+    ]
+  },
+  {
     "file-path": "~/org/arm/atomic-operation.org",
     "URL": "/2019/09/22/atomic-operation.html",
     "TITLE": "Atomic operation in aarch64",

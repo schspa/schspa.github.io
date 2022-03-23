@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<!-- 2022-03-23 Wed 19:14 -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Arm Scmi Archicture</title>
+<meta name="generator" content="Org mode">
+<meta name="author" content="Zhaohui Shi">
+<meta name="description" content="Arm scmi"
+>
+<link rel="shortcut icon" href="/images/rose-red.png" type="image/x-icon" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" integrity="sha256-sAcc18zvMnaJZrNT4v8J0T4HqzEUiUTlVFgDIywjQek=" crossorigin="anonymous">
+<link rel="stylesheet" href="/css/animate.min.css" />
+<link rel="stylesheet" href="/css/all.min.css" />
+<link rel="stylesheet" type="text/css" href="/css/style.css" />
+<link rel="stylesheet" type="text/css" href="/css/navbar.css" />
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/js/bootstrap.min.js" integrity="sha256-/hGxZHGQ57fXLp+NDusFZsZo/PG21Bp2+hXYV5a6w+g=" crossorigin="anonymous"></script>
+<script src="/js/jquery.min.js"></script>
+<script src="/js/darkreader.js"></script>
+<script src="/user.config.js"></script>
+<script src="/js/main.js"></script>
+</head>
+<body>
+<div id="preamble" class="status">
+<div class="mobile-container">
+  <!-- Top Navigation Menu -->
+  <div class="topnav">
+    <div id="header">
+      <a href="/" class="logo">Schspa's Blog</a>
+      <a href="javascript:void(0);" class="icon" onclick="toggleheader()">
+        <i class="fa fa-bars"></i>
+      </a>
+    </div>
+    <div id="nav_headers">
+      <a href="/sitemap.html" class="menu-item">Categories</a>
+    </div>
+  </div>
+  <!-- End smartphone / tablet look -->
+</div>
+
+<header id="header" class="header">
+  <div class="logo-wrapper">
+    <a href="/" class="logo">Schspa's Blogs</a>
+  </div>
+
+  <nav class="site-navbar">
+    <ul id="menu" class="menu">
+      <li class="menu-item">
+        <a class="menu-item-link" href="/">Home</a>
+      </li>
+      <li class="menu-item">
+        <a class="menu-item-link" href="/sitemap.html">Categories</a>
+      </li>
+    </ul>
+  </nav>
+</header>
+</div>
+<div id="content">
+<h1 class="title">Arm Scmi Archicture</h1>
+
+<div id="outline-container-org123f454" class="outline-2">
+<h2 id="org123f454">简介</h2>
+<div class="outline-text-2" id="text-org123f454">
+<p>
+Arm System Control and Management Interface<br>
+</p>
+
+<ul class="org-ul">
+<li>Discovery and self-description of the interfaces implemented by the platform.<br></li>
+<li>Agent-specific resource isolation interfaces for dynamically configuring an SCMI-compliant agent’s access to devices and protocols.<br></li>
+<li>Power domain management interfaces to place a given device or domain into the various power-saving states that it supports.<br></li>
+</ul>
+<ul class="org-ul">
+<li>Performance management interfaces to control the performance of a domain which, in turn, is composed of compute engines, such as Application Processors (APs), GPUs, or other accelerators.<br></li>
+<li>Clock management interfaces to set and enquire rates on platform-managed clocks.<br></li>
+<li>Sensor management interfaces to read sensor data and be notified of sensor value changes.<br></li>
+<li>Reset management interfaces to reset peripherals or reset domains.<br></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orgd8f2ba6" class="outline-2">
+<h2 id="orgd8f2ba6">Archicture</h2>
+<div class="outline-text-2" id="text-orgd8f2ba6">
+<p>
+<a href="https://developer.arm.com/architectures/system-architectures/software-standards/scmi">System Control and Management Interface</a><br>
+<a href="https://developer.arm.com/-/media/Arm%20Developer%20Community/PDF/Arm_Power_and_Performance_Management_SCMI_White_Paper.pdf?revision=9ee0a9f8-fce7-4584-bd1a-fa018ec9a283">Power and Performance Management using Arm® SCMI Specification White Paper</a><br>
+</p>
+
+
+<div id="org8be54ad" class="figure">
+<p><img src="assets/2022-01-19_13-15-56_screenshot.png" alt="2022-01-19_13-15-56_screenshot.png"><br>
+</p>
+</div>
+</div>
+<div id="outline-container-org9648dc7" class="outline-3">
+<h3 id="org9648dc7">SCMI 1.0 (May 2017)</h3>
+<div class="outline-text-3" id="text-org9648dc7">
+
+<div id="org05d04eb" class="figure">
+<p><img src="assets/2022-01-18_13-26-07_screenshot.png" alt="2022-01-18_13-26-07_screenshot.png"><br>
+</p>
+</div>
+<ol class="org-ol">
+<li>Discovery and self-description of the interfaces it supports<br></li>
+<li>Power domain management, which is the ability to place a given device or domain into the various power-saving states that it supports<br></li>
+<li>Performance management, which is the ability to control the performance of a domain that is composed of compute engines such as application processors (APs), GPUs, or other accelerators.<br></li>
+<li>Clock management, which is the ability to set and inquire rates on platform-managed clocks.<br></li>
+<li>Sensor management, which is the ability to read sensor data, and be notified of sensor value changes.<br></li>
+</ol>
+</div>
+</div>
+
+<div id="outline-container-org468f283" class="outline-3">
+<h3 id="org468f283">SCMI 2.0 (July 2019)</h3>
+<div class="outline-text-3" id="text-org468f283">
+
+<div id="orga312f25" class="figure">
+<p><img src="assets/2022-01-18_13-28-01_screenshot.png" alt="2022-01-18_13-28-01_screenshot.png"><br>
+</p>
+</div>
+
+<ol class="org-ol">
+<li>fast channel support<br></li>
+<li>Power Domain Management pre-notification suppor<br></li>
+<li>Agent-specific Resource Isolation capability as a part of Base protocol.<br></li>
+<li>Reset Management Protocol.<br></li>
+<li>Renamed Mailbox Transport to more appropriate Shared Memory based Transport and made changes to allow SMC/HVC based doorbells.<br></li>
+<li>Added support for notifications to agents on performance level change events triggered by external factors.<br></li>
+</ol>
+</div>
+</div>
+
+<div id="outline-container-org7289f2f" class="outline-3">
+<h3 id="org7289f2f">SCMI 3.1 (Jan 2022)</h3>
+<div class="outline-text-3" id="text-org7289f2f">
+
+<div id="org86aa77d" class="figure">
+<p><img src="assets/2022-01-18_13-29-54_screenshot.png" alt="2022-01-18_13-29-54_screenshot.png"><br>
+</p>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org2355095" class="outline-2">
+<h2 id="org2355095">Usage</h2>
+<div class="outline-text-2" id="text-org2355095">
+<ul class="org-ul">
+<li>basic usage<br></li>
+<li>支持trusted world的使用方法<br></li>
+<li>虚拟化系统中的使用方法<br></li>
+<li>支持硬件虚拟化的使用方法<br></li>
+</ul>
+</div>
+
+<div id="outline-container-org757a790" class="outline-3">
+<h3 id="org757a790">basic usage</h3>
+<div class="outline-text-3" id="text-org757a790">
+
+<div id="org2e2aafa" class="figure">
+<p><img src="assets/2022-01-18_15-52-40_screenshot.png" alt="2022-01-18_15-52-40_screenshot.png"><br>
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgdf8cf81" class="outline-3">
+<h3 id="orgdf8cf81">支持trusted world的使用方法</h3>
+<div class="outline-text-3" id="text-orgdf8cf81">
+
+<div id="orga4a2a6e" class="figure">
+<p><img src="assets/2022-01-18_15-51-54_screenshot.png" alt="2022-01-18_15-51-54_screenshot.png"><br>
+</p>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-org04eb3a7" class="outline-3">
+<h3 id="org04eb3a7">虚拟化系统中的使用方法</h3>
+<div class="outline-text-3" id="text-org04eb3a7">
+
+<div id="org8159d56" class="figure">
+<p><img src="assets/2022-01-18_15-50-05_screenshot.png" alt="2022-01-18_15-50-05_screenshot.png"><br>
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org8c49d7f" class="outline-3">
+<h3 id="org8c49d7f">支持硬件虚拟化的使用方法</h3>
+<div class="outline-text-3" id="text-org8c49d7f">
+
+<div id="orgcac51db" class="figure">
+<p><img src="assets/2022-01-18_15-39-13_screenshot.png" alt="2022-01-18_15-39-13_screenshot.png"><br>
+</p>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org4d21633" class="outline-2">
+<h2 id="org4d21633">Performance</h2>
+<div class="outline-text-2" id="text-org4d21633">
+</div>
+<div id="outline-container-org41f086e" class="outline-3">
+<h3 id="org41f086e">fastcall</h3>
+<div class="outline-text-3" id="text-org41f086e">
+<p>
+部份场景对性能有一定的要求（DVFS）<br>
+</p>
+
+<div id="org1596402" class="figure">
+<p><img src="assets/2022-01-18_15-54-30_screenshot.png" alt="2022-01-18_15-54-30_screenshot.png"><br>
+</p>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org794a6b3" class="outline-2">
+<h2 id="org794a6b3">Security</h2>
+<div class="outline-text-2" id="text-org794a6b3">
+</div>
+<div id="outline-container-org5bb70fc" class="outline-3">
+<h3 id="org5bb70fc">permission control</h3>
+<div class="outline-text-3" id="text-org5bb70fc">
+
+<div id="orgfeadc21" class="figure">
+<p><img src="assets/2022-01-18_16-01-05_screenshot.png" alt="2022-01-18_16-01-05_screenshot.png"><br>
+</p>
+</div>
+
+<ol class="org-ol">
+<li>Hypervisor has access to all channels.<br>
+<ul class="org-ul">
+<li>Each channel has a unique agent-id allocated by System Controller.<br>
+<ul class="org-ul">
+<li>Discoverable by BASE_DISCOVER_AGENT command<br></li>
+</ul></li>
+</ul></li>
+<li>Hypervisor chooses channels to allocate to VMs.<br></li>
+<li>Hypervisor configures access permissions of agents<br>
+<ul class="org-ul">
+<li>BASE_SET_DEVICE_PERMISSIONS<br></li>
+<li>BASE_SET_PROTOCOL_PERMISSIONS<br></li>
+<li>BASE_RESET_AGENT_CONFIGURATION<br></li>
+<li>Only one control channel has permissions to use above commands. Access control imposed at boot by System Controller.<br></li>
+<li>Control channel identification is done through firmware tables and is not discoverable.<br></li>
+</ul></li>
+</ol>
+<ol class="org-ol">
+<li>Hypervisors maps configured channels into VM space and starts VM.<br></li>
+<li>VM can use channel mapped to its space.<br>
+<ul class="org-ul">
+<li>Can send commands to access resources allowed by the hypervisor over the channel.<br></li>
+</ul></li>
+</ol>
+</div>
+</div>
+
+<div id="outline-container-org7b1e22e" class="outline-3">
+<h3 id="org7b1e22e">Realm Management Extension (RME)</h3>
+<div class="outline-text-3" id="text-org7b1e22e">
+<p>
+Armv9-A: Realm Management Extension (RME)<br>
+<a href="https://developer.arm.com/documentation/den0129/aa">https://developer.arm.com/documentation/den0129/aa</a><br>
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org70f004f" class="outline-2">
+<h2 id="org70f004f">refs</h2>
+<div class="outline-text-2" id="text-org70f004f">
+</div>
+<div id="outline-container-orgc3e6b74" class="outline-3">
+<h3 id="orgc3e6b74">software</h3>
+<div class="outline-text-3" id="text-orgc3e6b74">
+<p>
+<a href="https://github.com/ARM-software/SCP-firmware">https://github.com/ARM-software/SCP-firmware</a><br>
+<a href="https://github.com/ARM-software/arm-trusted-firmware">https://github.com/ARM-software/arm-trusted-firmware</a><br>
+<a href="https://www.arm.com/why-arm/technologies/trustzone-for-cortex-m">TRUSTZONE FOR CORTEX-M</a><br>
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgca68244" class="outline-3">
+<h3 id="orgca68244">blogs</h3>
+<div class="outline-text-3" id="text-orgca68244">
+<p>
+<a href="https://community.arm.com/arm-community-blogs/b/architectures-and-processors-blog/posts/improved-power-management-system-control-through-scmi?_ga=2.63837032.675421016.1641295042-416933497.1598343378">Improved Power Management and System Control through SCMI</a><br>
+<a href="https://static.linaro.org/connect/las16/Presentations/Tuesday/LAS16-200%20--%20%20SCMI%20-%20System%20Management%20and%20Control%20Interface.pdf">Charles García-Tobin: System Control and Management Interface</a><br>
+<a href="https://static.linaro.org/connect/san19/presentations/san19-213.pdf">SCMIv2.0</a><br>
+<a href="https://static.linaro.org/connect/san19/presentations/san19-207.pdf">SCMI server in secure World</a><br>
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgb46cfe5" class="outline-3">
+<h3 id="orgb46cfe5">patches</h3>
+<div class="outline-text-3" id="text-orgb46cfe5">
+<p>
+<a href="https://lore.kernel.org/lkml/1500852206-28771-1-git-send-email-andre.przywara@arm.com/">[PATCH v2 0/3] mailbox: arm: introduce smc triggered mailbox</a><br>
+<a href="https://patchwork.kernel.org/project/linux-arm-kernel/patch/1500852206-28771-2-git-send-email-andre.przywara@arm.com/">[v2,1/3] DT: mailbox: add binding doc for the ARM SMC mailbox</a><br>
+</p>
+</div>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<script src="https://utteranc.es/client.js"
+    repo="schspa/schspa.github.io"
+    issue-term="title"
+    label="✨💬✨"
+    theme="github-light"
+    crossorigin="anonymous"
+    async>
+</script>
+<div class="me">
+  <span><b>Contact me via :)</b><span>
+  <div class="contact">
+    <a id="email" href="mailto:schspa@gmail.com" target="_blank"><i class="fab fa-mailchimp animated heartBeat delay-2s slower"></i></a>
+    <a id="github" href="//github.com/schspa" target="_blank"><i class="fab fa-github animated heartBeat delay-2s slower"></i></a>
+  </div>
+</div>
+
+<div id="jinrishici-sentence" style="font-weight: 700;">虚怀乃若谷，水深则流缓。</div>
+<script src="https://sdk.jinrishici.com/v2/browser/jinrishici.js" charset="utf-8"></script>
+</div>
+</body>
+</html>
