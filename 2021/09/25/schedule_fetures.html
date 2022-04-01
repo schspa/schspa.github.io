@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<!-- 2022-04-01 Fri 20:34 -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Linux scheduled features</title>
+<meta name="generator" content="Org mode">
+<meta name="author" content="Schspa">
+<meta name="description" content="Linux scheduled features"
+>
+<link rel="shortcut icon" href="/images/rose-red.png" type="image/x-icon" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" integrity="sha256-sAcc18zvMnaJZrNT4v8J0T4HqzEUiUTlVFgDIywjQek=" crossorigin="anonymous">
+<link rel="stylesheet" href="/css/animate.min.css" />
+<link rel="stylesheet" href="/css/all.min.css" />
+<link rel="stylesheet" type="text/css" href="/css/style.css" />
+<link rel="stylesheet" type="text/css" href="/css/navbar.css" />
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/js/bootstrap.min.js" integrity="sha256-/hGxZHGQ57fXLp+NDusFZsZo/PG21Bp2+hXYV5a6w+g=" crossorigin="anonymous"></script>
+<script src="/js/jquery.min.js"></script>
+<script src="/js/darkreader.js"></script>
+<script src="/user.config.js"></script>
+<script src="/js/main.js"></script>
+</head>
+<body>
+<div id="preamble" class="status">
+<div class="mobile-container">
+  <!-- Top Navigation Menu -->
+  <div class="topnav">
+    <div id="header">
+      <a href="/" class="logo">Schspa's Blog</a>
+      <a href="javascript:void(0);" class="icon" onclick="toggleheader()">
+        <i class="fa fa-bars"></i>
+      </a>
+    </div>
+    <div id="nav_headers">
+      <a href="/sitemap.html" class="menu-item">Categories</a>
+    </div>
+  </div>
+  <!-- End smartphone / tablet look -->
+</div>
+
+<header id="header" class="header">
+  <div class="logo-wrapper">
+    <a href="/" class="logo">Schspa's Blogs</a>
+  </div>
+
+  <nav class="site-navbar">
+    <ul id="menu" class="menu">
+      <li class="menu-item">
+        <a class="menu-item-link" href="/">Home</a>
+      </li>
+      <li class="menu-item">
+        <a class="menu-item-link" href="/sitemap.html">Categories</a>
+      </li>
+    </ul>
+  </nav>
+</header>
+</div>
+<div id="content">
+<h1 class="title">Linux scheduled features</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#orgd9254e0">查看系统中开启的调度特性</a></li>
+<li><a href="#org361a1a6">RT_RUNTIME_SHARE</a></li>
+<li><a href="#org5a31d6a">TTWU_QUEUE</a></li>
+<li><a href="#org354e3ca">GENTLE_FAIR_SLEEPERS</a></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orgd9254e0" class="outline-2">
+<h2 id="orgd9254e0">查看系统中开启的调度特性</h2>
+<div class="outline-text-2" id="text-orgd9254e0">
+<p>
+cat /sys/kernel/debug/sched_features<br>
+</p>
+</div>
+</div>
+
+<div id="outline-container-org361a1a6" class="outline-2">
+<h2 id="org361a1a6">RT_RUNTIME_SHARE</h2>
+<div class="outline-text-2" id="text-org361a1a6">
+<p>
+定义：<a target="_blank" href="https://github.com/torvalds/linux/blob/b133f076639b918bb6ad157f6308b0f595058959/kernel/sched/features.h#L80">kernel source for RT_RUNTIME_SHARE</a><br>
+<a target="_blank" href="https://github.com/torvalds/linux/blob/b133f076639b918bb6ad157f6308b0f595058959/kernel/sched/rt.c#L839">kernel source for balance_runtime</a><br>
+   由这个函数可知，当开启RT_RUNTIME_SHARE并且rq进程运行的时间超过当前runqueue的rt_runtime时，系统将通过从其他的cpu上抽取一部份之间分给当前的rq。开启之后，rt time以及rt_throttled的判定就会变成共享所由cpu所占用的执行时间，从而可以使单个cpu的rt进程执行时间达到100%.<br>
+   开启这个feature时，会造成由于RT线程BUG导致单个CPU一直执行RT进程(绑定CPU的情况下)，而把其他进程饿死。最新版的内核已经默认关闭了这个feature.<br>
+   详情参考<a href="https://www.mail-archive.com/linux-kernel@vger.kernel.org/msg2315022.html">https://www.mail-archive.com/linux-kernel@vger.kernel.org/msg2315022.html</a> 这个patch的commit信息.<br>
+</p>
+</div>
+</div>
+
+<div id="outline-container-org5a31d6a" class="outline-2">
+<h2 id="org5a31d6a">TTWU_QUEUE</h2>
+<div class="outline-text-2" id="text-org5a31d6a">
+<p>
+<a target="_blank" href="https://github.com/torvalds/linux/blob/b133f076639b918bb6ad157f6308b0f595058959/kernel/sched/features.h#L53">kernel source TTWU_QUEUE</a><br>
+当开启这个特性时，系统将通过ipi中断的方式来将进程加入到等待队列，由此避免去加rq锁<br>
+<a target="_blank" href="https://github.com/torvalds/linux/blob/b133f076639b918bb6ad157f6308b0f595058959/kernel/sched/core.c#L3585">kernel source for rq_lock when task enqueue</a><br>
+</p>
+
+
+<p>
+<a href="https://review.lineageos.org/c/LineageOS/android_kernel_essential_msm8998/+/208190/1">https://review.lineageos.org/c/LineageOS/android_kernel_essential_msm8998/+/208190/1</a><br>
+</p>
+</div>
+</div>
+
+<div id="outline-container-org354e3ca" class="outline-2">
+<h2 id="org354e3ca">GENTLE_FAIR_SLEEPERS</h2>
+<div class="outline-text-2" id="text-org354e3ca">
+<p>
+<a target="_blank" href="https://github.com/torvalds/linux/blob/b133f076639b918bb6ad157f6308b0f595058959/kernel/sched/features.h#L7">kernel source for GENTLE_FAIR_SLEEPERS</a><br>
+</p>
+
+<p>
+内核注释<br>
+</p>
+<blockquote>
+<p>
+Only give sleepers 50% of their service deficit. This allows them to run sooner, but does not allow tons of sleepers to rip the spread apart.<br>
+</p>
+</blockquote>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<script src="https://utteranc.es/client.js"
+    repo="schspa/schspa.github.io"
+    issue-term="title"
+    label="✨💬✨"
+    theme="github-light"
+    crossorigin="anonymous"
+    async>
+</script>
+<div class="me">
+  <span><b>Contact me via :)</b><span>
+  <div class="contact">
+    <a id="email" href="mailto:schspa@gmail.com" target="_blank"><i class="fab fa-mailchimp animated heartBeat delay-2s slower"></i></a>
+    <a id="github" href="//github.com/schspa" target="_blank"><i class="fab fa-github animated heartBeat delay-2s slower"></i></a>
+  </div>
+</div>
+
+<div id="jinrishici-sentence" style="font-weight: 700;">虚怀乃若谷，水深则流缓。</div>
+<script src="https://sdk.jinrishici.com/v2/browser/jinrishici.js" charset="utf-8"></script>
+</div>
+</body>
+</html>
