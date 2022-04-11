@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<!-- 2022-04-11 Mon 10:16 -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Linux lockdep</title>
+<meta name="generator" content="Org mode">
+<meta name="author" content="Schspa Shi">
+<link rel="shortcut icon" href="/images/rose-red.png" type="image/x-icon" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" integrity="sha256-sAcc18zvMnaJZrNT4v8J0T4HqzEUiUTlVFgDIywjQek=" crossorigin="anonymous">
+<link rel="stylesheet" href="/css/animate.min.css" />
+<link rel="stylesheet" href="/css/all.min.css" />
+<link rel="stylesheet" type="text/css" href="/css/style.css" />
+<link rel="stylesheet" type="text/css" href="/css/navbar.css" />
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/js/bootstrap.min.js" integrity="sha256-/hGxZHGQ57fXLp+NDusFZsZo/PG21Bp2+hXYV5a6w+g=" crossorigin="anonymous"></script>
+<script src="/js/jquery.min.js"></script>
+<script src="/js/darkreader.js"></script>
+<script src="/user.config.js"></script>
+<script src="/js/main.js"></script>
+</head>
+<body>
+<div id="preamble" class="status">
+<div class="mobile-container">
+  <!-- Top Navigation Menu -->
+  <div class="topnav">
+    <div id="header">
+      <a href="/" class="logo">Schspa's Blog</a>
+      <a href="javascript:void(0);" class="icon" onclick="toggleheader()">
+        <i class="fa fa-bars"></i>
+      </a>
+    </div>
+    <div id="nav_headers">
+      <a href="/sitemap.html" class="menu-item">Categories</a>
+    </div>
+  </div>
+  <!-- End smartphone / tablet look -->
+</div>
+
+<header id="header" class="header">
+  <div class="logo-wrapper">
+    <a href="/" class="logo">Schspa's Blogs</a>
+  </div>
+
+  <nav class="site-navbar">
+    <ul id="menu" class="menu">
+      <li class="menu-item">
+        <a class="menu-item-link" href="/">Home</a>
+      </li>
+      <li class="menu-item">
+        <a class="menu-item-link" href="/sitemap.html">Categories</a>
+      </li>
+    </ul>
+  </nav>
+</header>
+</div>
+<div id="content">
+<h1 class="title">Linux lockdep</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#org8d15447">简介</a></li>
+<li><a href="#orge1d4919">可以检测到的问题</a>
+<ul>
+<li><a href="#orgc2a49fd">BUG: Invalid wait context</a></li>
+<li><a href="#org55fc0ef">WARNING: bad contention detected!</a></li>
+<li><a href="#orgaec6b01">WARNING: possible circular locking dependency detected</a></li>
+<li><a href="#orge9d794b">WARNING: possible recursive locking detected</a></li>
+<li><a href="#org02b267c">WARNING: bad unlock balance detected</a></li>
+<li><a href="#org52876c3">WARNING: suspicious RCU usage</a></li>
+<li><a href="#orgd085428">WARNING: lock held when returning to user space!</a></li>
+<li><a href="#org0032dba">WARNING: %s/%d still has locks held!</a></li>
+<li><a href="#orgadff51a">WARNING: held lock freed!</a></li>
+<li><a href="#org1892ad4">WARNING: Nested lock was not taken</a></li>
+<li><a href="#orgda8ecb0">WARNING: possible irq lock inversion dependency detected</a></li>
+<li><a href="#org4f7072b">WARNING: inconsistent lock state</a></li>
+<li><a href="#org00fc601">WARNING: chain_key collision</a></li>
+<li><a href="#org225f38d">WARNING: %s-safe -&gt; %s-unsafe lock order detected</a></li>
+</ul>
+</li>
+<li><a href="#org63b6767">实现原理</a>
+<ul>
+<li><a href="#orgee33a82">将锁抽象成lock class，并且在其中记录各种事件</a></li>
+<li><a href="#org822e9e5">锁状态</a></li>
+<li><a href="#org5bc9bf6">在当前的task struct中记录相关的加锁信息</a>
+<ul>
+<li><a href="#orgd0eb16f">RSLS Call Trace</a></li>
+<li><a href="#orged22642">Mutex lock</a></li>
+</ul>
+</li>
+<li><a href="#orgdc46545">在进行锁操作时，对比之前已经持有的锁信息，通过规则判断出具体的异常</a>
+<ul>
+<li><a href="#orgaeb4272">上下文判断</a></li>
+<li><a href="#org25d6ade">锁依赖</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#org4b6f201">Debug</a></li>
+<li><a href="#org3baeba0">refs</a></li>
+</ul>
+</div>
+</div>
+
+
+<div id="outline-container-org8d15447" class="outline-2">
+<h2 id="org8d15447">简介</h2>
+<div class="outline-text-2" id="text-org8d15447">
+<p>
+lockdep用来分析内核中的持锁顺序，使用情况等问题，本文简单的分析一下其实现的基本原理以及使用方法.<br>
+内核文档可参考 <a href="https://docs.kernel.org/locking/lockdep-design.html">https://docs.kernel.org/locking/lockdep-design.html</a><br>
+</p>
+</div>
+</div>
+
+<div id="outline-container-orge1d4919" class="outline-2">
+<h2 id="orge1d4919">可以检测到的问题</h2>
+<div class="outline-text-2" id="text-orge1d4919">
+</div>
+<div id="outline-container-orgc2a49fd" class="outline-3">
+<h3 id="orgc2a49fd">BUG: Invalid wait context</h3>
+<div class="outline-text-3" id="text-orgc2a49fd">
+<p>
+这个用来反馈内核中持锁上下文的问题，可以检测到如下类型的问题, 详情可以参考提交 <a href="https://lwn.net/Articles/579849/">https://lwn.net/Articles/579849/</a><br>
+</p>
+<div class="org-src-container">
+<pre class="src src-C"><code>raw_spin_lock(&amp;foo);</code>
+<code>spin_lock(&amp;bar);</code>
+<code>spin_unlock(&amp;bar);</code>
+<code>raw_spin_unlock(&amp;foo);</code>
+</pre>
+</div>
+<p>
+下面是一段实际发现问题的log<br>
+</p>
+<div class="org-src-container">
+<pre class="src src-C"><code>[   15.090335][    T1] </code>
+<code>[   15.090359][    T1] =============================</code>
+<code>[   15.090365][    T1] [ BUG: Invalid wait context ]</code>
+<code>[   15.090373][    T1] 5.10.59-rt52-00983-g186a6841c682-dirty #3 Not tainted</code>
+<code>[   15.090386][    T1] -----------------------------</code>
+<code>[   15.090392][    T1] swapper/0/1 is trying to lock:</code>
+<code>[   15.090402][    T1] 70ff00018507c188 (&amp;gc-&gt;bgpio_lock){....}-{3:3}, at: _raw_spin_lock_irqsave+0x1c/0x28</code>
+<code>[   15.090470][    T1] other info that might help us debug this:</code>
+<code>[   15.090477][    T1] context-{5:5}</code>
+<code>[   15.090485][    T1] 3 locks held by swapper/0/1:</code>
+<code>[   15.090497][    T1]  #0: c2ff0001816de1a0 (&amp;dev-&gt;mutex){....}-{4:4}, at: __device_driver_lock+0x98/0x104</code>
+<code>[   15.090553][    T1]  #1: ffff90001485b4b8 (irq_domain_mutex){+.+.}-{4:4}, at: irq_domain_associate+0xbc/0x6d4</code>
+<code>[   15.090606][    T1]  #2: 4bff000185d7a8e0 (lock_class){....}-{2:2}, at: _raw_spin_lock_irqsave+0x1c/0x28</code>
+<code>[   15.090654][    T1] stack backtrace:</code>
+<code>[   15.090661][    T1] CPU: 4 PID: 1 Comm: swapper/0 Not tainted 5.10.59-rt52-00983-g186a6841c682-dirty #3</code>
+<code>[   15.090682][    T1] Hardware name: Horizon Robotics Journey 5 DVB (DT)</code>
+<code>[   15.090692][    T1] Call trace:</code>
+<code>[   15.090698][    T1]  dump_backtrace+0x0/0x708</code>
+<code>[   15.090717][    T1]  show_stack+0x24/0x30</code>
+<code>[   15.090733][    T1]  dump_stack+0x1b4/0x2bc</code>
+<code>[   15.090752][    T1]  __lock_acquire+0x2800/0xb760</code>
+<code>[   15.090774][    T1]  lock_acquire+0x248/0x85c</code>
+<code>[   15.090793][    T1]  __raw_spin_lock_irqsave+0xd4/0x270</code>
+<code>[   15.090811][    T1]  _raw_spin_lock_irqsave+0x1c/0x28</code>
+<code>[   15.090828][    T1]  dwapb_irq_ack+0xb4/0x300</code>
+<code>[   15.090846][    T1]  __irq_do_set_handler+0x494/0xb2c</code>
+<code>[   15.090864][    T1]  __irq_set_handler+0x74/0x114</code>
+<code>[   15.090881][    T1]  irq_set_chip_and_handler_name+0x44/0x58</code>
+<code>[   15.090900][    T1]  gpiochip_irq_map+0x210/0x644</code>
+<code>[   15.090917][    T1]  irq_domain_associate+0x168/0x6d4</code>
+<code>[   15.090935][    T1]  irq_create_mapping_affinity+0x15c/0x354</code>
+<code>[   15.090955][    T1]  gpiochip_to_irq+0xb4/0x390</code>
+<code>[   15.090970][    T1]  gpiod_to_irq+0xf8/0x1e4</code>
+<code>[   15.090987][    T1]  gpio_keys_probe+0x9a0/0x24d0</code>
+<code>[   15.091008][    T1]  platform_drv_probe+0x138/0x214</code>
+<code>[   15.091026][    T1]  really_probe+0x2e0/0x15d4</code>
+<code>[   15.091045][    T1]  driver_probe_device+0x100/0x418</code>
+<code>[   15.091064][    T1]  device_driver_attach+0x138/0x234</code>
+<code>[   15.091084][    T1]  __driver_attach+0x184/0x358</code>
+<code>[   15.091103][    T1]  bus_for_each_dev+0x100/0x1e0</code>
+<code>[   15.091122][    T1]  driver_attach+0x5c/0x98</code>
+<code>[   15.091141][    T1]  bus_add_driver+0x33c/0x9d8</code>
+<code>[   15.091159][    T1]  driver_register+0x1e4/0x6b0</code>
+<code>[   15.091179][    T1]  __platform_driver_register+0x118/0x214</code>
+<code>[   15.091196][    T1]  gpio_keys_init+0x28/0x34</code>
+<code>[   15.091218][    T1]  do_one_initcall+0x8c/0x2d8</code>
+<code>[   15.091236][    T1]  do_initcall_level+0x144/0x230</code>
+<code>[   15.091257][    T1]  do_initcalls+0xb0/0x170</code>
+<code>[   15.091275][    T1]  do_basic_setup+0xd0/0xe4</code>
+<code>[   15.091293][    T1]  kernel_init_freeable+0x180/0x3e4</code>
+<code>[   15.091311][    T1]  kernel_init+0x2c/0x398</code>
+<code>[   15.091330][    T1]  ret_from_fork+0x10/0x30</code>
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-org55fc0ef" class="outline-3">
+<h3 id="org55fc0ef">WARNING: bad contention detected!</h3>
+<div class="outline-text-3" id="text-org55fc0ef">
+<p>
+这个错误表示lockdep内部逻辑出错，一般不应该报出来<br>
+</p>
+</div>
+</div>
+<div id="outline-container-orgaec6b01" class="outline-3">
+<h3 id="orgaec6b01">WARNING: possible circular locking dependency detected</h3>
+<div class="outline-text-3" id="text-orgaec6b01">
+<p>
+见下面的分析，通过依赖路径分析来检测<br>
+ABBA, ABBCCA 死锁<br>
+</p>
+</div>
+</div>
+<div id="outline-container-orge9d794b" class="outline-3">
+<h3 id="orge9d794b">WARNING: possible recursive locking detected</h3>
+<div class="outline-text-3" id="text-orge9d794b">
+<p>
+AA死锁，重入<br>
+这个通过遍历已获取到的锁列表，判断当前的锁是否已经被获取到.读锁除外.<br>
+</p>
+</div>
+</div>
+<div id="outline-container-org02b267c" class="outline-3">
+<h3 id="org02b267c">WARNING: bad unlock balance detected</h3>
+<div class="outline-text-3" id="text-org02b267c">
+<p>
+lock和unlock不成对调用<br>
+</p>
+<ul class="org-ul">
+<li>unlock时进行检测发现当前锁没有被持有时报错.<br></li>
+<li>初始化时检测是否持有锁，持有则报错.<br></li>
+</ul>
+</div>
+</div>
+<div id="outline-container-org52876c3" class="outline-3">
+<h3 id="org52876c3">WARNING: suspicious RCU usage</h3>
+<div class="outline-text-3" id="text-org52876c3">
+<p>
+在rcu代码中通过RCU_LOCKDEP_WARN宏来报出来的warning<br>
+</p>
+</div>
+</div>
+<div id="outline-container-orgd085428" class="outline-3">
+<h3 id="orgd085428">WARNING: lock held when returning to user space!</h3>
+<div class="outline-text-3" id="text-orgd085428">
+<p>
+在离开内核空间时，依旧持有内核空间中的锁, 通过在离开内核空间之前过滤进程已持有锁的列表来判断.<br>
+<a target="_blank" href="https://github.com/torvalds/linux/blob/09688c0166e76ce2fb85e86b9d99be8b0084cdf9/kernel/entry/common.c#L215">kernel source for call lockdep_sys_exit();</a><br>
+</p>
+</div>
+</div>
+<div id="outline-container-org0032dba" class="outline-3">
+<h3 id="org0032dba">WARNING: %s/%d still has locks held!</h3>
+<div class="outline-text-3" id="text-org0032dba">
+<p>
+在进程freeze，exit时报错<br>
+<a target="_blank" href="https://github.com/torvalds/linux/blob/09688c0166e76ce2fb85e86b9d99be8b0084cdf9/include/linux/freezer.h#L66">kernel source for no lock held check in include/linux/freezer.h</a><br>
+<a target="_blank" href="https://github.com/torvalds/linux/blob/09688c0166e76ce2fb85e86b9d99be8b0084cdf9/kernel/exit.c#L836">kernel source for no_locks_held check in kernel/exit.c</a><br>
+</p>
+</div>
+</div>
+<div id="outline-container-orgadff51a" class="outline-3">
+<h3 id="orgadff51a">WARNING: held lock freed!</h3>
+<div class="outline-text-3" id="text-orgadff51a">
+<p>
+通过debug_check_no_locks_freed报错，内核中在很多锁，对象初始化的地方加入该检查，通过检查free/初始化的区域中包含已经持有的锁来判断.<br>
+<a target="_blank" href="https://github.com/torvalds/linux/blob/09688c0166e76ce2fb85e86b9d99be8b0084cdf9/mm/slub.c#L1700">kernel source for lock freed check in mm/slub.c</a><br>
+</p>
+</div>
+</div>
+<div id="outline-container-org1892ad4" class="outline-3">
+<h3 id="org1892ad4">WARNING: Nested lock was not taken</h3>
+<div class="outline-text-3" id="text-org1892ad4">
+<p>
+检测持有nest锁时，是否已经持有锁<br>
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgda8ecb0" class="outline-3">
+<h3 id="orgda8ecb0">WARNING: possible irq lock inversion dependency detected</h3>
+<div class="outline-text-3" id="text-orgda8ecb0">
+<p>
+检测由于irq重入而造成可能的死锁<br>
+<a href="https://bugzilla.redhat.com/show_bug.cgi?id=1304242">https://bugzilla.redhat.com/show_bug.cgi?id=1304242</a><br>
+</p>
+<div class="org-src-container">
+<pre class="src src-bash"><code>[  108.223030]        CPU0                    CPU1</code>
+<code>[  108.223030]        ----                    ----</code>
+<code>[  108.223030]   lock(&amp;(&amp;list-&gt;lock)-&gt;rlock#2);</code>
+<code>[  108.223030]                                local_irq_disable();</code>
+<code>[  108.223030]                                lock(policy_rwlock);</code>
+<code>[  108.223030]                                lock(&amp;(&amp;list-&gt;lock)-&gt;rlock#2);</code>
+<code>[  108.223030]   &lt;Interrupt&gt;</code>
+<code>[  108.223030]     lock(policy_rwlock);</code>
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-org4f7072b" class="outline-3">
+<h3 id="org4f7072b">WARNING: inconsistent lock state</h3>
+<div class="outline-text-3" id="text-org4f7072b">
+<p>
+锁状态不匹配，i.e. 同一把锁在hardirq, softirq, 进程上下文中使用到，但是_bh, _irq的后缀使用错误，导致系统有死锁<br>
+如下面的patch，以及修复bug<br>
+</p>
+<div class="org-src-container">
+<pre class="src src-bash"><code>[  313.402947]        CPU0</code>
+<code>[  313.402948]        ----</code>
+<code>[  313.402949]   lock(&amp;(&amp;wsm.lock)-&gt;rlock);</code>
+<code>[  313.402951]   &lt;Interrupt&gt;</code>
+<code>[  313.402952]     lock(&amp;(&amp;wsm.lock)-&gt;rlock);</code>
+<code>[  313.402954]</code>
+<code>*** DEADLOCK ***</code>
+<code></code>
+</pre>
+</div>
+<p>
+<a href="https://lore.kernel.org/all/20190517231626.85614-1-dennis@kernel.org/">https://lore.kernel.org/all/20190517231626.85614-1-dennis@kernel.org/</a><br>
+</p>
+</div>
+</div>
+<div id="outline-container-org00fc601" class="outline-3">
+<h3 id="org00fc601">WARNING: chain_key collision</h3>
+</div>
+<div id="outline-container-org225f38d" class="outline-3">
+<h3 id="org225f38d">WARNING: %s-safe -&gt; %s-unsafe lock order detected</h3>
+<div class="outline-text-3" id="text-org225f38d">
+<p>
+锁上下文安全性检查<br>
+WARNING: HARDIRQ-safe -&gt; HARDIRQ-unsafe lock order detected<br>
+<a href="https://www.mail-archive.com/linux-kernel@vger.kernel.org/msg2299913.html">https://www.mail-archive.com/linux-kernel@vger.kernel.org/msg2299913.html</a><br>
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org63b6767" class="outline-2">
+<h2 id="org63b6767">实现原理</h2>
+<div class="outline-text-2" id="text-org63b6767">
+</div>
+<div id="outline-container-orgee33a82" class="outline-3">
+<h3 id="orgee33a82">将锁抽象成lock class，并且在其中记录各种事件</h3>
+<div class="outline-text-3" id="text-orgee33a82">
+<ol class="org-ol">
+<li><p>
+通过定义static的 lock_class_key来记录每个key<br>
+</p>
+<div class="org-src-container">
+<pre class="src src-C"><code><span style="color: #51afef; font-weight: bold;">#ifdef</span> CONFIG_DEBUG_SPINLOCK</code>
+<code><span style="color: #51afef;">extern</span> <span style="color: #ECBE7B;">void</span> <span style="color: #c678dd;">__raw_spin_lock_init</span>(<span style="color: #ECBE7B;">raw_spinlock_t</span> *<span style="color: #dcaeea;">lock</span>, <span style="color: #51afef;">const</span> <span style="color: #ECBE7B;">char</span> *<span style="color: #dcaeea;">name</span>,</code>
+<code>                <span style="color: #51afef;">struct</span> <span style="color: #ECBE7B;">lock_class_key</span> *<span style="color: #dcaeea;">key</span>, <span style="color: #ECBE7B;">short</span> <span style="color: #dcaeea;">inner</span>);</code>
+<code></code>
+<code><span style="color: #51afef; font-weight: bold;"># define</span> <span style="color: #c678dd;">raw_spin_lock_init</span>(<span style="color: #dcaeea;">lock</span>)                                       \</code>
+<code>    <span style="color: #51afef;">do</span> {                                                                \</code>
+<code>        <span style="color: #51afef;">static</span> <span style="color: #51afef;">struct</span> <span style="color: #ECBE7B;">lock_class_key</span> <span style="color: #dcaeea;">__key</span>;                     \</code>
+<code>                                    \</code>
+<code>        __raw_spin_lock_init((lock), #lock, &amp;__key, LD_WAIT_SPIN); \</code>
+<code>    } <span style="color: #51afef;">while</span> (0)</code>
+<code></code>
+<code><span style="color: #51afef; font-weight: bold;">#else</span></code>
+</pre>
+</div>
+<p>
+在锁初始化时，将具体的key和class联系在一起 （默认情况下代码中同一个初始化位址具有相同的class）<br>
+</p></li>
+
+<li>部分的同类型锁对象在代码的不同的位址初始化，可以自定义key class来设置同样的class.<br>
+lockdep_set_class* API可以用来实现这个功能<br>
+<a target="_blank" href="https://github.com/torvalds/linux/blob/09688c0166e76ce2fb85e86b9d99be8b0084cdf9/kernel/irq/irqdesc.c#L407">kernel source irq_desc.lock keyclass</a><br></li>
+
+<li>在相同代码位址初始化的key class也可以具备不同的subclass<br>
+<a target="_blank" href="https://github.com/torvalds/linux/blob/09688c0166e76ce2fb85e86b9d99be8b0084cdf9/drivers/tty/pty.c#L394">kernel source for tty_struct-&gt;termios_rwsem</a><br>
+<a href="https://github.com/torvalds/linux/commit/d2b6f44779d3be22d32a5697bd30b59367fd2b33">https://github.com/torvalds/linux/commit/d2b6f44779d3be22d32a5697bd30b59367fd2b33</a><br>
+不同的subclass也会被lockdep当作是不同的锁，subclass可以支持动态进行添加，而keyclass只能是编译的时候就确定好。无法动态根据示例化对性的个数做扩展<br></li>
+
+<li>通过以上的方法，lockdep将内核中的锁按照class的类别进行检测<br>
+lockdep认为同class的锁在逻辑上是同一种锁，具有相同的处理方法. 每个class可能包含很多个不同的锁对象，lockdep通过记录这些锁使用时进出的上下文信息，以及进出进程已经持有的锁的上下文信息进行比较来发现问题<br></li>
+</ol>
+</div>
+</div>
+<div id="outline-container-org822e9e5" class="outline-3">
+<h3 id="org822e9e5">锁状态</h3>
+<div class="outline-text-3" id="text-org822e9e5">
+<p>
+在内核中，各种锁共用9类状态<br>
+</p>
+<div class="org-src-container">
+<pre class="src src-bash"><code>===  ===================================================</code>
+<code><span style="color: #98be65;">'.'</span>  acquired while irqs disabled and not<span style="color: #51afef;"> in</span> irq context</code>
+<code><span style="color: #98be65;">'-'</span>  acquired<span style="color: #51afef;"> in</span> irq context</code>
+<code><span style="color: #98be65;">'+'</span>  acquired with irqs enabled</code>
+<code><span style="color: #98be65;">'?'</span>  acquired<span style="color: #51afef;"> in</span> irq context with irqs enabled.</code>
+<code>===  ===================================================</code>
+<code></code>
+<code>The bits are illustrated with an example::</code>
+<code>                     <span style="color: #98be65;">\-</span>---&gt; hardirq</code>
+<code>                     | <span style="color: #98be65;">\-</span>--&gt; hardirq readlock</code>
+<code>                     || <span style="color: #98be65;">\-</span>-&gt; softirq</code>
+<code>                     ||| <span style="color: #98be65;">\-</span>&gt; softirq readlock</code>
+<code>                     ||||</code>
+<code>(&amp;sio_locks[i].lock){-.-.}, at: [&lt;c02867fd&gt;] mutex_lock+0x21/0x24</code>
+<code>                     ||||</code>
+<code>                     ||| <span style="color: #98be65;">\-</span>&gt; softirq disabled and not<span style="color: #51afef;"> in</span> softirq context</code>
+<code>                     || <span style="color: #98be65;">\-</span>-&gt; acquired<span style="color: #51afef;"> in</span> softirq context</code>
+<code>                     | <span style="color: #98be65;">\-</span>--&gt; hardirq disabled and not<span style="color: #51afef;"> in</span> hardirq context</code>
+<code>                     <span style="color: #98be65;">\-</span>---&gt; acquired<span style="color: #51afef;"> in</span> hardirq context</code>
+</pre>
+</div>
+
+
+<p>
+上面的文档已经解决的很清楚了<br>
+从内核的使用中，由于不同上下文间具有固定的抢占规则，可以锁添加上softirq/hardirq-safe/unsafe的标签<br>
+根据上面的9种状态，lockdep通过记录锁在获取时的上下文，以及中断开启状态，来机率锁的状态，每把锁可以在不同safe/unsafe的标签中转化<br>
+<img src="/assets/.lockdep-struct-3.png"><br>
+softirq/hardirq的safe状态可以用来判断持锁是否会有风险，入下图所示，红色箭头所表示的锁依赖顺序是有死锁风险的<br>
+<img src="/assets/.lockdep-struct-4.png"><br>
+</p>
+</div>
+</div>
+
+<div id="outline-container-org5bc9bf6" class="outline-3">
+<h3 id="org5bc9bf6">在当前的task struct中记录相关的加锁信息</h3>
+<div class="outline-text-3" id="text-org5bc9bf6">
+<p>
+在记录时通过lock_class来进行，所以即使没有发生死锁，系统也可以上报具体的错误信息<br>
+</p>
+</div>
+
+<div id="outline-container-orgd0eb16f" class="outline-4">
+<h4 id="orgd0eb16f">RSLS Call Trace</h4>
+<div class="outline-text-4" id="text-orgd0eb16f">
+<p>
+下面是raw spinlock持锁时的lockdep相关的操作逻辑<br>
+</p>
+
+<ul class="org-ul">
+<li><a target="_blank" href="https://github.com/torvalds/linux/blob/09688c0166e76ce2fb85e86b9d99be8b0084cdf9/include/linux/spinlock_api_smp.h#L104">__raw_spin_lock_irqsave</a><br>
+<ul class="org-ul">
+<li><a target="_blank" href="https://github.com/torvalds/linux/blob/09688c0166e76ce2fb85e86b9d99be8b0084cdf9/include/linux/spinlock_api_smp.h#L110">spin_acquire</a><br>
+<ul class="org-ul">
+<li>if !try_lock success<br>
+<ul class="org-ul">
+<li><a target="_blank" href="https://github.com/torvalds/linux/blob/09688c0166e76ce2fb85e86b9d99be8b0084cdf9/include/linux/lockdep.h#L453">lock_contended</a><br>
+<ul class="org-ul">
+<li>lock<br></li>
+</ul></li>
+</ul></li>
+<li><a target="_blank" href="https://github.com/torvalds/linux/blob/09688c0166e76ce2fb85e86b9d99be8b0084cdf9/include/linux/lockdep.h#L456">lock_acquired</a><br></li>
+</ul></li>
+</ul></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orged22642" class="outline-4">
+<h4 id="orged22642">Mutex lock</h4>
+<div class="outline-text-4" id="text-orged22642">
+<p>
+下面是mutex_lock持锁时的lockdep相关的操作逻辑<br>
+</p>
+
+<ul class="org-ul">
+<li><a target="_blank" href="https://github.com/torvalds/linux/blob/09688c0166e76ce2fb85e86b9d99be8b0084cdf9/kernel/locking/mutex.c#L730">__mutex_lock</a><br>
+<ul class="org-ul">
+<li><p>
+<a target="_blank" href="https://github.com/torvalds/linux/blob/09688c0166e76ce2fb85e86b9d99be8b0084cdf9/kernel/locking/mutex.c#L566">__mutex_lock_common</a><br>
+</p>
+<ul class="org-ul">
+<li><a target="_blank" href="https://github.com/torvalds/linux/blob/09688c0166e76ce2fb85e86b9d99be8b0084cdf9/kernel/locking/mutex.c#L600">mutex_acquire_nest</a><br>
+<ul class="org-ul">
+<li>if try_lock success<br>
+<ul class="org-ul">
+<li><a target="_blank" href="https://github.com/torvalds/linux/blob/09688c0166e76ce2fb85e86b9d99be8b0084cdf9/kernel/locking/mutex.c#L605">lock_acquired</a><br></li>
+<li>return<br></li>
+</ul></li>
+<li>else<br>
+<ul class="org-ul">
+<li><a target="_blank" href="https://github.com/torvalds/linux/blob/09688c0166e76ce2fb85e86b9d99be8b0084cdf9/kernel/locking/mutex.c#L628">lock_contended</a><br></li>
+<li>wait until lock acquired<br></li>
+</ul></li>
+</ul></li>
+<li><a target="_blank" href="https://github.com/torvalds/linux/blob/09688c0166e76ce2fb85e86b9d99be8b0084cdf9/kernel/locking/mutex.c#L709">lock_acquired</a><br></li>
+</ul>
+<p>
+从上面的两个例子可以看出，对于不同的锁，lockdep处理逻辑都是类似的，主要用到3个api函数 lock_acquire, lock_contended, lock_acquired.<br>
+</p></li>
+</ul></li>
+</ul>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgdc46545" class="outline-3">
+<h3 id="orgdc46545">在进行锁操作时，对比之前已经持有的锁信息，通过规则判断出具体的异常</h3>
+<div class="outline-text-3" id="text-orgdc46545">
+</div>
+<div id="outline-container-orgaeb4272" class="outline-4">
+<h4 id="orgaeb4272">上下文判断</h4>
+<div class="outline-text-4" id="text-orgaeb4272">
+<p>
+这个很简单，通过判断每个锁所处于的上下文来进行判断<br>
+下面是linux对于上下文类型的定义, 代码提交如下 <a href="https://lwn.net/Articles/579849/">https://lwn.net/Articles/579849/</a><br>
+<a target="_blank" href="https://github.com/torvalds/linux/blob/09688c0166e76ce2fb85e86b9d99be8b0084cdf9/include/linux/lockdep_types.h#L17">lockdep_wait_type</a><br>
+</p>
+<div class="org-src-container">
+<pre class="src src-C"><code><span style="color: #51afef;">enum</span> <span style="color: #ECBE7B;">lockdep_wait_type</span> {</code>
+<code>    <span style="color: #dcaeea;">LD_WAIT_INV</span> = 0,    <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">not checked, catch all</span><span style="color: #5B6268;"> */</span></code>
+<code></code>
+<code>    <span style="color: #dcaeea;">LD_WAIT_FREE</span>,               <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">wait free, rcu etc..</span><span style="color: #5B6268;"> */</span></code>
+<code>    <span style="color: #dcaeea;">LD_WAIT_SPIN</span>,               <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">spin loops, raw_spinlock_t etc..</span><span style="color: #5B6268;"> */</span></code>
+<code></code>
+<code><span style="color: #51afef; font-weight: bold;">#ifdef</span> CONFIG_PROVE_RAW_LOCK_NESTING</code>
+<code>    <span style="color: #dcaeea;">LD_WAIT_CONFIG</span>,             <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">preemptible in PREEMPT_RT, spinlock_t etc..</span><span style="color: #5B6268;"> */</span></code>
+<code><span style="color: #51afef; font-weight: bold;">#else</span></code>
+<code>    <span style="color: #dcaeea;">LD_WAIT_CONFIG</span> = LD_WAIT_SPIN,</code>
+<code><span style="color: #51afef; font-weight: bold;">#endif</span></code>
+<code>    <span style="color: #dcaeea;">LD_WAIT_SLEEP</span>,              <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">sleeping locks, mutex_t etc..</span><span style="color: #5B6268;"> */</span></code>
+<code></code>
+<code>    <span style="color: #dcaeea;">LD_WAIT_MAX</span>,                <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">must be last</span><span style="color: #5B6268;"> */</span></code>
+<code>};</code>
+</pre>
+</div>
+<p>
+系统在运行时会检查所有已经获取到的锁，并且以此为依据检查持锁的上下文是否正确,代码可以参考 <a target="_blank" href="https://github.com/torvalds/linux/blob/09688c0166e76ce2fb85e86b9d99be8b0084cdf9/kernel/locking/lockdep.c#L4698">check_wait_context</a><br>
+</p>
+
+<ul class="org-ul">
+<li>wait_type_outer<br>
+可以持有此锁的上下文类型, wait_type &gt;= wait_type_outer既可认为是正确的持持锁顺序<br>
+LD_WAIT_SLEEP 表示可以在进程上下文中持有该锁<br>
+LD_WAIT_SPIN 表示可以在进程上下文，以及原子上下文中持有该锁<br>
+LD_WAIT_INV 表示outer和inner保持一致 (大部份锁都是这样的设置)<br></li>
+
+<li><p>
+wait_type_inner<br>
+持有该锁之后进入的上下文类型<br>
+eg:<br>
+  Mutex lock的wait_type_inner为LD_WAIT_SLEEP, 表示持有该锁之后系统可以睡眠。<br>
+  raw_spinlock的wait_type_inner为LD_WAIT_SPIN, 表示持有该锁之后系统就会进入不可抢占的原子上下文<br>
+</p>
+
+<p>
+<a target="_blank" href="https://github.com/torvalds/linux/blob/09688c0166e76ce2fb85e86b9d99be8b0084cdf9/include/linux/mutex.h#L24">MUTEX LOCK wait_type_inner</a><br>
+</p>
+<div class="org-src-container">
+<pre class="src src-C"><code><span style="color: #51afef; font-weight: bold;">#ifdef</span> CONFIG_DEBUG_LOCK_ALLOC</code>
+<code><span style="color: #51afef; font-weight: bold;"># define</span> <span style="color: #c678dd;">__DEP_MAP_MUTEX_INITIALIZER</span>(<span style="color: #dcaeea;">lockname</span>)          \</code>
+<code>    , .dep_map = {                                      \</code>
+<code>        .name = #lockname,                      \</code>
+<code>        .wait_type_inner = LD_WAIT_SLEEP,       \</code>
+<code>    }</code>
+<code><span style="color: #51afef; font-weight: bold;">#else</span></code>
+<code><span style="color: #51afef; font-weight: bold;"># define</span> <span style="color: #c678dd;">__DEP_MAP_MUTEX_INITIALIZER</span>(<span style="color: #dcaeea;">lockname</span>)</code>
+<code><span style="color: #51afef; font-weight: bold;">#endif</span></code>
+</pre>
+</div></li>
+</ul>
+
+<p>
+系统根据着个类型，就可以跟踪，记录目前系统所持有的锁的上下文状态，并且于即将持有的锁inner waittype做比较，检测出相应的问题<br>
+</p>
+</div>
+</div>
+
+<div id="outline-container-org25d6ade" class="outline-4">
+<h4 id="org25d6ade">锁依赖</h4>
+<div class="outline-text-4" id="text-org25d6ade">
+<p>
+此部份是lockdep设计的核心，死锁检测的方法，以及定理将从此处给出<br>
+</p>
+</div>
+<ul class="org-ul">
+<li><a id="org804a299"></a>lock type<br>
+<div class="outline-text-5" id="text-org804a299">
+<p>
+因为不同性质的锁阻塞的条件不同，所以内核根据阻塞产生条件，给内核中的锁分为了以下的几大类.lockdep将锁分为以下几种类型<br>
+</p>
+<dl class="org-dl">
+<dt>writers</dt><dd>exclusive lockers, like spin_lock() or write_lock()<br>
+此种锁是内核编程中最常用的类型，完全独占的锁，同一时间只会有一个owner，最容易分析<br></dd>
+
+<dt>non-recursive readers</dt><dd>shared lockers, like down_read()<br>
+此种锁是普通的读锁，因为读锁可以同时被读端锁持有，因此允许多线程同时持有，有相互依赖的持有关系也不一定会死锁<br></dd>
+
+<dt>recursive readers</dt><dd><p>
+recursive shared lockers, like rcu_read_lock()<br>
+这种锁是更不易死锁的类型，由于支持重入，具有更佳宽松个的死锁条件<br>
+</p>
+
+<p>
+并且为了方便文章编写，做出缩写如下<br>
+</p>
+<table>
+
+
+<colgroup>
+<col  class="org-left">
+
+<col  class="org-left">
+</colgroup>
+<tbody>
+<tr>
+<td class="org-left">abbr</td>
+<td class="org-left">type</td>
+</tr>
+
+<tr>
+<td class="org-left">W/E</td>
+<td class="org-left">exclusive lockers</td>
+</tr>
+
+<tr>
+<td class="org-left">r</td>
+<td class="org-left">non-recursive readers</td>
+</tr>
+
+<tr>
+<td class="org-left">R</td>
+<td class="org-left">recursive readers</td>
+</tr>
+
+<tr>
+<td class="org-left">S</td>
+<td class="org-left">all readers (non-recursive + recursive), as both are shared lockers.</td>
+</tr>
+
+<tr>
+<td class="org-left">N</td>
+<td class="org-left">writers and non-recursive readers, as both are not recursive.</td>
+</tr>
+</tbody>
+</table></dd>
+</dl>
+</div>
+</li>
+
+<li><a id="orgee90be1"></a>non-recursive readers的死锁情形<br>
+<div class="outline-text-5" id="text-orgee90be1">
+<p>
+为了方便理解，通过下面的例子，可以看出重入属性对死锁的产生的影响<br>
+这个例子展示了non-recursive readers被writer的waiter阻塞导致出现deadlock的情形<br>
+虽然read_lock可以同时被多个cpu/单个cpu持有，但是如果有线程在等待write锁, 系统依旧会因此而阻塞<br>
+</p>
+<blockquote>
+<p>
+TASK A:			TASK B:<br>
+</p>
+
+<p>
+read_lock(X);<br>
+            write_lock(X);<br>
+read_lock_2(X);<br>
+</p>
+</blockquote>
+<p>
+简而言之就是锁X在第二次获取读锁时，会因为另一个task在等待获取写锁而导致死锁。这是因为写锁会block之后尝试获取读锁的操作，如果没有这个block操作，系统可能会因为一致有进程不断获取读锁，而导致，写入的进程无法拿到锁，造成饿死.<br>
+具体可以参考 <a target="_blank" href="https://github.com/torvalds/linux/blob/09688c0166e76ce2fb85e86b9d99be8b0084cdf9/kernel/locking/qrwlock.c#L40">read_lock will wait for write waiter</a><br>
+</p>
+
+<div class="org-src-container">
+<pre class="src src-bash"><code>void queued_read_lock_slowpath(struct qrwlock *lock)</code>
+<code>{</code>
+<code>    /*</code>
+<code>     * Readers come here when they cannot get the lock without waiting</code>
+<code>     */</code>
+<code>    <span style="color: #51afef;">if</span> (unlikely(in_interrupt())) {</code>
+<code>        /*</code>
+<code>         * Readers<span style="color: #51afef;"> in</span> interrupt context will get the lock immediately</code>
+<code>         * if the writer is just waiting (not holding the lock yet),</code>
+<code>         * so spin with ACQUIRE semantics until the lock is available</code>
+<code>         * without waiting<span style="color: #51afef;"> in</span> the queue.</code>
+<code>         */</code>
+<code>        atomic_cond_read_acquire(&amp;lock-&gt;cnts, !(VAL &amp; _QW_LOCKED));</code>
+<code>        <span style="color: #51afef;">return</span>;</code>
+<code>    }</code>
+<code>    atomic_sub(_QR_BIAS, &amp;lock-&gt;cnts);</code>
+<code></code>
+<code>    /*</code>
+<code>     * Put the reader into the wait queue</code>
+<code>     */</code>
+<code>    arch_spin_lock(&amp;lock-&gt;wait_lock);</code>
+<code>    atomic_add(_QR_BIAS, &amp;lock-&gt;cnts);</code>
+<code></code>
+<code>    /*</code>
+<code>     * The ACQUIRE semantics of the following spinning code ensure</code>
+<code>     * that accesses can<span style="color: #98be65;">'t leak upwards out of our subsequent critical</span></code>
+<code><span style="color: #98be65;">     * section in the case that the lock is currently held for write.</span></code>
+<code><span style="color: #98be65;">     */</span></code>
+<code><span style="color: #98be65;">    atomic_cond_read_acquire(&amp;lock-&gt;cnts, !(VAL &amp; _QW_LOCKED));</span></code>
+<code></code>
+<code><span style="color: #98be65;">    /*</span></code>
+<code><span style="color: #98be65;">     * Signal the next one in queue to become queue head</span></code>
+<code><span style="color: #98be65;">     */</span></code>
+<code><span style="color: #98be65;">    arch_spin_unlock(&amp;lock-&gt;wait_lock);</span></code>
+<code><span style="color: #98be65;">}</span></code>
+<code><span style="color: #98be65;">EXPORT_SYMBOL(queued_read_lock_slowpath);</span></code>
+</pre>
+</div>
+<p>
+如上面的内核实现，读锁会block在arch_spin_lock(&amp;lock-&gt;wait_lock);或者 atomic_cond_read_acquire(&amp;lock-&gt;cnts, !(VAL &amp; _QW_LOCKED));，在此处等待写锁离开临界区，单此时，读写被Task A拿到，导致死锁.<br>
+</p>
+</div>
+</li>
+
+<li><a id="orgb904d8f"></a>根据锁类型，来观察死锁的条件关系<br>
+<div class="outline-text-5" id="text-orgb904d8f">
+<p>
+针对这三种锁类型，可以有如下几种的阻塞关系矩阵. Y表示行标会阻塞列标, N表示不会产生阻塞的问题<br>
+<img src="/assets/.lockdep-struct-5.png"><br>
+</p>
+
+<p>
+上面列出了不同类型的锁在相互依赖时是否会产生block，N表示完全不会形成阻塞等待<br>
+下面简单列举两个不会产生阻塞的路径<br>
+</p>
+<ul class="org-ul">
+<li>R won't block r. 递归的读锁不会阻塞非递归的读锁<br></li>
+<li>R won't block R. 递归的读锁不会相互block<br></li>
+</ul>
+</div>
+</li>
+<li><a id="orgd8bba1d"></a>依赖分析<br>
+<div class="outline-text-5" id="text-orgd8bba1d">
+<p>
+通过上面的表格，在检测死锁时，共需要检测9种情况<br>
+</p>
+
+<p>
+考虑如下的依赖情况<br>
+L1 -&gt; L2<br>
+我们需要关心在获取L1的情况下，再去获取L2系统会不会被block. 换句话说就是有没有可能存在L3，L3依赖于L1，而L2依赖于L3.<br>
+这样我们只需要检测一下获取L1之前获取过的锁列表, 以及获取L2之后获取过的锁列表，再综合锁的类型进行考虑就可以检测出来死锁。<br>
+</p>
+
+<p>
+  综合上面的阻塞关系图，具有如下规律<br>
+  <img src="/assets/.lockdep-struct-2.png"><br>
+  根据这个规律，可以方便的将关系简化为4种，这样，就可以大大降低复杂度.<br>
+lockdep会动态生成一张依赖图，系统将对应的lockclass添加到这张图中，通过对应的算法照出相应的依赖关系.<br>
+依赖类型<br>
+针对不同的锁类型，可以抽象出以下四中依赖关系, 按照上面的阻塞关系图。<br>
+</p>
+<ul class="org-ul">
+<li>-(ER)-&gt;<br>
+exclusive writer to recursive reader dependency<br></li>
+<li>-(EN)-&gt;<br>
+exclusive writer to non-recursive locker dependency<br></li>
+<li>-(SR)-&gt;<br>
+shared reader to recursive reader dependency<br></li>
+<li>-(SN)-&gt;<br>
+shared reader to non-recursive locker dependency<br></li>
+</ul>
+</div>
+</li>
+
+<li><a id="orgfdb851c"></a>strong path定义<br>
+<div class="outline-text-5" id="text-orgfdb851c">
+<p>
+根据阻塞图，如果一条依赖路径上全部都是可阻塞的类型，则定义为strong path<br>
+简单来说就是不经过-(<b>R)-&gt; -(S</b>)-&gt;路径的定义为strong path. 因为经过这种路径的都有非block的锁关系，lockdep认为不会造成死锁.<br>
+下面是内核文档中对strong path定义的原文<br>
+</p>
+<blockquote>
+<p>
+A "path" is a series of conjunct dependency edges in the graph. And we define a<br>
+"strong" path, which indicates the strong dependency throughout each dependency<br>
+in the path, as the path that doesn't have two conjunct edges (dependencies) as<br>
+-(xR)-&gt; and -(Sx)-&gt;. In other words, a "strong" path is a path from a lock<br>
+walking to another through the lock dependencies, and if X -&gt; Y -&gt; Z is in the<br>
+path (where X, Y, Z are locks), and the walk from X to Y is through a -(SR)-&gt; or<br>
+-(ER)-&gt; dependency, the walk from Y to Z must not be through a -(SN)-&gt; or<br>
+-(SR)-&gt; dependency.<br>
+</p>
+</blockquote>
+</div>
+</li>
+
+<li><a id="org8ce4638"></a>死锁关系证明<br>
+<div class="outline-text-5" id="text-org8ce4638">
+<ul class="org-ul">
+<li>定理1<br>
+如果一条路径上有闭环的strong path，那么这个就会构成死锁.<br></li>
+<li><p>
+定理2<br>
+如果一条路径上没有闭环的strong path，那么一定不会构成死锁.<br>
+</p>
+
+<p>
+在这两个定理的前提下，可以很容易得出，闭环的strong path是死锁的充分必要条件. 上面两条定理的证明在内核文档中有详细的描述。在此不再赘述.<br>
+</p>
+
+<p>
+所以在lockdep的检测中，只需要找出持锁路径上是否有闭环的strong path就可以了.<br>
+</p></li>
+</ul>
+</div>
+</li>
+<li><a id="orge353472"></a>代码实现<br>
+<div class="outline-text-5" id="text-orge353472">
+<p>
+<a target="_blank" href="https://github.com/torvalds/linux/blob/09688c0166e76ce2fb85e86b9d99be8b0084cdf9/kernel/locking/lockdep.c#L3064">source to call check_noncircular</a><br>
+通过代码注释可以看到，内核通过广度优先的遍历方式，寻找是否会形成依赖环路, 在找到对应的环路之后，再经过对闭环strong path的判断来验证是否存在死锁.<br>
+<a target="_blank" href="https://github.com/torvalds/linux/blob/09688c0166e76ce2fb85e86b9d99be8b0084cdf9/kernel/locking/lockdep.c#L1977">检测是否存在闭环的strong path</a><br>
+</p>
+<div class="org-src-container">
+<pre class="src src-C"><code><span style="color: #5B6268;">/*</span></code>
+<code><span style="color: #5B6268;"> * We are about to add B -&gt; A into the dependency graph, and in __bfs() a</span></code>
+<code><span style="color: #5B6268;"> * strong dependency path A -&gt; .. -&gt; B is found: hlock_class equals</span></code>
+<code><span style="color: #5B6268;"> * entry-&gt;class.</span></code>
+<code><span style="color: #5B6268;"> *</span></code>
+<code><span style="color: #5B6268;"> * We will have a deadlock case (conflict) if A -&gt; .. -&gt; B -&gt; A is a strong</span></code>
+<code><span style="color: #5B6268;"> * dependency cycle, that means:</span></code>
+<code><span style="color: #5B6268;"> *</span></code>
+<code><span style="color: #5B6268;"> * Either</span></code>
+<code><span style="color: #5B6268;"> *</span></code>
+<code><span style="color: #5B6268;"> *     a) B -&gt; A is -(E*)-&gt;</span></code>
+<code><span style="color: #5B6268;"> *</span></code>
+<code><span style="color: #5B6268;"> * or</span></code>
+<code><span style="color: #5B6268;"> *</span></code>
+<code><span style="color: #5B6268;"> *     b) A -&gt; .. -&gt; B is -(*N)-&gt; (i.e. A -&gt; .. -(*N)-&gt; B)</span></code>
+<code><span style="color: #5B6268;"> *</span></code>
+<code><span style="color: #5B6268;"> * as then we don't have -(*R)-&gt; -(S*)-&gt; in the cycle.</span></code>
+<code><span style="color: #5B6268;"> */</span></code>
+<code><span style="color: #51afef;">static</span> <span style="color: #51afef;">inline</span> <span style="color: #ECBE7B;">bool</span> <span style="color: #c678dd;">hlock_conflict</span>(<span style="color: #51afef;">struct</span> <span style="color: #ECBE7B;">lock_list</span> *<span style="color: #dcaeea;">entry</span>, <span style="color: #ECBE7B;">void</span> *<span style="color: #dcaeea;">data</span>)</code>
+<code>{</code>
+<code>    <span style="color: #51afef;">struct</span> <span style="color: #ECBE7B;">held_lock</span> *<span style="color: #dcaeea;">hlock</span> = (<span style="color: #51afef;">struct</span> <span style="color: #ECBE7B;">held_lock</span> *)data;</code>
+<code></code>
+<code>    <span style="color: #51afef;">return</span> hlock_class(hlock) == entry-&gt;class &amp;&amp; <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">Found A -&gt; .. -&gt; B</span><span style="color: #5B6268;"> */</span></code>
+<code>        (hlock-&gt;read == 0 || <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">B -&gt; A is -(E*)-&gt;</span><span style="color: #5B6268;"> */</span></code>
+<code>            <span style="color: #51afef; font-weight: bold;">!</span>entry-&gt;only_xr); <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">A -&gt; .. -&gt; B is -(*N)-&gt;</span><span style="color: #5B6268;"> */</span></code>
+<code>}</code>
+</pre>
+</div>
+<p>
+如上面的注释，判断几个东西<br>
+</p>
+<dl class="org-dl">
+<dt>hlock_class(hlock) == entry-&gt;class</dt><dd>A -&gt; B 这个锁和即将获取的锁形成了依赖关系<br>
+以前有依赖关系 A -&gt; B, 再尝试通过B -&gt; A的顺序拿锁是会造成这个条件成立<br></dd>
+<dt>hlock-&gt;read == 0</dt><dd>B -(E*)-&gt; A 这个情况满足闭环strong path的条件<br></dd>
+<dt>!entry-&gt;only_xr</dt><dd>A -&gt; .. -&gt; B is -(*N)-&gt; (i.e. A -&gt; .. -(*N)-&gt; B)<br>
+如果这几个条件成立，则认为满足了闭环strong path的充要条件.<br></dd>
+</dl>
+</div>
+</li>
+</ul>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org4b6f201" class="outline-2">
+<h2 id="org4b6f201">Debug</h2>
+<div class="outline-text-2" id="text-org4b6f201">
+<p>
+/proc/lockdep 节点可以查看每个lock class的详细debug信息, 下面列出了示例信息<br>
+代码请参考 <a target="_blank" href="https://github.com/torvalds/linux/blob/09688c0166e76ce2fb85e86b9d99be8b0084cdf9/kernel/locking/lockdep_proc.c#L58">source for /proc/lockdep</a><br>
+</p>
+<div class="org-src-container">
+<pre class="src src-bash"><code>00000000d17fd3f7 OPS:     137 FD:  308 BD:    9 ++++: &amp;tty-&gt;termios_rwsem</code>
+<code>  -&gt; [00000000b06224ce] &amp;lock-&gt;wait_lock</code>
+<code>  -&gt; [00000000d4898666] &amp;tty-&gt;write_wait</code>
+<code>  -&gt; [000000007b4e289b] &amp;ldata-&gt;output_lock</code>
+<code>  -&gt; [000000006ca1fe00] (console_sem).lock</code>
+<code>  -&gt; [00000000ee9c07cf] console_lock</code>
+<code>  -&gt; [000000002bdc3481] &amp;port-&gt;mutex</code>
+<code>  -&gt; [00000000bc14037e] &amp;rq-&gt;lock</code>
+<code>  -&gt; [000000004119195b] &amp;tty-&gt;read_wait</code>
+<code>  -&gt; [000000004246edf4] &amp;port_lock_key</code>
+<code>  -&gt; [00000000b287322b] &amp;mm-&gt;mmap_lock</code>
+<code>  -&gt; [0000000007fc188b] &amp;tty-&gt;throttle_mutex</code>
+<code>  -&gt; [000000003fde6c48] &amp;p-&gt;pi_lock</code>
+</pre>
+</div>
+
+<dl class="org-dl">
+<dt>00000000d17fd3f7</dt><dd>lock的地址，%p显示，这里由于打印的保护机制，被显示为指针的hash值<br></dd>
+<dt>OPS</dt><dd>137 尝试获取锁的次数, __lock_acquire时加1<br></dd>
+<dt>FD</dt><dd>308 在获取该锁之前获取过的锁的个数<br></dd>
+<dt>BD</dt><dd>9 在获取该锁之后获取过的锁个数<br></dd>
+<dt><del>++</del></dt><dd>锁的状态，见上文中的解释<br></dd>
+<dt>&amp;tty-&gt;termios_rwsem</dt><dd>锁的名字<br></dd>
+</dl>
+</div>
+</div>
+
+
+<div id="outline-container-org3baeba0" class="outline-2">
+<h2 id="org3baeba0">refs</h2>
+<div class="outline-text-2" id="text-org3baeba0">
+<p>
+<a href="https://lpc.events/event/2/contributions/74/attachments/67/78/Recursive_read_deadlocks_and_Where_to_find_them.pdf">https://lpc.events/event/2/contributions/74/attachments/67/78/Recursive_read_deadlocks_and_Where_to_find_them.pdf</a><br>
+</p>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<script src="https://utteranc.es/client.js"
+    repo="schspa/schspa.github.io"
+    issue-term="title"
+    label="✨💬✨"
+    theme="github-light"
+    crossorigin="anonymous"
+    async>
+</script>
+<div class="me">
+  <span><b>Contact me via :)</b><span>
+  <div class="contact">
+    <a id="email" href="mailto:schspa@gmail.com" target="_blank"><i class="fab fa-mailchimp animated heartBeat delay-2s slower"></i></a>
+    <a id="github" href="//github.com/schspa" target="_blank"><i class="fab fa-github animated heartBeat delay-2s slower"></i></a>
+  </div>
+</div>
+
+<div id="jinrishici-sentence" style="font-weight: 700;">虚怀乃若谷，水深则流缓。</div>
+<script src="https://sdk.jinrishici.com/v2/browser/jinrishici.js" charset="utf-8"></script>
+</div>
+</body>
+</html>

@@ -117,6 +117,18 @@
     ]
   },
   {
+    "file-path": "~/org/linux/sync/lockdep.org",
+    "URL": "/2022/03/25/lockdep.html",
+    "TITLE": "Linux lockdep",
+    "DATE": "<2022-03-25 13:25:29>",
+    "FILETAGS": [
+      "blogs"
+    ],
+    "CATEGORY": [
+      "Linux"
+    ]
+  },
+  {
     "file-path": "~/org/linux/security/nfs-rootsquash.org",
     "URL": "/2020/08/08/nfs-rootsquash.html",
     "TITLE": "利用nfs no_root_squash获取root权限",
