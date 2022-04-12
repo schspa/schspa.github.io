@@ -1,0 +1,7 @@
+(setq org-publish-cache (make-hash-table :test 'equal :weakness nil :size 100))
+(puthash ":project:" "css" org-publish-cache)
+(puthash ":cache-file:" "/Users/schspa/sites/.org-timestamps/css.cache" org-publish-cache)
+(puthash "X9749ee3060f7036aac0fcba311944f76f4f991ab" '(24428 13194 21284 513000) org-publish-cache)
+(puthash "Xc020b6b150f6b5feaed99da26751008ebc477759" '(24428 13194 20692 260000) org-publish-cache)
+(puthash "X6dd08a5879cbb882bc80e28e97136a372472899d" '(24428 13194 21577 809000) org-publish-cache)
+(puthash "Xbccd5cab1a7bc0ee1dc65036350f82778c00a837" '(25064 50511 51074 94000) org-publish-cache)
