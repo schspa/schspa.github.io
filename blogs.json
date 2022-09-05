@@ -353,6 +353,18 @@
     ]
   },
   {
+    "file-path": "~/org/debug/uboot-online-debug.org",
+    "URL": "/2019/10/22/uboot-online-debug.html",
+    "TITLE": "Debug Uboot with gdb",
+    "DATE": "<2019-10-22 11:09:10>",
+    "FILETAGS": [
+      "blogs"
+    ],
+    "CATEGORY": [
+      "Debug"
+    ]
+  },
+  {
     "file-path": "~/org/debug/AARCH64-native-debug.org",
     "URL": "/2021/04/27/AARCH64-native-debug.html",
     "TITLE": "AARCH64 native problem debug.",

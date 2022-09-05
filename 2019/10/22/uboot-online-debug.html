@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<!-- 2022-09-05 Mon 13:43 -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Debug Uboot with gdb</title>
+<meta name="generator" content="Org mode">
+<meta name="author" content="Schspa Shi">
+<meta name="description" content="Debug Uboot with gdb"
+>
+<link rel="shortcut icon" href="/images/rose-red.png" type="image/x-icon" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" integrity="sha256-sAcc18zvMnaJZrNT4v8J0T4HqzEUiUTlVFgDIywjQek=" crossorigin="anonymous">
+<link rel="stylesheet" href="/css/animate.min.css" />
+<link rel="stylesheet" href="/css/all.min.css" />
+<link rel="stylesheet" type="text/css" href="/css/style.css" />
+<link rel="stylesheet" type="text/css" href="/css/navbar.css" />
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/js/bootstrap.min.js" integrity="sha256-/hGxZHGQ57fXLp+NDusFZsZo/PG21Bp2+hXYV5a6w+g=" crossorigin="anonymous"></script>
+<script src="/js/jquery.min.js"></script>
+<script src="/js/darkreader.js"></script>
+<script src="/user.config.js"></script>
+<script src="/js/main.js"></script>
+</head>
+<body>
+<div id="preamble" class="status">
+<div class="mobile-container">
+  <!-- Top Navigation Menu -->
+  <div class="topnav">
+    <div id="header">
+      <a href="/" class="logo">Schspa's Blog</a>
+      <a href="javascript:void(0);" class="icon" onclick="toggleheader()">
+        <i class="fa fa-bars"></i>
+      </a>
+    </div>
+    <div id="nav_headers">
+      <a href="/sitemap.html" class="menu-item">Categories</a>
+    </div>
+  </div>
+  <!-- End smartphone / tablet look -->
+</div>
+
+<header id="header" class="header">
+  <div class="logo-wrapper">
+    <a href="/" class="logo">Schspa's Blogs</a>
+  </div>
+
+  <nav class="site-navbar">
+    <ul id="menu" class="menu">
+      <li class="menu-item">
+        <a class="menu-item-link" href="/">Home</a>
+      </li>
+      <li class="menu-item">
+        <a class="menu-item-link" href="/sitemap.html">Categories</a>
+      </li>
+    </ul>
+  </nav>
+</header>
+</div>
+<div id="content">
+<h1 class="title">Debug Uboot with gdb</h1>
+<div id="table-of-contents">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents">
+<ul>
+<li><a href="#orgc69615f">Boot flow</a></li>
+<li><a href="#org1523e37">Compile Test images</a></li>
+<li><a href="#org98f4ed3">U-Boot Debug</a>
+<ul>
+<li><a href="#orga6d1e67">Debug a command</a></li>
+<li><a href="#orgb5e4de8">Before relocate</a></li>
+<li><a href="#org9b09d07">After relocate</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+<div id="outline-container-orgc69615f" class="outline-2">
+<h2 id="orgc69615f">Boot flow</h2>
+<div class="outline-text-2" id="text-orgc69615f">
+<p>
+We have qemu virt arm64 running ATF code and Uboot.<br>
+</p>
+
+<p>
+Boot flow as<br>
+BL1 → BL2 → BL31 → BL33 (Uboot)<br>
+</p>
+</div>
+</div>
+
+<div id="outline-container-org1523e37" class="outline-2">
+<h2 id="org1523e37">Compile Test images</h2>
+<div class="outline-text-2" id="text-org1523e37">
+<ul class="org-ul">
+<li><p>
+ATF<br>
+</p>
+<div class="org-src-container">
+<pre class="src src-bash"><code>git clone https://github.com/ARM-software/arm-trusted-firmware.git -b v2.7.0</code>
+<code>make <span class="org-variable-name">PLAT</span>=qemu <span class="org-variable-name">DEBUG</span>=1 -j9</code>
+</pre>
+</div></li>
+<li><p>
+U-BOOT<br>
+</p>
+<div class="org-src-container">
+<pre class="src src-bash"><code>git clone https://github.com/u-boot/u-boot.git -b v2022.07</code>
+<code>make qemu_arm64_defconfig</code>
+<code>make -j9</code>
+</pre>
+</div></li>
+<li><p>
+Prepare image<br>
+</p>
+<div class="org-src-container">
+<pre class="src src-bash"><code>ln -sf arm-trusted-firmware/build/qemu/debug/bl1.bin bl1.bin</code>
+<code>ln -sf arm-trusted-firmware/build/qemu/debug/bl2.bin bl2.bin</code>
+<code>ln -sf arm-trusted-firmware/build/qemu/debug/bl31.bin bl31.bin</code>
+<code>ln -sf u-boot/u-boot.bin bl33.bin</code>
+</pre>
+</div></li>
+
+<li><p>
+Boot image<br>
+</p>
+<div class="org-src-container">
+<pre class="src src-bash"><code>~/work/src/qemu/build/aarch64-softmmu/qemu-system-aarch64 -nographic -machine virt,<span class="org-variable-name">secure</span>=on -cpu cortex-a57 -smp 2 -m 1024 -bios bl1.bin -d unimp -semihosting-config enable,<span class="org-variable-name">target</span>=native</code>
+</pre>
+</div></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org98f4ed3" class="outline-2">
+<h2 id="org98f4ed3">U-Boot Debug</h2>
+<div class="outline-text-2" id="text-org98f4ed3">
+</div>
+<div id="outline-container-orga6d1e67" class="outline-3">
+<h3 id="orga6d1e67">Debug a command</h3>
+<div class="outline-text-3" id="text-orga6d1e67">
+<p>
+If you can boot to Uboot console, it's more easy to debug<br>
+you can get the relocated address from x18 (in AARCH64), then add symbol to that address<br>
+</p>
+
+<div class="org-src-container">
+<pre class="src src-bash"><code>(gdb) p/x ((gd_t *)$<span class="org-variable-name">x18</span>)-&gt;relocaddr</code>
+<code>$<span class="org-variable-name">8</span> = 0x7ff12000</code>
+<code>(gdb) add-symbol-file u-boot/u-boot 0x7ff12000</code>
+<code>add symbol table from file <span class="org-string">"u-boot/u-boot"</span> at</code>
+<code>        .text_addr = 0x7ff12000</code>
+<code>(y or n) y</code>
+<code>Reading symbols from u-boot/u-boot...done.</code>
+<code>(gdb) bt</code>
+<code><span class="org-comment-delimiter">#</span><span class="org-comment">0  pl01x_serial_pending (dev=&lt;optimized out&gt;, input=true) at drivers/serial/serial_pl01x.c:327</span></code>
+<code><span class="org-comment-delimiter">#</span><span class="org-comment">1  0x000000007ff3707c in console_tstc (file=0) at common/console.c:492</span></code>
+<code><span class="org-comment-delimiter">#</span><span class="org-comment">2  fgetc (file=0) at common/console.c:492</span></code>
+<code><span class="org-comment-delimiter">#</span><span class="org-comment">3  0x000000007ff36650 in cread_line (timeout=0, len=&lt;synthetic pointer&gt;, buf=0x7ffe4590 "", prompt=0x7ffb2e59 "=&gt; ") at common/cli_readline.c:277</span></code>
+<code><span class="org-comment-delimiter">#</span><span class="org-comment">4  cli_readline_into_buffer (prompt=0x7ffb2e59 "=&gt; ", buffer=0x7ffe4590 "", timeout=0) at common/cli_readline.c:554</span></code>
+<code><span class="org-comment-delimiter">#</span><span class="org-comment">5  0x000000007ff2f460 in uboot_cli_readline (i=0x7eecfc70) at common/cli_hush.c:1028</span></code>
+<code><span class="org-comment-delimiter">#</span><span class="org-comment">6  get_user_input (i=0x7eecfc70) at common/cli_hush.c:1028</span></code>
+<code><span class="org-comment-delimiter">#</span><span class="org-comment">7  file_get (i=&lt;optimized out&gt;) at common/cli_hush.c:1107</span></code>
+<code><span class="org-comment-delimiter">#</span><span class="org-comment">8  file_get (i=0x7eecfc70) at common/cli_hush.c:1090</span></code>
+<code><span class="org-comment-delimiter">#</span><span class="org-comment">9  0x000000007ff305fc in parse_stream (end_trigger=&lt;optimized out&gt;, input=&lt;optimized out&gt;, ctx=&lt;optimized out&gt;, dest=&lt;optimized out&gt;) at common/cli_hush.c:3189</span></code>
+<code><span class="org-comment-delimiter">#</span><span class="org-comment">10 parse_stream_outer (inp=inp@entry=0x7eecfc70, flag=flag@entry=2) at common/cli_hush.c:3189</span></code>
+<code><span class="org-comment-delimiter">#</span><span class="org-comment">11 0x000000007ff30b84 in parse_file_outer () at common/cli_hush.c:3289</span></code>
+<code><span class="org-comment-delimiter">#</span><span class="org-comment">12 0x000000007ff39350 in cli_loop () at common/cli.c:229</span></code>
+<code><span class="org-comment-delimiter">#</span><span class="org-comment">13 0x000000007ff2ec4c in main_loop () at common/main.c:69</span></code>
+<code><span class="org-comment-delimiter">#</span><span class="org-comment">14 0x000000007ff31238 in run_main_loop () at common/board_r.c:590</span></code>
+<code><span class="org-comment-delimiter">#</span><span class="org-comment">15 0x000000007ff3151c in initcall_run_list (init_sequence=0x7ffc30c0) at include/initcall.h:46</span></code>
+<code><span class="org-comment-delimiter">#</span><span class="org-comment">16 board_init_r (new_gd=&lt;optimized out&gt;, dest_addr=&lt;optimized out&gt;) at common/board_r.c:824</span></code>
+<code><span class="org-comment-delimiter">#</span><span class="org-comment">17 0x000000007ff14570 in ?? () at arch/arm/lib/crt0_64.S:140</span></code>
+<code>Backtrace stopped: previous frame inner to this frame (corrupt stack?)</code>
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgb5e4de8" class="outline-3">
+<h3 id="orgb5e4de8">Before relocate</h3>
+<div class="outline-text-3" id="text-orgb5e4de8">
+<p>
+Before relocate, U-boot running with linked address. (Address you see with System.map)<br>
+</p>
+
+<p>
+In this case, you need to set a breakpoint at _start(u-boot entry), and then, you can debug it as you like.<br>
+</p>
+
+<p>
+fellowing gdb script used for gdb to stop program at _start uboot entry.<br>
+</p>
+<div class="org-src-container">
+<pre class="src src-bash"><code></code>
+<code>define add-symbol-file-auto</code>
+<code><span class="org-comment-delimiter"># </span><span class="org-comment">Parse .text address to temp file</span></code>
+<code>shell echo set <span class="org-string">\$</span><span class="org-variable-name">text_address</span>=$(readelf -WS $<span class="org-variable-name">arg0</span> | grep .text | awk <span class="org-string">'{ print "0x"$5 }'</span>) &gt;/tmp/temp_gdb_text_address.txt</code>
+<code></code>
+<code><span class="org-comment-delimiter"># </span><span class="org-comment">Source .text address</span></code>
+<code><span class="org-builtin">source</span> /tmp/temp_gdb_text_address.txt</code>
+<code></code>
+<code><span class="org-comment-delimiter">#  </span><span class="org-comment">Clean tempfile</span></code>
+<code>shell rm -f /tmp/temp_gdb_text_address.txt</code>
+<code></code>
+<code><span class="org-comment-delimiter"># </span><span class="org-comment">Load symbol table</span></code>
+<code>add-symbol-file $<span class="org-variable-name">arg0</span> $<span class="org-variable-name">text_address</span></code>
+<code>end</code>
+<code></code>
+<code><span class="org-builtin">set</span> print pretty</code>
+<code></code>
+<code>add-symbol-file-auto ../arm-trusted-firmware/build/qemu/debug/bl1/bl1.elf</code>
+<code>add-symbol-file-auto ../arm-trusted-firmware/build/qemu/debug/bl2/bl2.elf</code>
+<code>add-symbol-file-auto ../arm-trusted-firmware/build/qemu/debug/bl31/bl31.elf</code>
+<code>add-symbol-file ../u-boot/u-boot 0x60000000</code>
+<code></code>
+<code>target remote:1234</code>
+<code></code>
+<code>tb  print_entry_point_info</code>
+<code>c</code>
+<code>tb print_entry_point_info</code>
+<code>c</code>
+<code>b _start</code>
+<code>c</code>
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org9b09d07" class="outline-3">
+<h3 id="org9b09d07">After relocate</h3>
+<div class="outline-text-3" id="text-org9b09d07">
+<p>
+After relocate, Uboot will running on top of DRAM, (running address is different from linked address.)<br>
+In this case：<br>
+</p>
+
+<ol class="org-ol">
+<li>setup a break point to stop after relocate copy. and before relocate code to return.<br></li>
+<li>add uboot symbol file at relocaddr.<br></li>
+<li>you can debug it now.<br></li>
+</ol>
+
+<p>
+The following script can help you automate this step<br>
+</p>
+<div class="org-src-container">
+<pre class="src src-bash"><code>define add-symbol-file-auto</code>
+<code><span class="org-comment-delimiter"># </span><span class="org-comment">Parse .text address to temp file</span></code>
+<code>shell echo set <span class="org-string">\$</span><span class="org-variable-name">text_address</span>=$(readelf -WS $<span class="org-variable-name">arg0</span> | grep .text | awk <span class="org-string">'{ print "0x"$5 }'</span>) &gt;/tmp/temp_gdb_text_address.txt</code>
+<code></code>
+<code><span class="org-comment-delimiter"># </span><span class="org-comment">Source .text address</span></code>
+<code><span class="org-builtin">source</span> /tmp/temp_gdb_text_address.txt</code>
+<code></code>
+<code><span class="org-comment-delimiter">#  </span><span class="org-comment">Clean tempfile</span></code>
+<code>shell rm -f /tmp/temp_gdb_text_address.txt</code>
+<code></code>
+<code><span class="org-comment-delimiter"># </span><span class="org-comment">Load symbol table</span></code>
+<code>add-symbol-file $<span class="org-variable-name">arg0</span> $<span class="org-variable-name">text_address</span></code>
+<code>end</code>
+<code></code>
+<code></code>
+<code><span class="org-builtin">set</span> print pretty</code>
+<code></code>
+<code>add-symbol-file-auto ../arm-trusted-firmware/build/qemu/debug/bl1/bl1.elf</code>
+<code>add-symbol-file-auto ../arm-trusted-firmware/build/qemu/debug/bl2/bl2.elf</code>
+<code>add-symbol-file-auto ../arm-trusted-firmware/build/qemu/debug/bl31/bl31.elf</code>
+<code>add-symbol-file ../u-boot/u-boot 0x60000000</code>
+<code></code>
+<code>target remote:1234</code>
+<code></code>
+<code>tb  print_entry_point_info</code>
+<code>c</code>
+<code>tb print_entry_point_info</code>
+<code>c</code>
+<code>b _start</code>
+<code>c</code>
+<code>tb relocate_64.S:95</code>
+<code>c</code>
+<code></code>
+<code>add-symbol-file ../u-boot/u-boot gd-&gt;relocaddr</code>
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<script src="https://utteranc.es/client.js"
+    repo="schspa/schspa.github.io"
+    issue-term="title"
+    label="✨💬✨"
+    theme="github-light"
+    crossorigin="anonymous"
+    async>
+</script>
+<div class="me">
+  <span><b>Contact me via :)</b><span>
+  <div class="contact">
+    <a id="email" href="mailto:schspa@gmail.com" target="_blank"><i class="fab fa-mailchimp animated heartBeat delay-2s slower"></i></a>
+    <a id="github" href="//github.com/schspa" target="_blank"><i class="fab fa-github animated heartBeat delay-2s slower"></i></a>
+  </div>
+</div>
+
+<div id="jinrishici-sentence" style="font-weight: 700;">虚怀乃若谷，水深则流缓。</div>
+<script src="https://sdk.jinrishici.com/v2/browser/jinrishici.js" charset="utf-8"></script>
+</div>
+</body>
+</html>

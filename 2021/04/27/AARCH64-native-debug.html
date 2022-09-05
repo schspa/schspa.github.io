@@ -1,13 +1,14 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2022-03-03 Thu 11:48 -->
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
+<!-- 2022-09-05 Mon 13:50 -->
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
 <title>AARCH64 native problem debug.</title>
-<meta name="author" content="Zhaohui Shi" />
-<meta name="description" content="AARCH64 native proble debugging." />
-<meta name="generator" content="Org Mode" />
+<meta name="generator" content="Org mode">
+<meta name="author" content="Zhaohui Shi">
+<meta name="description" content="AARCH64 native proble debugging."
+>
 <link rel="shortcut icon" href="/images/rose-red.png" type="image/x-icon" />
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" integrity="sha256-sAcc18zvMnaJZrNT4v8J0T4HqzEUiUTlVFgDIywjQek=" crossorigin="anonymous">
 <link rel="stylesheet" href="/css/animate.min.css" />
@@ -55,7 +56,7 @@
   </nav>
 </header>
 </div>
-<div id="content" class="content">
+<div id="content">
 <h1 class="title">AARCH64 native problem debug.</h1>
 
 <div id="outline-container-org5dc635e" class="outline-2">
@@ -115,7 +116,7 @@
 <h4 id="org781c9a3">Generic Registers</h4>
 <div class="outline-text-4" id="text-org781c9a3">
 
-<div id="org3271971" class="figure">
+<div id="org770a3e4" class="figure">
 <p><img src="assets/2021-04-27_15-27-27_screenshot.png" alt="2021-04-27_15-27-27_screenshot.png"><br>
 </p>
 </div>
@@ -192,7 +193,7 @@
 <h4 id="org0a08896">Exception Flow</h4>
 <div class="outline-text-4" id="text-org0a08896">
 
-<div id="orgb151b63" class="figure">
+<div id="org4ad7d69" class="figure">
 <p><img src="assets/2021-04-27_15-19-54_screenshot.png" alt="2021-04-27_15-19-54_screenshot.png" width="600px"><br>
 </p>
 </div>
@@ -209,7 +210,7 @@
 <dt>ESR_ELx</dt><dd>Exception Syndrome Register<br></dd>
 </dl>
 
-<div id="orgda3ba95" class="figure">
+<div id="org4523a6c" class="figure">
 <p><img src="assets/2021-04-27_15-22-24_screenshot.png" alt="2021-04-27_15-22-24_screenshot.png" height="500px"><br>
 </p>
 </div>
@@ -440,25 +441,25 @@ All trigger by external physical signals, All of this should be asynchronous abo
 <a href="https://github.com/schspa/gdb-script/blob/master/load-linux-init.py">GDB Script</a><br>
 </p>
 <div class="org-src-container">
-<pre class="src src-python"><code><span style="color: #5B6268;">#</span><span style="color: #5B6268;">!/usr/bin/env python</span></code>
-<code><span style="color: #5B6268;"># </span><span style="color: #5B6268;">-*- coding: utf-8 -*-</span></code>
-<code><span style="color: #5B6268;">#</span></code>
-<code><span style="color: #5B6268;">#   </span><span style="color: #5B6268;">load-linux-init.py --- Load linux kernel init section</span></code>
-<code><span style="color: #5B6268;">#</span></code>
-<code><span style="color: #5B6268;">#   </span><span style="color: #5B6268;">Copyright (C) 2020, schspa, all rights reserved.</span></code>
-<code><span style="color: #5B6268;">#</span></code>
-<code><span style="color: #5B6268;">#   </span><span style="color: #5B6268;">This program is free software; you can redistribute it and/or modify</span></code>
-<code><span style="color: #5B6268;">#   </span><span style="color: #5B6268;">it under the terms of the GNU General Public License as published by</span></code>
-<code><span style="color: #5B6268;">#   </span><span style="color: #5B6268;">the Free Software Foundation; either version 2 of the License, or</span></code>
-<code><span style="color: #5B6268;">#   </span><span style="color: #5B6268;">(at your option) any later version.</span></code>
-<code><span style="color: #5B6268;">#</span></code>
-<code><span style="color: #5B6268;">#   </span><span style="color: #5B6268;">This program is distributed in the hope that it will be useful,</span></code>
-<code><span style="color: #5B6268;">#   </span><span style="color: #5B6268;">but WITHOUT ANY WARRANTY; without even the implied warranty of</span></code>
-<code><span style="color: #5B6268;">#   </span><span style="color: #5B6268;">MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span></code>
-<code><span style="color: #5B6268;">#   </span><span style="color: #5B6268;">GNU General Public License for more details.</span></code>
-<code><span style="color: #5B6268;">#</span></code>
-<code><span style="color: #5B6268;">#   </span><span style="color: #5B6268;">You should have received a copy of the GNU General Public License</span></code>
-<code><span style="color: #5B6268;">#   </span><span style="color: #5B6268;">along with this program.  If not, see <a href="http://www.gnu.org/licenses/&gt;.</code>
+<pre class="src src-python"><code><span class="org-comment-delimiter">#</span><span class="org-comment">!/usr/bin/env python</span></code>
+<code><span class="org-comment-delimiter"># </span><span class="org-comment">-*- coding: utf-8 -*-</span></code>
+<code><span class="org-comment-delimiter">#</span></code>
+<code><span class="org-comment-delimiter">#   </span><span class="org-comment">load-linux-init.py --- Load linux kernel init section</span></code>
+<code><span class="org-comment-delimiter">#</span></code>
+<code><span class="org-comment-delimiter">#   </span><span class="org-comment">Copyright (C) 2020, schspa, all rights reserved.</span></code>
+<code><span class="org-comment-delimiter">#</span></code>
+<code><span class="org-comment-delimiter">#   </span><span class="org-comment">This program is free software; you can redistribute it and/or modify</span></code>
+<code><span class="org-comment-delimiter">#   </span><span class="org-comment">it under the terms of the GNU General Public License as published by</span></code>
+<code><span class="org-comment-delimiter">#   </span><span class="org-comment">the Free Software Foundation; either version 2 of the License, or</span></code>
+<code><span class="org-comment-delimiter">#   </span><span class="org-comment">(at your option) any later version.</span></code>
+<code><span class="org-comment-delimiter">#</span></code>
+<code><span class="org-comment-delimiter">#   </span><span class="org-comment">This program is distributed in the hope that it will be useful,</span></code>
+<code><span class="org-comment-delimiter">#   </span><span class="org-comment">but WITHOUT ANY WARRANTY; without even the implied warranty of</span></code>
+<code><span class="org-comment-delimiter">#   </span><span class="org-comment">MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the</span></code>
+<code><span class="org-comment-delimiter">#   </span><span class="org-comment">GNU General Public License for more details.</span></code>
+<code><span class="org-comment-delimiter">#</span></code>
+<code><span class="org-comment-delimiter">#   </span><span class="org-comment">You should have received a copy of the GNU General Public License</span></code>
+<code><span class="org-comment-delimiter">#   </span><span class="org-comment">along with this program.  If not, see <a href="http://www.gnu.org/licenses/&gt;.</code>
 <code>#</code>
 <code>import re</code>
 <code>import gdb</code>
@@ -519,7 +520,7 @@ All trigger by external physical signals, All of this should be asynchronous abo
 <code>                                 r&quot;[\s]+(?P&lt;Size&gt;[\S]+)&quot; +</code>
 <code>                                 r&quot;[\s]+(?P&lt;ES&gt;[\S]+)&quot; +</code>
 <code>                                 r&quot;[\s]+(?P&lt;Flg"></code>
-<code></a><span style="color: #5B6268;"><a href="http://www.gnu.org/licenses/&gt;.</code>
+<code></a><span class="org-comment-delimiter"><a href="http://www.gnu.org/licenses/&gt;.</code>
 <code>#</code>
 <code>import re</code>
 <code>import gdb</code>
@@ -580,7 +581,7 @@ All trigger by external physical signals, All of this should be asynchronous abo
 <code>                                 r&quot;[\s]+(?P&lt;Size&gt;[\S]+)&quot; +</code>
 <code>                                 r&quot;[\s]+(?P&lt;ES&gt;[\S]+)&quot; +</code>
 <code>                                 r&quot;[\s]+(?P&lt;Flg"></code>
-<code></a><span style="color: #51afef;"><a href="http://www.gnu.org/licenses/&gt;.</code>
+<code></a><span class="org-keyword"><a href="http://www.gnu.org/licenses/&gt;.</code>
 <code>#</code>
 <code>import re</code>
 <code>import gdb</code>
@@ -641,7 +642,7 @@ All trigger by external physical signals, All of this should be asynchronous abo
 <code>                                 r&quot;[\s]+(?P&lt;Size&gt;[\S]+)&quot; +</code>
 <code>                                 r&quot;[\s]+(?P&lt;ES&gt;[\S]+)&quot; +</code>
 <code>                                 r&quot;[\s]+(?P&lt;Flg"> re</code>
-<code></a><span style="color: #51afef;"><a href="http://www.gnu.org/licenses/&gt;.</code>
+<code></a><span class="org-keyword"><a href="http://www.gnu.org/licenses/&gt;.</code>
 <code>#</code>
 <code>import re</code>
 <code>import gdb</code>
@@ -702,7 +703,7 @@ All trigger by external physical signals, All of this should be asynchronous abo
 <code>                                 r&quot;[\s]+(?P&lt;Size&gt;[\S]+)&quot; +</code>
 <code>                                 r&quot;[\s]+(?P&lt;ES&gt;[\S]+)&quot; +</code>
 <code>                                 r&quot;[\s]+(?P&lt;Flg"> gdb</code>
-<code></a><span style="color: #51afef;"><a href="http://www.gnu.org/licenses/&gt;.</code>
+<code></a><span class="org-keyword"><a href="http://www.gnu.org/licenses/&gt;.</code>
 <code>#</code>
 <code>import re</code>
 <code>import gdb</code>
@@ -762,7 +763,7 @@ All trigger by external physical signals, All of this should be asynchronous abo
 <code>                                 r&quot;[\s]+(?P&lt;Off&gt;[\S]+)&quot; +</code>
 <code>                                 r&quot;[\s]+(?P&lt;Size&gt;[\S]+)&quot; +</code>
 <code>                                 r&quot;[\s]+(?P&lt;ES&gt;[\S]+)&quot; +</code>
-<code>                                 r&quot;[\s]+(?P&lt;Flg"> subprocess </a><span style="color: #51afef;"><a href="http://www.gnu.org/licenses/&gt;.</code>
+<code>                                 r&quot;[\s]+(?P&lt;Flg"> subprocess </a><span class="org-keyword"><a href="http://www.gnu.org/licenses/&gt;.</code>
 <code>#</code>
 <code>import re</code>
 <code>import gdb</code>
@@ -825,7 +826,7 @@ All trigger by external physical signals, All of this should be asynchronous abo
 <code>                                 r&quot;[\s]+(?P&lt;Flg"> check_output, CalledProcessError</code>
 <code></code>
 <code></code>
-<code></a><span style="color: #51afef;"><a href="http://www.gnu.org/licenses/&gt;.</code>
+<code></a><span class="org-keyword"><a href="http://www.gnu.org/licenses/&gt;.</code>
 <code>#</code>
 <code>import re</code>
 <code>import gdb</code>
@@ -885,7 +886,7 @@ All trigger by external physical signals, All of this should be asynchronous abo
 <code>                                 r&quot;[\s]+(?P&lt;Off&gt;[\S]+)&quot; +</code>
 <code>                                 r&quot;[\s]+(?P&lt;Size&gt;[\S]+)&quot; +</code>
 <code>                                 r&quot;[\s]+(?P&lt;ES&gt;[\S]+)&quot; +</code>
-<code>                                 r&quot;[\s]+(?P&lt;Flg"> </a><span style="color: #ECBE7B;"><a href="http://www.gnu.org/licenses/&gt;.</code>
+<code>                                 r&quot;[\s]+(?P&lt;Flg"> </a><span class="org-type"><a href="http://www.gnu.org/licenses/&gt;.</code>
 <code>#</code>
 <code>import re</code>
 <code>import gdb</code>
@@ -946,7 +947,7 @@ All trigger by external physical signals, All of this should be asynchronous abo
 <code>                                 r&quot;[\s]+(?P&lt;Size&gt;[\S]+)&quot; +</code>
 <code>                                 r&quot;[\s]+(?P&lt;ES&gt;[\S]+)&quot; +</code>
 <code>                                 r&quot;[\s]+(?P&lt;Flg">(gdb.Command):</code>
-<code>    </a><span style="color: #83898d;"><a href="http://www.gnu.org/licenses/&gt;.</code>
+<code>    </a><span class="org-doc"><a href="http://www.gnu.org/licenses/&gt;.</code>
 <code>#</code>
 <code>import re</code>
 <code>import gdb</code>
@@ -1008,7 +1009,7 @@ All trigger by external physical signals, All of this should be asynchronous abo
 <code>                                 r&quot;[\s]+(?P&lt;ES&gt;[\S]+)&quot; +</code>
 <code>                                 r&quot;[\s]+(?P&lt;Flg"></code>
 <code></code>
-<code>    </a><span style="color: #51afef;"><a href="http://www.gnu.org/licenses/&gt;.</code>
+<code>    </a><span class="org-keyword"><a href="http://www.gnu.org/licenses/&gt;.</code>
 <code>#</code>
 <code>import re</code>
 <code>import gdb</code>
@@ -1068,7 +1069,7 @@ All trigger by external physical signals, All of this should be asynchronous abo
 <code>                                 r&quot;[\s]+(?P&lt;Off&gt;[\S]+)&quot; +</code>
 <code>                                 r&quot;[\s]+(?P&lt;Size&gt;[\S]+)&quot; +</code>
 <code>                                 r&quot;[\s]+(?P&lt;ES&gt;[\S]+)&quot; +</code>
-<code>                                 r&quot;[\s]+(?P&lt;Flg"> </a><span style="color: #c678dd;"><a href="http://www.gnu.org/licenses/&gt;.</code>
+<code>                                 r&quot;[\s]+(?P&lt;Flg"> </a><span class="org-function-name"><a href="http://www.gnu.org/licenses/&gt;.</code>
 <code>#</code>
 <code>import re</code>
 <code>import gdb</code>
@@ -1128,7 +1129,7 @@ All trigger by external physical signals, All of this should be asynchronous abo
 <code>                                 r&quot;[\s]+(?P&lt;Off&gt;[\S]+)&quot; +</code>
 <code>                                 r&quot;[\s]+(?P&lt;Size&gt;[\S]+)&quot; +</code>
 <code>                                 r&quot;[\s]+(?P&lt;ES&gt;[\S]+)&quot; +</code>
-<code>                                 r&quot;[\s]+(?P&lt;Flg">(</a><span style="color: #51afef;"><a href="http://www.gnu.org/licenses/&gt;.</code>
+<code>                                 r&quot;[\s]+(?P&lt;Flg">(</a><span class="org-keyword"><a href="http://www.gnu.org/licenses/&gt;.</code>
 <code>#</code>
 <code>import re</code>
 <code>import gdb</code>
@@ -1189,7 +1190,7 @@ All trigger by external physical signals, All of this should be asynchronous abo
 <code>                                 r&quot;[\s]+(?P&lt;Size&gt;[\S]+)&quot; +</code>
 <code>                                 r&quot;[\s]+(?P&lt;ES&gt;[\S]+)&quot; +</code>
 <code>                                 r&quot;[\s]+(?P&lt;Flg">):</code>
-<code>        </a><span style="color: #c678dd;"><a href="http://www.gnu.org/licenses/&gt;.</code>
+<code>        </a><span class="org-builtin"><a href="http://www.gnu.org/licenses/&gt;.</code>
 <code>#</code>
 <code>import re</code>
 <code>import gdb</code>
@@ -1250,7 +1251,7 @@ All trigger by external physical signals, All of this should be asynchronous abo
 <code>                                 r&quot;[\s]+(?P&lt;Size&gt;[\S]+)&quot; +</code>
 <code>                                 r&quot;[\s]+(?P&lt;ES&gt;[\S]+)&quot; +</code>
 <code>                                 r&quot;[\s]+(?P&lt;Flg">(LoadLinuxKernelInitCommand,</code>
-<code>              </a><span style="color: #51afef;"><a href="http://www.gnu.org/licenses/&gt;.</code>
+<code>              </a><span class="org-keyword"><a href="http://www.gnu.org/licenses/&gt;.</code>
 <code>#</code>
 <code>import re</code>
 <code>import gdb</code>
@@ -1310,7 +1311,7 @@ All trigger by external physical signals, All of this should be asynchronous abo
 <code>                                 r&quot;[\s]+(?P&lt;Off&gt;[\S]+)&quot; +</code>
 <code>                                 r&quot;[\s]+(?P&lt;Size&gt;[\S]+)&quot; +</code>
 <code>                                 r&quot;[\s]+(?P&lt;ES&gt;[\S]+)&quot; +</code>
-<code>                                 r&quot;[\s]+(?P&lt;Flg">).__init__(</a><span style="color: #98be65;"><a href="http://www.gnu.org/licenses/&gt;.</code>
+<code>                                 r&quot;[\s]+(?P&lt;Flg">).__init__(</a><span class="org-string"><a href="http://www.gnu.org/licenses/&gt;.</code>
 <code>#</code>
 <code>import re</code>
 <code>import gdb</code>
@@ -1371,7 +1372,7 @@ All trigger by external physical signals, All of this should be asynchronous abo
 <code>                                 r&quot;[\s]+(?P&lt;Size&gt;[\S]+)&quot; +</code>
 <code>                                 r&quot;[\s]+(?P&lt;ES&gt;[\S]+)&quot; +</code>
 <code>                                 r&quot;[\s]+(?P&lt;Flg">, gdb.COMMAND_SUPPORT,</code>
-<code>                             gdb.COMPLETE_EXPRESSION, </a><span style="color: #a9a1e1;"><a href="http://www.gnu.org/licenses/&gt;.</code>
+<code>                             gdb.COMPLETE_EXPRESSION, </a><span class="org-constant"><a href="http://www.gnu.org/licenses/&gt;.</code>
 <code>#</code>
 <code>import re</code>
 <code>import gdb</code>
@@ -1433,7 +1434,7 @@ All trigger by external physical signals, All of this should be asynchronous abo
 <code>                                 r&quot;[\s]+(?P&lt;ES&gt;[\S]+)&quot; +</code>
 <code>                                 r&quot;[\s]+(?P&lt;Flg">)</code>
 <code></code>
-<code>    </a><span style="color: #51afef;"><a href="http://www.gnu.org/licenses/&gt;.</code>
+<code>    </a><span class="org-keyword"><a href="http://www.gnu.org/licenses/&gt;.</code>
 <code>#</code>
 <code>import re</code>
 <code>import gdb</code>
@@ -1493,7 +1494,7 @@ All trigger by external physical signals, All of this should be asynchronous abo
 <code>                                 r&quot;[\s]+(?P&lt;Off&gt;[\S]+)&quot; +</code>
 <code>                                 r&quot;[\s]+(?P&lt;Size&gt;[\S]+)&quot; +</code>
 <code>                                 r&quot;[\s]+(?P&lt;ES&gt;[\S]+)&quot; +</code>
-<code>                                 r&quot;[\s]+(?P&lt;Flg"> </a><span style="color: #c678dd;"><a href="http://www.gnu.org/licenses/&gt;.</code>
+<code>                                 r&quot;[\s]+(?P&lt;Flg"> </a><span class="org-function-name"><a href="http://www.gnu.org/licenses/&gt;.</code>
 <code>#</code>
 <code>import re</code>
 <code>import gdb</code>
@@ -1553,7 +1554,7 @@ All trigger by external physical signals, All of this should be asynchronous abo
 <code>                                 r&quot;[\s]+(?P&lt;Off&gt;[\S]+)&quot; +</code>
 <code>                                 r&quot;[\s]+(?P&lt;Size&gt;[\S]+)&quot; +</code>
 <code>                                 r&quot;[\s]+(?P&lt;ES&gt;[\S]+)&quot; +</code>
-<code>                                 r&quot;[\s]+(?P&lt;Flg">(</a><span style="color: #51afef;"><a href="http://www.gnu.org/licenses/&gt;.</code>
+<code>                                 r&quot;[\s]+(?P&lt;Flg">(</a><span class="org-keyword"><a href="http://www.gnu.org/licenses/&gt;.</code>
 <code>#</code>
 <code>import re</code>
 <code>import gdb</code>
@@ -1614,7 +1615,7 @@ All trigger by external physical signals, All of this should be asynchronous abo
 <code>                                 r&quot;[\s]+(?P&lt;Size&gt;[\S]+)&quot; +</code>
 <code>                                 r&quot;[\s]+(?P&lt;ES&gt;[\S]+)&quot; +</code>
 <code>                                 r&quot;[\s]+(?P&lt;Flg">, path, section):</code>
-<code>        </a><span style="color: #83898d;"><a href="http://www.gnu.org/licenses/&gt;.</code>
+<code>        </a><span class="org-doc"><a href="http://www.gnu.org/licenses/&gt;.</code>
 <code>#</code>
 <code>import re</code>
 <code>import gdb</code>
@@ -1675,7 +1676,7 @@ All trigger by external physical signals, All of this should be asynchronous abo
 <code>                                 r&quot;[\s]+(?P&lt;Size&gt;[\S]+)&quot; +</code>
 <code>                                 r&quot;[\s]+(?P&lt;ES&gt;[\S]+)&quot; +</code>
 <code>                                 r&quot;[\s]+(?P&lt;Flg"></code>
-<code></a><span style="color: #83898d;"><a href="http://www.gnu.org/licenses/&gt;.</code>
+<code></a><span class="org-doc"><a href="http://www.gnu.org/licenses/&gt;.</code>
 <code>#</code>
 <code>import re</code>
 <code>import gdb</code>
@@ -1736,7 +1737,7 @@ All trigger by external physical signals, All of this should be asynchronous abo
 <code>                                 r&quot;[\s]+(?P&lt;Size&gt;[\S]+)&quot; +</code>
 <code>                                 r&quot;[\s]+(?P&lt;ES&gt;[\S]+)&quot; +</code>
 <code>                                 r&quot;[\s]+(?P&lt;Flg"></code>
-<code></a><span style="color: #83898d;"><a href="http://www.gnu.org/licenses/&gt;.</code>
+<code></a><span class="org-doc"><a href="http://www.gnu.org/licenses/&gt;.</code>
 <code>#</code>
 <code>import re</code>
 <code>import gdb</code>
@@ -1797,7 +1798,7 @@ All trigger by external physical signals, All of this should be asynchronous abo
 <code>                                 r&quot;[\s]+(?P&lt;Size&gt;[\S]+)&quot; +</code>
 <code>                                 r&quot;[\s]+(?P&lt;ES&gt;[\S]+)&quot; +</code>
 <code>                                 r&quot;[\s]+(?P&lt;Flg"></code>
-<code></a><span style="color: #83898d;"><a href="http://www.gnu.org/licenses/&gt;.</code>
+<code></a><span class="org-doc"><a href="http://www.gnu.org/licenses/&gt;.</code>
 <code>#</code>
 <code>import re</code>
 <code>import gdb</code>
@@ -1858,7 +1859,7 @@ All trigger by external physical signals, All of this should be asynchronous abo
 <code>                                 r&quot;[\s]+(?P&lt;Size&gt;[\S]+)&quot; +</code>
 <code>                                 r&quot;[\s]+(?P&lt;ES&gt;[\S]+)&quot; +</code>
 <code>                                 r&quot;[\s]+(?P&lt;Flg"></code>
-<code></a><span style="color: #83898d;"><a href="http://www.gnu.org/licenses/&gt;.</code>
+<code></a><span class="org-doc"><a href="http://www.gnu.org/licenses/&gt;.</code>
 <code>#</code>
 <code>import re</code>
 <code>import gdb</code>
@@ -1919,7 +1920,7 @@ All trigger by external physical signals, All of this should be asynchronous abo
 <code>                                 r&quot;[\s]+(?P&lt;Size&gt;[\S]+)&quot; +</code>
 <code>                                 r&quot;[\s]+(?P&lt;ES&gt;[\S]+)&quot; +</code>
 <code>                                 r&quot;[\s]+(?P&lt;Flg"></code>
-<code></a><span style="color: #83898d;"><a href="http://www.gnu.org/licenses/&gt;.</code>
+<code></a><span class="org-doc"><a href="http://www.gnu.org/licenses/&gt;.</code>
 <code>#</code>
 <code>import re</code>
 <code>import gdb</code>
@@ -1981,7 +1982,7 @@ All trigger by external physical signals, All of this should be asynchronous abo
 <code>                                 r&quot;[\s]+(?P&lt;ES&gt;[\S]+)&quot; +</code>
 <code>                                 r&quot;[\s]+(?P&lt;Flg"></code>
 <code></code>
-<code>        </a><span style="color: #dcaeea;"><a href="http://www.gnu.org/licenses/&gt;.</code>
+<code>        </a><span class="org-variable-name"><a href="http://www.gnu.org/licenses/&gt;.</code>
 <code>#</code>
 <code>import re</code>
 <code>import gdb</code>
@@ -2041,7 +2042,7 @@ All trigger by external physical signals, All of this should be asynchronous abo
 <code>                                 r&quot;[\s]+(?P&lt;Off&gt;[\S]+)&quot; +</code>
 <code>                                 r&quot;[\s]+(?P&lt;Size&gt;[\S]+)&quot; +</code>
 <code>                                 r&quot;[\s]+(?P&lt;ES&gt;[\S]+)&quot; +</code>
-<code>                                 r&quot;[\s]+(?P&lt;Flg"> = re.</a><span style="color: #c678dd;"><a href="http://www.gnu.org/licenses/&gt;.</code>
+<code>                                 r&quot;[\s]+(?P&lt;Flg"> = re.</a><span class="org-builtin"><a href="http://www.gnu.org/licenses/&gt;.</code>
 <code>#</code>
 <code>import re</code>
 <code>import gdb</code>
@@ -2101,7 +2102,7 @@ All trigger by external physical signals, All of this should be asynchronous abo
 <code>                                 r&quot;[\s]+(?P&lt;Off&gt;[\S]+)&quot; +</code>
 <code>                                 r&quot;[\s]+(?P&lt;Size&gt;[\S]+)&quot; +</code>
 <code>                                 r&quot;[\s]+(?P&lt;ES&gt;[\S]+)&quot; +</code>
-<code>                                 r&quot;[\s]+(?P&lt;Flg">(r</a><span style="color: #98be65;"><a href="http://www.gnu.org/licenses/&gt;.</code>
+<code>                                 r&quot;[\s]+(?P&lt;Flg">(r</a><span class="org-string"><a href="http://www.gnu.org/licenses/&gt;.</code>
 <code>#</code>
 <code>import re</code>
 <code>import gdb</code>
@@ -2162,7 +2163,7 @@ All trigger by external physical signals, All of this should be asynchronous abo
 <code>                                 r&quot;[\s]+(?P&lt;Size&gt;[\S]+)&quot; +</code>
 <code>                                 r&quot;[\s]+(?P&lt;ES&gt;[\S]+)&quot; +</code>
 <code>                                 r&quot;[\s]+(?P&lt;Flg"> +</code>
-<code>                                 r</a><span style="color: #98be65;"><a href="http://www.gnu.org/licenses/&gt;.</code>
+<code>                                 r</a><span class="org-string"><a href="http://www.gnu.org/licenses/&gt;.</code>
 <code>#</code>
 <code>import re</code>
 <code>import gdb</code>
@@ -2223,7 +2224,7 @@ All trigger by external physical signals, All of this should be asynchronous abo
 <code>                                 r&quot;[\s]+(?P&lt;Size&gt;[\S]+)&quot; +</code>
 <code>                                 r&quot;[\s]+(?P&lt;ES&gt;[\S]+)&quot; +</code>
 <code>                                 r&quot;[\s]+(?P&lt;Flg"> +</code>
-<code>                                 r</a><span style="color: #98be65;"><a href="http://www.gnu.org/licenses/&gt;.</code>
+<code>                                 r</a><span class="org-string"><a href="http://www.gnu.org/licenses/&gt;.</code>
 <code>#</code>
 <code>import re</code>
 <code>import gdb</code>
@@ -2284,7 +2285,7 @@ All trigger by external physical signals, All of this should be asynchronous abo
 <code>                                 r&quot;[\s]+(?P&lt;Size&gt;[\S]+)&quot; +</code>
 <code>                                 r&quot;[\s]+(?P&lt;ES&gt;[\S]+)&quot; +</code>
 <code>                                 r&quot;[\s]+(?P&lt;Flg"> +</code>
-<code>                                 r</a><span style="color: #98be65;"><a href="http://www.gnu.org/licenses/&gt;.</code>
+<code>                                 r</a><span class="org-string"><a href="http://www.gnu.org/licenses/&gt;.</code>
 <code>#</code>
 <code>import re</code>
 <code>import gdb</code>
@@ -2345,7 +2346,7 @@ All trigger by external physical signals, All of this should be asynchronous abo
 <code>                                 r&quot;[\s]+(?P&lt;Size&gt;[\S]+)&quot; +</code>
 <code>                                 r&quot;[\s]+(?P&lt;ES&gt;[\S]+)&quot; +</code>
 <code>                                 r&quot;[\s]+(?P&lt;Flg"> +</code>
-<code>                                 r</a><span style="color: #98be65;"><a href="http://www.gnu.org/licenses/&gt;.</code>
+<code>                                 r</a><span class="org-string"><a href="http://www.gnu.org/licenses/&gt;.</code>
 <code>#</code>
 <code>import re</code>
 <code>import gdb</code>
@@ -2406,7 +2407,7 @@ All trigger by external physical signals, All of this should be asynchronous abo
 <code>                                 r&quot;[\s]+(?P&lt;Size&gt;[\S]+)&quot; +</code>
 <code>                                 r&quot;[\s]+(?P&lt;ES&gt;[\S]+)&quot; +</code>
 <code>                                 r&quot;[\s]+(?P&lt;Flg"> +</code>
-<code>                                 r</a><span style="color: #98be65;"><a href="http://www.gnu.org/licenses/&gt;.</code>
+<code>                                 r</a><span class="org-string"><a href="http://www.gnu.org/licenses/&gt;.</code>
 <code>#</code>
 <code>import re</code>
 <code>import gdb</code>
@@ -2467,7 +2468,7 @@ All trigger by external physical signals, All of this should be asynchronous abo
 <code>                                 r&quot;[\s]+(?P&lt;Size&gt;[\S]+)&quot; +</code>
 <code>                                 r&quot;[\s]+(?P&lt;ES&gt;[\S]+)&quot; +</code>
 <code>                                 r&quot;[\s]+(?P&lt;Flg"> +</code>
-<code>                                 r</a><span style="color: #98be65;"><a href="http://www.gnu.org/licenses/&gt;.</code>
+<code>                                 r</a><span class="org-string"><a href="http://www.gnu.org/licenses/&gt;.</code>
 <code>#</code>
 <code>import re</code>
 <code>import gdb</code>
@@ -2528,7 +2529,7 @@ All trigger by external physical signals, All of this should be asynchronous abo
 <code>                                 r&quot;[\s]+(?P&lt;Size&gt;[\S]+)&quot; +</code>
 <code>                                 r&quot;[\s]+(?P&lt;ES&gt;[\S]+)&quot; +</code>
 <code>                                 r&quot;[\s]+(?P&lt;Flg"> +</code>
-<code>                                 r</a><span style="color: #98be65;"><a href="http://www.gnu.org/licenses/&gt;.</code>
+<code>                                 r</a><span class="org-string"><a href="http://www.gnu.org/licenses/&gt;.</code>
 <code>#</code>
 <code>import re</code>
 <code>import gdb</code>
@@ -2560,39 +2561,39 @@ All trigger by external physical signals, All of this should be asynchronous abo
 <code>                                 r&quot;[\s]+(?P&lt;ES&gt;[\S]+)&quot; +</code>
 <code>                                 r&quot;[\s]+(?P&lt;Flg">"[\s]+(?P&lt;Flg&gt;</a>[\S]+)"</span>)</code>
 <code></code>
-<code>        <span style="color: #dcaeea;">command</span> = r<span style="color: #98be65;">"readelf -WS "</span> + path + r<span style="color: #98be65;">"| grep -E '[[:space:]]+'"</span> + section</code>
-<code>        <span style="color: #dcaeea;">output</span> = check_output([command], shell=<span style="color: #a9a1e1;">True</span>).decode(<span style="color: #98be65;">"utf-8"</span>)</code>
-<code>        <span style="color: #dcaeea;">obj</span> = re.search(ELF_PATTERN, output)</code>
-<code>        <span style="color: #51afef;">if</span> obj <span style="color: #51afef;">is</span> <span style="color: #51afef;">not</span> <span style="color: #a9a1e1;">None</span>:</code>
-<code>            <span style="color: #dcaeea;">load_addr</span> = <span style="color: #c678dd;">int</span>(obj[<span style="color: #98be65;">'Address'</span>], 16)</code>
-<code>            <span style="color: #51afef;">return</span> load_addr</code>
+<code>        <span class="org-variable-name">command</span> = r<span class="org-string">"readelf -WS "</span> + path + r<span class="org-string">"| grep -E '[[:space:]]+'"</span> + section</code>
+<code>        <span class="org-variable-name">output</span> = check_output([command], shell=<span class="org-constant">True</span>).decode(<span class="org-string">"utf-8"</span>)</code>
+<code>        <span class="org-variable-name">obj</span> = re.search(ELF_PATTERN, output)</code>
+<code>        <span class="org-keyword">if</span> obj <span class="org-keyword">is</span> <span class="org-keyword">not</span> <span class="org-constant">None</span>:</code>
+<code>            <span class="org-variable-name">load_addr</span> = <span class="org-builtin">int</span>(obj[<span class="org-string">'Address'</span>], 16)</code>
+<code>            <span class="org-keyword">return</span> load_addr</code>
 <code></code>
-<code>    <span style="color: #51afef;">def</span> <span style="color: #c678dd;">invoke</span>(<span style="color: #51afef;">self</span>, arg, from_tty):</code>
-<code>        <span style="color: #dcaeea;">argv</span> = gdb.string_to_argv(arg)</code>
-<code>        <span style="color: #51afef;">if</span> <span style="color: #c678dd;">len</span>(argv) != 2:</code>
-<code>            <span style="color: #51afef;">raise</span> gdb.GdbError(<span style="color: #98be65;">"load-linux-init takes two argument"</span>)</code>
+<code>    <span class="org-keyword">def</span> <span class="org-function-name">invoke</span>(<span class="org-keyword">self</span>, arg, from_tty):</code>
+<code>        <span class="org-variable-name">argv</span> = gdb.string_to_argv(arg)</code>
+<code>        <span class="org-keyword">if</span> <span class="org-builtin">len</span>(argv) != 2:</code>
+<code>            <span class="org-keyword">raise</span> gdb.GdbError(<span class="org-string">"load-linux-init takes two argument"</span>)</code>
 <code></code>
-<code>        <span style="color: #dcaeea;">load_addr</span> = <span style="color: #c678dd;">int</span>(<span style="color: #c678dd;">str</span>(gdb.parse_and_eval(argv[1])))</code>
-<code>        <span style="color: #51afef;">print</span>(<span style="color: #98be65;">"Loading linux init head to 0x%016x"</span> % (load_addr))</code>
-<code>        <span style="color: #dcaeea;">head_init_addr</span> = <span style="color: #51afef;">self</span>.get_load_address(argv[0], <span style="color: #98be65;">".head.text"</span>)</code>
-<code>        <span style="color: #51afef;">print</span>(<span style="color: #98be65;">"Original linux text address at 0x%016x"</span> % (head_init_addr))</code>
-<code>        <span style="color: #dcaeea;">offset</span> = head_init_addr - load_addr</code>
-<code>        <span style="color: #dcaeea;">text_addr</span> = <span style="color: #51afef;">self</span>.get_load_address(argv[0], <span style="color: #98be65;">".text"</span>) - offset</code>
-<code>        <span style="color: #dcaeea;">init_text_addr</span> = <span style="color: #51afef;">self</span>.get_load_address(argv[0], <span style="color: #98be65;">".init.text"</span>) - offset</code>
+<code>        <span class="org-variable-name">load_addr</span> = <span class="org-builtin">int</span>(<span class="org-builtin">str</span>(gdb.parse_and_eval(argv[1])))</code>
+<code>        <span class="org-keyword">print</span>(<span class="org-string">"Loading linux init head to 0x%016x"</span> % (load_addr))</code>
+<code>        <span class="org-variable-name">head_init_addr</span> = <span class="org-keyword">self</span>.get_load_address(argv[0], <span class="org-string">".head.text"</span>)</code>
+<code>        <span class="org-keyword">print</span>(<span class="org-string">"Original linux text address at 0x%016x"</span> % (head_init_addr))</code>
+<code>        <span class="org-variable-name">offset</span> = head_init_addr - load_addr</code>
+<code>        <span class="org-variable-name">text_addr</span> = <span class="org-keyword">self</span>.get_load_address(argv[0], <span class="org-string">".text"</span>) - offset</code>
+<code>        <span class="org-variable-name">init_text_addr</span> = <span class="org-keyword">self</span>.get_load_address(argv[0], <span class="org-string">".init.text"</span>) - offset</code>
 <code></code>
-<code>        <span style="color: #dcaeea;">command</span> = <span style="color: #98be65;">"add-symbol-file {:s} 0x{:x} -s .head.text 0x{:x} -s .init.text 0x{:x}"</span>.<span style="color: #c678dd;">format</span>(</code>
+<code>        <span class="org-variable-name">command</span> = <span class="org-string">"add-symbol-file {:s} 0x{:x} -s .head.text 0x{:x} -s .init.text 0x{:x}"</span>.<span class="org-builtin">format</span>(</code>
 <code>            argv[0], text_addr, load_addr, init_text_addr)</code>
-<code>        <span style="color: #51afef;">print</span>(<span style="color: #98be65;">"load linux image to physical address with command {:s}"</span>.<span style="color: #c678dd;">format</span>(</code>
+<code>        <span class="org-keyword">print</span>(<span class="org-string">"load linux image to physical address with command {:s}"</span>.<span class="org-builtin">format</span>(</code>
 <code>            command))</code>
 <code>        gdb.execute(command)</code>
 <code></code>
 <code></code>
 <code>LoadLinuxKernelInitCommand()</code>
 <code></code>
-<code><span style="color: #5B6268;"># </span><span style="color: #5B6268;">Local Variables&#58;</span></code>
-<code><span style="color: #5B6268;"># </span><span style="color: #5B6268;">indent-tabs-mode: t</span></code>
-<code><span style="color: #5B6268;"># </span><span style="color: #5B6268;">tab-width: 8</span></code>
-<code><span style="color: #5B6268;"># </span><span style="color: #5B6268;">End:</span></code>
+<code><span class="org-comment-delimiter"># </span><span class="org-comment">Local Variables&#58;</span></code>
+<code><span class="org-comment-delimiter"># </span><span class="org-comment">indent-tabs-mode: t</span></code>
+<code><span class="org-comment-delimiter"># </span><span class="org-comment">tab-width: 8</span></code>
+<code><span class="org-comment-delimiter"># </span><span class="org-comment">End:</span></code>
 </pre>
 </div>
 </div>
@@ -2612,13 +2613,13 @@ All trigger by external physical signals, All of this should be asynchronous abo
 </p>
 
 <div class="org-src-container">
-<pre class="src src-bash"><code>SET <span style="color: #dcaeea;">mypath</span>=%~dp0</code>
+<pre class="src src-bash"><code>SET <span class="org-variable-name">mypath</span>=%~dp0</code>
 <code></code>
-<code>start C:\T32\bin\windows64\t32MARM64.exe -s %mypath%\linux-attach.cmm <span style="color: #98be65;">"%mypath%"</span> <span style="color: #98be65;">"U:/vmlinux"</span> <span style="color: #98be65;">"/Volumes/work/j5/kernel/"</span> U:/j5/kernel</code>
+<code>start C:\T32\bin\windows64\t32MARM64.exe -s %mypath%\linux-attach.cmm <span class="org-string">"%mypath%"</span> <span class="org-string">"U:/vmlinux"</span> <span class="org-string">"/Volumes/work/j5/kernel/"</span> U:/j5/kernel</code>
 </pre>
 </div>
 
-<div id="org92ee37c" class="figure">
+<div id="orgf9e5beb" class="figure">
 <p><img src="assets/1914-1034-max.png" alt="1914-1034-max.png"><br>
 </p>
 </div>
@@ -2628,7 +2629,7 @@ All trigger by external physical signals, All of this should be asynchronous abo
 <a href="https://www2.lauterbach.com/pdf/frontend_gdb.pdf">GDB Front-End</a><br>
 </p>
 
-<div id="orgef10530" class="figure">
+<div id="org9b4bf4c" class="figure">
 <p><img src="assets/2021-05-06_11-30-54_screenshot.png" alt="2021-05-06_11-30-54_screenshot.png"><br>
 </p>
 </div></li>
@@ -2639,7 +2640,7 @@ All trigger by external physical signals, All of this should be asynchronous abo
 <a href="https://www2.lauterbach.com/pdf/backend_gdb.pdf">GDB Back-End</a><br>
 </p>
 
-<div id="orgfb6a702" class="figure">
+<div id="orgc851adb" class="figure">
 <p><img src="assets/2021-05-06_10-38-52_screenshot.png" alt="2021-05-06_10-38-52_screenshot.png"><br>
 </p>
 </div></li>
@@ -2700,47 +2701,47 @@ All trigger by external physical signals, All of this should be asynchronous abo
 <h4 id="org764ec21">DS5 script</h4>
 <div class="outline-text-4" id="text-org764ec21">
 <div class="org-src-container">
-<pre class="src src-python"><code><span style="color: #5B6268;">#</span><span style="color: #5B6268;">!/usr/bin/env python2</span></code>
-<code><span style="color: #5B6268;"># </span><span style="color: #5B6268;">-*- coding: utf-8 -*-</span></code>
+<pre class="src src-python"><code><span class="org-comment-delimiter">#</span><span class="org-comment">!/usr/bin/env python2</span></code>
+<code><span class="org-comment-delimiter"># </span><span class="org-comment">-*- coding: utf-8 -*-</span></code>
 <code></code>
-<code><span style="color: #51afef;">import</span> os</code>
-<code><span style="color: #51afef;">import</span> sys</code>
-<code><span style="color: #51afef;">import</span> struct</code>
+<code><span class="org-keyword">import</span> os</code>
+<code><span class="org-keyword">import</span> sys</code>
+<code><span class="org-keyword">import</span> struct</code>
 <code></code>
-<code><span style="color: #dcaeea;">file_path</span> = os.path.abspath(os.path.dirname(__file__))</code>
-<code><span style="color: #dcaeea;">ms</span> = <span style="color: #a9a1e1;">None</span>;</code>
+<code><span class="org-variable-name">file_path</span> = os.path.abspath(os.path.dirname(__file__))</code>
+<code><span class="org-variable-name">ms</span> = <span class="org-constant">None</span>;</code>
 <code></code>
-<code><span style="color: #51afef;">try</span>:</code>
-<code>    <span style="color: #51afef;">from</span> arm_ds.debugger_v1 <span style="color: #51afef;">import</span> Debugger</code>
-<code>    <span style="color: #51afef;">from</span> arm_ds.debugger_v1 <span style="color: #51afef;">import</span> DebugException</code>
-<code>    <span style="color: #5B6268;"># </span><span style="color: #5B6268;">Debugger object for accessing the debugger</span></code>
-<code>    <span style="color: #dcaeea;">debugger</span> = Debugger()</code>
+<code><span class="org-keyword">try</span>:</code>
+<code>    <span class="org-keyword">from</span> arm_ds.debugger_v1 <span class="org-keyword">import</span> Debugger</code>
+<code>    <span class="org-keyword">from</span> arm_ds.debugger_v1 <span class="org-keyword">import</span> DebugException</code>
+<code>    <span class="org-comment-delimiter"># </span><span class="org-comment">Debugger object for accessing the debugger</span></code>
+<code>    <span class="org-variable-name">debugger</span> = Debugger()</code>
 <code></code>
-<code>    <span style="color: #5B6268;"># </span><span style="color: #5B6268;">Initialisation commands</span></code>
-<code>    <span style="color: #dcaeea;">ec</span> = debugger.getExecutionContext(0)</code>
+<code>    <span class="org-comment-delimiter"># </span><span class="org-comment">Initialisation commands</span></code>
+<code>    <span class="org-variable-name">ec</span> = debugger.getExecutionContext(0)</code>
 <code>    ec.getExecutionService().stop()</code>
 <code>    ec.getExecutionService().waitForStop()</code>
-<code>    <span style="color: #dcaeea;">ms</span> = ec.getMemoryService();</code>
-<code><span style="color: #51afef;">except</span> <span style="color: #ECBE7B;">BaseException</span> <span style="color: #51afef;">as</span> e:</code>
-<code>    <span style="color: #51afef;">print</span>(e)</code>
-<code>    <span style="color: #51afef;">pass</span></code>
+<code>    <span class="org-variable-name">ms</span> = ec.getMemoryService();</code>
+<code><span class="org-keyword">except</span> <span class="org-type">BaseException</span> <span class="org-keyword">as</span> e:</code>
+<code>    <span class="org-keyword">print</span>(e)</code>
+<code>    <span class="org-keyword">pass</span></code>
 <code></code>
-<code><span style="color: #51afef;">if</span> <span style="color: #c678dd;">__name__</span> == <span style="color: #98be65;">'__main__'</span>:</code>
-<code>    <span style="color: #51afef;">if</span> <span style="color: #c678dd;">len</span>(sys.argv) &lt; 3:</code>
-<code>        <span style="color: #51afef;">print</span>(<span style="color: #98be65;">"Usage: source %s &lt;address for dtb with base 16&gt; &lt;file_path&gt;"</span> % (sys.argv[0]))</code>
-<code>        <span style="color: #a9a1e1;">exit</span>(-1)</code>
+<code><span class="org-keyword">if</span> <span class="org-builtin">__name__</span> == <span class="org-string">'__main__'</span>:</code>
+<code>    <span class="org-keyword">if</span> <span class="org-builtin">len</span>(sys.argv) &lt; 3:</code>
+<code>        <span class="org-keyword">print</span>(<span class="org-string">"Usage: source %s &lt;address for dtb with base 16&gt; &lt;file_path&gt;"</span> % (sys.argv[0]))</code>
+<code>        <span class="org-constant">exit</span>(-1)</code>
 <code></code>
-<code>    <span style="color: #dcaeea;">dtb_addr</span> = <span style="color: #c678dd;">int</span>(sys.argv[1], 16)</code>
-<code>    <span style="color: #51afef;">print</span>(<span style="color: #98be65;">"Attempting to dump dtb from 0x%016x"</span> %(dtb_addr))</code>
-<code>    <span style="color: #dcaeea;">magic</span>, <span style="color: #dcaeea;">totalsize</span>, <span style="color: #dcaeea;">version</span> = struct.unpack(<span style="color: #98be65;">'&gt;III'</span>, ms.read(dtb_addr, 12))</code>
-<code>    <span style="color: #51afef;">print</span>(<span style="color: #98be65;">"magic: 0x%08x, totalsize: 0x%08x, version: 0x%08x"</span> % (magic, totalsize, version))</code>
-<code>    <span style="color: #51afef;">if</span> magic != 0xd00dfeed:</code>
-<code>        <span style="color: #a9a1e1;">exit</span>(-2)</code>
-<code>        <span style="color: #51afef;">pass</span></code>
+<code>    <span class="org-variable-name">dtb_addr</span> = <span class="org-builtin">int</span>(sys.argv[1], 16)</code>
+<code>    <span class="org-keyword">print</span>(<span class="org-string">"Attempting to dump dtb from 0x%016x"</span> %(dtb_addr))</code>
+<code>    <span class="org-variable-name">magic</span>, <span class="org-variable-name">totalsize</span>, <span class="org-variable-name">version</span> = struct.unpack(<span class="org-string">'&gt;III'</span>, ms.read(dtb_addr, 12))</code>
+<code>    <span class="org-keyword">print</span>(<span class="org-string">"magic: 0x%08x, totalsize: 0x%08x, version: 0x%08x"</span> % (magic, totalsize, version))</code>
+<code>    <span class="org-keyword">if</span> magic != 0xd00dfeed:</code>
+<code>        <span class="org-constant">exit</span>(-2)</code>
+<code>        <span class="org-keyword">pass</span></code>
 <code></code>
-<code>    ms.dump(sys.argv[2], <span style="color: #98be65;">'binary'</span>, dtb_addr, dtb_addr + totalsize)</code>
+<code>    ms.dump(sys.argv[2], <span class="org-string">'binary'</span>, dtb_addr, dtb_addr + totalsize)</code>
 <code></code>
-<code>    <span style="color: #51afef;">pass</span></code>
+<code>    <span class="org-keyword">pass</span></code>
 </pre>
 </div>
 </div>
@@ -2757,7 +2758,7 @@ All trigger by external physical signals, All of this should be asynchronous abo
 <p>
 U-Boot Debug before relocate<br>
 U-Boot Debug after relocate<br>
-<a href="http://wiki.hobot.cc/display/Hangzhou/u-boot+Debugging">u-boot Debugging</a><br>
+<a href="/2019/10/22/uboot-online-debug.html">2019/10/22/uboot-online-debug.html</a><br>
 </p>
 </div>
 </div>
@@ -2786,7 +2787,7 @@ Linux Debug after MMU enable<br>
 <h4 id="org151b02f">Stack Frame</h4>
 <div class="outline-text-4" id="text-org151b02f">
 
-<div id="org2a32525" class="figure">
+<div id="org958ff07" class="figure">
 <p><img src="assets/2021-05-05_22-29-45_screenshot.png" alt="2021-05-05_22-29-45_screenshot.png" width="600px"><br>
 </p>
 </div>
@@ -2811,39 +2812,39 @@ Linux Debug after MMU enable<br>
 Source<br>
 </p>
 <div class="org-src-container">
-<pre class="src src-C"><code><span style="color: #5B6268;">/*</span></code>
-<code><span style="color: #5B6268;"> * p1 and p2 should be directories on the same fs.</span></code>
-<code><span style="color: #5B6268;"> */</span></code>
-<code><span style="color: #51afef;">struct</span> <span style="color: #ECBE7B;">dentry</span> *<span style="color: #c678dd;">lock_rename</span>(<span style="color: #51afef;">struct</span> <span style="color: #ECBE7B;">dentry</span> *<span style="color: #dcaeea;">p1</span>, <span style="color: #51afef;">struct</span> <span style="color: #ECBE7B;">dentry</span> *<span style="color: #dcaeea;">p2</span>)</code>
+<pre class="src src-C"><code><span class="org-comment-delimiter">/*</span></code>
+<code><span class="org-comment"> * p1 and p2 should be directories on the same fs.</span></code>
+<code><span class="org-comment-delimiter"> */</span></code>
+<code><span class="org-keyword">struct</span> <span class="org-type">dentry</span> *<span class="org-function-name">lock_rename</span>(<span class="org-keyword">struct</span> <span class="org-type">dentry</span> *<span class="org-variable-name">p1</span>, <span class="org-keyword">struct</span> <span class="org-type">dentry</span> *<span class="org-variable-name">p2</span>)</code>
 <code>{</code>
-<code>    <span style="color: #51afef;">struct</span> <span style="color: #ECBE7B;">dentry</span> *<span style="color: #dcaeea;">p</span>;</code>
+<code>    <span class="org-keyword">struct</span> <span class="org-type">dentry</span> *<span class="org-variable-name">p</span>;</code>
 <code></code>
-<code>    <span style="color: #51afef;">if</span> (p1 == p2) {</code>
+<code>    <span class="org-keyword">if</span> (p1 == p2) {</code>
 <code>        inode_lock_nested(p1-&gt;d_inode, I_MUTEX_PARENT);</code>
-<code>        <span style="color: #51afef;">return</span> <span style="color: #a9a1e1;">NULL</span>;</code>
+<code>        <span class="org-keyword">return</span> <span class="org-constant">NULL</span>;</code>
 <code>    }</code>
 <code></code>
 <code>    mutex_lock(&amp;p1-&gt;d_sb-&gt;s_vfs_rename_mutex);</code>
 <code></code>
 <code>    p = d_ancestor(p2, p1);</code>
-<code>    <span style="color: #51afef;">if</span> (p) {</code>
+<code>    <span class="org-keyword">if</span> (p) {</code>
 <code>        inode_lock_nested(p2-&gt;d_inode, I_MUTEX_PARENT);</code>
 <code>        inode_lock_nested(p1-&gt;d_inode, I_MUTEX_CHILD);</code>
-<code>        <span style="color: #51afef;">return</span> p;</code>
+<code>        <span class="org-keyword">return</span> p;</code>
 <code>    }</code>
 <code></code>
 <code>    p = d_ancestor(p1, p2);</code>
-<code>    <span style="color: #51afef;">if</span> (p) {</code>
+<code>    <span class="org-keyword">if</span> (p) {</code>
 <code>        inode_lock_nested(p1-&gt;d_inode, I_MUTEX_PARENT);</code>
 <code>        inode_lock_nested(p2-&gt;d_inode, I_MUTEX_CHILD);</code>
-<code>        <span style="color: #51afef;">return</span> p;</code>
+<code>        <span class="org-keyword">return</span> p;</code>
 <code>    }</code>
 <code></code>
-<code>    <span style="color: #c678dd;">inode_lock_nested</span>(p1-&gt;d_inode, I_MUTEX_PARENT);</code>
-<code>    <span style="color: #c678dd;">inode_lock_nested</span>(p2-&gt;d_inode, I_MUTEX_PARENT2);</code>
-<code>    <span style="color: #51afef;">return</span> <span style="color: #a9a1e1;">NULL</span>;</code>
+<code>    <span class="org-function-name">inode_lock_nested</span>(p1-&gt;d_inode, I_MUTEX_PARENT);</code>
+<code>    <span class="org-function-name">inode_lock_nested</span>(p2-&gt;d_inode, I_MUTEX_PARENT2);</code>
+<code>    <span class="org-keyword">return</span> <span class="org-constant">NULL</span>;</code>
 <code>}</code>
-<code><span style="color: #c678dd;">EXPORT_SYMBOL</span>(lock_rename);</code>
+<code><span class="org-function-name">EXPORT_SYMBOL</span>(lock_rename);</code>
 </pre>
 </div>
 
@@ -2852,24 +2853,24 @@ Disassemble<br>
 </p>
 <div class="org-src-container">
 <pre class="src src-bash"><code>(gdb) disassemble /s lock_rename</code>
-<code>Dump of assembler code for <span style="color: #51afef;">function</span> <span style="color: #c678dd;">lock_rename</span>:</code>
+<code>Dump of assembler code for <span class="org-keyword">function</span> <span class="org-function-name">lock_rename</span>:</code>
 <code>fs/namei.c:</code>
 <code>2839    {</code>
 <code>2840            struct dentry *p;</code>
 <code>2841</code>
-<code>2842            if (<span style="color: #dcaeea;">p1</span> == p2) {</code>
-<code>   0xffffff800817e250 &lt;+0&gt;:     stp     x29, x30, [sp, <span style="color: #5B6268;">#</span><span style="color: #5B6268;">-48]!                    // &#20998;&#37197;&#26632;&#31354;&#38388;</span></code>
+<code>2842            if (<span class="org-variable-name">p1</span> == p2) {</code>
+<code>   0xffffff800817e250 &lt;+0&gt;:     stp     x29, x30, [sp, <span class="org-comment-delimiter">#</span><span class="org-comment">-48]!                    // &#20998;&#37197;&#26632;&#31354;&#38388;</span></code>
 <code>   0xffffff800817e254 &lt;+4&gt;:     cmp     x0, x1</code>
 <code>   0xffffff800817e258 &lt;+8&gt;:     mov     x29, sp                                  // &#20445;&#23384;&#26632;&#24103;</code>
-<code>   0xffffff800817e25c &lt;+12&gt;:    stp     x19, x20, [sp, <span style="color: #5B6268;">#</span><span style="color: #5B6268;">16]                      // &#20445;&#23384;&#38656;&#35201;Callee&#20445;&#25345;&#30340;&#21442;&#25968;</span></code>
+<code>   0xffffff800817e25c &lt;+12&gt;:    stp     x19, x20, [sp, <span class="org-comment-delimiter">#</span><span class="org-comment">16]                      // &#20445;&#23384;&#38656;&#35201;Callee&#20445;&#25345;&#30340;&#21442;&#25968;</span></code>
 <code>   0xffffff800817e260 &lt;+16&gt;:    mov     x19, x0</code>
 <code>   0xffffff800817e264 &lt;+20&gt;:    b.ne    0xffffff800817e27c &lt;lock_rename+44&gt;  // b.any</code>
 <code></code>
 <code>./include/linux/fs.h:</code>
 <code>748             down_write_nested(&amp;inode-&gt;i_rwsem, subclass);</code>
-<code>   0xffffff800817e268 &lt;+24&gt;:    ldr     x0, [x0, <span style="color: #5B6268;">#</span><span style="color: #5B6268;">48]                            // &#20808;&#24471;&#21040;p1-&gt;d_inode, check with ptype /o struct dentry</span></code>
-<code>   0xffffff800817e26c &lt;+28&gt;:    mov     x20, <span style="color: #5B6268;">#</span><span style="color: #5B6268;">0x0                       // #0</span></code>
-<code>   0xffffff800817e270 &lt;+32&gt;:    add     x0, x0, <span style="color: #5B6268;">#</span><span style="color: #5B6268;">0xa0                            // &#20877;&#33719;&#21462;&amp;p1-&gt;d_inode-&gt;i_rwsem check with ptype /o struct inode</span></code>
+<code>   0xffffff800817e268 &lt;+24&gt;:    ldr     x0, [x0, <span class="org-comment-delimiter">#</span><span class="org-comment">48]                            // &#20808;&#24471;&#21040;p1-&gt;d_inode, check with ptype /o struct dentry</span></code>
+<code>   0xffffff800817e26c &lt;+28&gt;:    mov     x20, <span class="org-comment-delimiter">#</span><span class="org-comment">0x0                       // #0</span></code>
+<code>   0xffffff800817e270 &lt;+32&gt;:    add     x0, x0, <span class="org-comment-delimiter">#</span><span class="org-comment">0xa0                            // &#20877;&#33719;&#21462;&amp;p1-&gt;d_inode-&gt;i_rwsem check with ptype /o struct inode</span></code>
 <code>   0xffffff800817e274 &lt;+36&gt;:    bl      0xffffff80087846e8 &lt;down_write&gt;          // &#35843;&#29992;&#23376;&#20989;&#25968;&#65292;&#36825;&#37324;&#27809;&#26377;&#35774;&#32622;x1&#21442;&#25968;&#65292;&#22240;&#20026;&#26368;&#21518;&#35843;&#29992;&#30340;down_write&#21482;&#26377;&#19968;&#20010;&#21442;&#25968;</code>
 <code></code>
 <code>fs/namei.c:</code>
@@ -2879,14 +2880,14 @@ Disassemble<br>
 <code>2845            }</code>
 <code>2846</code>
 <code>2847            mutex_lock(&amp;p1-&gt;d_sb-&gt;s_vfs_rename_mutex);</code>
-<code>   0xffffff800817e27c &lt;+44&gt;:    str     x21, [sp, <span style="color: #5B6268;">#</span><span style="color: #5B6268;">32]</span></code>
+<code>   0xffffff800817e27c &lt;+44&gt;:    str     x21, [sp, <span class="org-comment-delimiter">#</span><span class="org-comment">32]</span></code>
 <code>   0xffffff800817e280 &lt;+48&gt;:    mov     x21, x1</code>
-<code>   0xffffff800817e284 &lt;+52&gt;:    ldr     x0, [x0, <span style="color: #5B6268;">#</span><span style="color: #5B6268;">104]</span></code>
-<code>   0xffffff800817e288 &lt;+56&gt;:    add     x0, x0, <span style="color: #5B6268;">#</span><span style="color: #5B6268;">0x418</span></code>
+<code>   0xffffff800817e284 &lt;+52&gt;:    ldr     x0, [x0, <span class="org-comment-delimiter">#</span><span class="org-comment">104]</span></code>
+<code>   0xffffff800817e288 &lt;+56&gt;:    add     x0, x0, <span class="org-comment-delimiter">#</span><span class="org-comment">0x418</span></code>
 <code>   0xffffff800817e28c &lt;+60&gt;:    bl      0xffffff8008783950 &lt;mutex_lock&gt;</code>
 <code></code>
 <code>2848</code>
-<code>2849            <span style="color: #dcaeea;">p</span> = d_ancestor(p2, p1);</code>
+<code>2849            <span class="org-variable-name">p</span> = d_ancestor(p2, p1);</code>
 <code>   0xffffff800817e290 &lt;+64&gt;:    mov     x1, x19</code>
 <code>   0xffffff800817e294 &lt;+68&gt;:    mov     x0, x21</code>
 <code>   0xffffff800817e298 &lt;+72&gt;:    bl      0xffffff800818dec8 &lt;d_ancestor&gt;</code>
@@ -2897,21 +2898,21 @@ Disassemble<br>
 <code></code>
 <code>./include/linux/fs.h:</code>
 <code>748             down_write_nested(&amp;inode-&gt;i_rwsem, subclass);</code>
-<code>   0xffffff800817e2a4 &lt;+84&gt;:    ldr     x0, [x21, <span style="color: #5B6268;">#</span><span style="color: #5B6268;">48]</span></code>
-<code>   0xffffff800817e2a8 &lt;+88&gt;:    add     x0, x0, <span style="color: #5B6268;">#</span><span style="color: #5B6268;">0xa0</span></code>
+<code>   0xffffff800817e2a4 &lt;+84&gt;:    ldr     x0, [x21, <span class="org-comment-delimiter">#</span><span class="org-comment">48]</span></code>
+<code>   0xffffff800817e2a8 &lt;+88&gt;:    add     x0, x0, <span class="org-comment-delimiter">#</span><span class="org-comment">0xa0</span></code>
 <code>   0xffffff800817e2ac &lt;+92&gt;:    bl      0xffffff80087846e8 &lt;down_write&gt;</code>
-<code>   0xffffff800817e2b0 &lt;+96&gt;:    ldr     x0, [x19, <span style="color: #5B6268;">#</span><span style="color: #5B6268;">48]</span></code>
-<code>   0xffffff800817e2b4 &lt;+100&gt;:   add     x0, x0, <span style="color: #5B6268;">#</span><span style="color: #5B6268;">0xa0</span></code>
+<code>   0xffffff800817e2b0 &lt;+96&gt;:    ldr     x0, [x19, <span class="org-comment-delimiter">#</span><span class="org-comment">48]</span></code>
+<code>   0xffffff800817e2b4 &lt;+100&gt;:   add     x0, x0, <span class="org-comment-delimiter">#</span><span class="org-comment">0xa0</span></code>
 <code>   0xffffff800817e2b8 &lt;+104&gt;:   bl      0xffffff80087846e8 &lt;down_write&gt;</code>
 <code></code>
 <code>fs/namei.c:</code>
 <code>2853                    return p;</code>
-<code>   0xffffff800817e2bc &lt;+108&gt;:   ldr     x21, [sp, <span style="color: #5B6268;">#</span><span style="color: #5B6268;">32]</span></code>
+<code>   0xffffff800817e2bc &lt;+108&gt;:   ldr     x21, [sp, <span class="org-comment-delimiter">#</span><span class="org-comment">32]</span></code>
 <code>   0xffffff800817e2c0 &lt;+112&gt;:   b       0xffffff800817e2f0 &lt;lock_rename+160&gt;</code>
 <code></code>
 <code>2854            }</code>
 <code>2855</code>
-<code>2856            <span style="color: #dcaeea;">p</span> = d_ancestor(p1, p2);</code>
+<code>2856            <span class="org-variable-name">p</span> = d_ancestor(p1, p2);</code>
 <code>   0xffffff800817e2c4 &lt;+116&gt;:   mov     x1, x21</code>
 <code>   0xffffff800817e2c8 &lt;+120&gt;:   mov     x0, x19</code>
 <code>   0xffffff800817e2cc &lt;+124&gt;:   bl      0xffffff800818dec8 &lt;d_ancestor&gt;</code>
@@ -2919,19 +2920,19 @@ Disassemble<br>
 <code></code>
 <code>./include/linux/fs.h:</code>
 <code>748             down_write_nested(&amp;inode-&gt;i_rwsem, subclass);</code>
-<code>   0xffffff800817e2d4 &lt;+132&gt;:   ldr     x0, [x19, <span style="color: #5B6268;">#</span><span style="color: #5B6268;">48]</span></code>
-<code>   0xffffff800817e2d8 &lt;+136&gt;:   add     x0, x0, <span style="color: #5B6268;">#</span><span style="color: #5B6268;">0xa0</span></code>
+<code>   0xffffff800817e2d4 &lt;+132&gt;:   ldr     x0, [x19, <span class="org-comment-delimiter">#</span><span class="org-comment">48]</span></code>
+<code>   0xffffff800817e2d8 &lt;+136&gt;:   add     x0, x0, <span class="org-comment-delimiter">#</span><span class="org-comment">0xa0</span></code>
 <code>   0xffffff800817e2dc &lt;+140&gt;:   bl      0xffffff80087846e8 &lt;down_write&gt;</code>
-<code>   0xffffff800817e2e0 &lt;+144&gt;:   ldr     x0, [x21, <span style="color: #5B6268;">#</span><span style="color: #5B6268;">48]</span></code>
-<code>   0xffffff800817e2e4 &lt;+148&gt;:   add     x0, x0, <span style="color: #5B6268;">#</span><span style="color: #5B6268;">0xa0</span></code>
+<code>   0xffffff800817e2e0 &lt;+144&gt;:   ldr     x0, [x21, <span class="org-comment-delimiter">#</span><span class="org-comment">48]</span></code>
+<code>   0xffffff800817e2e4 &lt;+148&gt;:   add     x0, x0, <span class="org-comment-delimiter">#</span><span class="org-comment">0xa0</span></code>
 <code>   0xffffff800817e2e8 &lt;+152&gt;:   bl      0xffffff80087846e8 &lt;down_write&gt;</code>
 <code></code>
 <code>fs/namei.c:</code>
 <code>2865            return NULL;</code>
-<code>   0xffffff800817e2ec &lt;+156&gt;:   ldr     x21, [sp, <span style="color: #5B6268;">#</span><span style="color: #5B6268;">32]</span></code>
+<code>   0xffffff800817e2ec &lt;+156&gt;:   ldr     x21, [sp, <span class="org-comment-delimiter">#</span><span class="org-comment">32]</span></code>
 <code>   0xffffff800817e2f0 &lt;+160&gt;:   mov     x0, x20                                  // &#20934;&#22791;&#36820;&#22238;&#20540;</code>
-<code>   0xffffff800817e2f4 &lt;+164&gt;:   ldp     x19, x20, [sp, <span style="color: #5B6268;">#</span><span style="color: #5B6268;">16]                      // &#24674;&#22797;&#23492;&#23384;&#22120;</span></code>
-<code>   0xffffff800817e2f8 &lt;+168&gt;:   ldp     x29, x30, [sp], <span style="color: #5B6268;">#</span><span style="color: #5B6268;">48                      //&#24674;&#22797;&#26632;&#24103;</span></code>
+<code>   0xffffff800817e2f4 &lt;+164&gt;:   ldp     x19, x20, [sp, <span class="org-comment-delimiter">#</span><span class="org-comment">16]                      // &#24674;&#22797;&#23492;&#23384;&#22120;</span></code>
+<code>   0xffffff800817e2f8 &lt;+168&gt;:   ldp     x29, x30, [sp], <span class="org-comment-delimiter">#</span><span class="org-comment">48                      //&#24674;&#22797;&#26632;&#24103;</span></code>
 <code>   0xffffff800817e2fc &lt;+172&gt;:   ret                                              // return&#25351;&#20196;&#36820;&#22238;LR(X30)&#25351;&#38024;&#25152;&#22312;&#20301;&#32622;</code>
 <code>End of assembler dump.</code>
 </pre>
@@ -2950,18 +2951,18 @@ Disassemble<br>
 Souce<br>
 </p>
 <div class="org-src-container">
-<pre class="src src-C"><code>asmlinkage __visible <span style="color: #ECBE7B;">int</span> <span style="color: #c678dd;">printk</span>(<span style="color: #51afef;">const</span> <span style="color: #ECBE7B;">char</span> *<span style="color: #dcaeea;">fmt</span>, ...)</code>
+<pre class="src src-C"><code>asmlinkage __visible <span class="org-type">int</span> <span class="org-function-name">printk</span>(<span class="org-keyword">const</span> <span class="org-type">char</span> *<span class="org-variable-name">fmt</span>, ...)</code>
 <code>{</code>
-<code>    <span style="color: #ECBE7B;">va_list</span> <span style="color: #dcaeea;">args</span>;</code>
-<code>    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">r</span>;</code>
+<code>    <span class="org-type">va_list</span> <span class="org-variable-name">args</span>;</code>
+<code>    <span class="org-type">int</span> <span class="org-variable-name">r</span>;</code>
 <code></code>
 <code>    va_start(args, fmt);</code>
 <code>    r = vprintk_func(fmt, args);</code>
 <code>    va_end(args);</code>
 <code></code>
-<code>    <span style="color: #51afef;">return</span> r;</code>
+<code>    <span class="org-keyword">return</span> r;</code>
 <code>}</code>
-<code><span style="color: #c678dd;">EXPORT_SYMBOL</span>(printk);</code>
+<code><span class="org-function-name">EXPORT_SYMBOL</span>(printk);</code>
 </pre>
 </div>
 
@@ -2970,54 +2971,54 @@ Disassemble<br>
 </p>
 <div class="org-src-container">
 <pre class="src src-bash"><code>(gdb) disassemble /s</code>
-<code>Dump of assembler code for <span style="color: #51afef;">function</span> <span style="color: #c678dd;">printk</span>:</code>
+<code>Dump of assembler code for <span class="org-keyword">function</span> <span class="org-function-name">printk</span>:</code>
 <code>kernel/printk/printk.c:</code>
 <code>1990    {</code>
-<code>=&gt; 0xffff000008127454 &lt;+0&gt;:     stp     x29, x30, [sp, <span style="color: #5B6268;">#</span><span style="color: #5B6268;">-176]!                     sp = 0xffff00000805bcf0</span></code>
-<code>   0xffff000008127458 &lt;+4&gt;:     mov     w8, <span style="color: #5B6268;">#</span><span style="color: #5B6268;">0xffffffc8                 // #-56       sp = 0xFFFF00000805bc40</span></code>
-<code>   0xffff00000812745c &lt;+8&gt;:     mov     x29, sp                                       <span style="color: #dcaeea;">x29</span> = sp, <span style="color: #dcaeea;">fp</span> = 0xFFFF00000805bc40</code>
-<code>   0xffff000008127460 &lt;+12&gt;:    add     x9, sp, <span style="color: #5B6268;">#</span><span style="color: #5B6268;">0x70                                 x9= 0xFFFF00000805bcb0</span></code>
-<code>   0xffff000008127464 &lt;+16&gt;:    add     x10, sp, <span style="color: #5B6268;">#</span><span style="color: #5B6268;">0xb0                                x10 = 0xffff00000805bcf0  i.e. stack_top</span></code>
-<code>   0xffff000008127468 &lt;+20&gt;:    str     x19, [sp, <span style="color: #5B6268;">#</span><span style="color: #5B6268;">16]                                backup x19 to stack Local Variables</span></code>
+<code>=&gt; 0xffff000008127454 &lt;+0&gt;:     stp     x29, x30, [sp, <span class="org-comment-delimiter">#</span><span class="org-comment">-176]!                     sp = 0xffff00000805bcf0</span></code>
+<code>   0xffff000008127458 &lt;+4&gt;:     mov     w8, <span class="org-comment-delimiter">#</span><span class="org-comment">0xffffffc8                 // #-56       sp = 0xFFFF00000805bc40</span></code>
+<code>   0xffff00000812745c &lt;+8&gt;:     mov     x29, sp                                       <span class="org-variable-name">x29</span> = sp, <span class="org-variable-name">fp</span> = 0xFFFF00000805bc40</code>
+<code>   0xffff000008127460 &lt;+12&gt;:    add     x9, sp, <span class="org-comment-delimiter">#</span><span class="org-comment">0x70                                 x9= 0xFFFF00000805bcb0</span></code>
+<code>   0xffff000008127464 &lt;+16&gt;:    add     x10, sp, <span class="org-comment-delimiter">#</span><span class="org-comment">0xb0                                x10 = 0xffff00000805bcf0  i.e. stack_top</span></code>
+<code>   0xffff000008127468 &lt;+20&gt;:    str     x19, [sp, <span class="org-comment-delimiter">#</span><span class="org-comment">16]                                backup x19 to stack Local Variables</span></code>
 <code>   0xffff00000812746c &lt;+24&gt;:    adrp    x19, 0xffff0000092b9000 &lt;page_wait_table+5376&gt;</code>
-<code>   0xffff000008127470 &lt;+28&gt;:    add     x19, x19, <span style="color: #5B6268;">#</span><span style="color: #5B6268;">0x6c8                              x19 = address of __stack_chk_guard</span></code>
-<code>   0xffff000008127474 &lt;+32&gt;:    stp     x10, x10, [sp, <span style="color: #5B6268;">#</span><span style="color: #5B6268;">72]                           prepare va_list args</span></code>
-<code>   0xffff000008127478 &lt;+36&gt;:    str     x9, [sp, <span style="color: #5B6268;">#</span><span style="color: #5B6268;">88]                                 save x9 to 0xFFFF00000805BC98</span></code>
+<code>   0xffff000008127470 &lt;+28&gt;:    add     x19, x19, <span class="org-comment-delimiter">#</span><span class="org-comment">0x6c8                              x19 = address of __stack_chk_guard</span></code>
+<code>   0xffff000008127474 &lt;+32&gt;:    stp     x10, x10, [sp, <span class="org-comment-delimiter">#</span><span class="org-comment">72]                           prepare va_list args</span></code>
+<code>   0xffff000008127478 &lt;+36&gt;:    str     x9, [sp, <span class="org-comment-delimiter">#</span><span class="org-comment">88]                                 save x9 to 0xFFFF00000805BC98</span></code>
 <code>   0xffff00000812747c &lt;+40&gt;:    ldr     x9, [x19]                                     load stack guard magic value to x9.</code>
-<code>   0xffff000008127480 &lt;+44&gt;:    str     x9, [sp, <span style="color: #5B6268;">#</span><span style="color: #5B6268;">104]                                store stack guard magic value to stack on 0xFFFF00000805BCA8.</span></code>
-<code>   0xffff000008127484 &lt;+48&gt;:    mov     x9, <span style="color: #5B6268;">#</span><span style="color: #5B6268;">0x0                        // #0</span></code>
-<code>   0xffff000008127488 &lt;+52&gt;:    stp     w8, wzr, [sp, <span style="color: #5B6268;">#</span><span style="color: #5B6268;">96]                           &#35774;&#32622;&#21021;&#22987;&#30340;__gr_offs</span></code>
-<code>   0xffff00000812748c &lt;+56&gt;:    ldp     x8, x9, [sp, <span style="color: #5B6268;">#</span><span style="color: #5B6268;">72]</span></code>
-<code>   0xffff000008127490 &lt;+60&gt;:    stp     x8, x9, [sp, <span style="color: #5B6268;">#</span><span style="color: #5B6268;">32]</span></code>
-<code>   0xffff000008127494 &lt;+64&gt;:    ldp     x8, x9, [sp, <span style="color: #5B6268;">#</span><span style="color: #5B6268;">88]</span></code>
-<code>   0xffff000008127498 &lt;+68&gt;:    stp     x1, x2, [sp, <span style="color: #5B6268;">#</span><span style="color: #5B6268;">120]                           &#23558;x1 ~ x7&#25918;&#20837;GP Arg Save Area&#30340;&#21306;&#22495;</span></code>
-<code>   0xffff00000812749c &lt;+72&gt;:    add     x1, sp, <span style="color: #5B6268;">#</span><span style="color: #5B6268;">0x20</span></code>
-<code>   0xffff0000081274a0 &lt;+76&gt;:    stp     x8, x9, [sp, <span style="color: #5B6268;">#</span><span style="color: #5B6268;">48]</span></code>
-<code>   0xffff0000081274a4 &lt;+80&gt;:    stp     x3, x4, [sp, <span style="color: #5B6268;">#</span><span style="color: #5B6268;">136]</span></code>
-<code>   0xffff0000081274a8 &lt;+84&gt;:    stp     x5, x6, [sp, <span style="color: #5B6268;">#</span><span style="color: #5B6268;">152]</span></code>
-<code>   0xffff0000081274ac &lt;+88&gt;:    str     x7, [sp, <span style="color: #5B6268;">#</span><span style="color: #5B6268;">168]                               &#24050;&#32463;&#23558;GP Arg Save Area&#35774;&#32622;&#22909;,va_list args&#21442;&#25968;&#24050;&#32463;&#22788;&#29702;&#22909;&#20102;&#12290;</span></code>
+<code>   0xffff000008127480 &lt;+44&gt;:    str     x9, [sp, <span class="org-comment-delimiter">#</span><span class="org-comment">104]                                store stack guard magic value to stack on 0xFFFF00000805BCA8.</span></code>
+<code>   0xffff000008127484 &lt;+48&gt;:    mov     x9, <span class="org-comment-delimiter">#</span><span class="org-comment">0x0                        // #0</span></code>
+<code>   0xffff000008127488 &lt;+52&gt;:    stp     w8, wzr, [sp, <span class="org-comment-delimiter">#</span><span class="org-comment">96]                           &#35774;&#32622;&#21021;&#22987;&#30340;__gr_offs</span></code>
+<code>   0xffff00000812748c &lt;+56&gt;:    ldp     x8, x9, [sp, <span class="org-comment-delimiter">#</span><span class="org-comment">72]</span></code>
+<code>   0xffff000008127490 &lt;+60&gt;:    stp     x8, x9, [sp, <span class="org-comment-delimiter">#</span><span class="org-comment">32]</span></code>
+<code>   0xffff000008127494 &lt;+64&gt;:    ldp     x8, x9, [sp, <span class="org-comment-delimiter">#</span><span class="org-comment">88]</span></code>
+<code>   0xffff000008127498 &lt;+68&gt;:    stp     x1, x2, [sp, <span class="org-comment-delimiter">#</span><span class="org-comment">120]                           &#23558;x1 ~ x7&#25918;&#20837;GP Arg Save Area&#30340;&#21306;&#22495;</span></code>
+<code>   0xffff00000812749c &lt;+72&gt;:    add     x1, sp, <span class="org-comment-delimiter">#</span><span class="org-comment">0x20</span></code>
+<code>   0xffff0000081274a0 &lt;+76&gt;:    stp     x8, x9, [sp, <span class="org-comment-delimiter">#</span><span class="org-comment">48]</span></code>
+<code>   0xffff0000081274a4 &lt;+80&gt;:    stp     x3, x4, [sp, <span class="org-comment-delimiter">#</span><span class="org-comment">136]</span></code>
+<code>   0xffff0000081274a8 &lt;+84&gt;:    stp     x5, x6, [sp, <span class="org-comment-delimiter">#</span><span class="org-comment">152]</span></code>
+<code>   0xffff0000081274ac &lt;+88&gt;:    str     x7, [sp, <span class="org-comment-delimiter">#</span><span class="org-comment">168]                               &#24050;&#32463;&#23558;GP Arg Save Area&#35774;&#32622;&#22909;,va_list args&#21442;&#25968;&#24050;&#32463;&#22788;&#29702;&#22909;&#20102;&#12290;</span></code>
 <code>(gdb) i r pc</code>
 <code>pc             0xffff0000081274b0  0xffff0000081274b0 &lt;printk+92&gt;</code>
 <code>(gdb) p args</code>
-<code>$<span style="color: #dcaeea;">6</span> = {</code>
-<code>  <span style="color: #dcaeea;">__stack</span> = 0xffff00000805bcf0,</code>
-<code>  <span style="color: #dcaeea;">__gr_top</span> = 0xffff00000805bcf0,</code>
-<code>  <span style="color: #dcaeea;">__vr_top</span> = 0xffff00000805bcb0,</code>
-<code>  <span style="color: #dcaeea;">__gr_offs</span> = -56,</code>
-<code>  <span style="color: #dcaeea;">__vr_offs</span> = 0</code>
+<code>$<span class="org-variable-name">6</span> = {</code>
+<code>  <span class="org-variable-name">__stack</span> = 0xffff00000805bcf0,</code>
+<code>  <span class="org-variable-name">__gr_top</span> = 0xffff00000805bcf0,</code>
+<code>  <span class="org-variable-name">__vr_top</span> = 0xffff00000805bcb0,</code>
+<code>  <span class="org-variable-name">__gr_offs</span> = -56,</code>
+<code>  <span class="org-variable-name">__vr_offs</span> = 0</code>
 <code>}</code>
 <code>   0xffff0000081274b0 &lt;+92&gt;:    bl      0xffff000008127e28 &lt;vprintk_func&gt;</code>
 <code></code>
 <code>1996            va_end(args);</code>
 <code>1997</code>
 <code>1998            return r;</code>
-<code>   0xffff0000081274b4 &lt;+96&gt;:    ldr     x2, [sp, <span style="color: #5B6268;">#</span><span style="color: #5B6268;">104]</span></code>
+<code>   0xffff0000081274b4 &lt;+96&gt;:    ldr     x2, [sp, <span class="org-comment-delimiter">#</span><span class="org-comment">104]</span></code>
 <code>   0xffff0000081274b8 &lt;+100&gt;:   ldr     x1, [x19]</code>
 <code>   0xffff0000081274bc &lt;+104&gt;:   eor     x1, x2, x1</code>
 <code>   0xffff0000081274c0 &lt;+108&gt;:   cbz     x1, 0xffff0000081274c8 &lt;printk+116&gt;</code>
 <code>   0xffff0000081274c4 &lt;+112&gt;:   bl      0xffff0000080d3d48 &lt;__stack_chk_fail&gt;</code>
-<code>   0xffff0000081274c8 &lt;+116&gt;:   ldr     x19, [sp, <span style="color: #5B6268;">#</span><span style="color: #5B6268;">16]</span></code>
-<code>   0xffff0000081274cc &lt;+120&gt;:   ldp     x29, x30, [sp], <span style="color: #5B6268;">#</span><span style="color: #5B6268;">176</span></code>
+<code>   0xffff0000081274c8 &lt;+116&gt;:   ldr     x19, [sp, <span class="org-comment-delimiter">#</span><span class="org-comment">16]</span></code>
+<code>   0xffff0000081274cc &lt;+120&gt;:   ldp     x29, x30, [sp], <span class="org-comment-delimiter">#</span><span class="org-comment">176</span></code>
 <code>   0xffff0000081274d0 &lt;+124&gt;:   ret</code>
 <code>End of assembler dump.</code>
 </pre>
@@ -3171,7 +3172,7 @@ Disassemble<br>
 这个地方只看第二行打印的地址就可以了， <b>r: 1@0x0000000020000d14, w: 0@0x0000000020000000</b><br>
 </p>
 <div class="org-src-container">
-<pre class="src src-C"><code>INFO(<span style="color: #98be65;">"%s: r: %u@0x%016llx, w: %u@0x%016llx \n"</span>, __func__,</code>
+<pre class="src src-C"><code>INFO(<span class="org-string">"%s: r: %u@0x%016llx, w: %u@0x%016llx \n"</span>, __func__,</code>
 <code>    r_master, r_far, w_master, w_far);</code>
 </pre>
 </div>
@@ -3236,40 +3237,40 @@ master 1: <a href="http://gitlab.hobot.cc/HCPD/bootloader/blob/j5-dev/include/dr
 <li>源代码<br></li>
 </ul>
 <div class="org-src-container">
-<pre class="src src-C"><code><span style="color: #ECBE7B;">int</span> <span style="color: #c678dd;">merge_dtb</span>(<span style="color: #ECBE7B;">void</span> *<span style="color: #dcaeea;">dst</span>, <span style="color: #ECBE7B;">void</span> *<span style="color: #dcaeea;">src</span>)</code>
+<pre class="src src-C"><code><span class="org-type">int</span> <span class="org-function-name">merge_dtb</span>(<span class="org-type">void</span> *<span class="org-variable-name">dst</span>, <span class="org-type">void</span> *<span class="org-variable-name">src</span>)</code>
 <code>{</code>
-<code>    <span style="color: #ECBE7B;">u32</span> <span style="color: #dcaeea;">fdt_size</span>;</code>
-<code>    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">ret</span>;</code>
+<code>    <span class="org-type">u32</span> <span class="org-variable-name">fdt_size</span>;</code>
+<code>    <span class="org-type">int</span> <span class="org-variable-name">ret</span>;</code>
 <code></code>
-<code>    <span style="color: #51afef;">if</span> (dst == <span style="color: #a9a1e1;">NULL</span> || src == <span style="color: #a9a1e1;">NULL</span>)</code>
-<code>        <span style="color: #51afef;">return</span> 0;</code>
-<code>    <span style="color: #83898d;">/**</span></code>
-<code><span style="color: #83898d;">     * in FPGA environment, dtb will be load to memory directly.</span></code>
-<code><span style="color: #83898d;">     * In this case, dst will be same as src, because we use same dtbs</span></code>
-<code><span style="color: #83898d;">     */</span></code>
-<code>    <span style="color: #51afef;">if</span> (dst == src)</code>
-<code>        <span style="color: #51afef;">return</span> 0;</code>
+<code>    <span class="org-keyword">if</span> (dst == <span class="org-constant">NULL</span> || src == <span class="org-constant">NULL</span>)</code>
+<code>        <span class="org-keyword">return</span> 0;</code>
+<code>    <span class="org-doc">/**</span></code>
+<code><span class="org-doc">     * in FPGA environment, dtb will be load to memory directly.</span></code>
+<code><span class="org-doc">     * In this case, dst will be same as src, because we use same dtbs</span></code>
+<code><span class="org-doc">     */</span></code>
+<code>    <span class="org-keyword">if</span> (dst == src)</code>
+<code>        <span class="org-keyword">return</span> 0;</code>
 <code></code>
-<code>    <span style="color: #51afef;">if</span> (fdt_magic(dst) != FDT_MAGIC || fdt_magic(src) != FDT_MAGIC) {</code>
-<code>        <span style="color: #51afef;">return</span> -EINVAL;</code>
+<code>    <span class="org-keyword">if</span> (fdt_magic(dst) != FDT_MAGIC || fdt_magic(src) != FDT_MAGIC) {</code>
+<code>        <span class="org-keyword">return</span> -EINVAL;</code>
 <code>    }</code>
 <code></code>
-<code>    <span style="color: #83898d;">/**</span></code>
-<code><span style="color: #83898d;">     * overlay device tree properties</span></code>
-<code><span style="color: #83898d;">     * there is some services populated by secure monitor.</span></code>
-<code><span style="color: #83898d;">     * overlay our base device tree.</span></code>
-<code><span style="color: #83898d;">     */</span></code>
+<code>    <span class="org-doc">/**</span></code>
+<code><span class="org-doc">     * overlay device tree properties</span></code>
+<code><span class="org-doc">     * there is some services populated by secure monitor.</span></code>
+<code><span class="org-doc">     * overlay our base device tree.</span></code>
+<code><span class="org-doc">     */</span></code>
 <code>    fdt_size = fdt_totalsize(dst);</code>
 <code></code>
-<code>    assert(fdt_size &lt;= <span style="color: #51afef;">sizeof</span>(backup_buffer));</code>
+<code>    assert(fdt_size &lt;= <span class="org-keyword">sizeof</span>(backup_buffer));</code>
 <code>    memcpy(backup_buffer, dst, fdt_size);</code>
 <code>    ret = fdt_overlay_apply_verbose(dst, src);</code>
-<code>    <span style="color: #51afef;">if</span> (ret) {</code>
-<code>        pr_err(<span style="color: #98be65;">"dtb overlay failed with status %d\n"</span>, ret);</code>
+<code>    <span class="org-keyword">if</span> (ret) {</code>
+<code>        pr_err(<span class="org-string">"dtb overlay failed with status %d\n"</span>, ret);</code>
 <code>        memcpy(dst, backup_buffer, fdt_size);</code>
 <code>    }</code>
 <code></code>
-<code>    <span style="color: #51afef;">return</span> ret;</code>
+<code>    <span class="org-keyword">return</span> ret;</code>
 <code>}</code>
 </pre>
 </div>
@@ -3286,21 +3287,21 @@ DS5中，必须在镜像加载之后打上的断点才能起作用，使用时�
 <code>on file spl.c, line 412</code>
 <code>on file spl.c, line 414</code>
 <code>&gt;c</code>
-<code>Execution stopped<span style="color: #51afef;"> in</span> EL3h mode at breakpoint 2: EL3:0x0000000020002F64</code>
+<code>Execution stopped<span class="org-keyword"> in</span> EL3h mode at breakpoint 2: EL3:0x0000000020002F64</code>
 <code>In spl.c</code>
 <code>Unable to read source file /home/bin.zhu/jenkins/workspace/platform_j5/j5_testing@2/uboot/board/hobot/j5/spl/spl.c</code>
 <code>EL3:0x0000000020002F64   412,0   MOV      w1,#0x19</code>
 <code>&gt;bt</code>
-<code><span style="color: #5B6268;">#</span><span style="color: #5B6268;">0 spl_perform_fixups(spl_image = (struct spl_image_info*) 0x2001BD08) at spl.c:412</span></code>
-<code><span style="color: #5B6268;">#</span><span style="color: #5B6268;">1 [board_init_r+0xEC]</span></code>
-<code><span style="color: #5B6268;">#</span><span style="color: #5B6268;">2 [_main+0x28]</span></code>
+<code><span class="org-comment-delimiter">#</span><span class="org-comment">0 spl_perform_fixups(spl_image = (struct spl_image_info*) 0x2001BD08) at spl.c:412</span></code>
+<code><span class="org-comment-delimiter">#</span><span class="org-comment">1 [board_init_r+0xEC]</span></code>
+<code><span class="org-comment-delimiter">#</span><span class="org-comment">2 [_main+0x28]</span></code>
 <code>&gt;hb *EL2N:0x88000000</code>
 <code>Hardware breakpoint 3 at EL2N:0x0000000088000000</code>
 <code>&gt;c</code>
-<code>Execution stopped<span style="color: #51afef;"> in</span> EL2h mode at breakpoint 3: EL2N:0x0000000088000000</code>
+<code>Execution stopped<span class="org-keyword"> in</span> EL2h mode at breakpoint 3: EL2N:0x0000000088000000</code>
 <code>EL2N:0x0000000088000000   B        {pc}+40 ; 0x88000028</code>
 <code>&gt;bt</code>
-<code><span style="color: #5B6268;">#</span><span style="color: #5B6268;">0 [EL2N:0x0000000088000000]</span></code>
+<code><span class="org-comment-delimiter">#</span><span class="org-comment">0 [EL2N:0x0000000088000000]</span></code>
 <code>&gt;add-symbol-file ~/symbols/boot/u-boot</code>
 <code>&gt;hb merge_dtb</code>
 <code>Hardware breakpoint 4 at EL2N:0x00000000880039BC</code>
@@ -3314,7 +3315,7 @@ DS5中，必须在镜像加载之后打上的断点才能起作用，使用时�
 
 <div class="org-src-container">
 <pre class="src src-bash"><code>&gt;c</code>
-<code>Execution stopped<span style="color: #51afef;"> in</span> EL2h mode at breakpoint 4: EL2N:0x00000000880039BC</code>
+<code>Execution stopped<span class="org-keyword"> in</span> EL2h mode at breakpoint 4: EL2N:0x00000000880039BC</code>
 <code>In dtb_overlay.c</code>
 <code>Unable to read source file /home/bin.zhu/jenkins/workspace/platform_j5/j5_testing@2/uboot/board/hobot/j5/dtb_overlay.c</code>
 <code>EL2N:0x00000000880039BC   33,0   STP      x29,x30,[sp,#-0x30]!</code>
@@ -3331,14 +3332,14 @@ DS5中，必须在镜像加载之后打上的断点才能起作用，使用时�
 <code>    on file console.c, line 537</code>
 <code>    on file console.c, line 548</code>
 <code>&gt;c</code>
-<code>Execution stopped<span style="color: #51afef;"> in</span> EL2h mode at breakpoint 5.2: EL2N:0x000000008801F8FC</code>
+<code>Execution stopped<span class="org-keyword"> in</span> EL2h mode at breakpoint 5.2: EL2N:0x000000008801F8FC</code>
 <code>In console.c</code>
 <code>EL2N:0x000000008801F8FC   537,0   {</code>
 <code>&gt;p s</code>
-<code>$<span style="color: #dcaeea;">10</span> = 0x82FBBB58 <span style="color: #98be65;">"failed on fdt_overlay_apply(): FDT_ERR_NOTFOUND</span></code>
-<code><span style="color: #98be65;">"</span></code>
+<code>$<span class="org-variable-name">10</span> = 0x82FBBB58 <span class="org-string">"failed on fdt_overlay_apply(): FDT_ERR_NOTFOUND</span></code>
+<code><span class="org-string">"</span></code>
 <code>&gt;bt</code>
-<code><span style="color: #5B6268;">#</span><span style="color: #5B6268;">0 puts(s = 0x82FBBB58 "failed on fdt_overlay_apply(): FDT_ERR_NOTFOUND</span></code>
+<code><span class="org-comment-delimiter">#</span><span class="org-comment">0 puts(s = 0x82FBBB58 "failed on fdt_overlay_apply(): FDT_ERR_NOTFOUND</span></code>
 </pre>
 </div>
 </div>
@@ -3364,22 +3365,22 @@ DS5中，必须在镜像加载之后打上的断点才能起作用，使用时�
 <li>x0相关信息:<br></li>
 </ul>
 <div class="org-src-container">
-<pre class="src src-dts"><code><span style="color: #ECBE7B;">__symbols__</span> {</code>
-<code>    <span style="color: #dcaeea;">pmu</span> = <span style="color: #98be65;">"/pmu@aon"</span>;</code>
-<code>    <span style="color: #dcaeea;">gic</span> = <span style="color: #98be65;">"/interrupt-controller@58000000"</span>;</code>
-<code>    <span style="color: #dcaeea;">vmmcsd_fixed</span> = <span style="color: #98be65;">"/fixedregulator"</span>;</code>
-<code>    <span style="color: #dcaeea;">vmcsd1_fixed</span> = <span style="color: #98be65;">"/fixedregulator1"</span>;</code>
-<code>    <span style="color: #dcaeea;">tee_regmap</span> = <span style="color: #98be65;">"/tee_regmap_services"</span>;</code>
-<code>    <span style="color: #dcaeea;">gclk3</span> = <span style="color: #98be65;">"/gclk3"</span>;</code>
-<code>    <span style="color: #dcaeea;">cspi0</span> = <span style="color: #98be65;">"/cspi@0x48020000"</span>;</code>
-<code>    <span style="color: #dcaeea;">nor</span> = <span style="color: #98be65;">"/cspi@0x48020000/flash@0"</span>;</code>
-<code>    <span style="color: #dcaeea;">nand</span> = <span style="color: #98be65;">"/cspi@0x48020000/flash@1"</span>;</code>
-<code>    <span style="color: #dcaeea;">hyper</span> = <span style="color: #98be65;">"/cspi@0x48020000/flash@2"</span>;</code>
-<code>    <span style="color: #dcaeea;">hb_sci</span> = <span style="color: #98be65;">"/hb_sci@boot_flags"</span>;</code>
-<code>    -<span style="color: #dcaeea;">decoder</span> = <span style="color: #98be65;">"/hb_sci@sec_boot_flags"</span>;</code>
-<code>    <span style="color: #dcaeea;">ns,rclk-en</span> = <span style="color: #98be65;">"/firmware@tee"</span>;</code>
-<code>    <span style="color: #dcaeea;">n</span> = <span style="color: #98be65;">"/psci"</span>;</code>
-<code>    <span style="color: #dcaeea;">ess</span> = <span style="color: #98be65;">"/reserved-memory"</span>;</code>
+<pre class="src src-dts"><code><span class="org-type">__symbols__</span> {</code>
+<code>    <span class="org-variable-name">pmu</span> = <span class="org-string">"/pmu@aon"</span>;</code>
+<code>    <span class="org-variable-name">gic</span> = <span class="org-string">"/interrupt-controller@58000000"</span>;</code>
+<code>    <span class="org-variable-name">vmmcsd_fixed</span> = <span class="org-string">"/fixedregulator"</span>;</code>
+<code>    <span class="org-variable-name">vmcsd1_fixed</span> = <span class="org-string">"/fixedregulator1"</span>;</code>
+<code>    <span class="org-variable-name">tee_regmap</span> = <span class="org-string">"/tee_regmap_services"</span>;</code>
+<code>    <span class="org-variable-name">gclk3</span> = <span class="org-string">"/gclk3"</span>;</code>
+<code>    <span class="org-variable-name">cspi0</span> = <span class="org-string">"/cspi@0x48020000"</span>;</code>
+<code>    <span class="org-variable-name">nor</span> = <span class="org-string">"/cspi@0x48020000/flash@0"</span>;</code>
+<code>    <span class="org-variable-name">nand</span> = <span class="org-string">"/cspi@0x48020000/flash@1"</span>;</code>
+<code>    <span class="org-variable-name">hyper</span> = <span class="org-string">"/cspi@0x48020000/flash@2"</span>;</code>
+<code>    <span class="org-variable-name">hb_sci</span> = <span class="org-string">"/hb_sci@boot_flags"</span>;</code>
+<code>    -<span class="org-variable-name">decoder</span> = <span class="org-string">"/hb_sci@sec_boot_flags"</span>;</code>
+<code>    <span class="org-variable-name">ns,rclk-en</span> = <span class="org-string">"/firmware@tee"</span>;</code>
+<code>    <span class="org-variable-name">n</span> = <span class="org-string">"/psci"</span>;</code>
+<code>    <span class="org-variable-name">ess</span> = <span class="org-string">"/reserved-memory"</span>;</code>
 <code>};</code>
 <code></code>
 </pre>
@@ -3389,14 +3390,14 @@ DS5中，必须在镜像加载之后打上的断点才能起作用，使用时�
 <li>x1相关信息<br></li>
 </ul>
 <div class="org-src-container">
-<pre class="src src-dts"><code><span style="color: #ECBE7B;">__fixups__</span> {</code>
-<code>    <span style="color: #dcaeea;">firmware</span> = <span style="color: #98be65;">"/fragment@0:target:0"</span>;</code>
-<code>    <span style="color: #dcaeea;">reserved_memory</span> = <span style="color: #98be65;">"/fragment@1:target:0"</span>;</code>
-<code>    <span style="color: #dcaeea;">psci</span> = <span style="color: #98be65;">"/fragment@2:target:0"</span>;</code>
-<code>    <span style="color: #dcaeea;">tee_regmap</span> = <span style="color: #98be65;">"/fragment@3:target:0"</span>;</code>
-<code>    <span style="color: #dcaeea;">hb_sci</span> = <span style="color: #98be65;">"/fragment@4:target:0"</span>;</code>
-<code>    <span style="color: #dcaeea;">hb_sec_sci</span> = <span style="color: #98be65;">"/fragment@5:target:0"</span>;</code>
-<code>    <span style="color: #dcaeea;">soc</span> = <span style="color: #98be65;">"/fragment@6:target:0"</span>;</code>
+<pre class="src src-dts"><code><span class="org-type">__fixups__</span> {</code>
+<code>    <span class="org-variable-name">firmware</span> = <span class="org-string">"/fragment@0:target:0"</span>;</code>
+<code>    <span class="org-variable-name">reserved_memory</span> = <span class="org-string">"/fragment@1:target:0"</span>;</code>
+<code>    <span class="org-variable-name">psci</span> = <span class="org-string">"/fragment@2:target:0"</span>;</code>
+<code>    <span class="org-variable-name">tee_regmap</span> = <span class="org-string">"/fragment@3:target:0"</span>;</code>
+<code>    <span class="org-variable-name">hb_sci</span> = <span class="org-string">"/fragment@4:target:0"</span>;</code>
+<code>    <span class="org-variable-name">hb_sec_sci</span> = <span class="org-string">"/fragment@5:target:0"</span>;</code>
+<code>    <span class="org-variable-name">soc</span> = <span class="org-string">"/fragment@6:target:0"</span>;</code>
 <code>};</code>
 </pre>
 </div>
@@ -3450,23 +3451,23 @@ find offset in uboot.img.bin<br>
 dtb在uboot.img.bin中的位址: 0x00000000880bf2e8 - 0x0000000088000000 + 0x240 = 0xbf528<br>
 </p>
 <div class="org-src-container">
-<pre class="src src-bash"><code>dd <span style="color: #dcaeea;">if</span>=uboot.img.bin <span style="color: #dcaeea;">of</span>=dtb-in-image.dtb <span style="color: #dcaeea;">bs</span>=1 <span style="color: #dcaeea;">skip</span>=78365</code>
+<pre class="src src-bash"><code>dd <span class="org-variable-name">if</span>=uboot.img.bin <span class="org-variable-name">of</span>=dtb-in-image.dtb <span class="org-variable-name">bs</span>=1 <span class="org-variable-name">skip</span>=78365</code>
 </pre>
 </div>
 
 <div class="org-src-container">
-<pre class="src src-dts"><code><span style="color: #ECBE7B;">__symbols__</span> {</code>
-<code>        <span style="color: #dcaeea;">tee_regmap</span> = <span style="color: #98be65;">"/tee_regmap_services"</span>;</code>
-<code>        <span style="color: #dcaeea;">gclk3</span> = <span style="color: #98be65;">"/gclk3"</span>;</code>
-<code>        <span style="color: #dcaeea;">cspi0</span> = <span style="color: #98be65;">"/cspi@0x48020000"</span>;</code>
-<code>        <span style="color: #dcaeea;">nor</span> = <span style="color: #98be65;">"/cspi@0x48020000/flash@0"</span>;</code>
-<code>        <span style="color: #dcaeea;">nand</span> = <span style="color: #98be65;">"/cspi@0x48020000/flash@1"</span>;</code>
-<code>        <span style="color: #dcaeea;">hyper</span> = <span style="color: #98be65;">"/cspi@0x48020000/flash@2"</span>;</code>
-<code>        <span style="color: #dcaeea;">hb_sci</span> = <span style="color: #98be65;">"/hb_sci@boot_flags"</span>;</code>
-<code>        <span style="color: #dcaeea;">hb_sec_sci</span> = <span style="color: #98be65;">"/hb_sci@sec_boot_flags"</span>;</code>
-<code>        <span style="color: #dcaeea;">firmware</span> = <span style="color: #98be65;">"/firmware@tee"</span>;</code>
-<code>        <span style="color: #dcaeea;">psci</span> = <span style="color: #98be65;">"/psci"</span>;</code>
-<code>        <span style="color: #dcaeea;">reserved_memory</span> = <span style="color: #98be65;">"/reserved-memory"</span>;</code>
+<pre class="src src-dts"><code><span class="org-type">__symbols__</span> {</code>
+<code>        <span class="org-variable-name">tee_regmap</span> = <span class="org-string">"/tee_regmap_services"</span>;</code>
+<code>        <span class="org-variable-name">gclk3</span> = <span class="org-string">"/gclk3"</span>;</code>
+<code>        <span class="org-variable-name">cspi0</span> = <span class="org-string">"/cspi@0x48020000"</span>;</code>
+<code>        <span class="org-variable-name">nor</span> = <span class="org-string">"/cspi@0x48020000/flash@0"</span>;</code>
+<code>        <span class="org-variable-name">nand</span> = <span class="org-string">"/cspi@0x48020000/flash@1"</span>;</code>
+<code>        <span class="org-variable-name">hyper</span> = <span class="org-string">"/cspi@0x48020000/flash@2"</span>;</code>
+<code>        <span class="org-variable-name">hb_sci</span> = <span class="org-string">"/hb_sci@boot_flags"</span>;</code>
+<code>        <span class="org-variable-name">hb_sec_sci</span> = <span class="org-string">"/hb_sci@sec_boot_flags"</span>;</code>
+<code>        <span class="org-variable-name">firmware</span> = <span class="org-string">"/firmware@tee"</span>;</code>
+<code>        <span class="org-variable-name">psci</span> = <span class="org-string">"/psci"</span>;</code>
+<code>        <span class="org-variable-name">reserved_memory</span> = <span class="org-string">"/reserved-memory"</span>;</code>
 <code>};</code>
 </pre>
 </div>
