@@ -171,6 +171,27 @@
     ]
   },
   {
+    "file-path": "~/org/linux/sched/schdule_fetures.org",
+    "URL": "/2021/09/25/schdule_fetures.html",
+    "TITLE": "Linux scheduled features",
+    "DATE": "<2021-09-25 00:01:02>",
+    "FILETAGS": [
+      "blogs"
+    ]
+  },
+  {
+    "file-path": "~/org/linux/sched/bugs/bad_migration_disable.org",
+    "URL": "/2022/07/14/bad_migration_disable.html",
+    "TITLE": "Bad migration disable in rt after change ksoftirqd priority",
+    "DATE": "<2022-07-14 15:04:49>",
+    "FILETAGS": [
+      "blogs"
+    ],
+    "CATEGORY": [
+      "Linux"
+    ]
+  },
+  {
     "file-path": "~/org/linux/power/irq_wakeup.org",
     "URL": "/2020/07/10/irq_wakeup.html",
     "TITLE": "irq wakeup in linux",
