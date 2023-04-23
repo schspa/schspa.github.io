@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<!-- 2023-04-23 Sun 11:41 -->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>PVE Host</title>
+<meta name="author" content="Schspa" />
+<meta name="description" content="PVE Host" />
+<meta name="generator" content="Org Mode" />
+<link rel="shortcut icon" href="/images/rose-red.png" type="image/x-icon" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" integrity="sha256-sAcc18zvMnaJZrNT4v8J0T4HqzEUiUTlVFgDIywjQek=" crossorigin="anonymous">
+<link rel="stylesheet" href="/css/animate.min.css" />
+<link rel="stylesheet" href="/css/all.min.css" />
+<link rel="stylesheet" type="text/css" href="/css/style.css" />
+<link rel="stylesheet" type="text/css" href="/css/navbar.css" />
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/js/bootstrap.min.js" integrity="sha256-/hGxZHGQ57fXLp+NDusFZsZo/PG21Bp2+hXYV5a6w+g=" crossorigin="anonymous"></script>
+<script src="/js/jquery.min.js"></script>
+<script src="/js/darkreader.js"></script>
+<script src="/user.config.js"></script>
+<script src="/js/main.js"></script>
+</head>
+<body>
+<div id="preamble" class="status">
+<div class="mobile-container">
+  <!-- Top Navigation Menu -->
+  <div class="topnav">
+    <div id="header">
+      <a href="/" class="logo">Schspa's Blog</a>
+      <a href="javascript:void(0);" class="icon" onclick="toggleheader()">
+        <i class="fa fa-bars"></i>
+      </a>
+    </div>
+    <div id="nav_headers">
+      <a href="/sitemap.html" class="menu-item">Categories</a>
+    </div>
+  </div>
+  <!-- End smartphone / tablet look -->
+</div>
+
+<header id="header" class="header">
+  <div class="logo-wrapper">
+    <a href="/" class="logo">Schspa's Blogs</a>
+  </div>
+
+  <nav class="site-navbar">
+    <ul id="menu" class="menu">
+      <li class="menu-item">
+        <a class="menu-item-link" href="/">Home</a>
+      </li>
+      <li class="menu-item">
+        <a class="menu-item-link" href="/sitemap.html">Categories</a>
+      </li>
+    </ul>
+  </nav>
+</header>
+</div>
+<div id="content" class="content">
+<h1 class="title">PVE Host</h1>
+<div id="table-of-contents" role="doc-toc">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents" role="doc-toc">
+<ul>
+<li><a href="#orgb2bef5d">开启自动睡眠</a></li>
+<li><a href="#org5e727b6">当guest运行时，禁用休眠功能</a></li>
+<li><a href="#orgc2a82e7">一键安装脚本</a></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orgb2bef5d" class="outline-2">
+<h2 id="orgb2bef5d">开启自动睡眠</h2>
+<div class="outline-text-2" id="text-orgb2bef5d">
+<div class="org-src-container">
+<pre class="src src-bash"><code>vim /etc/systemd/logind.conf</code>
+</pre>
+</div>
+
+<p>
+如下设置将开启空闲超过30分钟后自动睡眠。<br>
+</p>
+<div class="org-src-container">
+<pre class="src src-bash"><code><span class="org-variable-name">IdleAction</span>=suspend</code>
+<code><span class="org-variable-name">IdleActionSec</span>=30min</code>
+</pre>
+</div>
+
+<p>
+Trigger new settings<br>
+</p>
+
+<div class="org-src-container">
+<pre class="src src-bash"><code>systemctl restart systemd-logind</code>
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org5e727b6" class="outline-2">
+<h2 id="org5e727b6">当guest运行时，禁用休眠功能</h2>
+<div class="outline-text-2" id="text-org5e727b6">
+<p>
+后台启动如下进程即可：<br>
+</p>
+
+<ol class="org-ol">
+<li>检测代码<br></li>
+</ol>
+
+<div class="org-src-container">
+<pre class="src src-bash" id="orged509ea"><code><span class="org-comment-delimiter">#</span><span class="org-comment">!/usr/bin/</span><span class="org-keyword">env</span><span class="org-comment"> bash</span></code>
+<code></code>
+<code><span class="org-variable-name">vmid</span>=100</code>
+<code></code>
+<code><span class="org-keyword">while </span><span class="org-builtin">true</span>; <span class="org-keyword">do</span></code>
+<code>        <span class="org-variable-name">active_count</span>=$(/usr/sbin/qm satus 100 | grep running | wc -l)</code>
+<code>        <span class="org-keyword">if</span> [[ $<span class="org-variable-name">active_count</span> -gt 0 ]]; <span class="org-keyword">then</span></code>
+<code>                <span class="org-comment-delimiter"># </span><span class="org-comment">inhibit host sleep</span></code>
+<code>                systemd-inhibit --what=sleep <span class="org-sh-escaped-newline">\</span></code>
+<code>                                --who=<span class="org-string">"Proxmox Guest"</span> <span class="org-sh-escaped-newline">\</span></code>
+<code>                                --why=<span class="org-string">"Guest VM is running"</span> <span class="org-sh-escaped-newline">\</span></code>
+<code>                                sleep 30</code>
+<code>        <span class="org-keyword">fi</span></code>
+<code>        <span class="org-comment-delimiter"># </span><span class="org-comment">wait for 1 second before checking againe</span></code>
+<code>        sleep 1</code>
+<code><span class="org-keyword">done</span></code>
+</pre>
+</div>
+
+<ol class="org-ol">
+<li><p>
+systemd service<br>
+</p>
+
+<div class="org-src-container">
+<pre class="src src-conf" id="org0bb8a52"><code>[<span class="org-type">Unit</span>]</code>
+<code><span class="org-variable-name">Description</span>=PVE guest status monitor</code>
+<code><span class="org-variable-name">After</span>=network.target</code>
+<code></code>
+<code>[<span class="org-type">Service</span>]</code>
+<code><span class="org-variable-name">ExecStart</span>=/usr/local/bin/pve-guest-monitor.sh</code>
+<code><span class="org-variable-name">ExecReload</span>=/bin/kill -HUP $MAINPID</code>
+<code><span class="org-variable-name">KillMode</span>=process</code>
+<code><span class="org-variable-name">Restart</span>=on-failure</code>
+<code><span class="org-variable-name">RestartSec</span>=42s</code>
+<code></code>
+<code>[<span class="org-type">Install</span>]</code>
+<code><span class="org-variable-name">WantedBy</span>=multi-user.target</code>
+</pre>
+</div></li>
+</ol>
+</div>
+</div>
+
+<div id="outline-container-orgc2a82e7" class="outline-2">
+<h2 id="orgc2a82e7">一键安装脚本</h2>
+<div class="outline-text-2" id="text-orgc2a82e7">
+<p>
+the whole script can be found at: <a href="assets/.pve-prevent-host-sleep.sh">assets/.pve-prevent-host-sleep.sh</a><br>
+</p>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<script src="https://utteranc.es/client.js"
+    repo="schspa/schspa.github.io"
+    issue-term="title"
+    label="✨💬✨"
+    theme="github-light"
+    crossorigin="anonymous"
+    async>
+</script>
+<div class="me">
+  <span><b>Contact me via :)</b><span>
+  <div class="contact">
+    <a id="email" href="mailto:schspa@gmail.com" target="_blank"><i class="fab fa-mailchimp animated heartBeat delay-2s slower"></i></a>
+    <a id="github" href="//github.com/schspa" target="_blank"><i class="fab fa-github animated heartBeat delay-2s slower"></i></a>
+  </div>
+</div>
+
+<div id="jinrishici-sentence" style="font-weight: 700;">虚怀乃若谷，水深则流缓。</div>
+<script src="https://sdk.jinrishici.com/v2/browser/jinrishici.js" charset="utf-8"></script>
+</div>
+</body>
+</html>

@@ -171,15 +171,6 @@
     ]
   },
   {
-    "file-path": "~/org/linux/sched/schdule_fetures.org",
-    "URL": "/2021/09/25/schdule_fetures.html",
-    "TITLE": "Linux scheduled features",
-    "DATE": "<2021-09-25 00:01:02>",
-    "FILETAGS": [
-      "blogs"
-    ]
-  },
-  {
     "file-path": "~/org/linux/sched/bugs/bad_migration_disable.org",
     "URL": "/2022/07/14/bad_migration_disable.html",
     "TITLE": "Bad migration disable in rt after change ksoftirqd priority",
@@ -371,6 +362,18 @@
     "DATE": "<2020-10-09 22:22:28>",
     "FILETAGS": [
       "blogs"
+    ]
+  },
+  {
+    "file-path": "~/org/env/pve/pve-host-sleep.org",
+    "URL": "/2023/04/12/pve-host-sleep.html",
+    "TITLE": "PVE Host",
+    "DATE": "<2023-04-12 17:33:24>",
+    "FILETAGS": [
+      "blogs"
+    ],
+    "CATEGORY": [
+      "Environment"
     ]
   },
   {

@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2022-03-03 Thu 11:47 -->
+<!-- 2023-04-14 Fri 15:31 -->
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Use org-caldav to sync calendars</title>
@@ -61,26 +61,26 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#orgeeef049">获取caldav链接</a></li>
-<li><a href="#orgbfdbb3a">添加org-caldav设置</a>
+<li><a href="#orgf3ee866">获取caldav链接</a></li>
+<li><a href="#org78e3906">添加org-caldav设置</a>
 <ul>
-<li><a href="#orge9434a1">配置</a></li>
-<li><a href="#orge715909">更新日历</a></li>
-<li><a href="#org0559c4a">密码认证</a>
+<li><a href="#org289f770">配置</a></li>
+<li><a href="#orgc780a37">更新日历</a></li>
+<li><a href="#org5fa76c9">密码认证</a>
 <ul>
-<li><a href="#orgf86ff7c">使用gpg + authinfo来进行认证</a></li>
+<li><a href="#orge4fbd65">使用gpg + authinfo来进行认证</a></li>
 </ul>
 </li>
-<li><a href="#org4cff26e">参考资料：</a></li>
+<li><a href="#org714c578">参考资料：</a></li>
 </ul>
 </li>
-<li><a href="#org44241c0">进阶</a>
+<li><a href="#org9063239">进阶</a>
 <ul>
-<li><a href="#orgf32a490">测试</a></li>
-<li><a href="#orgb35f247"><span class="done DONE">DONE</span> 自动生成org-protocol链接</a>
+<li><a href="#orgb33d3eb">测试</a></li>
+<li><a href="#orgcc41d87"><span class="done DONE">DONE</span> 自动生成org-protocol链接</a>
 <ul>
-<li><a href="#orgc1c8f9d">在导出时icalendar时自动生成打开对应task element的链接</a></li>
-<li><a href="#org0bc0b9b">添加org-protocol协议处理函数，自动跳转到对应的task节点</a></li>
+<li><a href="#org091c0ed">在导出时icalendar时自动生成打开对应task element的链接</a></li>
+<li><a href="#org04ba262">添加org-protocol协议处理函数，自动跳转到对应的task节点</a></li>
 </ul>
 </li>
 </ul>
@@ -89,9 +89,9 @@
 </div>
 </div>
 
-<div id="outline-container-orgeeef049" class="outline-2">
-<h2 id="orgeeef049">获取caldav链接</h2>
-<div class="outline-text-2" id="text-orgeeef049">
+<div id="outline-container-orgf3ee866" class="outline-2">
+<h2 id="orgf3ee866">获取caldav链接</h2>
+<div class="outline-text-2" id="text-orgf3ee866">
 <p>
 以nextcloud为例，打开网页，并进入倒日历选项卡<br>
 </p>
@@ -104,31 +104,31 @@
 </div>
 </div>
 
-<div id="outline-container-orgbfdbb3a" class="outline-2">
-<h2 id="orgbfdbb3a">添加org-caldav设置</h2>
-<div class="outline-text-2" id="text-orgbfdbb3a">
+<div id="outline-container-org78e3906" class="outline-2">
+<h2 id="org78e3906">添加org-caldav设置</h2>
+<div class="outline-text-2" id="text-org78e3906">
 </div>
-<div id="outline-container-orge9434a1" class="outline-3">
-<h3 id="orge9434a1">配置</h3>
-<div class="outline-text-3" id="text-orge9434a1">
+<div id="outline-container-org289f770" class="outline-3">
+<h3 id="org289f770">配置</h3>
+<div class="outline-text-3" id="text-org289f770">
 <div class="org-src-container">
-<pre class="src src-emacs-lisp"><code><span style="color: #5B6268;">;; </span><span style="color: #5B6268;">org-caldav</span></code>
-<code>(<span style="color: #51afef;">use-package</span> <span style="color: #a9a1e1;">org-caldav</span></code>
-<code>  <span style="color: #c678dd;">:ensure</span> t</code>
-<code>  <span style="color: #c678dd;">:config</span></code>
-<code>  (<span style="color: #51afef;">unless</span> (file-exists-p (concat my-cache-dir <span style="color: #98be65;">"/org-caldav/"</span>))</code>
-<code>    (make-directory (concat my-cache-dir <span style="color: #98be65;">"/org-caldav/"</span>)))</code>
+<pre class="src src-emacs-lisp"><code><span class="org-comment-delimiter">;; </span><span class="org-comment">org-caldav</span></code>
+<code>(<span class="org-keyword">use-package</span> <span class="org-constant">org-caldav</span></code>
+<code>  <span class="org-builtin">:ensure</span> t</code>
+<code>  <span class="org-builtin">:config</span></code>
+<code>  (<span class="org-keyword">unless</span> (file-exists-p (concat my-cache-dir <span class="org-string">"/org-caldav/"</span>))</code>
+<code>    (make-directory (concat my-cache-dir <span class="org-string">"/org-caldav/"</span>)))</code>
 <code></code>
-<code>  (<span style="color: #51afef;">setq</span> org-caldav-url <span style="color: #98be65;">"https://&lt;SERVER-DOMAIN.com&gt;/remote.php/dav/calendars/&lt;PERSONAL-UUID&gt;"</span>)</code>
-<code>  (<span style="color: #51afef;">setq</span> org-caldav-calendar-id <span style="color: #98be65;">"personal"</span>)</code>
-<code>  (<span style="color: #51afef;">setq</span></code>
-<code>   org-caldav-save-directory (concat my-cache-dir <span style="color: #98be65;">"/org-caldav/"</span>)</code>
-<code>   org-caldav-backup-file (concat my-cache-dir <span style="color: #98be65;">"/org-caldav-backup.org"</span>)</code>
+<code>  (<span class="org-keyword">setq</span> org-caldav-url <span class="org-string">"https://&lt;SERVER-DOMAIN.com&gt;/remote.php/dav/calendars/&lt;PERSONAL-UUID&gt;"</span>)</code>
+<code>  (<span class="org-keyword">setq</span> org-caldav-calendar-id <span class="org-string">"personal"</span>)</code>
+<code>  (<span class="org-keyword">setq</span></code>
+<code>   org-caldav-save-directory (concat my-cache-dir <span class="org-string">"/org-caldav/"</span>)</code>
+<code>   org-caldav-backup-file (concat my-cache-dir <span class="org-string">"/org-caldav-backup.org"</span>)</code>
 <code>   org-caldav-show-sync-results 'nil</code>
-<code>   org-caldav-files (mapcar (<span style="color: #51afef;">lambda</span> (x)</code>
+<code>   org-caldav-files (mapcar (<span class="org-keyword">lambda</span> (x)</code>
 <code>                              (concat org-directory x))</code>
-<code>                            '(<span style="color: #98be65;">"gtd/homework.org"</span> <span style="color: #98be65;">"gtd/tasks.org"</span>)))</code>
-<code>  (<span style="color: #51afef;">setq</span> org-caldav-inbox (concat org-directory <span style="color: #98be65;">"gtd/inbox.org"</span>)))</code>
+<code>                            '(<span class="org-string">"gtd/homework.org"</span> <span class="org-string">"gtd/tasks.org"</span>)))</code>
+<code>  (<span class="org-keyword">setq</span> org-caldav-inbox (concat org-directory <span class="org-string">"gtd/inbox.org"</span>)))</code>
 </pre>
 </div>
 <p>
@@ -136,9 +136,9 @@
 </p>
 </div>
 </div>
-<div id="outline-container-orge715909" class="outline-3">
-<h3 id="orge715909">更新日历</h3>
-<div class="outline-text-3" id="text-orge715909">
+<div id="outline-container-orgc780a37" class="outline-3">
+<h3 id="orgc780a37">更新日历</h3>
+<div class="outline-text-3" id="text-orgc780a37">
 <div class="org-src-container">
 <pre class="src src-emacs-lisp"><code>M-x org-caldav-sync</code>
 </pre>
@@ -146,29 +146,29 @@
 </div>
 </div>
 
-<div id="outline-container-org0559c4a" class="outline-3">
-<h3 id="org0559c4a">密码认证</h3>
-<div class="outline-text-3" id="text-org0559c4a">
+<div id="outline-container-org5fa76c9" class="outline-3">
+<h3 id="org5fa76c9">密码认证</h3>
+<div class="outline-text-3" id="text-org5fa76c9">
 <p>
 在同步时，每次需要认证，都要输入密码, 通过emacs自带的auth source，可以完成自动登录<br>
 </p>
 </div>
-<div id="outline-container-orgf86ff7c" class="outline-4">
-<h4 id="orgf86ff7c">使用gpg + authinfo来进行认证</h4>
-<div class="outline-text-4" id="text-orgf86ff7c">
+<div id="outline-container-orge4fbd65" class="outline-4">
+<h4 id="orge4fbd65">使用gpg + authinfo来进行认证</h4>
+<div class="outline-text-4" id="text-orge4fbd65">
 </div>
 <ul class="org-ul">
-<li><a id="org3e0c3c9"></a>创建gpg key<br>
-<div class="outline-text-5" id="text-org3e0c3c9">
+<li><a id="org9e909f0"></a>创建gpg key<br>
+<div class="outline-text-5" id="text-org9e909f0">
 <div class="org-src-container">
 <pre class="src src-bash"><code>gpg --gen-key</code>
-<code><span style="color: #5B6268;"># </span><span style="color: #5B6268;">&#25353;&#29031;&#25552;&#31034;&#36755;&#20837;&#21517;&#31216;&#65292;&#37038;&#31665;&#65292;&#21475;&#20196;&#31561;&#20449;&#24687;</span></code>
+<code><span class="org-comment-delimiter"># </span><span class="org-comment">&#25353;&#29031;&#25552;&#31034;&#36755;&#20837;&#21517;&#31216;&#65292;&#37038;&#31665;&#65292;&#21475;&#20196;&#31561;&#20449;&#24687;</span></code>
 </pre>
 </div>
 </div>
 </li>
-<li><a id="org8115821"></a>生成~/.authinfo<br>
-<div class="outline-text-5" id="text-org8115821">
+<li><a id="orgb9f8ab6"></a>生成~/.authinfo<br>
+<div class="outline-text-5" id="text-orgb9f8ab6">
 <div class="org-src-container">
 <pre class="src src-bash"><code>touch ~/.authinfo</code>
 <code>gpg -e ~/.authinfo</code>
@@ -177,16 +177,16 @@
 </div>
 </div>
 </li>
-<li><a id="org2fc8a58"></a>打开 ~/.authinfo.gpg<br>
-<div class="outline-text-5" id="text-org2fc8a58">
+<li><a id="orgc45a1ab"></a>打开 ~/.authinfo.gpg<br>
+<div class="outline-text-5" id="text-orgc45a1ab">
 <div class="org-src-container">
-<pre class="src src-authinfo"><code>machine &lt;SERVER-DOMAIN&gt;.com:443 port https login &lt;USER-NAME&gt; password &lt;PASSWORD&gt;</code>
+<pre class="src src-authinfo"><code><span class="org-variable-name">machine</span> <span class="org-builtin">&lt;SERVER-DOMAIN&gt;.com:443</span> <span class="org-comment-delimiter">port</span> <span class="org-type">https</span> <span class="org-comment-delimiter">login</span> <span class="org-keyword">&lt;USER-NAME&gt;</span> <span class="org-comment-delimiter">password</span> <span class="org-doc">&lt;PASSWORD&gt;</span></code>
 </pre>
 </div>
 </div>
 </li>
-<li><a id="org66ca62b"></a>运行org-caldav-sync<br>
-<div class="outline-text-5" id="text-org66ca62b">
+<li><a id="org71a09cd"></a>运行org-caldav-sync<br>
+<div class="outline-text-5" id="text-org71a09cd">
 <p>
 这下应该不会再提示输入密码了（注：可能需要输入gpg key的口令）<br>
 </p>
@@ -195,9 +195,9 @@
 </ul>
 </div>
 </div>
-<div id="outline-container-org4cff26e" class="outline-3">
-<h3 id="org4cff26e">参考资料：</h3>
-<div class="outline-text-3" id="text-org4cff26e">
+<div id="outline-container-org714c578" class="outline-3">
+<h3 id="org714c578">参考资料：</h3>
+<div class="outline-text-3" id="text-org714c578">
 <p>
 <a href="https://www.gnu.org/software/emacs/manual/html_mono/auth.html">Emacs auth-source</a><br>
 <a href="https://bretthutley.com/2018/09/01/emacs-gpg-and-pinentry-on-mac/">Emacs, gpg and pinentry on Mac</a><br>
@@ -206,22 +206,22 @@
 </div>
 </div>
 </div>
-<div id="outline-container-org44241c0" class="outline-2">
-<h2 id="org44241c0">进阶</h2>
-<div class="outline-text-2" id="text-org44241c0">
+<div id="outline-container-org9063239" class="outline-2">
+<h2 id="org9063239">进阶</h2>
+<div class="outline-text-2" id="text-org9063239">
 </div>
-<div id="outline-container-orgf32a490" class="outline-3">
-<h3 id="orgf32a490">测试</h3>
-<div class="outline-text-3" id="text-orgf32a490">
+<div id="outline-container-orgb33d3eb" class="outline-3">
+<h3 id="orgb33d3eb">测试</h3>
+<div class="outline-text-3" id="text-orgb33d3eb">
 <p>
 emacs-mac主分支上的代码还有BUG，无法通过open-source来打开文件，详见<a href="https://emacs-china.org/t/org-protocol-open-source/14692">org-protocol://open-source无法打开文件</a><br>
 </p>
 <div class="org-src-container">
-<pre class="src src-bash"><code><span style="color: #5B6268;"># </span><span style="color: #5B6268;">emacs-mac use apple script for url handle.</span></code>
-<code>open  <span style="color: #98be65;">'org-protocol://open-source?url=gtd%2Finbox.org'</span></code>
+<pre class="src src-bash"><code><span class="org-comment-delimiter"># </span><span class="org-comment">emacs-mac use apple script for url handle.</span></code>
+<code>open  <span class="org-string">'org-protocol://open-source?url=gtd%2Finbox.org'</span></code>
 <code></code>
-<code><span style="color: #5B6268;"># </span><span style="color: #5B6268;">others use emacsclient for url handle</span></code>
-<code>emacsclient  <span style="color: #98be65;">'org-protocol://open-source?url=gtd%2Finbox.org'</span></code>
+<code><span class="org-comment-delimiter"># </span><span class="org-comment">others use emacsclient for url handle</span></code>
+<code>emacsclient  <span class="org-string">'org-protocol://open-source?url=gtd%2Finbox.org'</span></code>
 <code>Waiting for Emacs...</code>
 </pre>
 </div>
@@ -230,56 +230,56 @@ emacs-mac主分支上的代码还有BUG，无法通过open-source来打开文件
 </p>
 </div>
 </div>
-<div id="outline-container-orgb35f247" class="outline-3">
-<h3 id="orgb35f247"><span class="done DONE">DONE</span> 自动生成org-protocol链接</h3>
-<div class="outline-text-3" id="text-orgb35f247">
+<div id="outline-container-orgcc41d87" class="outline-3">
+<h3 id="orgcc41d87"><span class="done DONE">DONE</span> 自动生成org-protocol链接</h3>
+<div class="outline-text-3" id="text-orgcc41d87">
 </div>
-<div id="outline-container-orgc1c8f9d" class="outline-4">
-<h4 id="orgc1c8f9d">在导出时icalendar时自动生成打开对应task element的链接</h4>
-<div class="outline-text-4" id="text-orgc1c8f9d">
+<div id="outline-container-org091c0ed" class="outline-4">
+<h4 id="org091c0ed">在导出时icalendar时自动生成打开对应task element的链接</h4>
+<div class="outline-text-4" id="text-org091c0ed">
 <p>
 通过org-protocol，自定义gdt的子协议，并且通过org文件节点的ID，可以轻松完成这个操作，由于icalendar的接口没有提供自定义entry的方法，这里对org-icalendar&#x2013;valarm进行了hook，在添加valarm属性之前，加上<a href="https://tools.ietf.org/html/rfc5545#section-3.8.4.6">rfc5545 URL property</a> URL属性<br>
 </p>
 <div class="org-src-container">
-<pre class="src src-emacs-lisp"><code><span style="color: #5B6268;">;; </span><span style="color: #5B6268;">setup icalendar</span></code>
-<code><span style="color: #5B6268;">;; </span><span style="color: #5B6268;">advice to org-icalendar--valarm</span></code>
-<code><span style="color: #5B6268;">;; </span><span style="color: #5B6268;">we need entry argument, so this function is a goog choice.</span></code>
-<code>(<span style="color: #51afef;">defun</span> <span style="color: #c678dd;">org-gdt-icalendar--valarm</span> (orig-fun <span style="color: #ECBE7B;">&amp;rest</span> args)</code>
-<code>  <span style="color: #83898d;">"Add needed URL entry for icalendar"</span></code>
-<code>  (<span style="color: #51afef;">let</span> ((valarms (apply orig-fun args)))</code>
+<pre class="src src-emacs-lisp"><code><span class="org-comment-delimiter">;; </span><span class="org-comment">setup icalendar</span></code>
+<code><span class="org-comment-delimiter">;; </span><span class="org-comment">advice to org-icalendar--valarm</span></code>
+<code><span class="org-comment-delimiter">;; </span><span class="org-comment">we need entry argument, so this function is a goog choice.</span></code>
+<code>(<span class="org-keyword">defun</span> <span class="org-function-name">org-gdt-icalendar--valarm</span> (orig-fun <span class="org-type">&amp;rest</span> args)</code>
+<code>  <span class="org-doc">"Add needed URL entry for icalendar"</span></code>
+<code>  (<span class="org-keyword">let</span> ((valarms (apply orig-fun args)))</code>
 <code>    (concat</code>
-<code>     <span style="color: #98be65;">"URL:org-protocol://gdt?id="</span> (org-element-property <span style="color: #c678dd;">:ID</span> (car args)) <span style="color: #98be65;">"\n"</span></code>
-<code>     (<span style="color: #51afef;">if</span> valarms valarms <span style="color: #98be65;">""</span>))))</code>
+<code>     <span class="org-string">"URL:org-protocol://gdt?id="</span> (org-element-property <span class="org-builtin">:ID</span> (car args)) <span class="org-string">"\n"</span></code>
+<code>     (<span class="org-keyword">if</span> valarms valarms <span class="org-string">""</span>))))</code>
 <code></code>
 <code>(eval-after-load 'ox-icalendar</code>
-<code>  (<span style="color: #51afef;">progn</span></code>
-<code>    (<span style="color: #51afef;">setq</span> org-icalendar-include-todo t</code>
+<code>  (<span class="org-keyword">progn</span></code>
+<code>    (<span class="org-keyword">setq</span> org-icalendar-include-todo t</code>
 <code>          org-icalendar-use-deadline '(event-if-todo event-if-not-todo todo-due event-if-todo-not-done)</code>
 <code>          org-icalendar-use-scheduled '(event-if-todo event-if-not-todo todo-start event-if-todo-not-done)</code>
 <code>          org-icalendar-with-timestamps t)</code>
-<code>    (advice-add 'org-icalendar--valarm <span style="color: #c678dd;">:around</span> #'org-gdt-icalendar--valarm)))</code>
+<code>    (advice-add 'org-icalendar--valarm <span class="org-builtin">:around</span> #'org-gdt-icalendar--valarm)))</code>
 </pre>
 </div>
 </div>
 </div>
-<div id="outline-container-org0bc0b9b" class="outline-4">
-<h4 id="org0bc0b9b">添加org-protocol协议处理函数，自动跳转到对应的task节点</h4>
-<div class="outline-text-4" id="text-org0bc0b9b">
+<div id="outline-container-org04ba262" class="outline-4">
+<h4 id="org04ba262">添加org-protocol协议处理函数，自动跳转到对应的task节点</h4>
+<div class="outline-text-4" id="text-org04ba262">
 <div class="org-src-container">
-<pre class="src src-emacs-lisp"><code>(<span style="color: #51afef;">require</span> '<span style="color: #a9a1e1;">org-protocol</span>)</code>
+<pre class="src src-emacs-lisp"><code>(<span class="org-keyword">require</span> '<span class="org-constant">org-protocol</span>)</code>
 <code></code>
-<code>(<span style="color: #51afef;">defun</span> <span style="color: #c678dd;">org-gdt-protocol-open</span> (info)</code>
-<code>  <span style="color: #83898d;">"This handler simply opens the file with emacsclient.</span></code>
-<code><span style="color: #83898d;">INFO is an alist containing additional information passed by the protocol URL.</span></code>
-<code><span style="color: #83898d;">It should contain the id key, pointing to the ID property for a org file to open.</span></code>
-<code><span style="color: #83898d;">  Example protocol string:</span></code>
-<code><span style="color: #83898d;">org-protocol://gdt?id=CBEC8DD1-7814-44A7-AA3D-97AEC35B6DB7"</span></code>
-<code>  (<span style="color: #51afef;">when-let</span> ((id (plist-get info <span style="color: #c678dd;">:id</span>)))</code>
+<code>(<span class="org-keyword">defun</span> <span class="org-function-name">org-gdt-protocol-open</span> (info)</code>
+<code>  <span class="org-doc">"This handler simply opens the file with emacsclient.</span></code>
+<code><span class="org-doc">INFO is an alist containing additional information passed by the protocol URL.</span></code>
+<code><span class="org-doc">It should contain the id key, pointing to the ID property for a org file to open.</span></code>
+<code><span class="org-doc">  Example protocol string:</span></code>
+<code><span class="org-doc">org-protocol://gdt?id=CBEC8DD1-7814-44A7-AA3D-97AEC35B6DB7"</span></code>
+<code>  (<span class="org-keyword">when-let</span> ((id (plist-get info <span class="org-builtin">:id</span>)))</code>
 <code>    (raise-frame)</code>
-<code>    (org-open-link-from-string (format <span style="color: #98be65;">"id:%s"</span> id)))</code>
+<code>    (org-open-link-from-string (format <span class="org-string">"id:%s"</span> id)))</code>
 <code>  nil)</code>
 <code></code>
-<code>(<span style="color: #51afef;">push</span> '(<span style="color: #98be65;">"org-gdt-ref"</span>  <span style="color: #c678dd;">:protocol</span> <span style="color: #98be65;">"gdt"</span>   <span style="color: #c678dd;">:function</span> org-gdt-protocol-open)</code>
+<code>(<span class="org-keyword">push</span> '(<span class="org-string">"org-gdt-ref"</span>  <span class="org-builtin">:protocol</span> <span class="org-string">"gdt"</span>   <span class="org-builtin">:function</span> org-gdt-protocol-open)</code>
 <code>      org-protocol-protocol-alist)</code>
 </pre>
 </div>
