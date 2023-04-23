@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<!-- 2023-04-23 Sun 14:19 -->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Linux Debug object</title>
+<meta name="author" content="Schspa Shi" />
+<meta name="description" content="Linux Debug object" />
+<meta name="generator" content="Org Mode" />
+<link rel="shortcut icon" href="/images/rose-red.png" type="image/x-icon" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" integrity="sha256-sAcc18zvMnaJZrNT4v8J0T4HqzEUiUTlVFgDIywjQek=" crossorigin="anonymous">
+<link rel="stylesheet" href="/css/animate.min.css" />
+<link rel="stylesheet" href="/css/all.min.css" />
+<link rel="stylesheet" type="text/css" href="/css/style.css" />
+<link rel="stylesheet" type="text/css" href="/css/navbar.css" />
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/js/bootstrap.min.js" integrity="sha256-/hGxZHGQ57fXLp+NDusFZsZo/PG21Bp2+hXYV5a6w+g=" crossorigin="anonymous"></script>
+<script src="/js/jquery.min.js"></script>
+<script src="/js/darkreader.js"></script>
+<script src="/user.config.js"></script>
+<script src="/js/main.js"></script>
+</head>
+<body>
+<div id="preamble" class="status">
+<div class="mobile-container">
+  <!-- Top Navigation Menu -->
+  <div class="topnav">
+    <div id="header">
+      <a href="/" class="logo">Schspa's Blog</a>
+      <a href="javascript:void(0);" class="icon" onclick="toggleheader()">
+        <i class="fa fa-bars"></i>
+      </a>
+    </div>
+    <div id="nav_headers">
+      <a href="/sitemap.html" class="menu-item">Categories</a>
+    </div>
+  </div>
+  <!-- End smartphone / tablet look -->
+</div>
+
+<header id="header" class="header">
+  <div class="logo-wrapper">
+    <a href="/" class="logo">Schspa's Blogs</a>
+  </div>
+
+  <nav class="site-navbar">
+    <ul id="menu" class="menu">
+      <li class="menu-item">
+        <a class="menu-item-link" href="/">Home</a>
+      </li>
+      <li class="menu-item">
+        <a class="menu-item-link" href="/sitemap.html">Categories</a>
+      </li>
+    </ul>
+  </nav>
+</header>
+</div>
+<div id="content" class="content">
+<h1 class="title">Linux Debug object</h1>
+<div id="table-of-contents" role="doc-toc">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents" role="doc-toc">
+<ul>
+<li><a href="#orgbd844f5">功能介绍</a>
+<ul>
+<li><a href="#orgf3f020b">状态列表</a></li>
+<li><a href="#org3fa8767">状态流转图</a></li>
+<li><a href="#org93fab3a">API</a></li>
+</ul>
+</li>
+<li><a href="#org1a6042b">实例</a>
+<ul>
+<li><a href="#org544a66c">debugobjects对于static object处理的BUG</a></li>
+<li><a href="#orgb0339de">原因分析</a></li>
+<li><a href="#org61cfa49">为什么没有当作静态对象处理？</a></li>
+<li><a href="#org4aef1c9">race在哪里？</a></li>
+<li><a href="#org2d65865">修复</a>
+<ul>
+<li><a href="#orgbdb7f2a">V1</a></li>
+<li><a href="#orgc5b7b8e">maintainer version</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-orgbd844f5" class="outline-2">
+<h2 id="orgbd844f5">功能介绍</h2>
+<div class="outline-text-2" id="text-orgbd844f5">
+<p>
+Debug Object 是内核中为了监控对象生命周期而引入的检测机制，通过该机制，系统会<br>
+在对象发生不正常状态切换时报出来错误。<br>
+</p>
+</div>
+
+<div id="outline-container-orgf3f020b" class="outline-3">
+<h3 id="orgf3f020b">状态列表</h3>
+<div class="outline-text-3" id="text-orgf3f020b">
+<dl class="org-dl">
+<dt>none</dt><dd>未初始化<br></dd>
+<dt>initialized</dt><dd>已初始化<br></dd>
+<dt>inactive</dt><dd>初始化，但未激活<br></dd>
+<dt>active</dt><dd>初始化，已激活<br></dd>
+<dt>destroyed</dt><dd>已销毁<br></dd>
+<dt>not available</dt><dd>未找到对象<br></dd>
+</dl>
+</div>
+</div>
+
+<div id="outline-container-org3fa8767" class="outline-3">
+<h3 id="org3fa8767">状态流转图</h3>
+<div class="outline-text-3" id="text-org3fa8767">
+<p>
+下图是debug object的状态流转图，下述流程之外的状态是不备被允许的<br>
+</p>
+
+<div id="orgc1b25d6" class="figure">
+<p><img src="assets/debug-object-stats.png" alt="debug-object-stats.png"><br>
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org93fab3a" class="outline-3">
+<h3 id="org93fab3a">API</h3>
+<div class="outline-text-3" id="text-org93fab3a">
+<p>
+头文件如下：<br>
+</p>
+
+<div class="org-src-container">
+<pre class="src src-C"><code><span class="org-preprocessor">#include</span> <span class="org-string">&lt;linux/debugobjects.h&gt;</span></code>
+</pre>
+</div>
+
+<p>
+debugobjects的 API 比较简单，在此不做解释。<br>
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org1a6042b" class="outline-2">
+<h2 id="org1a6042b">实例</h2>
+<div class="outline-text-2" id="text-org1a6042b">
+</div>
+<div id="outline-container-org544a66c" class="outline-3">
+<h3 id="org544a66c">debugobjects对于static object处理的BUG</h3>
+<div class="outline-text-3" id="text-org544a66c">
+<p>
+syzbot link: <a href="https://syzkaller.appspot.com/bug?id=22c8a5938eab640d1c6bcc0e3dc7be519d878462">WARNING in __mod_timer</a><br>
+</p>
+
+<p>
+Log 如下：<br>
+</p>
+<div class="org-src-container">
+<pre class="src src-bash"><code>------------[ cut here ]------------</code>
+<code>ODEBUG: assert_init not available (active state 0) object: ffffffff8d4fcbc0 object type: timer_list hint: key_gc_timer_func+0x0/0x80 security/keys/gc.c:117</code>
+<code>WARNING: CPU: 1 PID: 10646 at lib/debugobjects.c:512 debug_print_object lib/debugobjects.c:509 [inline]</code>
+<code>WARNING: CPU: 1 PID: 10646 at lib/debugobjects.c:512 debug_object_assert_init+0x1f2/0x240 lib/debugobjects.c:899</code>
+<code>Modules linked<span class="org-keyword"> in</span>:</code>
+<code>CPU: 1 PID: 10646 Comm: syz-executor.3 Not tainted 6.2.0-syzkaller-06695-gd8ca6dbb8de7 <span class="org-comment-delimiter">#</span><span class="org-comment">0</span></code>
+<code>Hardware name: Google Google Compute Engine/Google Compute Engine, BIOS Google 01/21/2023</code>
+<code>RIP: 0010:debug_print_object lib/debugobjects.c:509 [inline]</code>
+<code>RIP: 0010:debug_object_assert_init+0x1f2/0x240 lib/debugobjects.c:899</code>
+<code>Code: a0 fd 4c 8b 4d 00 48 c7 c7 20 68 38 8b 48 c7 c6 00 65 38 8b 48 c7 c2 e0 69 38 8b 31 c9 4d 89 e8 53 e8 42 6f 10 fd 48 83 c4 08 &lt;0f&gt; 0b ff 05 42 e1 10 0a 48 83 c5 38 48 89 e8 48 c1 e8 03 42 80 3c</code>
+<code>RSP: 0018:ffffc9000b1276f8 EFLAGS: 00010282</code>
+<code>RAX: caefb79dfa053800 RBX: ffffffff83f63700 RCX: 0000000000040000</code>
+<code>RDX: ffffc90014421000 RSI: 0000000000018ba9 RDI: 0000000000018baa</code>
+<code>RBP: ffffffff8aec5400 R08: ffffffff81536d42 R09: fffff52001624e55</code>
+<code>R10: 0000000000000000 R11: dffffc0000000001 R12: dffffc0000000000</code>
+<code>R13: ffffffff8d4fcbc0 R14: 0000000000000004 R15: ffffffff91d3e4e8</code>
+<code>FS:  00007f122cc29700(0000) GS:ffff8880b9900000(0000) knlGS:0000000000000000</code>
+<code>CS:  0010 DS: 0000 ES: 0000 CR0: 0000000080050033</code>
+<code>CR2: 000055555632f708 CR3: 00000000690df000 CR4: 00000000003526e0</code>
+<code>DR0: 0000000000000000 DR1: 0000000000000000 DR2: 0000000000000000</code>
+<code>DR3: 0000000000000000 DR6: 00000000fffe0ff0 DR7: 0000000000000400</code>
+<code>Call Trace:</code>
+<code> &lt;TASK&gt;</code>
+<code> debug_timer_assert_init kernel/time/timer.c:792 [inline]</code>
+<code> debug_assert_init kernel/time/timer.c:837 [inline]</code>
+<code> __mod_timer+0x10d/0xf40 kernel/time/timer.c:1020</code>
+<code> key_reject_and_link+0x3f5/0x6e0 security/keys/key.c:610</code>
+<code> key_negate_and_link include/linux/key-type.h:187 [inline]</code>
+<code> complete_request_key security/keys/request_key.c:64 [inline]</code>
+<code> call_sbin_request_key+0xa7b/0xcd0 security/keys/request_key.c:213</code>
+<code> construct_key security/keys/request_key.c:244 [inline]</code>
+<code> construct_key_and_link security/keys/request_key.c:503 [inline]</code>
+<code> request_key_and_link+0x11e3/0x18e0 security/keys/request_key.c:637</code>
+<code> __do_sys_request_key security/keys/keyctl.c:222 [inline]</code>
+<code> __se_sys_request_key+0x271/0x3b0 security/keys/keyctl.c:167</code>
+<code> do_syscall_x64 arch/x86/entry/common.c:50 [inline]</code>
+<code> do_syscall_64+0x41/0xc0 arch/x86/entry/common.c:80</code>
+<code> entry_SYSCALL_64_after_hwframe+0x63/0xcd</code>
+</pre>
+</div>
+
+<p>
+ODEBUG: assert_init not available (active state 0) object: ffffffff8d4fcbc0 object type: timer_list hint:<br>
+</p>
+
+<p>
+由上面面log可知，Linux的密钥管理模块在调用 <code>mod_timer</code> 时发现，这个timer对象未初始化，所以触发了assert的检查。<br>
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgb0339de" class="outline-3">
+<h3 id="orgb0339de">原因分析</h3>
+<div class="outline-text-3" id="text-orgb0339de">
+<p>
+调用路径：<br>
+key_schedule_gc(key-&gt;expiry + key_gc_delay);<br>
+  mod_timer(&amp;key_gc_timer, expires);<br>
+</p>
+
+<p>
+这里的 <code>key_gc_timer</code> 是个全局静态定义的timer对象, 对于静态定义的timer对象, 是不<br>
+需要显式调用 <code>timer_setup</code> 等初始化函数来进行初始化的。<br>
+</p>
+
+<div class="org-src-container">
+<pre class="src src-C"><code><span class="org-comment-delimiter">/*</span></code>
+<code><span class="org-comment"> * Reaper for links from keyrings to dead keys.</span></code>
+<code><span class="org-comment-delimiter"> */</span></code>
+<code><span class="org-keyword">static</span> <span class="org-type">void</span> <span class="org-function-name">key_gc_timer_func</span>(<span class="org-keyword">struct</span> <span class="org-type">timer_list</span> *);</code>
+<code><span class="org-keyword">static</span> DEFINE_TIMER(key_gc_timer, key_gc_timer_func);</code>
+</pre>
+</div>
+
+<p>
+对于 <a href="https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/lib/debugobjects.c?id=d8ca6dbb8de7923fcfb18e0b0b123f37c3225519#n870"><code>debug_object_assert_init</code></a> 函数，<br>
+</p>
+
+<div class="org-src-container">
+<pre class="src src-C"><code><span class="org-doc">/**</span></code>
+<code><span class="org-doc"> * debug_object_assert_init - debug checks when object should be init-ed</span></code>
+<code><span class="org-doc"> * </span><span class="org-doc"><span class="org-doc-markup"><span class="org-doc-markup">@addr</span></span></span><span class="org-doc">:       address of the object</span></code>
+<code><span class="org-doc"> * </span><span class="org-doc"><span class="org-doc-markup"><span class="org-doc-markup">@descr</span></span></span><span class="org-doc">:      pointer to an object specific debug description structure</span></code>
+<code><span class="org-doc"> */</span></code>
+<code><span class="org-type">void</span> <span class="org-function-name">debug_object_assert_init</span>(<span class="org-type">void</span> *<span class="org-variable-name">addr</span>, <span class="org-keyword">const</span> <span class="org-keyword">struct</span> <span class="org-type">debug_obj_descr</span> *<span class="org-variable-name">descr</span>)</code>
+<code>{</code>
+<code>    <span class="org-keyword">struct</span> <span class="org-type">debug_bucket</span> *<span class="org-variable-name">db</span>;</code>
+<code>    <span class="org-keyword">struct</span> <span class="org-type">debug_obj</span> *<span class="org-variable-name">obj</span>;</code>
+<code>    <span class="org-type">unsigned</span> <span class="org-type">long</span> <span class="org-variable-name">flags</span>;</code>
+<code></code>
+<code>    <span class="org-keyword">if</span> (<span class="org-negation-char">!</span>debug_objects_enabled)</code>
+<code>        <span class="org-keyword">return</span>;</code>
+<code></code>
+<code>    db = get_bucket((<span class="org-type">unsigned</span> <span class="org-type">long</span>) addr);</code>
+<code></code>
+<code>    raw_spin_lock_irqsave(&amp;db-&gt;lock, flags);</code>
+<code></code>
+<code>    obj = lookup_object(addr, db);</code>
+<code>    <span class="org-keyword">if</span> (<span class="org-negation-char">!</span>obj) {</code>
+<code>        <span class="org-keyword">struct</span> <span class="org-type">debug_obj</span> <span class="org-variable-name">o</span> = { .object = addr,</code>
+<code>                       .state = ODEBUG_STATE_NOTAVAILABLE,</code>
+<code>                       .descr = descr };</code>
+<code></code>
+<code>        raw_spin_unlock_irqrestore(&amp;db-&gt;lock, flags);</code>
+<code>        <span class="org-comment-delimiter">/*</span></code>
+<code><span class="org-comment">         * Maybe the object is static, and we let the type specific</span></code>
+<code><span class="org-comment">         * code confirm. Track this static object if true, else invoke</span></code>
+<code><span class="org-comment">         * fixup.</span></code>
+<code><span class="org-comment-delimiter">         */</span></code>
+<code>        <span class="org-keyword">if</span> (descr-&gt;is_static_object &amp;&amp; descr-&gt;is_static_object(addr)) {</code>
+<code>            <span class="org-comment-delimiter">/* </span><span class="org-comment">Track this static object</span><span class="org-comment-delimiter"> */</span></code>
+<code>            debug_object_init(addr, descr);</code>
+<code>        } <span class="org-keyword">else</span> {</code>
+<code>            debug_print_object(&amp;o, <span class="org-string">"assert_init"</span>);</code>
+<code>            debug_object_fixup(descr-&gt;fixup_assert_init, addr,</code>
+<code>                       ODEBUG_STATE_NOTAVAILABLE);</code>
+<code>        }</code>
+<code>        <span class="org-keyword">return</span>;</code>
+<code>    }</code>
+<code></code>
+<code>    raw_spin_unlock_irqrestore(&amp;db-&gt;lock, flags);</code>
+<code>}</code>
+<code><span class="org-function-name">EXPORT_SYMBOL_GPL</span>(debug_object_assert_init);</code>
+</pre>
+</div>
+
+<p>
+上面对于static的处理是有判断的，对于静态数据，允许在assert_init时，直接将对应的debugobject进行初始化。<br>
+</p>
+
+<p>
+但是在我们的例子中，代码神奇的跑到了else分支，并没有将这个timer当作静态对象来处理。<br>
+</p>
+</div>
+</div>
+
+<div id="outline-container-org61cfa49" class="outline-3">
+<h3 id="org61cfa49">为什么没有当作静态对象处理？</h3>
+<div class="outline-text-3" id="text-org61cfa49">
+<p>
+先看看判断静态对象的代码：<br>
+</p>
+
+<div class="org-src-container">
+<pre class="src src-C"><code><span class="org-preprocessor">#define</span> <span class="org-function-name">__TIMER_INITIALIZER</span>(<span class="org-variable-name">_function</span>, <span class="org-variable-name">_flags</span>) {        \</code>
+<code>        .entry = { .next = TIMER_ENTRY_STATIC },        \</code>
+<code>        .function = (_function),                        \</code>
+<code>        .flags = (_flags),                              \</code>
+<code>        __TIMER_LOCKDEP_MAP_INITIALIZER(                \</code>
+<code>            __FILE__ <span class="org-string">":"</span> __stringify(__LINE__))         \</code>
+<code>    }</code>
+<code></code>
+<code><span class="org-preprocessor">#define</span> <span class="org-function-name">DEFINE_TIMER</span>(<span class="org-variable-name">_name</span>, <span class="org-variable-name">_function</span>)          \</code>
+<code>    <span class="org-keyword">struct</span> <span class="org-type">timer_list</span> <span class="org-variable-name">_name</span> =                   \</code>
+<code>        __TIMER_INITIALIZER(_function, 0)</code>
+<code></code>
+<code><span class="org-keyword">static</span> <span class="org-type">bool</span> <span class="org-function-name">timer_is_static_object</span>(<span class="org-type">void</span> *<span class="org-variable-name">addr</span>)</code>
+<code>{</code>
+<code>    <span class="org-keyword">struct</span> <span class="org-type">timer_list</span> *<span class="org-variable-name">timer</span> = addr;</code>
+<code></code>
+<code>    <span class="org-keyword">return</span> (timer-&gt;entry.pprev == <span class="org-constant">NULL</span> &amp;&amp;</code>
+<code>        timer-&gt;entry.next == TIMER_ENTRY_STATIC);</code>
+<code>}</code>
+</pre>
+</div>
+
+<p>
+从上面的代码可以看到，系统是通过 <code>timer-&gt;entry</code> 的值来知道此对象是一个静态对象的。<br>
+这样就很容易联想到，如果timer被加入系统的timer list中，那么这个timer对象的<br>
+<code>timer-&gt;entry</code> 的值就和初始值不一样了，所以如果timer被使用之后，这个判断就不成立<br>
+了。<br>
+</p>
+
+<p>
+What？ 是不是发现了个大BUG，为什么syzbot才报了这么一次？<br>
+</p>
+
+<p>
+经过分析，这个问题其实并不严重，实际上，对于静态对象，只有在调用 debug_object_activate 和 debug_object_assert_init 时才有特殊处理。其他地方没有相关的处理。<br>
+</p>
+
+<p>
+对于 debug_object_activate, 只要不是首次调用，系统都可以找到已经申请到的<br>
+debugobject对象，从而可以正确的来处理这个对象的状态。<br>
+</p>
+
+<p>
+对于 debug_object_assert_init， 也是相同的，只有在首次调时，依赖于对象的状态。所<br>
+以来言，只有在对象第一次使用时会有概率出现问题，而静态对象，一般不存在第一次使用<br>
+就出现并发的场景，这个出现问题的情景就比较少见。<br>
+</p>
+</div>
+</div>
+
+<div id="outline-container-org4aef1c9" class="outline-3">
+<h3 id="org4aef1c9">race在哪里？</h3>
+<div class="outline-text-3" id="text-org4aef1c9">
+<p>
+我的patch comments已经对现象的现场做了分析。<br>
+</p>
+
+<p>
+Link: <a href="https://lore.kernel.org/all/20230303161906.831686-1-schspa@gmail.com/">https://lore.kernel.org/all/20230303161906.831686-1-schspa@gmail.com/</a><br>
+</p>
+
+<div class="org-src-container">
+<pre class="src src-text"><code>T0                                                   T1</code>
+<code>=========================================================================</code>
+<code>mod_timer();</code>
+<code>  debug_object_assert_init</code>
+<code>    db = get_bucket((unsigned long) addr);</code>
+<code>    raw_spin_lock_irqsave(&amp;db-&gt;lock, flags);</code>
+<code>    obj = lookup_object(addr, db);</code>
+<code>    if (!obj) {</code>
+<code>        raw_spin_unlock_irqrestore(&amp;db-&gt;lock, flags);</code>
+<code>        &lt;&lt; Context switch &gt;&gt;</code>
+<code>                                             mod_timer();</code>
+<code>                                               debug_object_assert_init</code>
+<code>                                               ...</code>
+<code>                                               enqueue_timer();</code>
+<code>        /*</code>
+<code>         * The initial state changed a static timer object, and</code>
+<code>         * is_static_object will return false</code>
+<code>         */</code>
+<code></code>
+<code>        if (descr-&gt;is_static_object &amp;&amp;</code>
+<code>            descr-&gt;is_static_object(addr)) {</code>
+<code>                debug_object_init();</code>
+<code>            } else {</code>
+<code>               &lt;&lt; Hit here for a static object &gt;&gt;</code>
+<code>               debug_print_object(&amp;o, "assert_init");</code>
+<code>               debug_object_fixup(descr-&gt;fixup_assert_init, addr,</code>
+<code>                       ODEBUG_STATE_NOTAVAILABLE);</code>
+<code>            }</code>
+<code>    }</code>
+</pre>
+</div>
+
+<p>
+上面的场景描述了问题发现的场景，从地址来获取debugobject对象这个地方，实际上都有<br>
+<code>&amp;db-&gt;lock</code> 来保护，而 <code>is_static_object</code> 的状态判断实际上依赖于对象的初始状态，<br>
+所以，事实上 <code>is_static_object</code> 也应该在系统第一次初始化的时候来判断， 而<br>
+<code>&amp;db-&gt;lock</code> 刚好可以用来保证第一次申请对象的时候再调用 <code>is_static_object</code> 的接口。<br>
+</p>
+</div>
+</div>
+
+<div id="outline-container-org2d65865" class="outline-3">
+<h3 id="org2d65865">修复</h3>
+<div class="outline-text-3" id="text-org2d65865">
+</div>
+<div id="outline-container-orgbdb7f2a" class="outline-4">
+<h4 id="orgbdb7f2a">V1</h4>
+<div class="outline-text-4" id="text-orgbdb7f2a">
+<ul class="org-ul">
+<li>解决思路<br>
+
+<ol class="org-ol">
+<li>添加额外的状态，并保证在 <code>&amp;db-&gt;lock</code> 锁范围内，在对象首次初始化的时候调用<br>
+<code>is_static_object</code> 接口，并将结果保存在debugobject对象中去。<br></li>
+<li>在判断静态对象的时候，如果已经找到对象，就直接返回之间保存的静态对象状态位，<br>
+而不需要调用 <code>is_static_object</code> 。<br></li>
+</ol></li>
+
+<li>存在的问题<br>
+
+<ol class="org-ol">
+<li>debug_objects_selftest 中将一个全局变量从不是static的类型，变为了static类型，<br>
+这样，由于debugobject对象已经找到，此时将不会调用 <code>is_static_object</code> 接口，<br>
+从而，事实上，未能将期转变为static对象，因此需要稍微修改一下目前的测试case。<br></li>
+</ol></li>
+</ul>
+
+<p>
+Link: <a href="https://lore.kernel.org/all/20230303161906.831686-1-schspa@gmail.com/">https://lore.kernel.org/all/20230303161906.831686-1-schspa@gmail.com/</a><br>
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgc5b7b8e" class="outline-4">
+<h4 id="orgc5b7b8e">maintainer version</h4>
+<div class="outline-text-4" id="text-orgc5b7b8e">
+<ul class="org-ul">
+<li>解决思路<br>
+
+<ol class="org-ol">
+<li>由于出现问题是由于查找对象和初始化对象是在两次单独的临界区，因此造成了状态<br>
+不一致，所以将这两个过程合并在一个临界去中完成，从而完成BUG修复。<br></li>
+</ol></li>
+</ul>
+
+<p>
+Link: <a href="https://lore.kernel.org/all/87zg7dzgao.ffs@tglx/">https://lore.kernel.org/all/87zg7dzgao.ffs@tglx/</a><br>
+</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<script src="https://utteranc.es/client.js"
+    repo="schspa/schspa.github.io"
+    issue-term="title"
+    label="✨💬✨"
+    theme="github-light"
+    crossorigin="anonymous"
+    async>
+</script>
+<div class="me">
+  <span><b>Contact me via :)</b><span>
+  <div class="contact">
+    <a id="email" href="mailto:schspa@gmail.com" target="_blank"><i class="fab fa-mailchimp animated heartBeat delay-2s slower"></i></a>
+    <a id="github" href="//github.com/schspa" target="_blank"><i class="fab fa-github animated heartBeat delay-2s slower"></i></a>
+  </div>
+</div>
+
+<div id="jinrishici-sentence" style="font-weight: 700;">虚怀乃若谷，水深则流缓。</div>
+<script src="https://sdk.jinrishici.com/v2/browser/jinrishici.js" charset="utf-8"></script>
+</div>
+</body>
+</html>
