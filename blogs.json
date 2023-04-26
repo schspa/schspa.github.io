@@ -389,6 +389,18 @@
     ]
   },
   {
+    "file-path": "~/org/env/maillist/send-patch-via-email.org",
+    "URL": "/2021/02/25/send-patch-via-email.html",
+    "TITLE": "Send Patchs with email",
+    "DATE": "<2021-02-25 23:29:04>",
+    "FILETAGS": [
+      "blogs"
+    ],
+    "CATEGORY": [
+      "Environment"
+    ]
+  },
+  {
     "file-path": "~/org/debug/uboot-online-debug.org",
     "URL": "/2019/10/22/uboot-online-debug.html",
     "TITLE": "Debug Uboot with gdb",

@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<!-- 2023-04-26 Wed 15:22 -->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Send Patchs with email</title>
+<meta name="author" content="Schspa" />
+<meta name="description" content="Send Patchs with email." />
+<meta name="generator" content="Org Mode" />
+<link rel="shortcut icon" href="/images/rose-red.png" type="image/x-icon" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" integrity="sha256-sAcc18zvMnaJZrNT4v8J0T4HqzEUiUTlVFgDIywjQek=" crossorigin="anonymous">
+<link rel="stylesheet" href="/css/animate.min.css" />
+<link rel="stylesheet" href="/css/all.min.css" />
+<link rel="stylesheet" type="text/css" href="/css/style.css" />
+<link rel="stylesheet" type="text/css" href="/css/navbar.css" />
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/js/bootstrap.min.js" integrity="sha256-/hGxZHGQ57fXLp+NDusFZsZo/PG21Bp2+hXYV5a6w+g=" crossorigin="anonymous"></script>
+<script src="/js/jquery.min.js"></script>
+<script src="/js/darkreader.js"></script>
+<script src="/user.config.js"></script>
+<script src="/js/main.js"></script>
+</head>
+<body>
+<div id="preamble" class="status">
+<div class="mobile-container">
+  <!-- Top Navigation Menu -->
+  <div class="topnav">
+    <div id="header">
+      <a href="/" class="logo">Schspa's Blog</a>
+      <a href="javascript:void(0);" class="icon" onclick="toggleheader()">
+        <i class="fa fa-bars"></i>
+      </a>
+    </div>
+    <div id="nav_headers">
+      <a href="/sitemap.html" class="menu-item">Categories</a>
+    </div>
+  </div>
+  <!-- End smartphone / tablet look -->
+</div>
+
+<header id="header" class="header">
+  <div class="logo-wrapper">
+    <a href="/" class="logo">Schspa's Blogs</a>
+  </div>
+
+  <nav class="site-navbar">
+    <ul id="menu" class="menu">
+      <li class="menu-item">
+        <a class="menu-item-link" href="/">Home</a>
+      </li>
+      <li class="menu-item">
+        <a class="menu-item-link" href="/sitemap.html">Categories</a>
+      </li>
+    </ul>
+  </nav>
+</header>
+</div>
+<div id="content" class="content">
+<h1 class="title">Send Patchs with email</h1>
+<div id="table-of-contents" role="doc-toc">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents" role="doc-toc">
+<ul>
+<li><a href="#org3e9679b">配置环境</a>
+<ul>
+<li><a href="#org333a0df">environment</a></li>
+<li><a href="#orga15b660">官方文档</a></li>
+<li><a href="#orgfb52cb8">gmail</a>
+<ul>
+<li><a href="#org386662b">应用专用密码</a></li>
+</ul>
+</li>
+<li><a href="#orgd3282d8">发送邮件</a></li>
+</ul>
+</li>
+<li><a href="#org98a7515">心理建设</a>
+<ul>
+<li><a href="#orga36d804">不要玻璃心, 做好被喷的准备</a></li>
+<li><a href="#org13fcf34">patch问题解答</a></li>
+</ul>
+</li>
+<li><a href="#org7537f2c">Comment Message</a>
+<ul>
+<li><a href="#orga148e84">Comments</a>
+<ul>
+<li><a href="#org22fe6fc">明确问题的引入点</a></li>
+<li><a href="#org50d34af">明确给出错误,失败日志</a></li>
+<li><a href="#org8383ce5">明确场景区别</a></li>
+<li><a href="#org894b177">给出出问题的场景</a></li>
+<li><a href="#orgc5e0eea">给出解决方案</a></li>
+</ul>
+</li>
+<li><a href="#org211eae7">Tag</a></li>
+<li><a href="#orgc65da8a">patch version</a></li>
+<li><a href="#org0c4bcae">change log</a></li>
+<li><a href="#org763a87c">git am 测试</a></li>
+<li><a href="#org6491473">previous versions Reviewed-by</a></li>
+<li><a href="#org7850403">Patch set</a></li>
+</ul>
+</li>
+<li><a href="#org5d6f578">提交技巧</a>
+<ul>
+<li><a href="#orge0cb1f2">问题分析</a>
+<ul>
+<li><a href="#org3258f5a">在适当的位置添加delay来提高复现概率</a></li>
+<li><a href="#orgbef047c">注意锁范围</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org3e9679b" class="outline-2">
+<h2 id="org3e9679b">配置环境</h2>
+<div class="outline-text-2" id="text-org3e9679b">
+</div>
+<div id="outline-container-org333a0df" class="outline-3">
+<h3 id="org333a0df">environment</h3>
+<div class="outline-text-3" id="text-org333a0df">
+<table>
+
+
+<colgroup>
+<col  class="org-left">
+
+<col  class="org-left">
+</colgroup>
+<tbody>
+<tr>
+<td class="org-left">OS</td>
+<td class="org-left">macos</td>
+</tr>
+
+<tr>
+<td class="org-left">email</td>
+<td class="org-left">gmail</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+<div id="outline-container-orga15b660" class="outline-3">
+<h3 id="orga15b660">官方文档</h3>
+<div class="outline-text-3" id="text-orga15b660">
+<p>
+<a href="https://git-scm.com/docs/git-send-email">https://git-scm.com/docs/git-send-email</a><br>
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgfb52cb8" class="outline-3">
+<h3 id="orgfb52cb8">gmail</h3>
+<div class="outline-text-3" id="text-orgfb52cb8">
+</div>
+<div id="outline-container-org386662b" class="outline-4">
+<h4 id="org386662b">应用专用密码</h4>
+<div class="outline-text-4" id="text-org386662b">
+<p>
+点击下方链接,创建安全密钥。<br>
+<a href="https://myaccount.google.com/security">https://myaccount.google.com/security</a><br>
+</p>
+
+<p>
+两步验证 -&gt; 专用密码<br>
+</p>
+
+<p>
+应用: 邮件<br>
+设备: 按需选择<br>
+之后会生成密码。<br>
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgd3282d8" class="outline-3">
+<h3 id="orgd3282d8">发送邮件</h3>
+<div class="outline-text-3" id="text-orgd3282d8">
+<div class="org-src-container">
+<pre class="src src-bash"><code>git send-email -smtp-debug --to=schspa@gmail.com -1</code>
+</pre>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org98a7515" class="outline-2">
+<h2 id="org98a7515">心理建设</h2>
+<div class="outline-text-2" id="text-org98a7515">
+</div>
+<div id="outline-container-orga36d804" class="outline-3">
+<h3 id="orga36d804">不要玻璃心, 做好被喷的准备</h3>
+<div class="outline-text-3" id="text-orga36d804">
+<p>
+<a href="https://www.oschina.net/news/116890/linux-kernel-maintainers-are-hard-to-find">https://www.oschina.net/news/116890/linux-kernel-maintainers-are-hard-to-find</a><br>
+</p>
+</div>
+</div>
+<div id="outline-container-org13fcf34" class="outline-3">
+<h3 id="org13fcf34">patch问题解答</h3>
+<div class="outline-text-3" id="text-org13fcf34">
+<p>
+要在合理的范围内质疑, maintainer 也会有没考虑周全的情况。<br>
+</p>
+
+
+<div id="orgb9d4c4a" class="figure">
+<p><img src="assets/2023-04-26_09-53-56_screenshot.png" alt="2023-04-26_09-53-56_screenshot.png"><br>
+</p>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org7537f2c" class="outline-2">
+<h2 id="org7537f2c">Comment Message</h2>
+<div class="outline-text-2" id="text-org7537f2c">
+</div>
+<div id="outline-container-orga148e84" class="outline-3">
+<h3 id="orga148e84">Comments</h3>
+<div class="outline-text-3" id="text-orga148e84">
+</div>
+<div id="outline-container-org22fe6fc" class="outline-4">
+<h4 id="org22fe6fc">明确问题的引入点</h4>
+<div class="outline-text-4" id="text-org22fe6fc">
+<div class="org-src-container">
+<pre class="src src-bash"><code>Commit 95158a89dd50 (<span class="org-string">"sched,rt: Use the full cpumask for balancing"</span>)</code>
+<code>allow find_lock_lowest_rq to pick a task with migration disabled.</code>
+<code>This commit is intended to push the current running task on this CPU</code>
+<code>away.</code>
+<code></code>
+<code>There is a race scenario, which allows a migration disabled task to</code>
+<code>be migrated to another CPU.</code>
+<code></code>
+<code>When there is a RT task with higher priority, rt sched class was</code>
+<code>intended to migrate higher priority task to lowest rq via push_rt_tasks,</code>
+<code>this WARNING will happen here.</code>
+<code></code>
+<code>With the system running on PREEMPT_RT, rt_spin_lock will disable</code>
+<code>migration, this will make the problem easier to reproduce.</code>
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-org50d34af" class="outline-4">
+<h4 id="org50d34af">明确给出错误,失败日志</h4>
+<div class="outline-text-4" id="text-org50d34af">
+<div class="org-src-container">
+<pre class="src src-bash"><code>At the moment the following QEMU command line triggers an assertion</code>
+<code>failure On xlnx-versal SOC:</code>
+<code>qemu-system-aarch64 <span class="org-sh-escaped-newline">\</span></code>
+<code>    -machine xlnx-versal-virt -nographic -smp 2 -m 128 <span class="org-sh-escaped-newline">\</span></code>
+<code>    -fsdev local,<span class="org-variable-name">id</span>=shareid,<span class="org-variable-name">path</span>=${<span class="org-variable-name">HOME</span>}/work,<span class="org-variable-name">security_model</span>=none <span class="org-sh-escaped-newline">\</span></code>
+<code>    -device virtio-9p-device,<span class="org-variable-name">fsdev</span>=shareid,<span class="org-variable-name">mount_tag</span>=share <span class="org-sh-escaped-newline">\</span></code>
+<code>    -fsdev local,<span class="org-variable-name">id</span>=shareid1,<span class="org-variable-name">path</span>=${<span class="org-variable-name">HOME</span>}/Music,<span class="org-variable-name">security_model</span>=none <span class="org-sh-escaped-newline">\</span></code>
+<code>    -device virtio-9p-device,<span class="org-variable-name">fsdev</span>=shareid1,<span class="org-variable-name">mount_tag</span>=share1</code>
+<code></code>
+<code>qemu-system-aarch64: ../migration/savevm.c:860:</code>
+<code>vmstate_register_with_alias_id:</code>
+<code>Assertion <span class="org-sh-quoted-exec">`!se-&gt;compat || se-&gt;instance_id == 0' failed.</span></code>
+<code></code>
+<code><span class="org-sh-quoted-exec">This problem was fixed on arm virt platform in patch</span></code>
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org8383ce5" class="outline-4">
+<h4 id="org8383ce5">明确场景区别</h4>
+<div class="outline-text-4" id="text-org8383ce5">
+<div class="org-src-container">
+<pre class="src src-bash"><code>This problem was fixed on arm virt platform<span class="org-keyword"> in</span> patch</code>
+<code></code>
+<code>https://lists.nongnu.org/archive/html/qemu-devel/2016-07/msg01119.html</code>
+<code></code>
+<code>It works perfectly on arm virt platform. but there is still there on</code>
+<code>xlnx-versal SOC.</code>
+<code></code>
+<code>The main difference between arm virt and xlnx-versal is they use</code>
+<code>different way to create virtio-mmio qdev. on arm virt, it calls</code>
+<code><span class="org-function-name">sysbus_create_simple</span>(<span class="org-string">"virtio-mmio"</span>, base, pic[irq]); <span class="org-builtin">which</span> will call</code>
+<code>sysbus_mmio_map internally and assign base address to subsys device</code>
+<code>mmio correctly. but xlnx-versal<span class="org-string">'s implements won'</span>t do this.</code>
+<code></code>
+<code>However, xlnx-versal can<span class="org-string">'t switch to sysbus_create_simple() to create</span></code>
+<code><span class="org-string">virtio-mmio device. It'</span>s because xlnx-versal<span class="org-string">'s cpu use</span></code>
+<code><span class="org-string">VersalVirt.soc.fpd.apu.mr as it'</span>s memory. which is subregion of</code>
+<code>system_memory. sysbus_create_simple will add virtio to system_memory,</code>
+<code><span class="org-builtin">which</span> can<span class="org-string">'t be accessed by cpu.</span></code>
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org894b177" class="outline-4">
+<h4 id="org894b177">给出出问题的场景</h4>
+<div class="outline-text-4" id="text-org894b177">
+<div class="org-src-container">
+<pre class="src src-text"><code>     T21124                   p9_read_work</code>
+<code>======================== second trans =================================</code>
+<code>p9_client_walk</code>
+<code>  p9_client_rpc</code>
+<code>    p9_client_prepare_req</code>
+<code>      p9_tag_alloc</code>
+<code>        req = kmem_cache_alloc(p9_req_cache, GFP_NOFS);</code>
+<code>        tag = idr_alloc</code>
+<code>        &lt;&lt; preempted &gt;&gt;</code>
+<code>        req-&gt;tc.tag = tag;</code>
+<code>                            /* req-&gt;[refcount/tag] == uninitialized */</code>
+<code>                            m-&gt;rreq = p9_tag_lookup(m-&gt;client, m-&gt;rc.tag);</code>
+<code>                              /* increments uninitalized refcount */</code>
+<code></code>
+<code>        refcount_set(&amp;req-&gt;refcount, 2);</code>
+<code>                            /* cb drops one ref */</code>
+<code>                            p9_client_cb(req)</code>
+<code>                            /* reader thread drops its ref:</code>
+<code>                               request is incorrectly freed */</code>
+<code>                            p9_req_put(req)</code>
+<code>    /* use after free and ref underflow */</code>
+<code>    p9_req_put(req)</code>
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgc5e0eea" class="outline-4">
+<h4 id="orgc5e0eea">给出解决方案</h4>
+<div class="outline-text-4" id="text-orgc5e0eea">
+<div class="org-src-container">
+<pre class="src src-text"><code>We can solve this by simply assign mmio[0].addr directly. makes</code>
+<code>virtio_mmio_bus_get_dev_path to produce correct unique device path.</code>
+</pre>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org211eae7" class="outline-3">
+<h3 id="org211eae7">Tag</h3>
+<div class="outline-text-3" id="text-org211eae7">
+<table>
+
+
+<colgroup>
+<col  class="org-left">
+
+<col  class="org-left">
+</colgroup>
+<tbody>
+<tr>
+<td class="org-left">Acked-by</td>
+<td class="org-left">Indicates that the code changes have been reviewed and approved by a specific person.</td>
+</tr>
+
+<tr>
+<td class="org-left">Reviewed-by</td>
+<td class="org-left">Similar to Acked-by, indicates that the code changes have been reviewed and approved by a specific person.</td>
+</tr>
+
+<tr>
+<td class="org-left">Tested-by</td>
+<td class="org-left">Indicates that the code changes have been tested and verified by a specific person.</td>
+</tr>
+
+<tr>
+<td class="org-left">Signed-off-by</td>
+<td class="org-left">Indicates that the person who is adding the tag certifies that they have the right to submit the changes, and that they agree to the license terms of the project.</td>
+</tr>
+
+<tr>
+<td class="org-left">Reported-by</td>
+<td class="org-left">Indicates that the person adding the tag is reporting a bug or issue, rather than submitting a patch.</td>
+</tr>
+
+<tr>
+<td class="org-left">Suggested-by</td>
+<td class="org-left">Indicates that the person adding the tag is suggesting a change or improvement, but may not have fully reviewed or tested the changes.</td>
+</tr>
+
+<tr>
+<td class="org-left">Reviewed-and-tested-by</td>
+<td class="org-left">Indicates that the person adding the tag has both reviewed and tested the code changes.</td>
+</tr>
+
+<tr>
+<td class="org-left">Original-patch-by</td>
+<td class="org-left">Indicates the original author of the patch, if different from the person submitting it.</td>
+</tr>
+
+<tr>
+<td class="org-left">Forwarded-by</td>
+<td class="org-left">Indicates that the person adding the tag is forwarding an email or patch from another source.</td>
+</tr>
+
+<tr>
+<td class="org-left">Inspired-by</td>
+<td class="org-left">Indicates that the person adding the tag was inspired by another idea or implementation.</td>
+</tr>
+
+<tr>
+<td class="org-left">Stable-dep-of</td>
+<td class="org-left">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="org-left">Debugged-by</td>
+<td class="org-left">&#xa0;</td>
+</tr>
+
+<tr>
+<td class="org-left">Co-developed-by</td>
+<td class="org-left">&#xa0;</td>
+</tr>
+</tbody>
+</table>
+
+<p>
+这些Tag间需要连续,中间不能有空行。<br>
+</p>
+
+<p>
+如下面的patch, <code>Reported-by</code> 和 <code>Signed-off-by</code> 标签之间有一个空行,这样会导致<br>
+<code>git interpret-trailers</code> 命令无法正常运行。<br>
+</p>
+
+<div class="org-src-container">
+<pre class="src src-text"><code>&gt;&gt; To fix it, we can initize the refcount to zero before add to idr.</code>
+<code>&gt;&gt;</code>
+<code>&gt;&gt; Reported-by: syzbot+8f1060e2aaf8ca55220b@syzkaller.appspotmail.com</code>
+<code>&gt;&gt;</code>
+<code>&gt;</code>
+<code>&gt; There should be no empty line between the tags; tags are part of the</code>
+<code>&gt; "trailer" and some tools handle it as such (like git interpret-trailers),</code>
+<code>&gt; which would ignore that Reported-by as it is not part of the last block</code>
+<code>&gt; of text.</code>
+<code>&gt;</code>
+<code>Thanks for reminding the format issue here.</code>
+<code>&gt;&gt; Signed-off-by: Schspa Shi <a href="mailto:schspa%40gmail.com">&lt;schspa@gmail.com&gt;</a></code>
+<code>&gt;&gt; ---</code>
+<code>&gt;&gt;  net/9p/client.c | 4 ++++</code>
+<code>&gt;&gt;  1 file changed, 4 insertions(+)</code>
+</pre>
+</div>
+
+<p>
+使用 <code>git interpret-trailers</code> 来获取某提交的标签.<br>
+</p>
+
+<div class="org-src-container">
+<pre class="src src-bash"><code>git interpret-trailers --parse &lt;(git log -n 1 --format=%B)</code>
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgc65da8a" class="outline-3">
+<h3 id="orgc65da8a">patch version</h3>
+<div class="outline-text-3" id="text-orgc65da8a">
+<div class="org-src-container">
+<pre class="src src-bash"><code>git format-patch -v 2 HEAD^</code>
+<code>ls -al v2-0001-test-Test-patch.patch</code>
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org0c4bcae" class="outline-3">
+<h3 id="org0c4bcae">change log</h3>
+<div class="outline-text-3" id="text-org0c4bcae">
+
+<div id="org9d84e15" class="figure">
+<p><img src="assets/2023-04-26_09-18-57_screenshot.png" alt="2023-04-26_09-18-57_screenshot.png"><br>
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org763a87c" class="outline-3">
+<h3 id="org763a87c">git am 测试</h3>
+<div class="outline-text-3" id="text-org763a87c">
+<div class="org-src-container">
+<pre class="src src-bash"><code>git reset --hard origin/master</code>
+<code>git am v2-0001-test-Test-patch.patch</code>
+<code>git log -n 1</code>
+</pre>
+</div>
+
+<p>
+提交日志中没有Changelog的内容.<br>
+</p>
+</div>
+</div>
+
+<div id="outline-container-org6491473" class="outline-3">
+<h3 id="org6491473">previous versions Reviewed-by</h3>
+<div class="outline-text-3" id="text-org6491473">
+<p>
+如果之前的版本已经得到了部分reviewer's允许, Reviewed-by Tag可以直接加入到提交记<br>
+录中。<br>
+</p>
+
+
+<div id="org1b13086" class="figure">
+<p><img src="assets/2023-04-25_17-44-26_screenshot.png" alt="2023-04-25_17-44-26_screenshot.png"><br>
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org7850403" class="outline-3">
+<h3 id="org7850403">Patch set</h3>
+<div class="outline-text-3" id="text-org7850403">
+<div class="org-src-container">
+<pre class="src src-bash"><code>git send-email --thread --no-chain-reply-to --to=your-email@email.com --cc=your-another-email@email.com v2-0001-test-Test-patch.patch v2-0002-test-test-patch-serial.patch</code>
+</pre>
+</div>
+</div>
+</div>
+</div>
+<div id="outline-container-org5d6f578" class="outline-2">
+<h2 id="org5d6f578">提交技巧</h2>
+<div class="outline-text-2" id="text-org5d6f578">
+</div>
+<div id="outline-container-orge0cb1f2" class="outline-3">
+<h3 id="orge0cb1f2">问题分析</h3>
+<div class="outline-text-3" id="text-orge0cb1f2">
+</div>
+<div id="outline-container-org3258f5a" class="outline-4">
+<h4 id="org3258f5a">在适当的位置添加delay来提高复现概率</h4>
+<div class="outline-text-4" id="text-org3258f5a">
+<p>
+使用kretprobe给特定函数前后加delay来提高复现概率。<br>
+eg:<br>
+<a href="https://syzkaller.appspot.com/bug?id=22c8a5938eab640d1c6bcc0e3dc7be519d878462">https://syzkaller.appspot.com/bug?id=22c8a5938eab640d1c6bcc0e3dc7be519d878462</a><br>
+<a href="https://github.com/schspa/code_snippet/blob/master/kernel_module/timer/timer-debugobject-test.c">https://github.com/schspa/code_snippet/blob/master/kernel_module/timer/timer-debugobject-test.c</a><br>
+</p>
+
+
+<div id="org92e9179" class="figure">
+<p><img src="assets/2023-04-26_09-38-51_screenshot.png" alt="2023-04-26_09-38-51_screenshot.png"><br>
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgbef047c" class="outline-4">
+<h4 id="orgbef047c">注意锁范围</h4>
+<div class="outline-text-4" id="text-orgbef047c">
+<p>
+大多数的BUG都是因为锁范围有问题而产生的。特别是先unlock,之后再去lock的情景,如果<br>
+有类似情况,一定要多加注意。<br>
+</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<script src="https://utteranc.es/client.js"
+    repo="schspa/schspa.github.io"
+    issue-term="title"
+    label="✨💬✨"
+    theme="github-light"
+    crossorigin="anonymous"
+    async>
+</script>
+<div class="me">
+  <span><b>Contact me via :)</b><span>
+  <div class="contact">
+    <a id="email" href="mailto:schspa@gmail.com" target="_blank"><i class="fab fa-mailchimp animated heartBeat delay-2s slower"></i></a>
+    <a id="github" href="//github.com/schspa" target="_blank"><i class="fab fa-github animated heartBeat delay-2s slower"></i></a>
+  </div>
+</div>
+
+<div id="jinrishici-sentence" style="font-weight: 700;">虚怀乃若谷，水深则流缓。</div>
+<script src="https://sdk.jinrishici.com/v2/browser/jinrishici.js" charset="utf-8"></script>
+</div>
+</body>
+</html>

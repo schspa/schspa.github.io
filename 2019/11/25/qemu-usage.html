@@ -1,14 +1,13 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2022-11-11 Fri 16:49 -->
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- 2023-04-26 Wed 15:46 -->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>qemu使用踩坑</title>
-<meta name="generator" content="Org mode">
-<meta name="author" content="Schspa Shi">
-<meta name="description" content="qemu basic usage"
->
+<meta name="author" content="Schspa Shi" />
+<meta name="description" content="qemu basic usage" />
+<meta name="generator" content="Org Mode" />
 <link rel="shortcut icon" href="/images/rose-red.png" type="image/x-icon" />
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" integrity="sha256-sAcc18zvMnaJZrNT4v8J0T4HqzEUiUTlVFgDIywjQek=" crossorigin="anonymous">
 <link rel="stylesheet" href="/css/animate.min.css" />
@@ -56,61 +55,65 @@
   </nav>
 </header>
 </div>
-<div id="content">
+<div id="content" class="content">
 <h1 class="title">qemu使用踩坑</h1>
-<div id="table-of-contents">
+<div id="table-of-contents" role="doc-toc">
 <h2>Table of Contents</h2>
-<div id="text-table-of-contents">
+<div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#org3b3d36e">编译qemu</a></li>
-<li><a href="#orgb47d46f">运行</a></li>
-<li><a href="#org7f0e372">推出</a></li>
-<li><a href="#org70f77a9">文件共享</a>
+<li><a href="#org223c05e">编译qemu</a></li>
+<li><a href="#org74644d1">运行</a></li>
+<li><a href="#org8a7a17b">推出</a></li>
+<li><a href="#org92f3c06">文件共享</a>
 <ul>
-<li><a href="#orgf35502d">9P over virtiofs</a></li>
+<li><a href="#org74c4a18">9P over virtiofs</a></li>
 </ul>
 </li>
-<li><a href="#org5b27791">网络设置</a>
+<li><a href="#org3b74077">网络设置</a>
 <ul>
-<li><a href="#orgd586e15">linux Host</a></li>
-<li><a href="#orgd4d7f0f"><span class="todo TODO">TODO</span> Macos Host</a></li>
-<li><a href="#org84e6246">qemu command line</a></li>
+<li><a href="#org894e17b">linux Host</a></li>
+<li><a href="#org4f0447f"><span class="todo TODO">TODO</span> Macos Host</a></li>
+<li><a href="#org1a69761">qemu command line</a></li>
 </ul>
 </li>
-<li><a href="#org181cd94">QMP (QEMU Machine Protocol)</a>
+<li><a href="#org2d830c4">QMP (QEMU Machine Protocol)</a>
 <ul>
-<li><a href="#orgf8107eb">Use TCP Port</a></li>
-<li><a href="#org7c21e15">Use Unix Socket</a></li>
-<li><a href="#org52c4f08">create vmcore</a></li>
+<li><a href="#org6d69ba2">Use TCP Port</a></li>
+<li><a href="#orge081ddd">Use Unix Socket</a></li>
+<li><a href="#orgf47b918">create vmcore</a></li>
 </ul>
 </li>
-<li><a href="#org6f53564">QEMU状态查询</a>
+<li><a href="#org692d0c9">QEMU状态查询</a>
 <ul>
-<li><a href="#orga4d27fb">dumpdtb</a></li>
+<li><a href="#org78c2093">dumpdtb</a></li>
 </ul>
 </li>
-<li><a href="#org484d865">参考文档</a></li>
+<li><a href="#org202b430">参考文档</a></li>
 </ul>
 </div>
 </div>
 
-<div id="outline-container-org3b3d36e" class="outline-2">
-<h2 id="org3b3d36e">编译qemu</h2>
-<div class="outline-text-2" id="text-org3b3d36e">
+<div id="outline-container-org223c05e" class="outline-2">
+<h2 id="org223c05e">编译qemu</h2>
+<div class="outline-text-2" id="text-org223c05e">
 <div class="org-src-container">
-<pre class="src src-bash"><code>./configure --target-list=aarch64-softmmu --enable-virtfs</code>
+<pre class="src src-bash"><code>./configure --target-list=aarch64-softmmu --enable-virtfs --enable-slirp --enable-debug</code>
 <code>make -j8</code>
 </pre>
 </div>
 <p>
 <b>Mac OS 不支持9Pfs</b><br>
 </p>
+
+<p>
+最新的slirp需要从发行版外部来安装 <code>libslirp</code> 包。<br>
+</p>
 </div>
 </div>
 
-<div id="outline-container-orgb47d46f" class="outline-2">
-<h2 id="orgb47d46f">运行</h2>
-<div class="outline-text-2" id="text-orgb47d46f">
+<div id="outline-container-org74644d1" class="outline-2">
+<h2 id="org74644d1">运行</h2>
+<div class="outline-text-2" id="text-org74644d1">
 <div class="org-src-container">
 <pre class="src src-bash"><code>qemu-system-aarch64 -machine virt -cpu cortex-a57 -machine <span class="org-variable-name">type</span>=virt -nographic -smp 4 -m 2048 --append <span class="org-string">"console=ttyAMA0"</span> --kernel ~/work/src/linux.git/arch/arm64/boot/Image --initrd ~/work/buildroot-2018.05/output/images/rootfs.cpio.bz2</code>
 </pre>
@@ -118,22 +121,22 @@
 </div>
 </div>
 
-<div id="outline-container-org7f0e372" class="outline-2">
-<h2 id="org7f0e372">推出</h2>
-<div class="outline-text-2" id="text-org7f0e372">
+<div id="outline-container-org8a7a17b" class="outline-2">
+<h2 id="org8a7a17b">推出</h2>
+<div class="outline-text-2" id="text-org8a7a17b">
 <div class="org-src-container">
 <pre class="src src-bash"><code>Ctrl-A x</code>
 </pre>
 </div>
 </div>
 </div>
-<div id="outline-container-org70f77a9" class="outline-2">
-<h2 id="org70f77a9">文件共享</h2>
-<div class="outline-text-2" id="text-org70f77a9">
+<div id="outline-container-org92f3c06" class="outline-2">
+<h2 id="org92f3c06">文件共享</h2>
+<div class="outline-text-2" id="text-org92f3c06">
 </div>
-<div id="outline-container-orgf35502d" class="outline-3">
-<h3 id="orgf35502d"><a href="https://wiki.qemu.org/Documentation/9psetup">9P over virtiofs</a></h3>
-<div class="outline-text-3" id="text-orgf35502d">
+<div id="outline-container-org74c4a18" class="outline-3">
+<h3 id="org74c4a18"><a href="https://wiki.qemu.org/Documentation/9psetup">9P over virtiofs</a></h3>
+<div class="outline-text-3" id="text-org74c4a18">
 <p>
 9pfs是基于网络的文件共享协议，qemu中的软件可以通过此种方法来访问宿主机中的文件。详见Plan 9 9p remote filesystem protocol<br>
 <b>qemu在Mac OS上不支持virtio，故无法使用以下的方法</b><br>
@@ -175,7 +178,7 @@
 mount tag也可以通过sysfs来查看<br>
 </p>
 <div class="org-src-container">
-<pre class="src src-bash"><code>/sys/bus/virtio/drivers/9pnet_virtio/virtio&lt;n&gt;/mount_tag         </code>
+<pre class="src src-bash"><code>/sys/bus/virtio/drivers/9pnet_virtio/virtio&lt;n&gt;/mount_tag</code>
 </pre>
 </div></li>
 </ul>
@@ -183,13 +186,13 @@ mount tag也可以通过sysfs来查看<br>
 </div>
 </div>
 
-<div id="outline-container-org5b27791" class="outline-2">
-<h2 id="org5b27791">网络设置</h2>
-<div class="outline-text-2" id="text-org5b27791">
+<div id="outline-container-org3b74077" class="outline-2">
+<h2 id="org3b74077">网络设置</h2>
+<div class="outline-text-2" id="text-org3b74077">
 </div>
-<div id="outline-container-orgd586e15" class="outline-3">
-<h3 id="orgd586e15">linux Host</h3>
-<div class="outline-text-3" id="text-orgd586e15">
+<div id="outline-container-org894e17b" class="outline-3">
+<h3 id="org894e17b">linux Host</h3>
+<div class="outline-text-3" id="text-org894e17b">
 <ul class="org-ul">
 <li><p>
 设置网络设备<br>
@@ -223,17 +226,17 @@ mount tag也可以通过sysfs来查看<br>
 </pre>
 </div>
 <p>
-上述脚本添加了一个tap设备<sup><a id="fnr.1" class="footref" href="#fn.1">1</a></sup>，并使用dnsmasq网桥桥开启了dhcp，客户端启动之后即可自动获取ip地址。由于没有将实体网卡加入到br0的网桥之中，目前客户机系统还无法联网。<br>
+上述脚本添加了一个tap设备<sup><a id="fnr.1" class="footref" href="#fn.1" role="doc-backlink">1</a></sup>，并使用dnsmasq网桥桥开启了dhcp，客户端启动之后即可自动获取ip地址。由于没有将实体网卡加入到br0的网桥之中，目前客户机系统还无法联网。<br>
 </p></li>
 </ul>
 </div>
 </div>
-<div id="outline-container-orgd4d7f0f" class="outline-3">
-<h3 id="orgd4d7f0f"><span class="todo TODO">TODO</span> Macos Host</h3>
+<div id="outline-container-org4f0447f" class="outline-3">
+<h3 id="org4f0447f"><span class="todo TODO">TODO</span> Macos Host</h3>
 </div>
-<div id="outline-container-org84e6246" class="outline-3">
-<h3 id="org84e6246">qemu command line</h3>
-<div class="outline-text-3" id="text-org84e6246">
+<div id="outline-container-org1a69761" class="outline-3">
+<h3 id="org1a69761">qemu command line</h3>
+<div class="outline-text-3" id="text-org1a69761">
 <div class="org-src-container">
 <pre class="src src-bash"><code>-netdev tap,<span class="org-variable-name">ifname</span>=tap0,<span class="org-variable-name">id</span>=net0,<span class="org-variable-name">script</span>=no,<span class="org-variable-name">downscript</span>=no -device virtio-net-device,<span class="org-variable-name">netdev</span>=net0,<span class="org-variable-name">mac</span>=52:55:00:fa:ee:10</code>
 </pre>
@@ -242,18 +245,18 @@ mount tag也可以通过sysfs来查看<br>
 </div>
 </div>
 
-<div id="outline-container-org181cd94" class="outline-2">
-<h2 id="org181cd94">QMP (QEMU Machine Protocol)</h2>
-<div class="outline-text-2" id="text-org181cd94">
+<div id="outline-container-org2d830c4" class="outline-2">
+<h2 id="org2d830c4">QMP (QEMU Machine Protocol)</h2>
+<div class="outline-text-2" id="text-org2d830c4">
 <p>
 <a href="https://wiki.qemu.org/Documentation/QMP">https://wiki.qemu.org/Documentation/QMP</a><br>
 <a href="https://qemu-project.gitlab.io/qemu/interop/qemu-qmp-ref.html">https://qemu-project.gitlab.io/qemu/interop/qemu-qmp-ref.html</a><br>
 </p>
 </div>
 
-<div id="outline-container-orgf8107eb" class="outline-3">
-<h3 id="orgf8107eb">Use TCP Port</h3>
-<div class="outline-text-3" id="text-orgf8107eb">
+<div id="outline-container-org6d69ba2" class="outline-3">
+<h3 id="org6d69ba2">Use TCP Port</h3>
+<div class="outline-text-3" id="text-org6d69ba2">
 <ul class="org-ul">
 <li><p>
 qemu launch argument<br>
@@ -278,9 +281,9 @@ connect command<br>
 </div>
 </div>
 
-<div id="outline-container-org7c21e15" class="outline-3">
-<h3 id="org7c21e15">Use Unix Socket</h3>
-<div class="outline-text-3" id="text-org7c21e15">
+<div id="outline-container-orge081ddd" class="outline-3">
+<h3 id="orge081ddd">Use Unix Socket</h3>
+<div class="outline-text-3" id="text-orge081ddd">
 <ul class="org-ul">
 <li>qemu launch argument<br></li>
 </ul>
@@ -302,9 +305,9 @@ connect command<br>
 </div>
 </div>
 
-<div id="outline-container-org52c4f08" class="outline-3">
-<h3 id="org52c4f08">create vmcore</h3>
-<div class="outline-text-3" id="text-org52c4f08">
+<div id="outline-container-orgf47b918" class="outline-3">
+<h3 id="orgf47b918">create vmcore</h3>
+<div class="outline-text-3" id="text-orgf47b918">
 <p>
 This can be used to create a vmcore file for debug via crash/gdb<br>
 </p>
@@ -318,13 +321,13 @@ This can be used to create a vmcore file for debug via crash/gdb<br>
 </div>
 </div>
 
-<div id="outline-container-org6f53564" class="outline-2">
-<h2 id="org6f53564">QEMU状态查询</h2>
-<div class="outline-text-2" id="text-org6f53564">
+<div id="outline-container-org692d0c9" class="outline-2">
+<h2 id="org692d0c9">QEMU状态查询</h2>
+<div class="outline-text-2" id="text-org692d0c9">
 </div>
-<div id="outline-container-orga4d27fb" class="outline-3">
-<h3 id="orga4d27fb">dumpdtb</h3>
-<div class="outline-text-3" id="text-orga4d27fb">
+<div id="outline-container-org78c2093" class="outline-3">
+<h3 id="org78c2093">dumpdtb</h3>
+<div class="outline-text-3" id="text-org78c2093">
 <div class="org-src-container">
 <pre class="src src-bash"><code>qemu-system-arm -machine virt-2.9,<span class="org-variable-name">dumpdtb</span>=file.dtb</code>
 </pre>
@@ -333,9 +336,9 @@ This can be used to create a vmcore file for debug via crash/gdb<br>
 </div>
 </div>
 
-<div id="outline-container-org484d865" class="outline-2">
-<h2 id="org484d865">参考文档</h2>
-<div class="outline-text-2" id="text-org484d865">
+<div id="outline-container-org202b430" class="outline-2">
+<h2 id="org202b430">参考文档</h2>
+<div class="outline-text-2" id="text-org202b430">
 <p>
 <a href="http://www.voidcn.com/article/p-xlgkygpv-p.html">http://www.voidcn.com/article/p-xlgkygpv-p.html</a><br>
 <a href="https://kennedy-han.github.io/2015/06/15/QEMU-arm64-guide.html">https://kennedy-han.github.io/2015/06/15/QEMU-arm64-guide.html</a><br>
@@ -348,7 +351,7 @@ This can be used to create a vmcore file for debug via crash/gdb<br>
 <h2 class="footnotes">Footnotes: </h2>
 <div id="text-footnotes">
 
-<div class="footdef"><sup><a id="fn.1" class="footnum" href="#fnr.1">1</a></sup> <div class="footpara"><p class="footpara">
+<div class="footdef"><sup><a id="fn.1" class="footnum" href="#fnr.1" role="doc-backlink">1</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">
 <a href="https://segmentfault.com/a/1190000009249039">Linux虚拟网络设备之tun/tap</a><br>
 </p></div></div>
 
