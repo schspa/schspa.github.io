@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2022-03-03 Thu 11:48 -->
+<!-- 2023-05-06 Sat 10:09 -->
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>SuDump: Exploiting suid binaries through the kernel笔记</title>
@@ -60,15 +60,15 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#org2cfc649">简介</a></li>
-<li><a href="#org3f166d3">实现原理</a>
+<li><a href="#org99dd69a">简介</a></li>
+<li><a href="#org2627d11">实现原理</a>
 <ul>
-<li><a href="#org2d89d66">在任意目录升成coredump文件</a></li>
-<li><a href="#org11f5c1b">在coredump中加入可以自定义的脚本</a></li>
-<li><a href="#org6a3465f">执行coredump中的脚本</a></li>
+<li><a href="#orgc3c5bb1">在任意目录升成coredump文件</a></li>
+<li><a href="#org6c9e2fe">在coredump中加入可以自定义的脚本</a></li>
+<li><a href="#org1b26c40">执行coredump中的脚本</a></li>
 </ul>
 </li>
-<li><a href="#org13239f9">总结</a></li>
+<li><a href="#org37334e9">总结</a></li>
 </ul>
 </div>
 </div>
@@ -78,22 +78,22 @@
 <a href="https://www.openwall.com/lists/oss-security/2021/10/20/2">https://www.openwall.com/lists/oss-security/2021/10/20/2</a><br>
 </p>
 
-<div id="outline-container-org2cfc649" class="outline-2">
-<h2 id="org2cfc649">简介</h2>
-<div class="outline-text-2" id="text-org2cfc649">
+<div id="outline-container-org99dd69a" class="outline-2">
+<h2 id="org99dd69a">简介</h2>
+<div class="outline-text-2" id="text-org99dd69a">
 <p>
 这个案例通过suid以及coredump来达到向任意目录写入coredump文件的目的.<br>
 </p>
 </div>
 </div>
 
-<div id="outline-container-org3f166d3" class="outline-2">
-<h2 id="org3f166d3">实现原理</h2>
-<div class="outline-text-2" id="text-org3f166d3">
+<div id="outline-container-org2627d11" class="outline-2">
+<h2 id="org2627d11">实现原理</h2>
+<div class="outline-text-2" id="text-org2627d11">
 </div>
-<div id="outline-container-org2d89d66" class="outline-3">
-<h3 id="org2d89d66">在任意目录升成coredump文件</h3>
-<div class="outline-text-3" id="text-org2d89d66">
+<div id="outline-container-orgc3c5bb1" class="outline-3">
+<h3 id="orgc3c5bb1">在任意目录升成coredump文件</h3>
+<div class="outline-text-3" id="text-orgc3c5bb1">
 <ol class="org-ol">
 <li>suid的root用户可执行文件<br></li>
 <li>该可执行文件会调用 setuid(0) and setgid(0)<br></li>
@@ -105,18 +105,18 @@
 </p>
 </div>
 </div>
-<div id="outline-container-org11f5c1b" class="outline-3">
-<h3 id="org11f5c1b">在coredump中加入可以自定义的脚本</h3>
-<div class="outline-text-3" id="text-org11f5c1b">
+<div id="outline-container-org6c9e2fe" class="outline-3">
+<h3 id="org6c9e2fe">在coredump中加入可以自定义的脚本</h3>
+<div class="outline-text-3" id="text-org6c9e2fe">
 <p>
 XAUTHORITY这个环境变量，在sudo中可以原封不动的通过带到子进程中, 通过设置这个环境变量，就可以在coredump中带入任意的字符串<br>
 </p>
 </div>
 </div>
 
-<div id="outline-container-org6a3465f" class="outline-3">
-<h3 id="org6a3465f">执行coredump中的脚本</h3>
-<div class="outline-text-3" id="text-org6a3465f">
+<div id="outline-container-org1b26c40" class="outline-3">
+<h3 id="org1b26c40">执行coredump中的脚本</h3>
+<div class="outline-text-3" id="text-org1b26c40">
 <ol class="org-ol">
 <li>需要有其他的程序来执行我们生成的coredump中的shell脚本/其他命令<br>
 Logrotate刚好可以满足要求.<br>
@@ -130,9 +130,9 @@ Logrotate刚好可以满足要求.<br>
 </div>
 </div>
 
-<div id="outline-container-org13239f9" class="outline-2">
-<h2 id="org13239f9">总结</h2>
-<div class="outline-text-2" id="text-org13239f9">
+<div id="outline-container-org37334e9" class="outline-2">
+<h2 id="org37334e9">总结</h2>
+<div class="outline-text-2" id="text-org37334e9">
 <p>
 在这个例子中，通过一些小组合就可以成功获取到root权限. 漏洞中可能的解决方案是在内核中将suid进程的RLIMIT_CORE设置成0，但是这样会有很多之前能正常产生coredump的地方就无法再升成coredump了。<br>
 </p>

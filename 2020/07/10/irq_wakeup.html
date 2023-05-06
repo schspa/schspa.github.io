@@ -1,14 +1,13 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2022-11-11 Fri 16:50 -->
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- 2023-05-06 Sat 10:09 -->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>irq wakeup in linux</title>
-<meta name="generator" content="Org mode">
-<meta name="author" content="schspa">
-<meta name="description" content="irq wakeup in linux"
->
+<meta name="author" content="schspa" />
+<meta name="description" content="irq wakeup in linux" />
+<meta name="generator" content="Org Mode" />
 <link rel="shortcut icon" href="/images/rose-red.png" type="image/x-icon" />
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" integrity="sha256-sAcc18zvMnaJZrNT4v8J0T4HqzEUiUTlVFgDIywjQek=" crossorigin="anonymous">
 <link rel="stylesheet" href="/css/animate.min.css" />
@@ -56,60 +55,60 @@
   </nav>
 </header>
 </div>
-<div id="content">
+<div id="content" class="content">
 <h1 class="title">irq wakeup in linux</h1>
-<div id="table-of-contents">
+<div id="table-of-contents" role="doc-toc">
 <h2>Table of Contents</h2>
-<div id="text-table-of-contents">
+<div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#org25d0ce2">术语</a></li>
-<li><a href="#org96885f3">硬件架构</a>
+<li><a href="#orgfc9ffe1">术语</a></li>
+<li><a href="#org8cf277b">硬件架构</a>
 <ul>
-<li><a href="#org6f51070">gic对唤醒功能的支持</a></li>
-<li><a href="#org4d9533d">GIC power down ？</a></li>
-<li><a href="#org04506eb">CPU Power Down</a></li>
-<li><a href="#orgf776201">CPU Power Up</a>
+<li><a href="#orgbb8d79a">gic对唤醒功能的支持</a></li>
+<li><a href="#org9ec32e8">GIC power down ？</a></li>
+<li><a href="#org8924152">CPU Power Down</a></li>
+<li><a href="#org2184afe">CPU Power Up</a>
 <ul>
-<li><a href="#orgfd6ef2f">RESET的执行地址</a></li>
+<li><a href="#org53db4aa">RESET的执行地址</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li><a href="#orga61bab5">Suspend In Linux</a></li>
-<li><a href="#org0e34c76">Linux irq wakeup</a>
+<li><a href="#orge44092a">Suspend In Linux</a></li>
+<li><a href="#org506fd02">Linux irq wakeup</a>
 <ul>
-<li><a href="#org88b2b75">irq flags</a>
+<li><a href="#org07b1783">irq flags</a>
 <ul>
-<li><a href="#org5eb80d8">IRQCHIP_MASK_ON_SUSPEND</a></li>
-<li><a href="#org3c38727">IRQCHIP_SKIP_SET_WAKE</a></li>
+<li><a href="#org9e87a13">IRQCHIP_MASK_ON_SUSPEND</a></li>
+<li><a href="#org4b58d52">IRQCHIP_SKIP_SET_WAKE</a></li>
 </ul>
 </li>
-<li><a href="#org7a22b59">arm-gic</a></li>
-<li><a href="#orgabec106">linux内核接口</a></li>
-<li><a href="#orgf083711">implement stacked irqchip</a>
+<li><a href="#orgd330b5c">arm-gic</a></li>
+<li><a href="#orgff2825d">linux内核接口</a></li>
+<li><a href="#orgbc47817">implement stacked irqchip</a>
 <ul>
-<li><a href="#orgb890355">used function &amp; macors</a></li>
-<li><a href="#orgdbcf161">irq domain</a></li>
-<li><a href="#org6211cda">irq initialization</a></li>
-<li><a href="#org39be6d7">irq domain ops</a></li>
+<li><a href="#org846eb01">used function &amp; macors</a></li>
+<li><a href="#orgbe92c01">irq domain</a></li>
+<li><a href="#org518deae">irq initialization</a></li>
+<li><a href="#org3437768">irq domain ops</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li><a href="#orga0a8f6f">ATF软件</a>
+<li><a href="#org626112b">ATF软件</a>
 <ul>
-<li><a href="#org570b3cf">参数：</a></li>
+<li><a href="#org8a2844d">参数：</a></li>
 <li><a href="#ATF-PSCI-SCMI-IMPLEMENT">平台相关实现</a></li>
 </ul>
 </li>
-<li><a href="#orgb0a401b">refs</a></li>
+<li><a href="#orge69eed8">refs</a></li>
 </ul>
 </div>
 </div>
 
-<div id="outline-container-org25d0ce2" class="outline-2">
-<h2 id="org25d0ce2">术语</h2>
-<div class="outline-text-2" id="text-org25d0ce2">
+<div id="outline-container-orgfc9ffe1" class="outline-2">
+<h2 id="orgfc9ffe1">术语</h2>
+<div class="outline-text-2" id="text-orgfc9ffe1">
 <table>
 
 
@@ -143,9 +142,9 @@
 </div>
 </div>
 
-<div id="outline-container-org96885f3" class="outline-2">
-<h2 id="org96885f3">硬件架构</h2>
-<div class="outline-text-2" id="text-org96885f3">
+<div id="outline-container-org8cf277b" class="outline-2">
+<h2 id="org8cf277b">硬件架构</h2>
+<div class="outline-text-2" id="text-org8cf277b">
 <p>
 在本篇文章中基于AARCH64平台，GIC作为中断控制器来进行讨论<br>
 下面是GIC-600的系统框架图：<br>
@@ -156,103 +155,77 @@
 </p>
 </div>
 
-<div id="outline-container-org6f51070" class="outline-3">
-<h3 id="org6f51070">gic对唤醒功能的支持</h3>
-<div class="outline-text-3" id="text-org6f51070">
+<div id="outline-container-orgbb8d79a" class="outline-3">
+<h3 id="orgbb8d79a">gic对唤醒功能的支持</h3>
+<div class="outline-text-3" id="text-orgbb8d79a">
 <p>
 在<a href="https://developer.arm.com/documentation/101206/0000/signal-descriptions/power-control-signals">gic600的TRM手册</a>中，可以看到gic600有wake_request的输出信号，Power controller可以根据这个信号来将对应的cpu唤醒。<br>
 唤醒信号：<br>
 </p>
 
-<p>
-<del>--------------------------------</del>--------<del>-----------------------</del>---------------------------------------------------------------------------------&#x2013;&#x2014;+<br>
-</p>
-<table>
-
-
-<colgroup>
-<col  class="org-left">
-
-<col  class="org-left">
-
-<col  class="org-left">
-
-<col  class="org-left">
-</colgroup>
-<tbody>
-<tr>
-<td class="org-left">Signal</td>
-<td class="org-left">Type</td>
-<td class="org-left">Source or destination</td>
-<td class="org-left">Description</td>
-</tr>
-</tbody>
+<!-- This HTML table template is generated by emacs 29.0.60 -->
+<table border="1">
+  <tr>
+    <td align="left" valign="top">
+      &nbsp;Signal&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    </td>
+    <td align="left" valign="top">
+      &nbsp;Type&nbsp;&nbsp;&nbsp;
+    </td>
+    <td align="left" valign="top">
+      &nbsp;Source&nbsp;or&nbsp;destination&nbsp;
+    </td>
+    <td align="left" valign="top">
+      &nbsp;Description&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    </td>
+  </tr>
+  <tr>
+    <td align="left" valign="top">
+      &nbsp;wake_request[<num_cpus&nbsp;−&nbsp;1:0>]&nbsp;<br />
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br />
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    </td>
+    <td align="left" valign="top">
+      &nbsp;Output&nbsp;<br />
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br />
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    </td>
+    <td align="left" valign="top">
+      &nbsp;Power&nbsp;controller&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br />
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br />
+      &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    </td>
+    <td align="left" valign="top">
+      &nbsp;Wake&nbsp;request&nbsp;signal&nbsp;to&nbsp;power&nbsp;controller&nbsp;indicating&nbsp;that&nbsp;an&nbsp;interrupt&nbsp;is&nbsp;targeting&nbsp;&nbsp;&nbsp;&nbsp;<br />
+      this&nbsp;core&nbsp;and&nbsp;it&nbsp;must&nbsp;be&nbsp;woken.&nbsp;When&nbsp;asserted,&nbsp;the&nbsp;wake_request&nbsp;is&nbsp;sticky&nbsp;unless&nbsp;the&nbsp;&nbsp;<br />
+      Distributor&nbsp;is&nbsp;put&nbsp;into&nbsp;the&nbsp;gated&nbsp;state.&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    </td>
+  </tr>
 </table>
-<p>
-<del>--------------------------------</del>--------<del>-----------------------</del>---------------------------------------------------------------------------------&#x2013;&#x2014;+<br>
-</p>
-<table>
-
-
-<colgroup>
-<col  class="org-left">
-
-<col  class="org-left">
-
-<col  class="org-left">
-
-<col  class="org-left">
-</colgroup>
-<tbody>
-<tr>
-<td class="org-left">wake_request[&lt;num_cpus − 1:0&gt;]</td>
-<td class="org-left">Output</td>
-<td class="org-left">Power controller</td>
-<td class="org-left">Wake request signal to power controller indicating that an interrupt is targeting</td>
-</tr>
-
-<tr>
-<td class="org-left">&#xa0;</td>
-<td class="org-left">&#xa0;</td>
-<td class="org-left">&#xa0;</td>
-<td class="org-left">this core and it must be woken. When asserted, the wake_request is sticky unless the</td>
-</tr>
-
-<tr>
-<td class="org-left">&#xa0;</td>
-<td class="org-left">&#xa0;</td>
-<td class="org-left">&#xa0;</td>
-<td class="org-left">Distributor is put into the gated state.</td>
-</tr>
-</tbody>
-</table>
-<p>
-<del>--------------------------------</del>--------<del>-----------------------</del>---------------------------------------------------------------------------------&#x2013;&#x2014;+<br>
-</p>
 </div>
 </div>
 
 
-<div id="outline-container-org4d9533d" class="outline-3">
-<h3 id="org4d9533d">GIC power down ？</h3>
-<div class="outline-text-3" id="text-org4d9533d">
+<div id="outline-container-org9ec32e8" class="outline-3">
+<h3 id="org9ec32e8">GIC power down ？</h3>
+<div class="outline-text-3" id="text-org9ec32e8">
 <p>
 GIC可以被关闭电源，也可以不关闭电源，这个在SOC设计阶段就可以选择。<br>
 对于Arm gic来言，一般具有两种情况<br>
 </p>
 <ol class="org-ol">
-<li>GIC处于always on的power domain之中，这样gic在休眠时由于没有断电，仍旧可以正常工作，任何的中断都可以正常唤醒soc <sup><a id="fnr.1" class="footref" href="#fn.1">1</a></sup>, 如图中的Wakeup Request的信号<br></li>
+<li>GIC处于always on的power domain之中，这样gic在休眠时由于没有断电，仍旧可以正常工作，任何的中断都可以正常唤醒soc <sup><a id="fnr.1" class="footref" href="#fn.1" role="doc-backlink">1</a></sup>, 如图中的Wakeup Request的信号<br></li>
 <li>GIC在可以断电的power domain中，这样在休眠时一般都会对gic进行断电，这种状况下，系统需要soc特定的实现来进行唤醒。<br>
 具体实现各家SOC都不相同，在此不做讨论，只需要知道这个唤醒功能和GIC没有关系，完全由SOC厂商在设计时实现。<br></li>
 </ol>
 </div>
 </div>
 
-<div id="outline-container-org04506eb" class="outline-3">
-<h3 id="org04506eb">CPU Power Down</h3>
-<div class="outline-text-3" id="text-org04506eb">
+<div id="outline-container-org8924152" class="outline-3">
+<h3 id="org8924152">CPU Power Down</h3>
+<div class="outline-text-3" id="text-org8924152">
 <p>
-下面是ARM Crotext A55 CPU的下电流程，CPU有寄存器CPUPWRCTLR来控制电源控制相关功能，当CPUPWRCTLR.CORE_PWRDN_EN置1时，就是代表CPU在下次执行WFI指令时要进入掉电状态。<sup><a id="fnr.2" class="footref" href="#fn.2">2</a></sup><br>
+下面是ARM Crotext A55 CPU的下电流程，CPU有寄存器CPUPWRCTLR来控制电源控制相关功能，当CPUPWRCTLR.CORE_PWRDN_EN置1时，就是代表CPU在下次执行WFI指令时要进入掉电状态。<sup><a id="fnr.2" class="footref" href="#fn.2" role="doc-backlink">2</a></sup><br>
 </p>
 <blockquote>
 <p>
@@ -293,20 +266,20 @@ After executing WFI and then receiving a powerdown request from the power contro
 </div>
 </div>
 
-<div id="outline-container-orgf776201" class="outline-3">
-<h3 id="orgf776201">CPU Power Up</h3>
-<div class="outline-text-3" id="text-orgf776201">
+<div id="outline-container-org2184afe" class="outline-3">
+<h3 id="org2184afe">CPU Power Up</h3>
+<div class="outline-text-3" id="text-org2184afe">
 <p>
 从上边Power Down的流程可知，系统在进入Power Down之后需要进行reset才可以将CPU重新启动，具体的过程也是SOC厂商自己定义的行为，没有太大分析的必要。<br>
 Reset之后，CPU需要从RVBAR寄存器所显示的地址来重新启动。RVBAR寄存器是通过CPU的外部信号线进行输入的。<br>
 </p>
 </div>
 
-<div id="outline-container-orgfd6ef2f" class="outline-4">
-<h4 id="orgfd6ef2f">RESET的执行地址</h4>
-<div class="outline-text-4" id="text-orgfd6ef2f">
+<div id="outline-container-org53db4aa" class="outline-4">
+<h4 id="org53db4aa">RESET的执行地址</h4>
+<div class="outline-text-4" id="text-org53db4aa">
 
-<div id="orgd14ec1e" class="figure">
+<div id="orgf99a890" class="figure">
 <p><img src="assets/2021-03-05_13-40-42_screenshot.png" alt="2021-03-05_13-40-42_screenshot.png"><br>
 </p>
 </div>
@@ -316,7 +289,7 @@ Reset之后，CPU需要从RVBAR寄存器所显示的地址来重新启动。RVBA
 </p>
 
 
-<div id="org831081c" class="figure">
+<div id="orgf3b5e55" class="figure">
 <p><img src="assets/2021-03-05_13-43-32_screenshot.png" alt="2021-03-05_13-43-32_screenshot.png"><br>
 </p>
 </div>
@@ -329,9 +302,9 @@ Reset之后，CPU需要从RVBAR寄存器所显示的地址来重新启动。RVBA
 </div>
 </div>
 
-<div id="outline-container-orga61bab5" class="outline-2">
-<h2 id="orga61bab5">Suspend In Linux</h2>
-<div class="outline-text-2" id="text-orga61bab5">
+<div id="outline-container-orge44092a" class="outline-2">
+<h2 id="orge44092a">Suspend In Linux</h2>
+<div class="outline-text-2" id="text-orge44092a">
 <p>
 下图是Linux系统中suspend以及resume的流程图，图中以PSCI为例，描写了系统在休眠时的调用流程。<br>
 </p>
@@ -343,31 +316,31 @@ Linux唤醒时，运行的Linux内核的第一段指令是cpu_resume，之后再
 </div>
 </div>
 
-<div id="outline-container-org0e34c76" class="outline-2">
-<h2 id="org0e34c76">Linux irq wakeup</h2>
-<div class="outline-text-2" id="text-org0e34c76">
+<div id="outline-container-org506fd02" class="outline-2">
+<h2 id="org506fd02">Linux irq wakeup</h2>
+<div class="outline-text-2" id="text-org506fd02">
 <p>
-在Linux系统中，如果想要唤醒已经进入休眠状态中的cpu，就需要通过~enable_irq_wake~来设置开启唤醒功能<sup><a id="fnr.3" class="footref" href="#fn.3">3</a></sup>。<br>
+在Linux系统中，如果想要唤醒已经进入休眠状态中的cpu，就需要通过~enable_irq_wake~来设置开启唤醒功能<sup><a id="fnr.3" class="footref" href="#fn.3" role="doc-backlink">3</a></sup>。<br>
 实际上，芯片支持的唤醒源个数是有限的，并不是每种中断都可以正常的唤醒系统。<br>
 </p>
 </div>
 
-<div id="outline-container-org88b2b75" class="outline-3">
-<h3 id="org88b2b75">irq flags</h3>
-<div class="outline-text-3" id="text-org88b2b75">
+<div id="outline-container-org07b1783" class="outline-3">
+<h3 id="org07b1783">irq flags</h3>
+<div class="outline-text-3" id="text-org07b1783">
 </div>
-<div id="outline-container-org5eb80d8" class="outline-4">
-<h4 id="org5eb80d8">IRQCHIP_MASK_ON_SUSPEND</h4>
-<div class="outline-text-4" id="text-org5eb80d8">
+<div id="outline-container-org9e87a13" class="outline-4">
+<h4 id="org9e87a13">IRQCHIP_MASK_ON_SUSPEND</h4>
+<div class="outline-text-4" id="text-org9e87a13">
 <p>
 Mask non wake irqs in the suspend path<br>
 </p>
 </div>
 </div>
 
-<div id="outline-container-org3c38727" class="outline-4">
-<h4 id="org3c38727">IRQCHIP_SKIP_SET_WAKE</h4>
-<div class="outline-text-4" id="text-org3c38727">
+<div id="outline-container-org4b58d52" class="outline-4">
+<h4 id="org4b58d52">IRQCHIP_SKIP_SET_WAKE</h4>
+<div class="outline-text-4" id="text-org4b58d52">
 <p>
 Skip chip.irq_set_wake(), for this irq chip<br>
 由以下patch引入，提交说明已经很明确<br>
@@ -399,11 +372,11 @@ Skip chip.irq_set_wake(), for this irq chip<br>
 </div>
 </div>
 
-<div id="outline-container-org7a22b59" class="outline-3">
-<h3 id="org7a22b59">arm-gic</h3>
-<div class="outline-text-3" id="text-org7a22b59">
+<div id="outline-container-orgd330b5c" class="outline-3">
+<h3 id="orgd330b5c">arm-gic</h3>
+<div class="outline-text-3" id="text-orgd330b5c">
 <p>
-在arm gic的实现中，既没有提供IRQCHIP_SKIP_SET_WAKE的flag，也没有实现set_irq_wake的实现。这是因为Linux内核认为gic不处理休眠唤醒的问题，这些应该由平台来基于stacked irqchip来实现。<sup><a id="fnr.4" class="footref" href="#fn.4">4</a></sup><br>
+在arm gic的实现中，既没有提供IRQCHIP_SKIP_SET_WAKE的flag，也没有实现set_irq_wake的实现。这是因为Linux内核认为gic不处理休眠唤醒的问题，这些应该由平台来基于stacked irqchip来实现。<sup><a id="fnr.4" class="footref" href="#fn.4" role="doc-backlink">4</a></sup><br>
 Marc Zyngier在内核的邮件有如下回复<br>
 </p>
 <blockquote>
@@ -464,9 +437,9 @@ M.<br>
 </div>
 </div>
 
-<div id="outline-container-orgabec106" class="outline-3">
-<h3 id="orgabec106">linux内核接口</h3>
-<div class="outline-text-3" id="text-orgabec106">
+<div id="outline-container-orgff2825d" class="outline-3">
+<h3 id="orgff2825d">linux内核接口</h3>
+<div class="outline-text-3" id="text-orgff2825d">
 <ul class="org-ul">
 <li>/sys/power/pm_wakeup_irq<br>
 可以查询到最近一次休眠的唤醒源<br></li>
@@ -474,73 +447,73 @@ M.<br>
 </div>
 </div>
 
-<div id="outline-container-orgf083711" class="outline-3">
-<h3 id="orgf083711">implement stacked irqchip</h3>
-<div class="outline-text-3" id="text-orgf083711">
+<div id="outline-container-orgbc47817" class="outline-3">
+<h3 id="orgbc47817">implement stacked irqchip</h3>
+<div class="outline-text-3" id="text-orgbc47817">
 </div>
-<div id="outline-container-orgb890355" class="outline-4">
-<h4 id="orgb890355">used function &amp; macors</h4>
-<div class="outline-text-4" id="text-orgb890355">
+<div id="outline-container-org846eb01" class="outline-4">
+<h4 id="org846eb01">used function &amp; macors</h4>
+<div class="outline-text-4" id="text-org846eb01">
 </div>
 <ul class="org-ul">
-<li><a id="org5e10039"></a>IRQCHIP_DECLARE<br>
-<div class="outline-text-5" id="text-org5e10039">
+<li><a id="org05b2253"></a>IRQCHIP_DECLARE<br>
+<div class="outline-text-5" id="text-org05b2253">
 <p>
 用来声明一个irqchip驱动，包含compatible属性，irqchip的名称，以及初始化函数<br>
 device tree<br>
 dts中配置了sysirq，其parent是gic，<br>
 </p>
 <div class="org-src-container">
-<pre class="src src-dts"><code><span class="org-variable-name">gic</span>: <span class="org-type">interrupt-controller</span>@58000000 {</code>
-<code>    <span class="org-variable-name">status</span> = <span class="org-string">"okay"</span>;</code>
-<code>    <span class="org-variable-name">compatible</span> = <span class="org-string">"arm,gic-v3"</span>;</code>
-<code>    #<span class="org-variable-name">interrupt-cells</span> = &lt;3&gt;;</code>
-<code>    #<span class="org-variable-name">address-cells</span> = &lt;2&gt;;</code>
-<code>    #<span class="org-variable-name">size-cells</span> = &lt;2&gt;;</code>
-<code>    <span class="org-variable-name">ranges</span>;</code>
-<code>    <span class="org-variable-name">interrupt-controller</span>;</code>
-<code>    <span class="org-variable-name">reg</span> =   &lt;0x0 0x58000000 0x0 0x10000&gt;,       <span class="org-comment">// GICD</span></code>
-<code>        &lt;0x0 0x58040000 0x0 0x100000&gt;;      <span class="org-comment">// GICR0~7</span></code>
-<code>    <span class="org-variable-name">interrupts</span> = &lt;1 9 4&gt;;</code>
+<pre class="src src-dts"><code>gic: interrupt-controller@58000000 {</code>
+<code>    status = "okay";</code>
+<code>    compatible = "arm,gic-v3";</code>
+<code>    #interrupt-cells = &lt;3&gt;;</code>
+<code>    #address-cells = &lt;2&gt;;</code>
+<code>    #size-cells = &lt;2&gt;;</code>
+<code>    ranges;</code>
+<code>    interrupt-controller;</code>
+<code>    reg =	&lt;0x0 0x58000000 0x0 0x10000&gt;,		// GICD</code>
+<code>        &lt;0x0 0x58040000 0x0 0x100000&gt;;		// GICR0~7</code>
+<code>    interrupts = &lt;1 9 4&gt;;</code>
 <code>};</code>
 <code></code>
-<code><span class="org-variable-name">sysirq</span>: sysirq@<span class="org-type">system</span> {</code>
-<code>    <span class="org-variable-name">compatible</span> = <span class="org-string">"xxx,XX-sysirq"</span>, <span class="org-string">"syscon"</span>;</code>
-<code>    #<span class="org-variable-name">interrupt-cells</span> = &lt;3&gt;;</code>
-<code>    <span class="org-variable-name">interrupt-parent</span> = &lt;&amp;<span class="org-variable-name">gic</span>&gt;;</code>
-<code>    <span class="org-variable-name">interrupt-controller</span>;</code>
-<code>    <span class="org-variable-name">ranges</span>;</code>
-<code>    <span class="org-variable-name">services</span> = &lt;&amp;<span class="org-variable-name">tee_regmap</span>&gt;;</code>
-<code>    <span class="org-variable-name">irq-map</span> = &lt;48 2 0&gt;, <span class="org-comment">// GPIO</span></code>
-<code>    &lt;29 4 1&gt;, <span class="org-comment">// AON RTC</span></code>
-<code>    &lt;31 6 0&gt;, <span class="org-comment">// aon timer1</span></code>
-<code>    &lt;30 8 0&gt;, <span class="org-comment">// aon time0</span></code>
-<code>    &lt;9 10 0&gt;, <span class="org-comment">// eth0</span></code>
-<code>    &lt;33 18 0&gt;, <span class="org-comment">// canfd0</span></code>
-<code>    &lt;36 14 0&gt;; <span class="org-comment">// canfd1</span></code>
-<code>    <span class="org-variable-name">reg</span> = &lt;0x0 0x43060000 0x0 0x634&gt;;</code>
+<code>sysirq: sysirq@system {</code>
+<code>    compatible = "xxx,XX-sysirq", "syscon";</code>
+<code>    #interrupt-cells = &lt;3&gt;;</code>
+<code>    interrupt-parent = &lt;&amp;gic&gt;;</code>
+<code>    interrupt-controller;</code>
+<code>    ranges;</code>
+<code>    services = &lt;&amp;tee_regmap&gt;;</code>
+<code>    irq-map = &lt;48 2 0&gt;, // GPIO</code>
+<code>    &lt;29 4 1&gt;, // AON RTC</code>
+<code>    &lt;31 6 0&gt;, // aon timer1</code>
+<code>    &lt;30 8 0&gt;, // aon time0</code>
+<code>    &lt;9 10 0&gt;, // eth0</code>
+<code>    &lt;33 18 0&gt;, // canfd0</code>
+<code>    &lt;36 14 0&gt;; // canfd1</code>
+<code>    reg = &lt;0x0 0x43060000 0x0 0x634&gt;;</code>
 <code>};</code>
 </pre>
 </div>
 </div>
 </li>
 
-<li><a id="orgec72382"></a>get map configuration from device tree node.<br>
-<div class="outline-text-5" id="text-orgec72382">
+<li><a id="org5e71ca1"></a>get map configuration from device tree node.<br>
+<div class="outline-text-5" id="text-org5e71ca1">
 <div class="org-src-container">
-<pre class="src src-dts"><code><span class="org-variable-name">irq-map</span> = &lt;irq-number enable-bit polar-bit&gt;;</code>
-<code>#<span class="org-variable-name">address-cells</span> = &lt;2&gt;;</code>
-<code>#<span class="org-variable-name">size-cells</span> = &lt;2&gt;;</code>
-<code><span class="org-variable-name">reg</span> = &lt;0x0 0x43840000 0x0 0x634&gt;;</code>
+<pre class="src src-dts"><code>irq-map = &lt;irq-number enable-bit polar-bit&gt;;</code>
+<code>#address-cells = &lt;2&gt;;</code>
+<code>#size-cells = &lt;2&gt;;</code>
+<code>reg = &lt;0x0 0x43840000 0x0 0x634&gt;;</code>
 </pre>
 </div>
 </div>
 </li>
 </ul>
 </div>
-<div id="outline-container-orgdbcf161" class="outline-4">
-<h4 id="orgdbcf161">irq domain</h4>
-<div class="outline-text-4" id="text-orgdbcf161">
+<div id="outline-container-orgbe92c01" class="outline-4">
+<h4 id="orgbe92c01">irq domain</h4>
+<div class="outline-text-4" id="text-orgbe92c01">
 <p>
 关于irq domain可以参考以下文档<br>
 <a href="https://lwn.net/Articles/487684/">https://lwn.net/Articles/487684/</a><br>
@@ -548,18 +521,18 @@ dts中配置了sysirq，其parent是gic，<br>
 </div>
 </div>
 
-<div id="outline-container-org6211cda" class="outline-4">
-<h4 id="org6211cda">irq initialization</h4>
-<div class="outline-text-4" id="text-org6211cda">
+<div id="outline-container-org518deae" class="outline-4">
+<h4 id="org518deae">irq initialization</h4>
+<div class="outline-text-4" id="text-org518deae">
 <div class="org-src-container">
 <pre class="src src-C"><code>(<span class="org-type">gdb</span>) bt</code>
 <code><span class="org-preprocessor">#0</span>  XX_irq_of_init (node=0xffffffc03efed568, parent=0x0 &lt;bl1_entrypoint&gt;) at ./include/linux/irqdomain.h:298</code>
-<code><span class="org-preprocessor">#1</span>  0xffffff8008856224 in of_irq_init (matches=&lt;optimized out&gt;) <span class="org-type">at</span> <span class="org-variable-name">drivers</span>/of/irq.c:546</code>
-<code><span class="org-preprocessor">#2</span>  0xffffff8008849240 in irqchip_init () <span class="org-type">at</span> <span class="org-variable-name">drivers</span>/irqchip/irqchip.c:29</code>
-<code><span class="org-preprocessor">#3</span>  0xffffff800883241c in init_IRQ () <span class="org-type">at</span> <span class="org-variable-name">arch</span>/arm64/kernel/irq.c:91</code>
-<code><span class="org-preprocessor">#4</span>  0xffffff80088309f8 in start_kernel () <span class="org-type">at</span> <span class="org-variable-name">init</span>/main.c:611</code>
+<code><span class="org-preprocessor">#1</span>  0xffffff8008856224 in of_irq_init (matches=&lt;optimized out&gt;) at drivers/of/irq.c:546</code>
+<code><span class="org-preprocessor">#2</span>  0xffffff8008849240 in irqchip_init () at drivers/irqchip/irqchip.c:29</code>
+<code><span class="org-preprocessor">#3</span>  0xffffff800883241c in init_IRQ () at arch/arm64/kernel/irq.c:91</code>
+<code><span class="org-preprocessor">#4</span>  0xffffff80088309f8 in start_kernel () at init/main.c:611</code>
 <code><span class="org-preprocessor">#5</span>  0x0000000000000000 in ?? ()</code>
-<code><span class="org-type">Backtrace</span> <span class="org-function-name">stopped</span>: previous frame identical to this frame (<span class="org-type">corrupt</span> <span class="org-variable-name">stack</span>?)</code>
+<code>Backtrace <span class="org-type">stopped</span>: previous frame identical to this frame (corrupt stack?)</code>
 </pre>
 </div>
 <p>
@@ -589,9 +562,9 @@ dts中配置了sysirq，其parent是gic，<br>
 </ol>
 </div>
 </div>
-<div id="outline-container-org39be6d7" class="outline-4">
-<h4 id="org39be6d7">irq domain ops</h4>
-<div class="outline-text-4" id="text-org39be6d7">
+<div id="outline-container-org3437768" class="outline-4">
+<h4 id="org3437768">irq domain ops</h4>
+<div class="outline-text-4" id="text-org3437768">
 <div class="org-src-container">
 <pre class="src src-C"><code><span class="org-keyword">static</span> <span class="org-type">int</span> <span class="org-function-name">XX_irq_domain_translate</span>(<span class="org-keyword">struct</span> <span class="org-type">irq_domain</span> *<span class="org-variable-name">d</span>,</code>
 <code>                                <span class="org-keyword">struct</span> <span class="org-type">irq_fwspec</span> *<span class="org-variable-name">fwspec</span>,</code>
@@ -629,9 +602,9 @@ dts中配置了sysirq，其parent是gic，<br>
 </div>
 </div>
 
-<div id="outline-container-orga0a8f6f" class="outline-2">
-<h2 id="orga0a8f6f">ATF软件</h2>
-<div class="outline-text-2" id="text-orga0a8f6f">
+<div id="outline-container-org626112b" class="outline-2">
+<h2 id="org626112b">ATF软件</h2>
+<div class="outline-text-2" id="text-org626112b">
 <p>
 arm atf中实现了psci协议，当系统休眠时，可以通过psci来进入休眠。psci方法：PSCI_CPU_SUSPEND_AARCH64，PSCI_CPU_SUSPEND_AARCH32<br>
 suspend的方法原型为：<br>
@@ -643,9 +616,9 @@ suspend的方法原型为：<br>
 </pre>
 </div>
 </div>
-<div id="outline-container-org570b3cf" class="outline-3">
-<h3 id="org570b3cf">参数：</h3>
-<div class="outline-text-3" id="text-org570b3cf">
+<div id="outline-container-org8a2844d" class="outline-3">
+<h3 id="org8a2844d">参数：</h3>
+<div class="outline-text-3" id="text-org8a2844d">
 <dl class="org-dl">
 <dt>power_state</dt><dd>power_state参数比较复杂，power_state定义了系统要处于的低功耗模式，根据系统的实现，有两种格式可供选择。<br></dd>
 <dt>entrypoint</dt><dd><p>
@@ -676,7 +649,7 @@ context_id都时psci代码来处理，SOC平台无需关心此部份代码。为
 </p>
 
 
-<div id="orgf27a438" class="figure">
+<div id="org2621fc3" class="figure">
 <p><img src="assets/atf-suspend-resume.png" alt="atf-suspend-resume.png"><br>
 </p>
 </div>
@@ -684,9 +657,9 @@ context_id都时psci代码来处理，SOC平台无需关心此部份代码。为
 </div>
 </div>
 
-<div id="outline-container-orgb0a401b" class="outline-2">
-<h2 id="orgb0a401b">refs</h2>
-<div class="outline-text-2" id="text-orgb0a401b">
+<div id="outline-container-orge69eed8" class="outline-2">
+<h2 id="orge69eed8">refs</h2>
+<div class="outline-text-2" id="text-orge69eed8">
 <p>
 <a href="https://patchwork.kernel.org/patch/9343061/">https://patchwork.kernel.org/patch/9343061/</a><br>
 <a href="https://patchwork.kernel.org/patch/6799191/">https://patchwork.kernel.org/patch/6799191/</a><br>
@@ -697,19 +670,19 @@ context_id都时psci代码来处理，SOC平台无需关心此部份代码。为
 <h2 class="footnotes">Footnotes: </h2>
 <div id="text-footnotes">
 
-<div class="footdef"><sup><a id="fn.1" class="footnum" href="#fnr.1">1</a></sup> <div class="footpara"><p class="footpara">
+<div class="footdef"><sup><a id="fn.1" class="footnum" href="#fnr.1" role="doc-backlink">1</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">
 虽然gic可以工作来输出唤醒信号，但是输出的唤醒信号仍需gic之外的控制器来处理<br>
 </p></div></div>
 
-<div class="footdef"><sup><a id="fn.2" class="footnum" href="#fnr.2">2</a></sup> <div class="footpara"><p class="footpara">
+<div class="footdef"><sup><a id="fn.2" class="footnum" href="#fnr.2" role="doc-backlink">2</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">
 CPU power down还需要SOC内部power controller的支持，具体SOC也有较大区别，在此不做关系<br>
 </p></div></div>
 
-<div class="footdef"><sup><a id="fn.3" class="footnum" href="#fnr.3">3</a></sup> <div class="footpara"><p class="footpara">
+<div class="footdef"><sup><a id="fn.3" class="footnum" href="#fnr.3" role="doc-backlink">3</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">
 视SOC的实现不同，enable_irq_wake也不是必须调用。<br>
 </p></div></div>
 
-<div class="footdef"><sup><a id="fn.4" class="footnum" href="#fnr.4">4</a></sup> <div class="footpara"><p class="footpara">
+<div class="footdef"><sup><a id="fn.4" class="footnum" href="#fnr.4" role="doc-backlink">4</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">
 <a href="https://www.mail-archive.com/linux-kernel@vger.kernel.org/msg1598347.html">https://www.mail-archive.com/linux-kernel@vger.kernel.org/msg1598347.html</a><br>
 </p></div></div>
 

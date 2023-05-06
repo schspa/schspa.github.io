@@ -1,14 +1,13 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2022-11-11 Fri 17:04 -->
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- 2023-05-06 Sat 10:09 -->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Linux scheduled features</title>
-<meta name="generator" content="Org mode">
-<meta name="author" content="Schspa">
-<meta name="description" content="Linux scheduled features"
->
+<meta name="author" content="Schspa" />
+<meta name="description" content="Linux scheduled features" />
+<meta name="generator" content="Org Mode" />
 <link rel="shortcut icon" href="/images/rose-red.png" type="image/x-icon" />
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" integrity="sha256-sAcc18zvMnaJZrNT4v8J0T4HqzEUiUTlVFgDIywjQek=" crossorigin="anonymous">
 <link rel="stylesheet" href="/css/animate.min.css" />
@@ -56,32 +55,32 @@
   </nav>
 </header>
 </div>
-<div id="content">
+<div id="content" class="content">
 <h1 class="title">Linux scheduled features</h1>
-<div id="table-of-contents">
+<div id="table-of-contents" role="doc-toc">
 <h2>Table of Contents</h2>
-<div id="text-table-of-contents">
+<div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#orgd9254e0">查看系统中开启的调度特性</a></li>
-<li><a href="#org361a1a6">RT_RUNTIME_SHARE</a></li>
-<li><a href="#org5a31d6a">TTWU_QUEUE</a></li>
-<li><a href="#org354e3ca">GENTLE_FAIR_SLEEPERS</a></li>
+<li><a href="#org57fedc1">查看系统中开启的调度特性</a></li>
+<li><a href="#org6dd8f57">RT_RUNTIME_SHARE</a></li>
+<li><a href="#orgfeb787e">TTWU_QUEUE</a></li>
+<li><a href="#org7c18167">GENTLE_FAIR_SLEEPERS</a></li>
 </ul>
 </div>
 </div>
 
-<div id="outline-container-orgd9254e0" class="outline-2">
-<h2 id="orgd9254e0">查看系统中开启的调度特性</h2>
-<div class="outline-text-2" id="text-orgd9254e0">
+<div id="outline-container-org57fedc1" class="outline-2">
+<h2 id="org57fedc1">查看系统中开启的调度特性</h2>
+<div class="outline-text-2" id="text-org57fedc1">
 <p>
 cat /sys/kernel/debug/sched_features<br>
 </p>
 </div>
 </div>
 
-<div id="outline-container-org361a1a6" class="outline-2">
-<h2 id="org361a1a6">RT_RUNTIME_SHARE</h2>
-<div class="outline-text-2" id="text-org361a1a6">
+<div id="outline-container-org6dd8f57" class="outline-2">
+<h2 id="org6dd8f57">RT_RUNTIME_SHARE</h2>
+<div class="outline-text-2" id="text-org6dd8f57">
 <p>
 定义：<a target="_blank" href="https://github.com/torvalds/linux/blob/b133f076639b918bb6ad157f6308b0f595058959/kernel/sched/features.h#L80">kernel source for RT_RUNTIME_SHARE</a><br>
 <a target="_blank" href="https://github.com/torvalds/linux/blob/b133f076639b918bb6ad157f6308b0f595058959/kernel/sched/rt.c#L839">kernel source for balance_runtime</a><br>
@@ -92,9 +91,9 @@ cat /sys/kernel/debug/sched_features<br>
 </div>
 </div>
 
-<div id="outline-container-org5a31d6a" class="outline-2">
-<h2 id="org5a31d6a">TTWU_QUEUE</h2>
-<div class="outline-text-2" id="text-org5a31d6a">
+<div id="outline-container-orgfeb787e" class="outline-2">
+<h2 id="orgfeb787e">TTWU_QUEUE</h2>
+<div class="outline-text-2" id="text-orgfeb787e">
 <p>
 <a target="_blank" href="https://github.com/torvalds/linux/blob/b133f076639b918bb6ad157f6308b0f595058959/kernel/sched/features.h#L53">kernel source TTWU_QUEUE</a><br>
 当开启这个特性时，系统将通过ipi中断的方式来将进程加入到等待队列，由此避免去加rq锁<br>
@@ -108,9 +107,9 @@ cat /sys/kernel/debug/sched_features<br>
 </div>
 </div>
 
-<div id="outline-container-org354e3ca" class="outline-2">
-<h2 id="org354e3ca">GENTLE_FAIR_SLEEPERS</h2>
-<div class="outline-text-2" id="text-org354e3ca">
+<div id="outline-container-org7c18167" class="outline-2">
+<h2 id="org7c18167">GENTLE_FAIR_SLEEPERS</h2>
+<div class="outline-text-2" id="text-org7c18167">
 <p>
 <a target="_blank" href="https://github.com/torvalds/linux/blob/b133f076639b918bb6ad157f6308b0f595058959/kernel/sched/features.h#L7">kernel source for GENTLE_FAIR_SLEEPERS</a><br>
 </p>

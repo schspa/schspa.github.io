@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2022-03-03 Thu 11:48 -->
+<!-- 2023-05-06 Sat 10:09 -->
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>ARM64 Page type</title>
@@ -62,48 +62,48 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#org5574f37">查看内存属性</a></li>
-<li><a href="#orga75da86">两种pagetype</a>
+<li><a href="#orgb6160ce">查看内存属性</a></li>
+<li><a href="#org589cf1c">两种pagetype</a>
 <ul>
-<li><a href="#orgc449c56">指定内存类型</a></li>
-<li><a href="#org9e0fab0">Normal Memory</a></li>
-<li><a href="#org4b45c3a">Device Memory</a></li>
-<li><a href="#org54576f0">Strongly Ordered Memory :: ARMv7 platform, merge into Device Memory</a></li>
+<li><a href="#org17f0236">指定内存类型</a></li>
+<li><a href="#org1a70127">Normal Memory</a></li>
+<li><a href="#org30c5246">Device Memory</a></li>
+<li><a href="#org6cfd5d9">Strongly Ordered Memory :: ARMv7 platform, merge into Device Memory</a></li>
 </ul>
 </li>
-<li><a href="#orgaa3fb81">MMU table</a>
+<li><a href="#orgc6f16d8">MMU table</a>
 <ul>
-<li><a href="#orgeb7c5a0">Input Address size limit.</a></li>
-<li><a href="#org3620f1d">Translate table</a></li>
-<li><a href="#org6fbc205">example</a></li>
+<li><a href="#org22ca111">Input Address size limit.</a></li>
+<li><a href="#orga266f0c">Translate table</a></li>
+<li><a href="#orgb82cf4f">example</a></li>
 </ul>
 </li>
 </ul>
 </div>
 </div>
 
-<div id="outline-container-org5574f37" class="outline-2">
-<h2 id="org5574f37">查看内存属性</h2>
-<div class="outline-text-2" id="text-org5574f37">
+<div id="outline-container-orgb6160ce" class="outline-2">
+<h2 id="orgb6160ce">查看内存属性</h2>
+<div class="outline-text-2" id="text-orgb6160ce">
 
-<div id="org70b861f" class="figure">
+<div id="org3ced229" class="figure">
 <p><img src="assets/find-aarch64-memory-attr.png" alt="find-aarch64-memory-attr.png"><br>
 </p>
 </div>
 </div>
 </div>
 
-<div id="outline-container-orga75da86" class="outline-2">
-<h2 id="orga75da86">两种pagetype</h2>
-<div class="outline-text-2" id="text-orga75da86">
+<div id="outline-container-org589cf1c" class="outline-2">
+<h2 id="org589cf1c">两种pagetype</h2>
+<div class="outline-text-2" id="text-org589cf1c">
 <p>
 在ARM64中，共分两种内存类型<sup><a id="fnr.1" class="footref" href="#fn.1" role="doc-backlink">1</a></sup><br>
 </p>
 </div>
 
-<div id="outline-container-orgc449c56" class="outline-3">
-<h3 id="orgc449c56">指定内存类型</h3>
-<div class="outline-text-3" id="text-orgc449c56">
+<div id="outline-container-org17f0236" class="outline-3">
+<h3 id="org17f0236">指定内存类型</h3>
+<div class="outline-text-3" id="text-org17f0236">
 <p>
 How does system distinguish memory types?<br>
 table entry[4:2] -&gt; MAIR(Memory Attribute Indirection Register) -&gt; Attr&lt;n&gt;[7:4] -&gt; Device Memory or Normal Memory<br>
@@ -111,39 +111,39 @@ table entry[4:2] -&gt; MAIR(Memory Attribute Indirection Register) -&gt; Attr&lt
 </p>
 
 <div class="org-src-container">
-<pre class="src src-C"><code><span style="color: #5B6268;">/*</span></code>
-<code><span style="color: #5B6268;"> * Memory types available.</span></code>
-<code><span style="color: #5B6268;"> */</span></code>
-<code><span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #dcaeea;">MT_DEVICE_nGnRnE</span>        0</code>
-<code><span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #dcaeea;">MT_DEVICE_nGnRE</span>         1</code>
-<code><span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #dcaeea;">MT_DEVICE_GRE</span>           2</code>
-<code><span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #dcaeea;">MT_NORMAL_NC</span>            3</code>
-<code><span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #dcaeea;">MT_NORMAL</span>               4</code>
-<code><span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #dcaeea;">MT_NORMAL_WT</span>            5</code>
+<pre class="src src-C"><code><span class="org-comment-delimiter">/*</span></code>
+<code><span class="org-comment"> * Memory types available.</span></code>
+<code><span class="org-comment-delimiter"> */</span></code>
+<code><span class="org-preprocessor">#define</span> <span class="org-variable-name">MT_DEVICE_nGnRnE</span>        0</code>
+<code><span class="org-preprocessor">#define</span> <span class="org-variable-name">MT_DEVICE_nGnRE</span>         1</code>
+<code><span class="org-preprocessor">#define</span> <span class="org-variable-name">MT_DEVICE_GRE</span>           2</code>
+<code><span class="org-preprocessor">#define</span> <span class="org-variable-name">MT_NORMAL_NC</span>            3</code>
+<code><span class="org-preprocessor">#define</span> <span class="org-variable-name">MT_NORMAL</span>               4</code>
+<code><span class="org-preprocessor">#define</span> <span class="org-variable-name">MT_NORMAL_WT</span>            5</code>
 <code></code>
 </pre>
 </div>
 <div class="org-src-container">
-<pre class="src src-asm"><code><span style="color: #5B6268;">/*</span></code>
-<code><span style="color: #5B6268;"> * Memory region attributes for LPAE:</span></code>
-<code><span style="color: #5B6268;"> *</span></code>
-<code><span style="color: #5B6268;"> *   n = AttrIndx[2:0]</span></code>
-<code><span style="color: #5B6268;"> *          n   MAIR</span></code>
-<code><span style="color: #5B6268;"> *   DEVICE_nGnRnE  000 00000000</span></code>
-<code><span style="color: #5B6268;"> *   DEVICE_nGnRE   001 00000100</span></code>
-<code><span style="color: #5B6268;"> *   DEVICE_GRE     010 00001100</span></code>
+<pre class="src src-asm"><code><span class="org-comment-delimiter">/*</span></code>
+<code><span class="org-comment"> * Memory region attributes for LPAE:</span></code>
+<code><span class="org-comment"> *</span></code>
+<code><span class="org-comment"> *   n = AttrIndx[2:0]</span></code>
+<code><span class="org-comment"> *          n   MAIR</span></code>
+<code><span class="org-comment"> *   DEVICE_nGnRnE  000 00000000</span></code>
+<code><span class="org-comment"> *   DEVICE_nGnRE   001 00000100</span></code>
+<code><span class="org-comment"> *   DEVICE_GRE     010 00001100</span></code>
 <code></code>
-<code><span style="color: #5B6268;"> *   NORMAL_NC      011 01000100</span></code>
-<code><span style="color: #5B6268;"> *   NORMAL         100 11111111</span></code>
-<code><span style="color: #5B6268;"> *   NORMAL_WT      101 10111011</span></code>
-<code><span style="color: #5B6268;"> */</span></code>
-<code><span style="color: #c678dd;">ldr</span> <span style="color: #51afef;">x5</span>, =MAIR(0x00, MT_DEVICE_nGnRnE) | \</code>
-<code>         <span style="color: #51afef;">MAIR</span>(0x04, MT_DEVICE_nGnRE) | \</code>
-<code>         <span style="color: #51afef;">MAIR</span>(0x0c, MT_DEVICE_GRE) | \</code>
-<code>         <span style="color: #51afef;">MAIR</span>(0x44, MT_NORMAL_NC) | \</code>
-<code>         <span style="color: #51afef;">MAIR</span>(0xff, MT_NORMAL) | \</code>
-<code>         <span style="color: #51afef;">MAIR</span>(0xbb, MT_NORMAL_WT)</code>
-<code><span style="color: #c678dd;">msr</span> <span style="color: #51afef;">mair</span>_el1, x5</code>
+<code><span class="org-comment"> *   NORMAL_NC      011 01000100</span></code>
+<code><span class="org-comment"> *   NORMAL         100 11111111</span></code>
+<code><span class="org-comment"> *   NORMAL_WT      101 10111011</span></code>
+<code><span class="org-comment-delimiter"> */</span></code>
+<code><span class="org-function-name">ldr</span> <span class="org-keyword">x5</span>, =MAIR(0x00, MT_DEVICE_nGnRnE) | \</code>
+<code>         <span class="org-keyword">MAIR</span>(0x04, MT_DEVICE_nGnRE) | \</code>
+<code>         <span class="org-keyword">MAIR</span>(0x0c, MT_DEVICE_GRE) | \</code>
+<code>         <span class="org-keyword">MAIR</span>(0x44, MT_NORMAL_NC) | \</code>
+<code>         <span class="org-keyword">MAIR</span>(0xff, MT_NORMAL) | \</code>
+<code>         <span class="org-keyword">MAIR</span>(0xbb, MT_NORMAL_WT)</code>
+<code><span class="org-function-name">msr</span> <span class="org-keyword">mair</span>_el1, x5</code>
 </pre>
 </div>
 
@@ -253,29 +253,29 @@ table entry[4:2] -&gt; MAIR(Memory Attribute Indirection Register) -&gt; Attr&lt
 </div>
 </div>
 
-<div id="outline-container-org9e0fab0" class="outline-3">
-<h3 id="org9e0fab0">Normal Memory</h3>
-<div class="outline-text-3" id="text-org9e0fab0">
+<div id="outline-container-org1a70127" class="outline-3">
+<h3 id="org1a70127">Normal Memory</h3>
+<div class="outline-text-3" id="text-org1a70127">
 </div>
 <ul class="org-ul">
-<li><a id="org9ce75b0"></a>MT_NORMAL_NC<br>
-<div class="outline-text-4" id="text-org9ce75b0">
+<li><a id="orgd37b619"></a>MT_NORMAL_NC<br>
+<div class="outline-text-4" id="text-orgd37b619">
 <p>
 Attr&lt;n&gt; = 0x44, Normal memory, Outer Non-cacheable, Inner Non-cacheabe<br>
 就是普通的不带cache访问的类型<br>
 </p>
 </div>
 </li>
-<li><a id="orge8b7c8b"></a>MT_NORMAL<br>
-<div class="outline-text-4" id="text-orge8b7c8b">
+<li><a id="orge04220e"></a>MT_NORMAL<br>
+<div class="outline-text-4" id="text-orge04220e">
 <p>
 Attr&lt;n&gt; = 0xff, Normal memory, Outer Write-Back Non-transient, Outer Read-Allocate, Outer Write-Allocate, Inner Write-Back, Inner Read-Allocate, Inner-Write-Allocate<br>
 这个就是带cache的普通内存，速度最快, 读写都是先经过cache。<br>
 </p>
 </div>
 </li>
-<li><a id="orga8881d9"></a>MT_NORMAL_WT<br>
-<div class="outline-text-4" id="text-orga8881d9">
+<li><a id="org380bb01"></a>MT_NORMAL_WT<br>
+<div class="outline-text-4" id="text-org380bb01">
 <p>
 Attr&lt;n&gt; = 0xbb, Normal memory, Outer Write-Through Non-transient, Outer Read-Allocate, Outer Write-Allocate, Inner Write-Through, Inner Read-Allocate, Inner-Write-Allocate<br>
 这个也是带cache的设置，读取时会经过cache，写入时则不经过cache<br>
@@ -285,13 +285,13 @@ Attr&lt;n&gt; = 0xbb, Normal memory, Outer Write-Through Non-transient, Outer Re
 </ul>
 </div>
 
-<div id="outline-container-org4b45c3a" class="outline-3">
-<h3 id="org4b45c3a">Device Memory</h3>
-<div class="outline-text-3" id="text-org4b45c3a">
+<div id="outline-container-org30c5246" class="outline-3">
+<h3 id="org30c5246">Device Memory</h3>
+<div class="outline-text-3" id="text-org30c5246">
 </div>
 <ul class="org-ul">
-<li><a id="org2cf8342"></a>GRE<br>
-<div class="outline-text-4" id="text-org2cf8342">
+<li><a id="org303144d"></a>GRE<br>
+<div class="outline-text-4" id="text-org303144d">
 <p>
 ref to <a href="https://developer.arm.com/documentation/den0024/a/Memory-Ordering/Memory-types/Device-memory?lang=en">ARM Cortex-A Series Programmer's Guide for ARMv8-A#Device memory</a><br>
 </p>
@@ -313,33 +313,33 @@ ref to <a href="https://developer.arm.com/documentation/den0024/a/Memory-Orderin
 </li>
 </ul>
 </div>
-<div id="outline-container-org54576f0" class="outline-3">
-<h3 id="org54576f0">Strongly Ordered Memory :: ARMv7 platform, merge into Device Memory</h3>
+<div id="outline-container-org6cfd5d9" class="outline-3">
+<h3 id="org6cfd5d9">Strongly Ordered Memory :: ARMv7 platform, merge into Device Memory</h3>
 </div>
 </div>
 
-<div id="outline-container-orgaa3fb81" class="outline-2">
-<h2 id="orgaa3fb81">MMU table</h2>
-<div class="outline-text-2" id="text-orgaa3fb81">
+<div id="outline-container-orgc6f16d8" class="outline-2">
+<h2 id="orgc6f16d8">MMU table</h2>
+<div class="outline-text-2" id="text-orgc6f16d8">
 </div>
-<div id="outline-container-orgeb7c5a0" class="outline-3">
-<h3 id="orgeb7c5a0">Input Address size limit.</h3>
-<div class="outline-text-3" id="text-orgeb7c5a0">
+<div id="outline-container-org22ca111" class="outline-3">
+<h3 id="org22ca111">Input Address size limit.</h3>
+<div class="outline-text-3" id="text-org22ca111">
 <p>
 通过TCR_ELx.T0SZ 可以控制系统进行映射的地址范围，计算方法 size = 2 ^(64 - TCR_ELx.T0SZ).<br>
 默认值为0，启用最大支持的地址范围，一般不需要进行修改，当需要限制地址范围时可以使用这个寄存器来控制.<br>
 </p>
 
-<div id="orgdfb2aa4" class="figure">
+<div id="org4e95efe" class="figure">
 <p><img src="assets/2021-11-04_18-44-51_screenshot.png" alt="2021-11-04_18-44-51_screenshot.png"><br>
 </p>
 </div>
 </div>
 </div>
 
-<div id="outline-container-org3620f1d" class="outline-3">
-<h3 id="org3620f1d">Translate table</h3>
-<div class="outline-text-3" id="text-org3620f1d">
+<div id="outline-container-orga266f0c" class="outline-3">
+<h3 id="orga266f0c">Translate table</h3>
+<div class="outline-text-3" id="text-orga266f0c">
 <p>
 VMSAv8-64 translation table format descriptors<br>
 <img src="assets/11_Translation_table_format.png" alt="11_Translation_table_format.png"><br>
@@ -347,33 +347,33 @@ VMSAv8-64 translation table format descriptors<br>
 </div>
 
 <ul class="org-ul">
-<li><a id="org49983e3"></a>An invalid or fault entry.<br>
-<div class="outline-text-4" id="text-org49983e3">
+<li><a id="org8637ba3"></a>An invalid or fault entry.<br>
+<div class="outline-text-4" id="text-org8637ba3">
 <p>
 最低位为0表示无效的表项，当访问该地址时，系统将会产生同步的data abort.<br>
 </p>
 </div>
 </li>
-<li><a id="org8d792b8"></a>A table entry, that points to the next-level translation table.<br>
-<div class="outline-text-4" id="text-org8d792b8">
+<li><a id="org463abe1"></a>A table entry, that points to the next-level translation table.<br>
+<div class="outline-text-4" id="text-org463abe1">
 <p>
 table entry表示还有下一级的映射表需要去查询，就只是一个简单的下级地址记录，功能比较简单.<br>
 </p>
 
-<div id="orgbc57ab3" class="figure">
+<div id="org4e62843" class="figure">
 <p><img src="assets/2021-11-04_18-48-42_screenshot.png" alt="2021-11-04_18-48-42_screenshot.png"><br>
 </p>
 </div>
 </div>
 </li>
 
-<li><a id="org30645f5"></a>A block entry, that defines the memory properties for the access.<br>
-<div class="outline-text-4" id="text-org30645f5">
+<li><a id="orgee9b08b"></a>A block entry, that defines the memory properties for the access.<br>
+<div class="outline-text-4" id="text-orgee9b08b">
 <p>
 block entry表示一个具体的映射项，当系统记录了最终映射到的地址，以及一些属性的配制，mmu设置的内存属性全部都可以从这里查到.<br>
 </p>
 
-<div id="org3f5fc1a" class="figure">
+<div id="org9aba101" class="figure">
 <p><img src="assets/2021-11-04_16-25-15_screenshot.png" alt="2021-11-04_16-25-15_screenshot.png"><br>
 </p>
 </div>
@@ -382,16 +382,16 @@ block entry表示一个具体的映射项，当系统记录了最终映射到的
 </ul>
 </div>
 
-<div id="outline-container-org6fbc205" class="outline-3">
-<h3 id="org6fbc205">example</h3>
-<div class="outline-text-3" id="text-org6fbc205">
+<div id="outline-container-orgb82cf4f" class="outline-3">
+<h3 id="orgb82cf4f">example</h3>
+<div class="outline-text-3" id="text-orgb82cf4f">
 <p>
 下面是一个具体的映射表的例子，颗粒度：4KB<br>
 </p>
 </div>
 <ul class="org-ul">
-<li><a id="org6f5cd4f"></a>相关寄存器值以及映射表内容<br>
-<div class="outline-text-4" id="text-org6f5cd4f">
+<li><a id="org69a976d"></a>相关寄存器值以及映射表内容<br>
+<div class="outline-text-4" id="text-org69a976d">
 <div class="org-src-container">
 <pre class="src src-bash"><code>i r TCR_EL2</code>
 <code>TCR_EL2     0x0007FFF78081351C</code>
@@ -440,8 +440,8 @@ block entry表示一个具体的映射项，当系统记录了最终映射到的
 </div>
 </div>
 </li>
-<li><a id="orgd62de4d"></a>TCR_EL2<br>
-<div class="outline-text-4" id="text-orgd62de4d">
+<li><a id="org27a1836"></a>TCR_EL2<br>
+<div class="outline-text-4" id="text-org27a1836">
 <p>
 从这个寄存器中，我们可以得到如下信息：<br>
 </p>
@@ -480,14 +480,14 @@ block entry表示一个具体的映射项，当系统记录了最终映射到的
 对于4KB的颗粒度, 每一级的地址范围如下图<br>
 </p>
 
-<div id="org939bede" class="figure">
+<div id="org68422b4" class="figure">
 <p><img src="assets/2021-11-04_15-45-13_screenshot.png" alt="2021-11-04_15-45-13_screenshot.png"><br>
 </p>
 </div>
 </div>
 </li>
-<li><a id="orgef6687b"></a>mmu 表项解释<br>
-<div class="outline-text-4" id="text-orgef6687b">
+<li><a id="org477a0c4"></a>mmu 表项解释<br>
+<div class="outline-text-4" id="text-org477a0c4">
 <p>
 在上面这个例子中，mmu table位于 0xffff0000 的位置，每个表项有64bit长度, 使用4KB的颗粒度.<br>
 </p>

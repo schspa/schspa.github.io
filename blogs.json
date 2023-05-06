@@ -425,6 +425,18 @@
     ]
   },
   {
+    "file-path": "~/org/build/makefile.org",
+    "URL": "/2021/01/10/makefile.html",
+    "TITLE": "Makefile",
+    "DATE": "<2021-01-10 14:31:16>",
+    "FILETAGS": [
+      "blogs"
+    ],
+    "CATEGORY": [
+      "Compiler"
+    ]
+  },
+  {
     "file-path": "~/org/arm/scmi.org",
     "URL": "/2022/01/18/scmi.html",
     "TITLE": "Arm Scmi Archicture",

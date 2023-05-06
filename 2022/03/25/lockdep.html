@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2022-04-11 Mon 10:16 -->
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- 2023-05-06 Sat 10:09 -->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Linux lockdep</title>
-<meta name="generator" content="Org mode">
-<meta name="author" content="Schspa Shi">
+<meta name="author" content="Schspa Shi" />
+<meta name="generator" content="Org Mode" />
 <link rel="shortcut icon" href="/images/rose-red.png" type="image/x-icon" />
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" integrity="sha256-sAcc18zvMnaJZrNT4v8J0T4HqzEUiUTlVFgDIywjQek=" crossorigin="anonymous">
 <link rel="stylesheet" href="/css/animate.min.css" />
@@ -54,59 +54,59 @@
   </nav>
 </header>
 </div>
-<div id="content">
+<div id="content" class="content">
 <h1 class="title">Linux lockdep</h1>
-<div id="table-of-contents">
+<div id="table-of-contents" role="doc-toc">
 <h2>Table of Contents</h2>
-<div id="text-table-of-contents">
+<div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#org8d15447">简介</a></li>
-<li><a href="#orge1d4919">可以检测到的问题</a>
+<li><a href="#org43cce1b">简介</a></li>
+<li><a href="#org8e9439e">可以检测到的问题</a>
 <ul>
-<li><a href="#orgc2a49fd">BUG: Invalid wait context</a></li>
-<li><a href="#org55fc0ef">WARNING: bad contention detected!</a></li>
-<li><a href="#orgaec6b01">WARNING: possible circular locking dependency detected</a></li>
-<li><a href="#orge9d794b">WARNING: possible recursive locking detected</a></li>
-<li><a href="#org02b267c">WARNING: bad unlock balance detected</a></li>
-<li><a href="#org52876c3">WARNING: suspicious RCU usage</a></li>
-<li><a href="#orgd085428">WARNING: lock held when returning to user space!</a></li>
-<li><a href="#org0032dba">WARNING: %s/%d still has locks held!</a></li>
-<li><a href="#orgadff51a">WARNING: held lock freed!</a></li>
-<li><a href="#org1892ad4">WARNING: Nested lock was not taken</a></li>
-<li><a href="#orgda8ecb0">WARNING: possible irq lock inversion dependency detected</a></li>
-<li><a href="#org4f7072b">WARNING: inconsistent lock state</a></li>
-<li><a href="#org00fc601">WARNING: chain_key collision</a></li>
-<li><a href="#org225f38d">WARNING: %s-safe -&gt; %s-unsafe lock order detected</a></li>
+<li><a href="#orge8ab453">BUG: Invalid wait context</a></li>
+<li><a href="#orge4f6c34">WARNING: bad contention detected!</a></li>
+<li><a href="#org7060705">WARNING: possible circular locking dependency detected</a></li>
+<li><a href="#org3e69467">WARNING: possible recursive locking detected</a></li>
+<li><a href="#org375d151">WARNING: bad unlock balance detected</a></li>
+<li><a href="#org94808de">WARNING: suspicious RCU usage</a></li>
+<li><a href="#org92f834e">WARNING: lock held when returning to user space!</a></li>
+<li><a href="#org71888dc">WARNING: %s/%d still has locks held!</a></li>
+<li><a href="#org9c62ccd">WARNING: held lock freed!</a></li>
+<li><a href="#org40afd9c">WARNING: Nested lock was not taken</a></li>
+<li><a href="#orgab114aa">WARNING: possible irq lock inversion dependency detected</a></li>
+<li><a href="#org0510966">WARNING: inconsistent lock state</a></li>
+<li><a href="#org71bf41c">WARNING: chain_key collision</a></li>
+<li><a href="#org23b9d99">WARNING: %s-safe -&gt; %s-unsafe lock order detected</a></li>
 </ul>
 </li>
-<li><a href="#org63b6767">实现原理</a>
+<li><a href="#orgc113206">实现原理</a>
 <ul>
-<li><a href="#orgee33a82">将锁抽象成lock class，并且在其中记录各种事件</a></li>
-<li><a href="#org822e9e5">锁状态</a></li>
-<li><a href="#org5bc9bf6">在当前的task struct中记录相关的加锁信息</a>
+<li><a href="#org1f258a1">将锁抽象成lock class，并且在其中记录各种事件</a></li>
+<li><a href="#org8732413">锁状态</a></li>
+<li><a href="#org393a532">在当前的task struct中记录相关的加锁信息</a>
 <ul>
-<li><a href="#orgd0eb16f">RSLS Call Trace</a></li>
-<li><a href="#orged22642">Mutex lock</a></li>
+<li><a href="#org29d3a0c">RSLS Call Trace</a></li>
+<li><a href="#org5a475b1">Mutex lock</a></li>
 </ul>
 </li>
-<li><a href="#orgdc46545">在进行锁操作时，对比之前已经持有的锁信息，通过规则判断出具体的异常</a>
+<li><a href="#org82bcfee">在进行锁操作时，对比之前已经持有的锁信息，通过规则判断出具体的异常</a>
 <ul>
-<li><a href="#orgaeb4272">上下文判断</a></li>
-<li><a href="#org25d6ade">锁依赖</a></li>
+<li><a href="#org787b49e">上下文判断</a></li>
+<li><a href="#org9d4853a">锁依赖</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li><a href="#org4b6f201">Debug</a></li>
-<li><a href="#org3baeba0">refs</a></li>
+<li><a href="#org5764464">Debug</a></li>
+<li><a href="#orgee0fbe5">refs</a></li>
 </ul>
 </div>
 </div>
 
 
-<div id="outline-container-org8d15447" class="outline-2">
-<h2 id="org8d15447">简介</h2>
-<div class="outline-text-2" id="text-org8d15447">
+<div id="outline-container-org43cce1b" class="outline-2">
+<h2 id="org43cce1b">简介</h2>
+<div class="outline-text-2" id="text-org43cce1b">
 <p>
 lockdep用来分析内核中的持锁顺序，使用情况等问题，本文简单的分析一下其实现的基本原理以及使用方法.<br>
 内核文档可参考 <a href="https://docs.kernel.org/locking/lockdep-design.html">https://docs.kernel.org/locking/lockdep-design.html</a><br>
@@ -114,28 +114,28 @@ lockdep用来分析内核中的持锁顺序，使用情况等问题，本文简�
 </div>
 </div>
 
-<div id="outline-container-orge1d4919" class="outline-2">
-<h2 id="orge1d4919">可以检测到的问题</h2>
-<div class="outline-text-2" id="text-orge1d4919">
+<div id="outline-container-org8e9439e" class="outline-2">
+<h2 id="org8e9439e">可以检测到的问题</h2>
+<div class="outline-text-2" id="text-org8e9439e">
 </div>
-<div id="outline-container-orgc2a49fd" class="outline-3">
-<h3 id="orgc2a49fd">BUG: Invalid wait context</h3>
-<div class="outline-text-3" id="text-orgc2a49fd">
+<div id="outline-container-orge8ab453" class="outline-3">
+<h3 id="orge8ab453">BUG: Invalid wait context</h3>
+<div class="outline-text-3" id="text-orge8ab453">
 <p>
 这个用来反馈内核中持锁上下文的问题，可以检测到如下类型的问题, 详情可以参考提交 <a href="https://lwn.net/Articles/579849/">https://lwn.net/Articles/579849/</a><br>
 </p>
 <div class="org-src-container">
-<pre class="src src-C"><code>raw_spin_lock(&amp;foo);</code>
-<code>spin_lock(&amp;bar);</code>
-<code>spin_unlock(&amp;bar);</code>
-<code>raw_spin_unlock(&amp;foo);</code>
+<pre class="src src-C"><code>+++++    raw_spin_lock(&amp;foo);</code>
+<code>    spin_lock(&amp;bar);</code>
+<code>    spin_unlock(&amp;bar);</code>
+<code>    raw_spin_unlock(&amp;foo);</code>
 </pre>
 </div>
 <p>
 下面是一段实际发现问题的log<br>
 </p>
 <div class="org-src-container">
-<pre class="src src-C"><code>[   15.090335][    T1] </code>
+<pre class="src src-C"><code>[   15.090335][    T1]</code>
 <code>[   15.090359][    T1] =============================</code>
 <code>[   15.090365][    T1] [ BUG: Invalid wait context ]</code>
 <code>[   15.090373][    T1] 5.10.59-rt52-00983-g186a6841c682-dirty #3 Not tainted</code>
@@ -191,35 +191,35 @@ lockdep用来分析内核中的持锁顺序，使用情况等问题，本文简�
 </div>
 </div>
 </div>
-<div id="outline-container-org55fc0ef" class="outline-3">
-<h3 id="org55fc0ef">WARNING: bad contention detected!</h3>
-<div class="outline-text-3" id="text-org55fc0ef">
+<div id="outline-container-orge4f6c34" class="outline-3">
+<h3 id="orge4f6c34">WARNING: bad contention detected!</h3>
+<div class="outline-text-3" id="text-orge4f6c34">
 <p>
 这个错误表示lockdep内部逻辑出错，一般不应该报出来<br>
 </p>
 </div>
 </div>
-<div id="outline-container-orgaec6b01" class="outline-3">
-<h3 id="orgaec6b01">WARNING: possible circular locking dependency detected</h3>
-<div class="outline-text-3" id="text-orgaec6b01">
+<div id="outline-container-org7060705" class="outline-3">
+<h3 id="org7060705">WARNING: possible circular locking dependency detected</h3>
+<div class="outline-text-3" id="text-org7060705">
 <p>
 见下面的分析，通过依赖路径分析来检测<br>
 ABBA, ABBCCA 死锁<br>
 </p>
 </div>
 </div>
-<div id="outline-container-orge9d794b" class="outline-3">
-<h3 id="orge9d794b">WARNING: possible recursive locking detected</h3>
-<div class="outline-text-3" id="text-orge9d794b">
+<div id="outline-container-org3e69467" class="outline-3">
+<h3 id="org3e69467">WARNING: possible recursive locking detected</h3>
+<div class="outline-text-3" id="text-org3e69467">
 <p>
 AA死锁，重入<br>
 这个通过遍历已获取到的锁列表，判断当前的锁是否已经被获取到.读锁除外.<br>
 </p>
 </div>
 </div>
-<div id="outline-container-org02b267c" class="outline-3">
-<h3 id="org02b267c">WARNING: bad unlock balance detected</h3>
-<div class="outline-text-3" id="text-org02b267c">
+<div id="outline-container-org375d151" class="outline-3">
+<h3 id="org375d151">WARNING: bad unlock balance detected</h3>
+<div class="outline-text-3" id="text-org375d151">
 <p>
 lock和unlock不成对调用<br>
 </p>
@@ -229,26 +229,26 @@ lock和unlock不成对调用<br>
 </ul>
 </div>
 </div>
-<div id="outline-container-org52876c3" class="outline-3">
-<h3 id="org52876c3">WARNING: suspicious RCU usage</h3>
-<div class="outline-text-3" id="text-org52876c3">
+<div id="outline-container-org94808de" class="outline-3">
+<h3 id="org94808de">WARNING: suspicious RCU usage</h3>
+<div class="outline-text-3" id="text-org94808de">
 <p>
 在rcu代码中通过RCU_LOCKDEP_WARN宏来报出来的warning<br>
 </p>
 </div>
 </div>
-<div id="outline-container-orgd085428" class="outline-3">
-<h3 id="orgd085428">WARNING: lock held when returning to user space!</h3>
-<div class="outline-text-3" id="text-orgd085428">
+<div id="outline-container-org92f834e" class="outline-3">
+<h3 id="org92f834e">WARNING: lock held when returning to user space!</h3>
+<div class="outline-text-3" id="text-org92f834e">
 <p>
 在离开内核空间时，依旧持有内核空间中的锁, 通过在离开内核空间之前过滤进程已持有锁的列表来判断.<br>
 <a target="_blank" href="https://github.com/torvalds/linux/blob/09688c0166e76ce2fb85e86b9d99be8b0084cdf9/kernel/entry/common.c#L215">kernel source for call lockdep_sys_exit();</a><br>
 </p>
 </div>
 </div>
-<div id="outline-container-org0032dba" class="outline-3">
-<h3 id="org0032dba">WARNING: %s/%d still has locks held!</h3>
-<div class="outline-text-3" id="text-org0032dba">
+<div id="outline-container-org71888dc" class="outline-3">
+<h3 id="org71888dc">WARNING: %s/%d still has locks held!</h3>
+<div class="outline-text-3" id="text-org71888dc">
 <p>
 在进程freeze，exit时报错<br>
 <a target="_blank" href="https://github.com/torvalds/linux/blob/09688c0166e76ce2fb85e86b9d99be8b0084cdf9/include/linux/freezer.h#L66">kernel source for no lock held check in include/linux/freezer.h</a><br>
@@ -256,27 +256,27 @@ lock和unlock不成对调用<br>
 </p>
 </div>
 </div>
-<div id="outline-container-orgadff51a" class="outline-3">
-<h3 id="orgadff51a">WARNING: held lock freed!</h3>
-<div class="outline-text-3" id="text-orgadff51a">
+<div id="outline-container-org9c62ccd" class="outline-3">
+<h3 id="org9c62ccd">WARNING: held lock freed!</h3>
+<div class="outline-text-3" id="text-org9c62ccd">
 <p>
 通过debug_check_no_locks_freed报错，内核中在很多锁，对象初始化的地方加入该检查，通过检查free/初始化的区域中包含已经持有的锁来判断.<br>
 <a target="_blank" href="https://github.com/torvalds/linux/blob/09688c0166e76ce2fb85e86b9d99be8b0084cdf9/mm/slub.c#L1700">kernel source for lock freed check in mm/slub.c</a><br>
 </p>
 </div>
 </div>
-<div id="outline-container-org1892ad4" class="outline-3">
-<h3 id="org1892ad4">WARNING: Nested lock was not taken</h3>
-<div class="outline-text-3" id="text-org1892ad4">
+<div id="outline-container-org40afd9c" class="outline-3">
+<h3 id="org40afd9c">WARNING: Nested lock was not taken</h3>
+<div class="outline-text-3" id="text-org40afd9c">
 <p>
 检测持有nest锁时，是否已经持有锁<br>
 </p>
 </div>
 </div>
 
-<div id="outline-container-orgda8ecb0" class="outline-3">
-<h3 id="orgda8ecb0">WARNING: possible irq lock inversion dependency detected</h3>
-<div class="outline-text-3" id="text-orgda8ecb0">
+<div id="outline-container-orgab114aa" class="outline-3">
+<h3 id="orgab114aa">WARNING: possible irq lock inversion dependency detected</h3>
+<div class="outline-text-3" id="text-orgab114aa">
 <p>
 检测由于irq重入而造成可能的死锁<br>
 <a href="https://bugzilla.redhat.com/show_bug.cgi?id=1304242">https://bugzilla.redhat.com/show_bug.cgi?id=1304242</a><br>
@@ -294,9 +294,9 @@ lock和unlock不成对调用<br>
 </div>
 </div>
 </div>
-<div id="outline-container-org4f7072b" class="outline-3">
-<h3 id="org4f7072b">WARNING: inconsistent lock state</h3>
-<div class="outline-text-3" id="text-org4f7072b">
+<div id="outline-container-org0510966" class="outline-3">
+<h3 id="org0510966">WARNING: inconsistent lock state</h3>
+<div class="outline-text-3" id="text-org0510966">
 <p>
 锁状态不匹配，i.e. 同一把锁在hardirq, softirq, 进程上下文中使用到，但是_bh, _irq的后缀使用错误，导致系统有死锁<br>
 如下面的patch，以及修复bug<br>
@@ -317,12 +317,12 @@ lock和unlock不成对调用<br>
 </p>
 </div>
 </div>
-<div id="outline-container-org00fc601" class="outline-3">
-<h3 id="org00fc601">WARNING: chain_key collision</h3>
+<div id="outline-container-org71bf41c" class="outline-3">
+<h3 id="org71bf41c">WARNING: chain_key collision</h3>
 </div>
-<div id="outline-container-org225f38d" class="outline-3">
-<h3 id="org225f38d">WARNING: %s-safe -&gt; %s-unsafe lock order detected</h3>
-<div class="outline-text-3" id="text-org225f38d">
+<div id="outline-container-org23b9d99" class="outline-3">
+<h3 id="org23b9d99">WARNING: %s-safe -&gt; %s-unsafe lock order detected</h3>
+<div class="outline-text-3" id="text-org23b9d99">
 <p>
 锁上下文安全性检查<br>
 WARNING: HARDIRQ-safe -&gt; HARDIRQ-unsafe lock order detected<br>
@@ -332,30 +332,30 @@ WARNING: HARDIRQ-safe -&gt; HARDIRQ-unsafe lock order detected<br>
 </div>
 </div>
 
-<div id="outline-container-org63b6767" class="outline-2">
-<h2 id="org63b6767">实现原理</h2>
-<div class="outline-text-2" id="text-org63b6767">
+<div id="outline-container-orgc113206" class="outline-2">
+<h2 id="orgc113206">实现原理</h2>
+<div class="outline-text-2" id="text-orgc113206">
 </div>
-<div id="outline-container-orgee33a82" class="outline-3">
-<h3 id="orgee33a82">将锁抽象成lock class，并且在其中记录各种事件</h3>
-<div class="outline-text-3" id="text-orgee33a82">
+<div id="outline-container-org1f258a1" class="outline-3">
+<h3 id="org1f258a1">将锁抽象成lock class，并且在其中记录各种事件</h3>
+<div class="outline-text-3" id="text-org1f258a1">
 <ol class="org-ol">
 <li><p>
 通过定义static的 lock_class_key来记录每个key<br>
 </p>
 <div class="org-src-container">
-<pre class="src src-C"><code><span style="color: #51afef; font-weight: bold;">#ifdef</span> CONFIG_DEBUG_SPINLOCK</code>
-<code><span style="color: #51afef;">extern</span> <span style="color: #ECBE7B;">void</span> <span style="color: #c678dd;">__raw_spin_lock_init</span>(<span style="color: #ECBE7B;">raw_spinlock_t</span> *<span style="color: #dcaeea;">lock</span>, <span style="color: #51afef;">const</span> <span style="color: #ECBE7B;">char</span> *<span style="color: #dcaeea;">name</span>,</code>
-<code>                <span style="color: #51afef;">struct</span> <span style="color: #ECBE7B;">lock_class_key</span> *<span style="color: #dcaeea;">key</span>, <span style="color: #ECBE7B;">short</span> <span style="color: #dcaeea;">inner</span>);</code>
+<pre class="src src-C"><code><span class="org-preprocessor">#ifdef</span> CONFIG_DEBUG_SPINLOCK</code>
+<code><span class="org-keyword">extern</span> <span class="org-type">void</span> <span class="org-function-name">__raw_spin_lock_init</span>(<span class="org-type">raw_spinlock_t</span> *<span class="org-variable-name">lock</span>, <span class="org-keyword">const</span> <span class="org-type">char</span> *<span class="org-variable-name">name</span>,</code>
+<code>                <span class="org-keyword">struct</span> <span class="org-type">lock_class_key</span> *<span class="org-variable-name">key</span>, <span class="org-type">short</span> <span class="org-variable-name">inner</span>);</code>
 <code></code>
-<code><span style="color: #51afef; font-weight: bold;"># define</span> <span style="color: #c678dd;">raw_spin_lock_init</span>(<span style="color: #dcaeea;">lock</span>)                                       \</code>
-<code>    <span style="color: #51afef;">do</span> {                                                                \</code>
-<code>        <span style="color: #51afef;">static</span> <span style="color: #51afef;">struct</span> <span style="color: #ECBE7B;">lock_class_key</span> <span style="color: #dcaeea;">__key</span>;                     \</code>
+<code><span class="org-preprocessor"># define</span> <span class="org-function-name">raw_spin_lock_init</span>(<span class="org-variable-name">lock</span>)                                       \</code>
+<code>    <span class="org-keyword">do</span> {                                                                \</code>
+<code>        <span class="org-keyword">static</span> <span class="org-keyword">struct</span> <span class="org-type">lock_class_key</span> <span class="org-variable-name">__key</span>;                     \</code>
 <code>                                    \</code>
 <code>        __raw_spin_lock_init((lock), #lock, &amp;__key, LD_WAIT_SPIN); \</code>
-<code>    } <span style="color: #51afef;">while</span> (0)</code>
+<code>    } <span class="org-keyword">while</span> (0)</code>
 <code></code>
-<code><span style="color: #51afef; font-weight: bold;">#else</span></code>
+<code><span class="org-preprocessor">#else</span></code>
 </pre>
 </div>
 <p>
@@ -376,32 +376,32 @@ lockdep认为同class的锁在逻辑上是同一种锁，具有相同的处理�
 </ol>
 </div>
 </div>
-<div id="outline-container-org822e9e5" class="outline-3">
-<h3 id="org822e9e5">锁状态</h3>
-<div class="outline-text-3" id="text-org822e9e5">
+<div id="outline-container-org8732413" class="outline-3">
+<h3 id="org8732413">锁状态</h3>
+<div class="outline-text-3" id="text-org8732413">
 <p>
 在内核中，各种锁共用9类状态<br>
 </p>
 <div class="org-src-container">
 <pre class="src src-bash"><code>===  ===================================================</code>
-<code><span style="color: #98be65;">'.'</span>  acquired while irqs disabled and not<span style="color: #51afef;"> in</span> irq context</code>
-<code><span style="color: #98be65;">'-'</span>  acquired<span style="color: #51afef;"> in</span> irq context</code>
-<code><span style="color: #98be65;">'+'</span>  acquired with irqs enabled</code>
-<code><span style="color: #98be65;">'?'</span>  acquired<span style="color: #51afef;"> in</span> irq context with irqs enabled.</code>
+<code><span class="org-string">'.'</span>  acquired while irqs disabled and not<span class="org-keyword"> in</span> irq context</code>
+<code><span class="org-string">'-'</span>  acquired<span class="org-keyword"> in</span> irq context</code>
+<code><span class="org-string">'+'</span>  acquired with irqs enabled</code>
+<code><span class="org-string">'?'</span>  acquired<span class="org-keyword"> in</span> irq context with irqs enabled.</code>
 <code>===  ===================================================</code>
 <code></code>
 <code>The bits are illustrated with an example::</code>
-<code>                     <span style="color: #98be65;">\-</span>---&gt; hardirq</code>
-<code>                     | <span style="color: #98be65;">\-</span>--&gt; hardirq readlock</code>
-<code>                     || <span style="color: #98be65;">\-</span>-&gt; softirq</code>
-<code>                     ||| <span style="color: #98be65;">\-</span>&gt; softirq readlock</code>
+<code>                     <span class="org-string">\-</span>---&gt; hardirq</code>
+<code>                     | <span class="org-string">\-</span>--&gt; hardirq readlock</code>
+<code>                     || <span class="org-string">\-</span>-&gt; softirq</code>
+<code>                     ||| <span class="org-string">\-</span>&gt; softirq readlock</code>
 <code>                     ||||</code>
 <code>(&amp;sio_locks[i].lock){-.-.}, at: [&lt;c02867fd&gt;] mutex_lock+0x21/0x24</code>
 <code>                     ||||</code>
-<code>                     ||| <span style="color: #98be65;">\-</span>&gt; softirq disabled and not<span style="color: #51afef;"> in</span> softirq context</code>
-<code>                     || <span style="color: #98be65;">\-</span>-&gt; acquired<span style="color: #51afef;"> in</span> softirq context</code>
-<code>                     | <span style="color: #98be65;">\-</span>--&gt; hardirq disabled and not<span style="color: #51afef;"> in</span> hardirq context</code>
-<code>                     <span style="color: #98be65;">\-</span>---&gt; acquired<span style="color: #51afef;"> in</span> hardirq context</code>
+<code>                     ||| <span class="org-string">\-</span>&gt; softirq disabled and not<span class="org-keyword"> in</span> softirq context</code>
+<code>                     || <span class="org-string">\-</span>-&gt; acquired<span class="org-keyword"> in</span> softirq context</code>
+<code>                     | <span class="org-string">\-</span>--&gt; hardirq disabled and not<span class="org-keyword"> in</span> hardirq context</code>
+<code>                     <span class="org-string">\-</span>---&gt; acquired<span class="org-keyword"> in</span> hardirq context</code>
 </pre>
 </div>
 
@@ -417,17 +417,17 @@ softirq/hardirq的safe状态可以用来判断持锁是否会有风险，入下�
 </div>
 </div>
 
-<div id="outline-container-org5bc9bf6" class="outline-3">
-<h3 id="org5bc9bf6">在当前的task struct中记录相关的加锁信息</h3>
-<div class="outline-text-3" id="text-org5bc9bf6">
+<div id="outline-container-org393a532" class="outline-3">
+<h3 id="org393a532">在当前的task struct中记录相关的加锁信息</h3>
+<div class="outline-text-3" id="text-org393a532">
 <p>
 在记录时通过lock_class来进行，所以即使没有发生死锁，系统也可以上报具体的错误信息<br>
 </p>
 </div>
 
-<div id="outline-container-orgd0eb16f" class="outline-4">
-<h4 id="orgd0eb16f">RSLS Call Trace</h4>
-<div class="outline-text-4" id="text-orgd0eb16f">
+<div id="outline-container-org29d3a0c" class="outline-4">
+<h4 id="org29d3a0c">RSLS Call Trace</h4>
+<div class="outline-text-4" id="text-org29d3a0c">
 <p>
 下面是raw spinlock持锁时的lockdep相关的操作逻辑<br>
 </p>
@@ -451,9 +451,9 @@ softirq/hardirq的safe状态可以用来判断持锁是否会有风险，入下�
 </div>
 </div>
 
-<div id="outline-container-orged22642" class="outline-4">
-<h4 id="orged22642">Mutex lock</h4>
-<div class="outline-text-4" id="text-orged22642">
+<div id="outline-container-org5a475b1" class="outline-4">
+<h4 id="org5a475b1">Mutex lock</h4>
+<div class="outline-text-4" id="text-org5a475b1">
 <p>
 下面是mutex_lock持锁时的lockdep相关的操作逻辑<br>
 </p>
@@ -489,33 +489,33 @@ softirq/hardirq的safe状态可以用来判断持锁是否会有风险，入下�
 </div>
 </div>
 
-<div id="outline-container-orgdc46545" class="outline-3">
-<h3 id="orgdc46545">在进行锁操作时，对比之前已经持有的锁信息，通过规则判断出具体的异常</h3>
-<div class="outline-text-3" id="text-orgdc46545">
+<div id="outline-container-org82bcfee" class="outline-3">
+<h3 id="org82bcfee">在进行锁操作时，对比之前已经持有的锁信息，通过规则判断出具体的异常</h3>
+<div class="outline-text-3" id="text-org82bcfee">
 </div>
-<div id="outline-container-orgaeb4272" class="outline-4">
-<h4 id="orgaeb4272">上下文判断</h4>
-<div class="outline-text-4" id="text-orgaeb4272">
+<div id="outline-container-org787b49e" class="outline-4">
+<h4 id="org787b49e">上下文判断</h4>
+<div class="outline-text-4" id="text-org787b49e">
 <p>
 这个很简单，通过判断每个锁所处于的上下文来进行判断<br>
 下面是linux对于上下文类型的定义, 代码提交如下 <a href="https://lwn.net/Articles/579849/">https://lwn.net/Articles/579849/</a><br>
 <a target="_blank" href="https://github.com/torvalds/linux/blob/09688c0166e76ce2fb85e86b9d99be8b0084cdf9/include/linux/lockdep_types.h#L17">lockdep_wait_type</a><br>
 </p>
 <div class="org-src-container">
-<pre class="src src-C"><code><span style="color: #51afef;">enum</span> <span style="color: #ECBE7B;">lockdep_wait_type</span> {</code>
-<code>    <span style="color: #dcaeea;">LD_WAIT_INV</span> = 0,    <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">not checked, catch all</span><span style="color: #5B6268;"> */</span></code>
+<pre class="src src-C"><code><span class="org-keyword">enum</span> <span class="org-type">lockdep_wait_type</span> {</code>
+<code>    <span class="org-variable-name">LD_WAIT_INV</span> = 0,    <span class="org-comment-delimiter">/* </span><span class="org-comment">not checked, catch all</span><span class="org-comment-delimiter"> */</span></code>
 <code></code>
-<code>    <span style="color: #dcaeea;">LD_WAIT_FREE</span>,               <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">wait free, rcu etc..</span><span style="color: #5B6268;"> */</span></code>
-<code>    <span style="color: #dcaeea;">LD_WAIT_SPIN</span>,               <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">spin loops, raw_spinlock_t etc..</span><span style="color: #5B6268;"> */</span></code>
+<code>    <span class="org-variable-name">LD_WAIT_FREE</span>,               <span class="org-comment-delimiter">/* </span><span class="org-comment">wait free, rcu etc..</span><span class="org-comment-delimiter"> */</span></code>
+<code>    <span class="org-variable-name">LD_WAIT_SPIN</span>,               <span class="org-comment-delimiter">/* </span><span class="org-comment">spin loops, raw_spinlock_t etc..</span><span class="org-comment-delimiter"> */</span></code>
 <code></code>
-<code><span style="color: #51afef; font-weight: bold;">#ifdef</span> CONFIG_PROVE_RAW_LOCK_NESTING</code>
-<code>    <span style="color: #dcaeea;">LD_WAIT_CONFIG</span>,             <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">preemptible in PREEMPT_RT, spinlock_t etc..</span><span style="color: #5B6268;"> */</span></code>
-<code><span style="color: #51afef; font-weight: bold;">#else</span></code>
-<code>    <span style="color: #dcaeea;">LD_WAIT_CONFIG</span> = LD_WAIT_SPIN,</code>
-<code><span style="color: #51afef; font-weight: bold;">#endif</span></code>
-<code>    <span style="color: #dcaeea;">LD_WAIT_SLEEP</span>,              <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">sleeping locks, mutex_t etc..</span><span style="color: #5B6268;"> */</span></code>
+<code><span class="org-preprocessor">#ifdef</span> CONFIG_PROVE_RAW_LOCK_NESTING</code>
+<code>    <span class="org-variable-name">LD_WAIT_CONFIG</span>,             <span class="org-comment-delimiter">/* </span><span class="org-comment">preemptible in PREEMPT_RT, spinlock_t etc..</span><span class="org-comment-delimiter"> */</span></code>
+<code><span class="org-preprocessor">#else</span></code>
+<code>    <span class="org-variable-name">LD_WAIT_CONFIG</span> = LD_WAIT_SPIN,</code>
+<code><span class="org-preprocessor">#endif</span></code>
+<code>    <span class="org-variable-name">LD_WAIT_SLEEP</span>,              <span class="org-comment-delimiter">/* </span><span class="org-comment">sleeping locks, mutex_t etc..</span><span class="org-comment-delimiter"> */</span></code>
 <code></code>
-<code>    <span style="color: #dcaeea;">LD_WAIT_MAX</span>,                <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">must be last</span><span style="color: #5B6268;"> */</span></code>
+<code>    <span class="org-variable-name">LD_WAIT_MAX</span>,                <span class="org-comment-delimiter">/* </span><span class="org-comment">must be last</span><span class="org-comment-delimiter"> */</span></code>
 <code>};</code>
 </pre>
 </div>
@@ -542,15 +542,15 @@ eg:<br>
 <a target="_blank" href="https://github.com/torvalds/linux/blob/09688c0166e76ce2fb85e86b9d99be8b0084cdf9/include/linux/mutex.h#L24">MUTEX LOCK wait_type_inner</a><br>
 </p>
 <div class="org-src-container">
-<pre class="src src-C"><code><span style="color: #51afef; font-weight: bold;">#ifdef</span> CONFIG_DEBUG_LOCK_ALLOC</code>
-<code><span style="color: #51afef; font-weight: bold;"># define</span> <span style="color: #c678dd;">__DEP_MAP_MUTEX_INITIALIZER</span>(<span style="color: #dcaeea;">lockname</span>)          \</code>
+<pre class="src src-C"><code><span class="org-preprocessor">#ifdef</span> CONFIG_DEBUG_LOCK_ALLOC</code>
+<code><span class="org-preprocessor"># define</span> <span class="org-function-name">__DEP_MAP_MUTEX_INITIALIZER</span>(<span class="org-variable-name">lockname</span>)          \</code>
 <code>    , .dep_map = {                                      \</code>
 <code>        .name = #lockname,                      \</code>
 <code>        .wait_type_inner = LD_WAIT_SLEEP,       \</code>
 <code>    }</code>
-<code><span style="color: #51afef; font-weight: bold;">#else</span></code>
-<code><span style="color: #51afef; font-weight: bold;"># define</span> <span style="color: #c678dd;">__DEP_MAP_MUTEX_INITIALIZER</span>(<span style="color: #dcaeea;">lockname</span>)</code>
-<code><span style="color: #51afef; font-weight: bold;">#endif</span></code>
+<code><span class="org-preprocessor">#else</span></code>
+<code><span class="org-preprocessor"># define</span> <span class="org-function-name">__DEP_MAP_MUTEX_INITIALIZER</span>(<span class="org-variable-name">lockname</span>)</code>
+<code><span class="org-preprocessor">#endif</span></code>
 </pre>
 </div></li>
 </ul>
@@ -561,16 +561,16 @@ eg:<br>
 </div>
 </div>
 
-<div id="outline-container-org25d6ade" class="outline-4">
-<h4 id="org25d6ade">锁依赖</h4>
-<div class="outline-text-4" id="text-org25d6ade">
+<div id="outline-container-org9d4853a" class="outline-4">
+<h4 id="org9d4853a">锁依赖</h4>
+<div class="outline-text-4" id="text-org9d4853a">
 <p>
 此部份是lockdep设计的核心，死锁检测的方法，以及定理将从此处给出<br>
 </p>
 </div>
 <ul class="org-ul">
-<li><a id="org804a299"></a>lock type<br>
-<div class="outline-text-5" id="text-org804a299">
+<li><a id="org03b889a"></a>lock type<br>
+<div class="outline-text-5" id="text-org03b889a">
 <p>
 因为不同性质的锁阻塞的条件不同，所以内核根据阻塞产生条件，给内核中的锁分为了以下的几大类.lockdep将锁分为以下几种类型<br>
 </p>
@@ -633,8 +633,8 @@ recursive shared lockers, like rcu_read_lock()<br>
 </div>
 </li>
 
-<li><a id="orgee90be1"></a>non-recursive readers的死锁情形<br>
-<div class="outline-text-5" id="text-orgee90be1">
+<li><a id="orgc59bb69"></a>non-recursive readers的死锁情形<br>
+<div class="outline-text-5" id="text-orgc59bb69">
 <p>
 为了方便理解，通过下面的例子，可以看出重入属性对死锁的产生的影响<br>
 这个例子展示了non-recursive readers被writer的waiter阻塞导致出现deadlock的情形<br>
@@ -651,8 +651,14 @@ read_lock(X);<br>
 read_lock_2(X);<br>
 </p>
 </blockquote>
+
 <p>
-简而言之就是锁X在第二次获取读锁时，会因为另一个task在等待获取写锁而导致死锁。这是因为写锁会block之后尝试获取读锁的操作，如果没有这个block操作，系统可能会因为一致有进程不断获取读锁，而导致，写入的进程无法拿到锁，造成饿死.<br>
+简而言之就是锁X在第二次获取读锁时，会因为另一个task在等待获取写锁而导致死<br>
+锁。这是因为写锁会block之后尝试获取读锁的操作，如果没有这个block操作，系统<br>
+可能会因为一致有进程不断获取读锁，而导致，写入的进程无法拿到锁，造成饿死.<br>
+</p>
+
+<p>
 具体可以参考 <a target="_blank" href="https://github.com/torvalds/linux/blob/09688c0166e76ce2fb85e86b9d99be8b0084cdf9/kernel/locking/qrwlock.c#L40">read_lock will wait for write waiter</a><br>
 </p>
 
@@ -662,15 +668,15 @@ read_lock_2(X);<br>
 <code>    /*</code>
 <code>     * Readers come here when they cannot get the lock without waiting</code>
 <code>     */</code>
-<code>    <span style="color: #51afef;">if</span> (unlikely(in_interrupt())) {</code>
+<code>    <span class="org-keyword">if</span> (unlikely(in_interrupt())) {</code>
 <code>        /*</code>
-<code>         * Readers<span style="color: #51afef;"> in</span> interrupt context will get the lock immediately</code>
+<code>         * Readers<span class="org-keyword"> in</span> interrupt context will get the lock immediately</code>
 <code>         * if the writer is just waiting (not holding the lock yet),</code>
 <code>         * so spin with ACQUIRE semantics until the lock is available</code>
-<code>         * without waiting<span style="color: #51afef;"> in</span> the queue.</code>
+<code>         * without waiting<span class="org-keyword"> in</span> the queue.</code>
 <code>         */</code>
 <code>        atomic_cond_read_acquire(&amp;lock-&gt;cnts, !(VAL &amp; _QW_LOCKED));</code>
-<code>        <span style="color: #51afef;">return</span>;</code>
+<code>        <span class="org-keyword">return</span>;</code>
 <code>    }</code>
 <code>    atomic_sub(_QR_BIAS, &amp;lock-&gt;cnts);</code>
 <code></code>
@@ -682,17 +688,17 @@ read_lock_2(X);<br>
 <code></code>
 <code>    /*</code>
 <code>     * The ACQUIRE semantics of the following spinning code ensure</code>
-<code>     * that accesses can<span style="color: #98be65;">'t leak upwards out of our subsequent critical</span></code>
-<code><span style="color: #98be65;">     * section in the case that the lock is currently held for write.</span></code>
-<code><span style="color: #98be65;">     */</span></code>
-<code><span style="color: #98be65;">    atomic_cond_read_acquire(&amp;lock-&gt;cnts, !(VAL &amp; _QW_LOCKED));</span></code>
+<code>     * that accesses can<span class="org-string">'t leak upwards out of our subsequent critical</span></code>
+<code><span class="org-string">     * section in the case that the lock is currently held for write.</span></code>
+<code><span class="org-string">     */</span></code>
+<code><span class="org-string">    atomic_cond_read_acquire(&amp;lock-&gt;cnts, !(VAL &amp; _QW_LOCKED));</span></code>
 <code></code>
-<code><span style="color: #98be65;">    /*</span></code>
-<code><span style="color: #98be65;">     * Signal the next one in queue to become queue head</span></code>
-<code><span style="color: #98be65;">     */</span></code>
-<code><span style="color: #98be65;">    arch_spin_unlock(&amp;lock-&gt;wait_lock);</span></code>
-<code><span style="color: #98be65;">}</span></code>
-<code><span style="color: #98be65;">EXPORT_SYMBOL(queued_read_lock_slowpath);</span></code>
+<code><span class="org-string">    /*</span></code>
+<code><span class="org-string">     * Signal the next one in queue to become queue head</span></code>
+<code><span class="org-string">     */</span></code>
+<code><span class="org-string">    arch_spin_unlock(&amp;lock-&gt;wait_lock);</span></code>
+<code><span class="org-string">}</span></code>
+<code><span class="org-string">EXPORT_SYMBOL(queued_read_lock_slowpath);</span></code>
 </pre>
 </div>
 <p>
@@ -701,8 +707,8 @@ read_lock_2(X);<br>
 </div>
 </li>
 
-<li><a id="orgb904d8f"></a>根据锁类型，来观察死锁的条件关系<br>
-<div class="outline-text-5" id="text-orgb904d8f">
+<li><a id="org63c1429"></a>根据锁类型，来观察死锁的条件关系<br>
+<div class="outline-text-5" id="text-org63c1429">
 <p>
 针对这三种锁类型，可以有如下几种的阻塞关系矩阵. Y表示行标会阻塞列标, N表示不会产生阻塞的问题<br>
 <img src="/assets/.lockdep-struct-5.png"><br>
@@ -718,8 +724,8 @@ read_lock_2(X);<br>
 </ul>
 </div>
 </li>
-<li><a id="orgd8bba1d"></a>依赖分析<br>
-<div class="outline-text-5" id="text-orgd8bba1d">
+<li><a id="orgd4cc054"></a>依赖分析<br>
+<div class="outline-text-5" id="text-orgd4cc054">
 <p>
 通过上面的表格，在检测死锁时，共需要检测9种情况<br>
 </p>
@@ -752,8 +758,8 @@ shared reader to non-recursive locker dependency<br></li>
 </div>
 </li>
 
-<li><a id="orgfdb851c"></a>strong path定义<br>
-<div class="outline-text-5" id="text-orgfdb851c">
+<li><a id="org259dac5"></a>strong path定义<br>
+<div class="outline-text-5" id="text-org259dac5">
 <p>
 根据阻塞图，如果一条依赖路径上全部都是可阻塞的类型，则定义为strong path<br>
 简单来说就是不经过-(<b>R)-&gt; -(S</b>)-&gt;路径的定义为strong path. 因为经过这种路径的都有非block的锁关系，lockdep认为不会造成死锁.<br>
@@ -774,8 +780,8 @@ path (where X, Y, Z are locks), and the walk from X to Y is through a -(SR)-&gt;
 </div>
 </li>
 
-<li><a id="org8ce4638"></a>死锁关系证明<br>
-<div class="outline-text-5" id="text-org8ce4638">
+<li><a id="orgb3bbb34"></a>死锁关系证明<br>
+<div class="outline-text-5" id="text-orgb3bbb34">
 <ul class="org-ul">
 <li>定理1<br>
 如果一条路径上有闭环的strong path，那么这个就会构成死锁.<br></li>
@@ -794,39 +800,39 @@ path (where X, Y, Z are locks), and the walk from X to Y is through a -(SR)-&gt;
 </ul>
 </div>
 </li>
-<li><a id="orge353472"></a>代码实现<br>
-<div class="outline-text-5" id="text-orge353472">
+<li><a id="org9d967db"></a>代码实现<br>
+<div class="outline-text-5" id="text-org9d967db">
 <p>
 <a target="_blank" href="https://github.com/torvalds/linux/blob/09688c0166e76ce2fb85e86b9d99be8b0084cdf9/kernel/locking/lockdep.c#L3064">source to call check_noncircular</a><br>
 通过代码注释可以看到，内核通过广度优先的遍历方式，寻找是否会形成依赖环路, 在找到对应的环路之后，再经过对闭环strong path的判断来验证是否存在死锁.<br>
 <a target="_blank" href="https://github.com/torvalds/linux/blob/09688c0166e76ce2fb85e86b9d99be8b0084cdf9/kernel/locking/lockdep.c#L1977">检测是否存在闭环的strong path</a><br>
 </p>
 <div class="org-src-container">
-<pre class="src src-C"><code><span style="color: #5B6268;">/*</span></code>
-<code><span style="color: #5B6268;"> * We are about to add B -&gt; A into the dependency graph, and in __bfs() a</span></code>
-<code><span style="color: #5B6268;"> * strong dependency path A -&gt; .. -&gt; B is found: hlock_class equals</span></code>
-<code><span style="color: #5B6268;"> * entry-&gt;class.</span></code>
-<code><span style="color: #5B6268;"> *</span></code>
-<code><span style="color: #5B6268;"> * We will have a deadlock case (conflict) if A -&gt; .. -&gt; B -&gt; A is a strong</span></code>
-<code><span style="color: #5B6268;"> * dependency cycle, that means:</span></code>
-<code><span style="color: #5B6268;"> *</span></code>
-<code><span style="color: #5B6268;"> * Either</span></code>
-<code><span style="color: #5B6268;"> *</span></code>
-<code><span style="color: #5B6268;"> *     a) B -&gt; A is -(E*)-&gt;</span></code>
-<code><span style="color: #5B6268;"> *</span></code>
-<code><span style="color: #5B6268;"> * or</span></code>
-<code><span style="color: #5B6268;"> *</span></code>
-<code><span style="color: #5B6268;"> *     b) A -&gt; .. -&gt; B is -(*N)-&gt; (i.e. A -&gt; .. -(*N)-&gt; B)</span></code>
-<code><span style="color: #5B6268;"> *</span></code>
-<code><span style="color: #5B6268;"> * as then we don't have -(*R)-&gt; -(S*)-&gt; in the cycle.</span></code>
-<code><span style="color: #5B6268;"> */</span></code>
-<code><span style="color: #51afef;">static</span> <span style="color: #51afef;">inline</span> <span style="color: #ECBE7B;">bool</span> <span style="color: #c678dd;">hlock_conflict</span>(<span style="color: #51afef;">struct</span> <span style="color: #ECBE7B;">lock_list</span> *<span style="color: #dcaeea;">entry</span>, <span style="color: #ECBE7B;">void</span> *<span style="color: #dcaeea;">data</span>)</code>
+<pre class="src src-C"><code><span class="org-comment-delimiter">/*</span></code>
+<code><span class="org-comment"> * We are about to add B -&gt; A into the dependency graph, and in __bfs() a</span></code>
+<code><span class="org-comment"> * strong dependency path A -&gt; .. -&gt; B is found: hlock_class equals</span></code>
+<code><span class="org-comment"> * entry-&gt;class.</span></code>
+<code><span class="org-comment"> *</span></code>
+<code><span class="org-comment"> * We will have a deadlock case (conflict) if A -&gt; .. -&gt; B -&gt; A is a strong</span></code>
+<code><span class="org-comment"> * dependency cycle, that means:</span></code>
+<code><span class="org-comment"> *</span></code>
+<code><span class="org-comment"> * Either</span></code>
+<code><span class="org-comment"> *</span></code>
+<code><span class="org-comment"> *     a) B -&gt; A is -(E*)-&gt;</span></code>
+<code><span class="org-comment"> *</span></code>
+<code><span class="org-comment"> * or</span></code>
+<code><span class="org-comment"> *</span></code>
+<code><span class="org-comment"> *     b) A -&gt; .. -&gt; B is -(*N)-&gt; (i.e. A -&gt; .. -(*N)-&gt; B)</span></code>
+<code><span class="org-comment"> *</span></code>
+<code><span class="org-comment"> * as then we don't have -(*R)-&gt; -(S*)-&gt; in the cycle.</span></code>
+<code><span class="org-comment-delimiter"> */</span></code>
+<code><span class="org-keyword">static</span> <span class="org-keyword">inline</span> <span class="org-type">bool</span> <span class="org-function-name">hlock_conflict</span>(<span class="org-keyword">struct</span> <span class="org-type">lock_list</span> *<span class="org-variable-name">entry</span>, <span class="org-type">void</span> *<span class="org-variable-name">data</span>)</code>
 <code>{</code>
-<code>    <span style="color: #51afef;">struct</span> <span style="color: #ECBE7B;">held_lock</span> *<span style="color: #dcaeea;">hlock</span> = (<span style="color: #51afef;">struct</span> <span style="color: #ECBE7B;">held_lock</span> *)data;</code>
+<code>    <span class="org-keyword">struct</span> <span class="org-type">held_lock</span> *<span class="org-variable-name">hlock</span> = (<span class="org-keyword">struct</span> <span class="org-type">held_lock</span> *)data;</code>
 <code></code>
-<code>    <span style="color: #51afef;">return</span> hlock_class(hlock) == entry-&gt;class &amp;&amp; <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">Found A -&gt; .. -&gt; B</span><span style="color: #5B6268;"> */</span></code>
-<code>        (hlock-&gt;read == 0 || <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">B -&gt; A is -(E*)-&gt;</span><span style="color: #5B6268;"> */</span></code>
-<code>            <span style="color: #51afef; font-weight: bold;">!</span>entry-&gt;only_xr); <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">A -&gt; .. -&gt; B is -(*N)-&gt;</span><span style="color: #5B6268;"> */</span></code>
+<code>    <span class="org-keyword">return</span> hlock_class(hlock) == entry-&gt;class &amp;&amp; <span class="org-comment-delimiter">/* </span><span class="org-comment">Found A -&gt; .. -&gt; B</span><span class="org-comment-delimiter"> */</span></code>
+<code>        (hlock-&gt;read == 0 || <span class="org-comment-delimiter">/* </span><span class="org-comment">B -&gt; A is -(E*)-&gt;</span><span class="org-comment-delimiter"> */</span></code>
+<code>            <span class="org-negation-char">!</span>entry-&gt;only_xr); <span class="org-comment-delimiter">/* </span><span class="org-comment">A -&gt; .. -&gt; B is -(*N)-&gt;</span><span class="org-comment-delimiter"> */</span></code>
 <code>}</code>
 </pre>
 </div>
@@ -847,9 +853,9 @@ path (where X, Y, Z are locks), and the walk from X to Y is through a -(SR)-&gt;
 </div>
 </div>
 
-<div id="outline-container-org4b6f201" class="outline-2">
-<h2 id="org4b6f201">Debug</h2>
-<div class="outline-text-2" id="text-org4b6f201">
+<div id="outline-container-org5764464" class="outline-2">
+<h2 id="org5764464">Debug</h2>
+<div class="outline-text-2" id="text-org5764464">
 <p>
 /proc/lockdep 节点可以查看每个lock class的详细debug信息, 下面列出了示例信息<br>
 代码请参考 <a target="_blank" href="https://github.com/torvalds/linux/blob/09688c0166e76ce2fb85e86b9d99be8b0084cdf9/kernel/locking/lockdep_proc.c#L58">source for /proc/lockdep</a><br>
@@ -883,9 +889,9 @@ path (where X, Y, Z are locks), and the walk from X to Y is through a -(SR)-&gt;
 </div>
 
 
-<div id="outline-container-org3baeba0" class="outline-2">
-<h2 id="org3baeba0">refs</h2>
-<div class="outline-text-2" id="text-org3baeba0">
+<div id="outline-container-orgee0fbe5" class="outline-2">
+<h2 id="orgee0fbe5">refs</h2>
+<div class="outline-text-2" id="text-orgee0fbe5">
 <p>
 <a href="https://lpc.events/event/2/contributions/74/attachments/67/78/Recursive_read_deadlocks_and_Where_to_find_them.pdf">https://lpc.events/event/2/contributions/74/attachments/67/78/Recursive_read_deadlocks_and_Where_to_find_them.pdf</a><br>
 </p>
