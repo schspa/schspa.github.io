@@ -64,3 +64,5 @@
 (puthash "Xbfb6b4a90743ef1978b9e2a439299eba78d7e91d" '(25656 65310 885373 14000) org-publish-cache)
 (puthash "X352c057f53247cca7ab7aa0b7ee0579b3c917be8" '(25656 65310 930777 846000) org-publish-cache)
 (puthash "X3528aa421d7ee813782d83fe11ffb0752f96194e" '(25685 46795 307231 195000) org-publish-cache)
+(puthash "/Users/schspa/org/env/udev.org" '(:crossrefs (((other "Create" "symlink" "for" "ttyUSB*") . 112239714) ((headline "Create" "symlink" "for" "ttyUSB*") . 112239714) ((other "According" "to" "physical" "USB" "port" "address") . 9333193) ((headline "According" "to" "physical" "USB" "port" "address") . 9333193)) :index nil) org-publish-cache)
+(puthash "Xb1ac5c42b6a98818cd8d2b80775fe32053c17318" '(25688 36481 808846 962000) org-publish-cache)

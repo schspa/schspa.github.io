@@ -320,6 +320,18 @@
     ]
   },
   {
+    "file-path": "~/org/env/udev.org",
+    "URL": "/2023/05/05/udev.html",
+    "TITLE": "udev rules",
+    "DATE": "<2023-05-05 20:49:11>",
+    "FILETAGS": [
+      "blogs"
+    ],
+    "CATEGORY": [
+      "Environment"
+    ]
+  },
+  {
     "file-path": "~/org/env/terminal.org",
     "URL": "/2022/03/22/terminal.html",
     "TITLE": "Termial tips",

@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<!-- 2023-05-08 Mon 13:54 -->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>udev rules</title>
+<meta name="author" content="Schspa Shi" />
+<meta name="description" content="udev rules" />
+<meta name="generator" content="Org Mode" />
+<link rel="shortcut icon" href="/images/rose-red.png" type="image/x-icon" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" integrity="sha256-sAcc18zvMnaJZrNT4v8J0T4HqzEUiUTlVFgDIywjQek=" crossorigin="anonymous">
+<link rel="stylesheet" href="/css/animate.min.css" />
+<link rel="stylesheet" href="/css/all.min.css" />
+<link rel="stylesheet" type="text/css" href="/css/style.css" />
+<link rel="stylesheet" type="text/css" href="/css/navbar.css" />
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/js/bootstrap.min.js" integrity="sha256-/hGxZHGQ57fXLp+NDusFZsZo/PG21Bp2+hXYV5a6w+g=" crossorigin="anonymous"></script>
+<script src="/js/jquery.min.js"></script>
+<script src="/js/darkreader.js"></script>
+<script src="/user.config.js"></script>
+<script src="/js/main.js"></script>
+</head>
+<body>
+<div id="preamble" class="status">
+<div class="mobile-container">
+  <!-- Top Navigation Menu -->
+  <div class="topnav">
+    <div id="header">
+      <a href="/" class="logo">Schspa's Blog</a>
+      <a href="javascript:void(0);" class="icon" onclick="toggleheader()">
+        <i class="fa fa-bars"></i>
+      </a>
+    </div>
+    <div id="nav_headers">
+      <a href="/sitemap.html" class="menu-item">Categories</a>
+    </div>
+  </div>
+  <!-- End smartphone / tablet look -->
+</div>
+
+<header id="header" class="header">
+  <div class="logo-wrapper">
+    <a href="/" class="logo">Schspa's Blogs</a>
+  </div>
+
+  <nav class="site-navbar">
+    <ul id="menu" class="menu">
+      <li class="menu-item">
+        <a class="menu-item-link" href="/">Home</a>
+      </li>
+      <li class="menu-item">
+        <a class="menu-item-link" href="/sitemap.html">Categories</a>
+      </li>
+    </ul>
+  </nav>
+</header>
+</div>
+<div id="content" class="content">
+<h1 class="title">udev rules</h1>
+<div id="table-of-contents" role="doc-toc">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents" role="doc-toc">
+<ul>
+<li><a href="#org6b0a462">Create symlink for ttyUSB*</a>
+<ul>
+<li><a href="#org08e69c9">According to physical USB port address</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org6b0a462" class="outline-2">
+<h2 id="org6b0a462">Create symlink for ttyUSB*</h2>
+<div class="outline-text-2" id="text-org6b0a462">
+</div>
+<div id="outline-container-org08e69c9" class="outline-3">
+<h3 id="org08e69c9">According to physical USB port address</h3>
+<div class="outline-text-3" id="text-org08e69c9">
+<p>
+eg: 给 <code>/dev/ttyUSB6</code> 创建软链接:<br>
+</p>
+<div class="org-src-container">
+<pre class="src src-bash"><code>sudo udevadm info /dev/ttyUSB6</code>
+</pre>
+</div>
+
+<div class="org-src-container">
+<pre class="src src-bash"><code>P: /devices/pci0000:00/0000:00:14.0/usb1/1-12/1-12.2/1-12.2:1.2/ttyUSB6/tty/ttyUSB6</code>
+<code>N: ttyUSB6</code>
+<code>S: serial/by-id/usb-FTDI_Quad_RS232-HS-if02-port0</code>
+<code>S: serial/by-path/pci-0000:00:14.0-usb-0:12.2:1.2-port0</code>
+<code>S: ttySchspa</code>
+<code>E: <span class="org-variable-name">DEVLINKS</span>=/dev/serial/by-id/usb-FTDI_Quad_RS232-HS-if02-port0 /dev/serial/by-path/pci-0000:00:14.0-usb-0:12.2:1.2-port0 /dev/ttySchspa</code>
+<code>E: <span class="org-variable-name">DEVNAME</span>=/dev/ttyUSB6</code>
+<code>E: <span class="org-variable-name">DEVPATH</span>=/devices/pci0000:00/0000:00:14.0/usb1/1-12/1-12.2/1-12.2:1.2/ttyUSB6/tty/ttyUSB6</code>
+<code>E: <span class="org-variable-name">ID_BUS</span>=usb</code>
+<code>E: <span class="org-variable-name">ID_MM_CANDIDATE</span>=1</code>
+<code>E: <span class="org-variable-name">ID_MODEL</span>=Quad_RS232-HS</code>
+<code>E: <span class="org-variable-name">ID_MODEL_ENC</span>=Quad\x20RS232-HS</code>
+<code>E: <span class="org-variable-name">ID_MODEL_FROM_DATABASE</span>=FT4232H Quad HS USB-UART/FIFO IC</code>
+<code>E: <span class="org-variable-name">ID_MODEL_ID</span>=6011</code>
+<code>E: <span class="org-variable-name">ID_PATH</span>=pci-0000:00:14.0-usb-0:12.2:1.2</code>
+<code>E: <span class="org-variable-name">ID_PATH_TAG</span>=pci-0000_00_14_0-usb-0_12_2_1_2</code>
+<code>E: <span class="org-variable-name">ID_PCI_CLASS_FROM_DATABASE</span>=Serial bus controller</code>
+<code>E: <span class="org-variable-name">ID_PCI_INTERFACE_FROM_DATABASE</span>=XHCI</code>
+<code>E: <span class="org-variable-name">ID_PCI_SUBCLASS_FROM_DATABASE</span>=USB controller</code>
+<code>E: <span class="org-variable-name">ID_REVISION</span>=0800</code>
+<code>E: <span class="org-variable-name">ID_SERIAL</span>=FTDI_Quad_RS232-HS</code>
+<code>E: <span class="org-variable-name">ID_TYPE</span>=generic</code>
+<code>E: <span class="org-variable-name">ID_USB_DRIVER</span>=ftdi_sio</code>
+<code>E: <span class="org-variable-name">ID_USB_INTERFACES</span>=:ffffff:</code>
+<code>E: <span class="org-variable-name">ID_USB_INTERFACE_NUM</span>=02</code>
+<code>E: <span class="org-variable-name">ID_VENDOR</span>=FTDI</code>
+<code>E: <span class="org-variable-name">ID_VENDOR_ENC</span>=FTDI</code>
+<code>E: <span class="org-variable-name">ID_VENDOR_FROM_DATABASE</span>=Future Technology Devices International, Ltd</code>
+<code>E: <span class="org-variable-name">ID_VENDOR_ID</span>=0403</code>
+<code>E: <span class="org-variable-name">MAJOR</span>=188</code>
+<code>E: <span class="org-variable-name">MINOR</span>=6</code>
+<code>E: <span class="org-variable-name">SUBSYSTEM</span>=tty</code>
+<code>E: <span class="org-variable-name">TAGS</span>=:systemd:</code>
+<code>E: <span class="org-variable-name">USEC_INITIALIZED</span>=19602963</code>
+</pre>
+</div>
+
+<p>
+如上面的日志, ttyUSB6的路径为 <code>ID_PATH=pci-0000:00:14.0-usb-0:12.2:1.2</code>, 下面就<br>
+配置udev规则根据这个path来自动创建软链接。<br>
+</p>
+
+<div class="org-src-container">
+<pre class="src src-text"><code>SUBSYSTEM=="tty" ENV{ID_PATH}=="pci-0000:00:14.0-usb-0:10:1.2" MODE="0660", SYMLINK+="ttySchspa", GROUP="schspa"</code>
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<script src="https://utteranc.es/client.js"
+    repo="schspa/schspa.github.io"
+    issue-term="title"
+    label="✨💬✨"
+    theme="github-light"
+    crossorigin="anonymous"
+    async>
+</script>
+<div class="me">
+  <span><b>Contact me via :)</b><span>
+  <div class="contact">
+    <a id="email" href="mailto:schspa@gmail.com" target="_blank"><i class="fab fa-mailchimp animated heartBeat delay-2s slower"></i></a>
+    <a id="github" href="//github.com/schspa" target="_blank"><i class="fab fa-github animated heartBeat delay-2s slower"></i></a>
+  </div>
+</div>
+
+<div id="jinrishici-sentence" style="font-weight: 700;">虚怀乃若谷，水深则流缓。</div>
+<script src="https://sdk.jinrishici.com/v2/browser/jinrishici.js" charset="utf-8"></script>
+</div>
+</body>
+</html>
