@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<!-- 2023-05-09 Tue 11:38 -->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Macos setup</title>
+<meta name="author" content="Schspa Shi" />
+<meta name="description" content="macos.org" />
+<meta name="generator" content="Org Mode" />
+<link rel="shortcut icon" href="/images/rose-red.png" type="image/x-icon" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" integrity="sha256-sAcc18zvMnaJZrNT4v8J0T4HqzEUiUTlVFgDIywjQek=" crossorigin="anonymous">
+<link rel="stylesheet" href="/css/animate.min.css" />
+<link rel="stylesheet" href="/css/all.min.css" />
+<link rel="stylesheet" type="text/css" href="/css/style.css" />
+<link rel="stylesheet" type="text/css" href="/css/navbar.css" />
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/js/bootstrap.min.js" integrity="sha256-/hGxZHGQ57fXLp+NDusFZsZo/PG21Bp2+hXYV5a6w+g=" crossorigin="anonymous"></script>
+<script src="/js/jquery.min.js"></script>
+<script src="/js/darkreader.js"></script>
+<script src="/user.config.js"></script>
+<script src="/js/main.js"></script>
+</head>
+<body>
+<div id="preamble" class="status">
+<div class="mobile-container">
+  <!-- Top Navigation Menu -->
+  <div class="topnav">
+    <div id="header">
+      <a href="/" class="logo">Schspa's Blog</a>
+      <a href="javascript:void(0);" class="icon" onclick="toggleheader()">
+        <i class="fa fa-bars"></i>
+      </a>
+    </div>
+    <div id="nav_headers">
+      <a href="/sitemap.html" class="menu-item">Categories</a>
+    </div>
+  </div>
+  <!-- End smartphone / tablet look -->
+</div>
+
+<header id="header" class="header">
+  <div class="logo-wrapper">
+    <a href="/" class="logo">Schspa's Blogs</a>
+  </div>
+
+  <nav class="site-navbar">
+    <ul id="menu" class="menu">
+      <li class="menu-item">
+        <a class="menu-item-link" href="/">Home</a>
+      </li>
+      <li class="menu-item">
+        <a class="menu-item-link" href="/sitemap.html">Categories</a>
+      </li>
+    </ul>
+  </nav>
+</header>
+</div>
+<div id="content" class="content">
+<h1 class="title">Macos setup</h1>
+<div id="table-of-contents" role="doc-toc">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents" role="doc-toc">
+<ul>
+<li><a href="#org2e83b13">Setup a NFS server on macos and mount it on linux vms.</a>
+<ul>
+<li><a href="#orgc395174">NFS Server</a></li>
+<li><a href="#org2c6b1dd">mount nfs client.</a></li>
+</ul>
+</li>
+<li><a href="#orgdcc1611">disable english input method in rime</a></li>
+<li><a href="#org3b75778">parallels</a>
+<ul>
+<li><a href="#org6eb06ed">manjaro黑屏</a></li>
+<li><a href="#orgeee3a13">挂载第二块硬盘</a></li>
+</ul>
+</li>
+<li><a href="#orgbdb8b0b">mds_stores</a>
+<ul>
+<li><a href="#orgd9c668d">开启/关闭索引</a></li>
+</ul>
+</li>
+<li><a href="#org4c27d65">sleep issues</a>
+<ul>
+<li><a href="#org4c25036">查看休眠参数</a></li>
+<li><a href="#orgc4ae991">sleep参数解析</a></li>
+<li><a href="#org232e6b2">查看唤醒源</a></li>
+<li><a href="#org8b53391">issues</a>
+<ul>
+<li><a href="#orgeb66b5f">com.apple.parsec-fbf.flush</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#org4ed33ea">virtualbox crash</a></li>
+<li><a href="#org492c2cc">ntfs</a>
+<ul>
+<li><a href="#org3c6e72e">ntfs-3g</a></li>
+</ul>
+</li>
+<li><a href="#org80fa299">Swap</a></li>
+<li><a href="#org1d42967">LaunchDaemon</a>
+<ul>
+<li><a href="#orgc59775f">log size</a></li>
+</ul>
+</li>
+<li><a href="#org00006d8">setup rclone mount</a>
+<ul>
+<li><a href="#org2c2359d">restart</a></li>
+</ul>
+</li>
+<li><a href="#orgc136d84">sshfs</a></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org2e83b13" class="outline-2">
+<h2 id="org2e83b13">Setup a NFS server on macos and mount it on linux vms.</h2>
+<div class="outline-text-2" id="text-org2e83b13">
+</div>
+<div id="outline-container-orgc395174" class="outline-3">
+<h3 id="orgc395174">NFS Server</h3>
+<div class="outline-text-3" id="text-orgc395174">
+<p>
+配置文件：/etc/exports<br>
+</p>
+<div class="org-src-container">
+<pre class="src src-bash"><code>/Volumes/work -alldirs -rw -mapall=schspa:staff -network 10.211.55.0 -mask 255.255.255.0</code>
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-org2c6b1dd" class="outline-3">
+<h3 id="org2c6b1dd">mount nfs client.</h3>
+</div>
+</div>
+<div id="outline-container-orgdcc1611" class="outline-2">
+<h2 id="orgdcc1611">disable english input method in rime</h2>
+</div>
+<div id="outline-container-org3b75778" class="outline-2">
+<h2 id="org3b75778">parallels</h2>
+<div class="outline-text-2" id="text-org3b75778">
+</div>
+<div id="outline-container-org6eb06ed" class="outline-3">
+<h3 id="org6eb06ed">manjaro黑屏</h3>
+<div class="outline-text-3" id="text-org6eb06ed">
+<p>
+<a href="https://kb.parallels.com/en/124751">Manjaro LiveCD virtual machine shows black screen after boot</a><br>
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgeee3a13" class="outline-3">
+<h3 id="orgeee3a13">挂载第二块硬盘</h3>
+<div class="outline-text-3" id="text-orgeee3a13">
+<p>
+<a href="https://post.smzdm.com/p/andg7qx3/">https://post.smzdm.com/p/andg7qx3/</a><br>
+<a href="https://gist.github.com/Obbut/b0a94d96bf2a8069f1c470696ab7f9f2">https://gist.github.com/Obbut/b0a94d96bf2a8069f1c470696ab7f9f2</a><br>
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgbdb8b0b" class="outline-2">
+<h2 id="orgbdb8b0b">mds_stores</h2>
+<div class="outline-text-2" id="text-orgbdb8b0b">
+<p>
+mds_stores是Spotlight和finder用到的后台进程，主要用来对磁盘上的文件做索引。<br>
+当硬盘上存在大量文件时，会占用大量系统资源来进行index操作。<br>
+</p>
+</div>
+<div id="outline-container-orgd9c668d" class="outline-3">
+<h3 id="orgd9c668d">开启/关闭索引</h3>
+<div class="outline-text-3" id="text-orgd9c668d">
+<div class="org-src-container">
+<pre class="src src-bash"><code><span class="org-comment-delimiter">## </span><span class="org-comment">&#20851;&#38381;&#32034;&#24341;</span></code>
+<code>sudo mdutil -a -i off</code>
+<code><span class="org-comment-delimiter">## </span><span class="org-comment">&#24320;&#21551;&#32034;&#24341;</span></code>
+<code>sudo mdutil -a -i on</code>
+<code><span class="org-comment-delimiter">## </span><span class="org-comment">&#20851;&#38381;&#37096;&#20998;&#30913;&#30424;&#32034;&#24341;</span></code>
+<code>sudo mdutil -d /Volumes/Work</code>
+</pre>
+</div>
+</div>
+</div>
+</div>
+<div id="outline-container-org4c27d65" class="outline-2">
+<h2 id="org4c27d65">sleep issues</h2>
+<div class="outline-text-2" id="text-org4c27d65">
+</div>
+<div id="outline-container-org4c25036" class="outline-3">
+<h3 id="org4c25036">查看休眠参数</h3>
+<div class="outline-text-3" id="text-org4c25036">
+<div class="org-src-container">
+<pre class="src src-bash"><code>$ pmset -g</code>
+<code>System-wide power settings:</code>
+<code>Currently<span class="org-keyword"> in</span> use:</code>
+<code>standby              1</code>
+<code>Sleep On Power Button 1</code>
+<code>womp                 0</code>
+<code>autorestart          0</code>
+<code>hibernatefile        /var/vm/sleepimage</code>
+<code>proximitywake        0</code>
+<code>powernap             0</code>
+<code>networkoversleep     0</code>
+<code>disksleep            0</code>
+<code>standbydelayhigh     150</code>
+<code>sleep                1 (sleep prevented by Google Chrome, mds, coreaudiod)</code>
+<code>autopoweroffdelay    28800</code>
+<code>hibernatemode        0</code>
+<code>autopoweroff         1</code>
+<code>ttyskeepawake        1</code>
+<code>displaysleep         1 (display sleep prevented by coreaudiod)</code>
+<code>highstandbythreshold 50</code>
+<code>standbydelaylow      120</code>
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-orgc4ae991" class="outline-3">
+<h3 id="orgc4ae991">sleep参数解析</h3>
+<div class="outline-text-3" id="text-orgc4ae991">
+<p>
+ 请参考以下文章<br>
+<a href="https://www.qiansw.com/in-depth-study-of-mac-os-sleep-mode.html">https://www.qiansw.com/in-depth-study-of-mac-os-sleep-mode.html</a><br>
+</p>
+</div>
+</div>
+<div id="outline-container-org232e6b2" class="outline-3">
+<h3 id="org232e6b2">查看唤醒源</h3>
+<div class="outline-text-3" id="text-org232e6b2">
+<div class="org-src-container">
+<pre class="src src-bash"><code>$ pmset -g assertions</code>
+<code>Assertion status system-wide:</code>
+<code>   BackgroundTask                 1</code>
+<code>   ApplePushServiceTask           0</code>
+<code>   UserIsActive                   1</code>
+<code>   PreventUserIdleDisplaySleep    1</code>
+<code>   PreventSystemSleep             0</code>
+<code>   ExternalMedia                  0</code>
+<code>   PreventUserIdleSystemSleep     1</code>
+<code>   NetworkClientActive            0</code>
+<code>Listed by owning process:</code>
+<code>   pid 948(Google Chrome): [0x00006bdb000196fd] 00:17:41 NoIdleSleepAssertion named: <span class="org-string">"Playing audio"</span></code>
+<code>   pid 33480(mds): [0x000067e0000b9657] 00:34:41 BackgroundTask named: <span class="org-string">"com.apple.metadata.mds.power"</span></code>
+<code>   pid 208(hidd): [0x00006dbd00099719] 00:00:00 UserIsActive named: <span class="org-string">"com.apple.iohideventsystem.queue.tickle serviceID:1000004b1 name:AppleUserHIDEventSe product:GT BLE60 eventType:3"</span></code>
+<code>        Timeout will fire<span class="org-keyword"> in</span> 60 secs <span class="org-variable-name">Action</span>=TimeoutActionRelease</code>
+<code>   pid 257(coreaudiod): [0x00005eee000194c3] 01:12:50 PreventUserIdleSystemSleep named: <span class="org-string">"com.apple.audio.~:AMS2_StackedOutput:0.context.preventuseridlesleep"</span></code>
+<code>        Created for PID: 2665.</code>
+<code>   pid 257(coreaudiod): [0x00005eee000594c5] 01:12:50 PreventUserIdleDisplaySleep named: <span class="org-string">"com.apple.audio.~:AMS2_StackedOutput:0.context.preventuseridledisplaysleep"</span></code>
+<code>        Created for PID: 2665.</code>
+<code>Kernel Assertions: <span class="org-variable-name">0x4</span>=USB</code>
+<code>   <span class="org-variable-name">id</span>=501  <span class="org-variable-name">level</span>=255 <span class="org-variable-name">0x4</span>=USB <span class="org-variable-name">mod</span>=1970/1/1 08:00 <span class="org-variable-name">description</span>=com.apple.usb.externaldevice.14200000 <span class="org-variable-name">owner</span>=iPad</code>
+<code>Idle sleep preventers: IODisplayWrangler</code>
+</pre>
+</div>
+</div>
+</div>
+<div id="outline-container-org8b53391" class="outline-3">
+<h3 id="org8b53391">issues</h3>
+<div class="outline-text-3" id="text-org8b53391">
+</div>
+<div id="outline-container-orgeb66b5f" class="outline-4">
+<h4 id="orgeb66b5f">com.apple.parsec-fbf.flush</h4>
+<div class="outline-text-4" id="text-orgeb66b5f">
+<p>
+<a href="https://www.insanelymac.com/forum/topic/342000-parsec-fbf-agent-prevents-idle-sleep-automatic-on-macos-catalina-10152/">parsec-fbf agent prevents Idle Sleep (automatic) on macOS Catalina 10.15.2</a><br>
+</p>
+<ul class="org-ul">
+<li>fixup:<br></li>
+</ul>
+<div class="org-src-container">
+<pre class="src src-bash"><code>launchctl unload -w /System/Library/LaunchAgents/com.apple.parsec-fbf.plist</code>
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div id="outline-container-org4ed33ea" class="outline-2">
+<h2 id="org4ed33ea">virtualbox crash</h2>
+<div class="outline-text-2" id="text-org4ed33ea">
+<div class="org-src-container">
+<pre class="src src-bash"><code></code>
+<code>Thread 2 Crashed:: Dispatch queue: com.apple.root.default-qos</code>
+<code>0   libsystem_kernel.dylib          0x00007fff67c78ad6 __abort_with_payload + 10</code>
+<code>1   libsystem_kernel.dylib          0x00007fff67c7a3df abort_with_payload_wrapper_internal + 80</code>
+<code>2   libsystem_kernel.dylib          0x00007fff67c7a411 abort_with_payload + 9</code>
+<code>3   com.apple.TCC                   0x00007fff5e34a59f __CRASHING_DUE_TO_PRIVACY_VIOLATION__ + 163</code>
+<code>4   com.apple.TCC                   0x00007fff5e348531 __TCCAccessRequest_block_invoke.114 + 500</code>
+<code>5   com.apple.TCC                   0x00007fff5e348a58 __tccd_send_message_block_invoke + 231</code>
+<code>6   libxpc.dylib                    0x00007fff67d5d1ff _xpc_connection_reply_callout + 36</code>
+<code>7   libxpc.dylib                    0x00007fff67d5d187 _xpc_connection_call_reply_async + 69</code>
+<code>8   libdispatch.dylib               0x00007fff67abe6c2 _dispatch_client_callout3 + 8</code>
+<code>9   libdispatch.dylib               0x00007fff67ad515d _dispatch_mach_msg_async_reply_invoke + 369</code>
+<code>10  libdispatch.dylib               0x00007fff67acd5f9 _dispatch_kevent_worker_thread + 1316</code>
+<code>11  libsystem_pthread.dylib         0x00007fff67d18a85 _pthread_wqthread + 362</code>
+<code>12  libsystem_pthread.dylib         0x00007fff67d17b77 start_wqthread + 15</code>
+</pre>
+</div>
+<p>
+fix: <a href="https://forums.virtualbox.org/viewtopic.php?f=8&amp;t=97141">https://forums.virtualbox.org/viewtopic.php?f=8&amp;t=97141</a><br>
+</p>
+</div>
+</div>
+
+<div id="outline-container-org492c2cc" class="outline-2">
+<h2 id="org492c2cc">ntfs</h2>
+<div class="outline-text-2" id="text-org492c2cc">
+</div>
+<div id="outline-container-org3c6e72e" class="outline-3">
+<h3 id="org3c6e72e">ntfs-3g</h3>
+<div class="outline-text-3" id="text-org3c6e72e">
+<ul class="org-ul">
+<li>ntfs not showing on finder<br>
+<a href="https://github.com/osxfuse/osxfuse/issues/574">https://github.com/osxfuse/osxfuse/issues/574</a><br>
+add -oallow_other -oauto_xattr<br></li>
+</ul>
+</div>
+</div>
+</div>
+<div id="outline-container-org80fa299" class="outline-2">
+<h2 id="org80fa299">Swap</h2>
+<div class="outline-text-2" id="text-org80fa299">
+<p>
+<a href="https://blog.ixiaocai.net/2020/12/31/Disable_Swap_On_Macos_Catalina.html">https://blog.ixiaocai.net/2020/12/31/Disable_Swap_On_Macos_Catalina.html</a><br>
+<a href="https://lanyundev.com/posts/50102#%E5%AE%89%E8%A3%85-smartctl">https://lanyundev.com/posts/50102#%E5%AE%89%E8%A3%85-smartctl</a><br>
+</p>
+</div>
+</div>
+
+<div id="outline-container-org1d42967" class="outline-2">
+<h2 id="org1d42967">LaunchDaemon</h2>
+<div class="outline-text-2" id="text-org1d42967">
+</div>
+<div id="outline-container-orgc59775f" class="outline-3">
+<h3 id="orgc59775f">log size</h3>
+<div class="outline-text-3" id="text-orgc59775f">
+<p>
+<a href="https://serverfault.com/questions/900499/how-do-i-limit-launchd-log-size-on-os-x">How do I limit launchd log size on OS X?</a><br>
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org00006d8" class="outline-2">
+<h2 id="org00006d8">setup rclone mount</h2>
+<div class="outline-text-2" id="text-org00006d8">
+<p>
+脚本参考: <a href="https://github.com/Callumpy/macos-rclone-launchd">https://github.com/Callumpy/macos-rclone-launchd</a><br>
+</p>
+
+<p>
+<a href="assets/nas.raspi.plist">assets/nas.raspi.plist</a><br>
+</p>
+<div class="org-src-container">
+<pre class="src src-bash"><code>cat /Library/LaunchDaemons/nas.raspi.plist</code>
+</pre>
+</div>
+</div>
+
+<div id="outline-container-org2c2359d" class="outline-3">
+<h3 id="org2c2359d">restart</h3>
+<div class="outline-text-3" id="text-org2c2359d">
+<div class="org-src-container">
+<pre class="src src-bash"><code>sudo diskutil unmount force ~/Documents/nas</code>
+<code>launchctl stop /Library/LaunchDaemons/nas.raspi.plist</code>
+<code>launchctl start /Library/LaunchDaemons/nas.raspi.plist</code>
+</pre>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgc136d84" class="outline-2">
+<h2 id="orgc136d84">sshfs</h2>
+<div class="outline-text-2" id="text-orgc136d84">
+<div class="org-src-container">
+<pre class="src src-bash"><code>brew install sshfs 2&gt;&amp;1 || <span class="org-builtin">true</span></code>
+</pre>
+</div>
+
+<p>
+<a href="https://github.com/telepresenceio/telepresence/issues/1654">https://github.com/telepresenceio/telepresence/issues/1654</a><br>
+</p>
+
+<div class="org-src-container">
+<pre class="src src-bash"><code>brew install --cask macfuse</code>
+<code>brew install gromgit/fuse/sshfs-mac</code>
+<code>brew link --overwrite sshfs-mac</code>
+</pre>
+</div>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<script src="https://utteranc.es/client.js"
+    repo="schspa/schspa.github.io"
+    issue-term="title"
+    label="✨💬✨"
+    theme="github-light"
+    crossorigin="anonymous"
+    async>
+</script>
+<div class="me">
+  <span><b>Contact me via :)</b><span>
+  <div class="contact">
+    <a id="email" href="mailto:schspa@gmail.com" target="_blank"><i class="fab fa-mailchimp animated heartBeat delay-2s slower"></i></a>
+    <a id="github" href="//github.com/schspa" target="_blank"><i class="fab fa-github animated heartBeat delay-2s slower"></i></a>
+  </div>
+</div>
+
+<div id="jinrishici-sentence" style="font-weight: 700;">虚怀乃若谷，水深则流缓。</div>
+<script src="https://sdk.jinrishici.com/v2/browser/jinrishici.js" charset="utf-8"></script>
+</div>
+</body>
+</html>
