@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<!-- 2023-05-09 Tue 11:17 -->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Setup Proxy Server</title>
+<meta name="author" content="Schspa" />
+<meta name="description" content="v2ray.org" />
+<meta name="generator" content="Org Mode" />
+<link rel="shortcut icon" href="/images/rose-red.png" type="image/x-icon" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" integrity="sha256-sAcc18zvMnaJZrNT4v8J0T4HqzEUiUTlVFgDIywjQek=" crossorigin="anonymous">
+<link rel="stylesheet" href="/css/animate.min.css" />
+<link rel="stylesheet" href="/css/all.min.css" />
+<link rel="stylesheet" type="text/css" href="/css/style.css" />
+<link rel="stylesheet" type="text/css" href="/css/navbar.css" />
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/js/bootstrap.min.js" integrity="sha256-/hGxZHGQ57fXLp+NDusFZsZo/PG21Bp2+hXYV5a6w+g=" crossorigin="anonymous"></script>
+<script src="/js/jquery.min.js"></script>
+<script src="/js/darkreader.js"></script>
+<script src="/user.config.js"></script>
+<script src="/js/main.js"></script>
+</head>
+<body>
+<div id="preamble" class="status">
+<div class="mobile-container">
+  <!-- Top Navigation Menu -->
+  <div class="topnav">
+    <div id="header">
+      <a href="/" class="logo">Schspa's Blog</a>
+      <a href="javascript:void(0);" class="icon" onclick="toggleheader()">
+        <i class="fa fa-bars"></i>
+      </a>
+    </div>
+    <div id="nav_headers">
+      <a href="/sitemap.html" class="menu-item">Categories</a>
+    </div>
+  </div>
+  <!-- End smartphone / tablet look -->
+</div>
+
+<header id="header" class="header">
+  <div class="logo-wrapper">
+    <a href="/" class="logo">Schspa's Blogs</a>
+  </div>
+
+  <nav class="site-navbar">
+    <ul id="menu" class="menu">
+      <li class="menu-item">
+        <a class="menu-item-link" href="/">Home</a>
+      </li>
+      <li class="menu-item">
+        <a class="menu-item-link" href="/sitemap.html">Categories</a>
+      </li>
+    </ul>
+  </nav>
+</header>
+</div>
+<div id="content" class="content">
+<h1 class="title">Setup Proxy Server</h1>
+<div id="table-of-contents" role="doc-toc">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents" role="doc-toc">
+<ul>
+<li><a href="#org3545f4c">WebSocket+TLS+Web</a>
+<ul>
+<li><a href="#org7facd78">v2ray server client setup</a></li>
+<li><a href="#org29f32f4">v2ray client config</a></li>
+<li><a href="#orgd3249f6">Clash config</a></li>
+<li><a href="#org1309279">Nginx</a></li>
+<li><a href="#org50c465b">测试</a>
+<ul>
+<li><a href="#orge3c6ea3">访问网站根目录</a></li>
+<li><a href="#org6ba2958">先通过普通的curl命令来连接</a></li>
+<li><a href="#org1feb6ba">带参数访问</a></li>
+</ul>
+</li>
+<li><a href="#org1c2a6d2">Trouble Shoot</a>
+<ul>
+<li><a href="#org4e3e175">AH01144: No protocol handler was valid for the URL /ray (scheme 'ws').</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#org8f0f67c">参考资料</a></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org3545f4c" class="outline-2">
+<h2 id="org3545f4c">WebSocket+TLS+Web</h2>
+<div class="outline-text-2" id="text-org3545f4c">
+</div>
+<div id="outline-container-org7facd78" class="outline-3">
+<h3 id="org7facd78">v2ray server client setup</h3>
+<div class="outline-text-3" id="text-org7facd78">
+<div class="org-src-container">
+<pre class="src src-json"><code>{</code>
+<code>  "log": {</code>
+<code>    "access": "/var/log/v2ray/access.log",</code>
+<code>    "error": "/var/log/v2ray/error.log",</code>
+<code>    "loglevel": "warning"</code>
+<code>  },</code>
+<code>  "routing": {</code>
+<code>    "domainStrategy": "AsIs",</code>
+<code>    "rules": [</code>
+<code>      {</code>
+<code>        "type": "field",</code>
+<code>        "ip": [</code>
+<code>          "geoip:private"</code>
+<code>        ],</code>
+<code>        "outboundTag": "block"</code>
+<code>      }</code>
+<code>    ]</code>
+<code>  },</code>
+<code>  "inbounds": [</code>
+<code>    {</code>
+<code>      "port": 789,</code>
+<code>      "protocol": "vmess",</code>
+<code>      "settings": {</code>
+<code>        "clients": [</code>
+<code>          {</code>
+<code>            "id": "4e1c5285-2e60-4302-9f30-5d1aedf6d9eb",</code>
+<code>            "level": 1,</code>
+<code>            "alterId": 0</code>
+<code>          }</code>
+<code>        ]</code>
+<code>      },</code>
+<code>      "streamSettings": {</code>
+<code>        "network": "tcp"</code>
+<code>      },</code>
+<code>      "sniffing": {</code>
+<code>        "enabled": true,</code>
+<code>        "destOverride": [</code>
+<code>          "http",</code>
+<code>          "tls"</code>
+<code>        ]</code>
+<code>      }</code>
+<code>    },</code>
+<code>    {</code>
+<code>      "listen": "127.0.0.1",</code>
+<code>      "port": 10000,</code>
+<code>      "protocol": "vmess",</code>
+<code>      "settings": {</code>
+<code>        "clients": [</code>
+<code>          {</code>
+<code>            "id": "bf1d82a2-640a-484e-83ea-3b30bc7a46da",</code>
+<code>            "alterId": 0</code>
+<code>          }</code>
+<code>        ]</code>
+<code>      },</code>
+<code>      "streamSettings": {</code>
+<code>        "network": "ws",</code>
+<code>        "wsSettings": {</code>
+<code>          "path": "/ray"</code>
+<code>        }</code>
+<code>      }</code>
+<code>    }</code>
+<code>  ],</code>
+<code>  "outbounds": [</code>
+<code>    {</code>
+<code>      "protocol": "freedom",</code>
+<code>      "tag": "direct"</code>
+<code>    },</code>
+<code>    {</code>
+<code>      "protocol": "blackhole",</code>
+<code>      "tag": "block"</code>
+<code>    }</code>
+<code>  ]</code>
+<code>}</code>
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org29f32f4" class="outline-3">
+<h3 id="org29f32f4">v2ray client config</h3>
+<div class="outline-text-3" id="text-org29f32f4">
+<div class="org-src-container">
+<pre class="src src-json"><code>{</code>
+<code>  "inbounds": [</code>
+<code>    {</code>
+<code>      "port": 1080,</code>
+<code>      "listen": "127.0.0.1",</code>
+<code>      "protocol": "socks",</code>
+<code>      "sniffing": {</code>
+<code>        "enabled": true,</code>
+<code>        "destOverride": [</code>
+<code>          "http",</code>
+<code>          "tls"</code>
+<code>        ]</code>
+<code>      },</code>
+<code>      "settings": {</code>
+<code>        "auth": "noauth",</code>
+<code>        "udp": false</code>
+<code>      }</code>
+<code>    }</code>
+<code>  ],</code>
+<code>  "outbounds": [</code>
+<code>    {</code>
+<code>      "protocol": "vmess",</code>
+<code>      "settings": {</code>
+<code>        "vnext": [</code>
+<code>          {</code>
+<code>            "address": "proxy.example.com",</code>
+<code>            "port": 443,</code>
+<code>            "users": [</code>
+<code>              {</code>
+<code>                "id": "bf1d82a2-640a-484e-83ea-3b30bc7a46da",</code>
+<code>                "alterId": 0</code>
+<code>              }</code>
+<code>            ]</code>
+<code>          }</code>
+<code>        ]</code>
+<code>      },</code>
+<code>      "streamSettings": {</code>
+<code>        "network": "ws",</code>
+<code>        "security": "tls",</code>
+<code>        "wsSettings": {</code>
+<code>          "path": "/ray"</code>
+<code>        }</code>
+<code>      }</code>
+<code>    }</code>
+<code>  ]</code>
+<code>}</code>
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orgd3249f6" class="outline-3">
+<h3 id="orgd3249f6">Clash config</h3>
+<div class="outline-text-3" id="text-orgd3249f6">
+<div class="org-src-container">
+<pre class="src src-bash"><code>proxies:</code>
+<code>  - name: <span class="org-string">"vmess"</span></code>
+<code>    <span class="org-builtin">type</span>: vmess</code>
+<code>    server: proxy.example.com</code>
+<code>    port: 443</code>
+<code>    uuid: bf1d82a2-640a-484e-83ea-3b30bc7a46da</code>
+<code>    alterId: 0</code>
+<code>    cipher: auto</code>
+<code>    tls: true</code>
+<code>    skip-cert-verify: true</code>
+<code>    network: ws</code>
+<code>    ws-opts:</code>
+<code>      path: /ray</code>
+<code>      Host: example.com</code>
+<code>      mux: false</code>
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org1309279" class="outline-3">
+<h3 id="org1309279">Nginx</h3>
+<div class="outline-text-3" id="text-org1309279">
+<div class="org-src-container">
+<pre class="src src-conf"><code><span class="org-type">server</span> {</code>
+<code>    server_name proxy.example.com;</code>
+<code></code>
+<code>    listen 443 ssl;</code>
+<code>    ssl on;</code>
+<code>    ssl_certificate your_fullchains_cert.crt;</code>
+<code>    ssl_certificate_key your_fullchains_cert.key;</code>
+<code>    ssl_protocols         TLSv1 TLSv1.1 TLSv1.2;</code>
+<code>    ssl_ciphers           HIGH:!aNULL:!MD5;</code>
+<code></code>
+<code>    <span class="org-type">location /ray</span> {</code>
+<code>      <span class="org-variable-name">if ($http_upgrade !</span>= <span class="org-string">"websocket"</span>) {</code>
+<code>          return 404;</code>
+<code>      }</code>
+<code>      proxy_redirect off;</code>
+<code>      proxy_pass http://127.0.0.1:10000/ray;</code>
+<code>      proxy_http_version 1.1;</code>
+<code>      proxy_set_header Upgrade $http_upgrade;</code>
+<code>      proxy_set_header Connection <span class="org-string">"upgrade"</span>;</code>
+<code>      proxy_set_header Host $host;</code>
+<code>      <span class="org-comment-delimiter"># </span><span class="org-comment">Show real IP in v2ray access.log</span></code>
+<code>      proxy_set_header X-Real-IP $remote_addr;</code>
+<code>      proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;</code>
+<code>    }</code>
+<code>}</code>
+<code></code>
+<code><span class="org-type">server</span> {</code>
+<code>    listen 80;</code>
+<code>    server_name proxy.example.com;</code>
+<code>    rewrite ^(.*)$ https://example.com:443/$1 permanent;</code>
+<code>}</code>
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org50c465b" class="outline-3">
+<h3 id="org50c465b">测试</h3>
+<div class="outline-text-3" id="text-org50c465b">
+</div>
+<div id="outline-container-orge3c6ea3" class="outline-4">
+<h4 id="orge3c6ea3">访问网站根目录</h4>
+<div class="outline-text-4" id="text-orge3c6ea3">
+<div class="org-src-container">
+<pre class="src src-bash"><code>curl -s https://proxy.example.com</code>
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org6ba2958" class="outline-4">
+<h4 id="org6ba2958">先通过普通的curl命令来连接</h4>
+<div class="outline-text-4" id="text-org6ba2958">
+<div class="org-src-container">
+<pre class="src src-bash"><code>curl -s https://proxy.example.com/ray</code>
+</pre>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org1feb6ba" class="outline-4">
+<h4 id="org1feb6ba">带参数访问</h4>
+<div class="outline-text-4" id="text-org1feb6ba">
+<div class="org-src-container">
+<pre class="src src-bash"><code>curl -s --include --header <span class="org-string">"Upgrade: websocket"</span> https://proxy.example.com/ray</code>
+</pre>
+</div>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org1c2a6d2" class="outline-3">
+<h3 id="org1c2a6d2">Trouble Shoot</h3>
+<div class="outline-text-3" id="text-org1c2a6d2">
+</div>
+<div id="outline-container-org4e3e175" class="outline-4">
+<h4 id="org4e3e175">AH01144: No protocol handler was valid for the URL /ray (scheme 'ws').</h4>
+<div class="outline-text-4" id="text-org4e3e175">
+<p>
+尝试使用apache2来配置时，出现下面的问题，对apache2的配置不熟悉，暂未解决, 改用了nginx。<br>
+</p>
+<div class="org-src-container">
+<pre class="src src-text"><code>[Mon Mar 20 18:52:16.056911 2023] [proxy:warn] [pid 38602:tid 139868881540864] [client 18.117.95.84:34288] AH01144: No protocol handler was valid for the URL /ray (scheme 'ws'). If you are using a DSO version of mod_proxy, make sure the proxy submodules are included in the configuration using LoadModule.</code>
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+
+
+<div id="outline-container-org8f0f67c" class="outline-2">
+<h2 id="org8f0f67c">参考资料</h2>
+<div class="outline-text-2" id="text-org8f0f67c">
+<p>
+<a href="https://guide.v2fly.org/en_US/advanced/wss_and_web.html#configuration-example">https://guide.v2fly.org/en_US/advanced/wss_and_web.html#configuration-example</a><br>
+<a href="https://toutyrater.github.io/advanced/wss_and_web.html">https://toutyrater.github.io/advanced/wss_and_web.html</a><br>
+<a href="https://zelikk.blogspot.com/2022/04/setup-v2ray-websocket-tls-troubleshoot.html">https://zelikk.blogspot.com/2022/04/setup-v2ray-websocket-tls-troubleshoot.html</a><br>
+<a href="https://zelikk.blogspot.com/2022/04/connect-v2ray-websocket-tls-troubleshoot.html">https://zelikk.blogspot.com/2022/04/connect-v2ray-websocket-tls-troubleshoot.html</a><br>
+</p>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<script src="https://utteranc.es/client.js"
+    repo="schspa/schspa.github.io"
+    issue-term="title"
+    label="✨💬✨"
+    theme="github-light"
+    crossorigin="anonymous"
+    async>
+</script>
+<div class="me">
+  <span><b>Contact me via :)</b><span>
+  <div class="contact">
+    <a id="email" href="mailto:schspa@gmail.com" target="_blank"><i class="fab fa-mailchimp animated heartBeat delay-2s slower"></i></a>
+    <a id="github" href="//github.com/schspa" target="_blank"><i class="fab fa-github animated heartBeat delay-2s slower"></i></a>
+  </div>
+</div>
+
+<div id="jinrishici-sentence" style="font-weight: 700;">虚怀乃若谷，水深则流缓。</div>
+<script src="https://sdk.jinrishici.com/v2/browser/jinrishici.js" charset="utf-8"></script>
+</div>
+</body>
+</html>

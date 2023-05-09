@@ -401,6 +401,18 @@
     ]
   },
   {
+    "file-path": "~/org/env/network/v2ray.org",
+    "URL": "/2023/03/20/v2ray.html",
+    "TITLE": "Setup Proxy Server",
+    "DATE": "<2023-03-20 13:40:08>",
+    "FILETAGS": [
+      "blogs"
+    ],
+    "CATEGORY": [
+      "Environment"
+    ]
+  },
+  {
     "file-path": "~/org/env/maillist/send-patch-via-email.org",
     "URL": "/2021/02/25/send-patch-via-email.html",
     "TITLE": "Send Patchs with email",
