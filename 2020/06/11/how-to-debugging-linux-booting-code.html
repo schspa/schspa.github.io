@@ -1,21 +1,23 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2022-03-03 Thu 11:48 -->
+<!-- 2023-10-20 Fri 17:00 -->
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Debug linux kernel boot process</title>
 <meta name="author" content="schspa" />
 <meta name="description" content="how-to-debugging-linux-booting-code" />
 <meta name="generator" content="Org Mode" />
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <link rel="shortcut icon" href="/images/rose-red.png" type="image/x-icon" />
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" integrity="sha256-sAcc18zvMnaJZrNT4v8J0T4HqzEUiUTlVFgDIywjQek=" crossorigin="anonymous">
+<link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.2.3/css/bootstrap.min.css" rel="stylesheet">
 <link rel="stylesheet" href="/css/animate.min.css" />
 <link rel="stylesheet" href="/css/all.min.css" />
 <link rel="stylesheet" type="text/css" href="/css/style.css" />
 <link rel="stylesheet" type="text/css" href="/css/navbar.css" />
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/js/bootstrap.min.js" integrity="sha256-/hGxZHGQ57fXLp+NDusFZsZo/PG21Bp2+hXYV5a6w+g=" crossorigin="anonymous"></script>
-<script src="/js/jquery.min.js"></script>
+<script src="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.2.3/js/bootstrap.min.js"></script>
+<script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
 <script src="/js/darkreader.js"></script>
 <script src="/user.config.js"></script>
 <script src="/js/main.js"></script>
@@ -61,26 +63,26 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#orgac556f7">目的</a></li>
-<li><a href="#org19c26b1">初始化代码（MMU开启之前）</a>
+<li><a href="#orgda9a222">目的</a></li>
+<li><a href="#orgc683108">初始化代码（MMU开启之前）</a>
 <ul>
-<li><a href="#org6da47cb">获取加载地址</a>
+<li><a href="#org68ef9d6">获取加载地址</a>
 <ul>
-<li><a href="#orgb9106ea">正确加载uboot的symbol到运行位置</a></li>
-<li><a href="#org5bf8562">在跳入内核之前打上断点，获取内核运行地址</a></li>
-<li><a href="#org0208ded">加载.head.text段，在内核第一条指令处打断点</a></li>
+<li><a href="#org19a72b1">正确加载uboot的symbol到运行位置</a></li>
+<li><a href="#org879f848">在跳入内核之前打上断点，获取内核运行地址</a></li>
+<li><a href="#orgcde9cb7">加载.head.text段，在内核第一条指令处打断点</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li><a href="#org14df6dc">初始代码（MMU开启之后)</a></li>
+<li><a href="#org8646580">初始代码（MMU开启之后)</a></li>
 </ul>
 </div>
 </div>
 
-<div id="outline-container-orgac556f7" class="outline-2">
-<h2 id="orgac556f7">目的</h2>
-<div class="outline-text-2" id="text-orgac556f7">
+<div id="outline-container-orgda9a222" class="outline-2">
+<h2 id="orgda9a222">目的</h2>
+<div class="outline-text-2" id="text-orgda9a222">
 <p>
 当linux内核在启动过程中出现bug时，可能需要适用gdb/ulink/ds5 debugger来进行debug，大多数的debug方法时在启动后，再连接上调试器，最后连接上调试器之后再加载symbol，打断点来完成debug。<br>
 对于大多数的情况，以上方法就足以应付，但是部分情况下（在内核初始化早期，可能还来不及连上调试器，内核就已经挂掉了），需要更加复杂的打断点方法。<br>
@@ -90,32 +92,32 @@
 </div>
 </div>
 
-<div id="outline-container-org19c26b1" class="outline-2">
-<h2 id="org19c26b1">初始化代码（MMU开启之前）</h2>
-<div class="outline-text-2" id="text-org19c26b1">
+<div id="outline-container-orgc683108" class="outline-2">
+<h2 id="orgc683108">初始化代码（MMU开启之前）</h2>
+<div class="outline-text-2" id="text-orgc683108">
 <p>
 由于Linux内核可以被bootloader加载到任意位置来执行，在mmu开启之前，内核代码运行地址是由bootloader来决定，此时需要在bootloader处打断点来获取加载地址，通过这个地址来调试。<br>
 </p>
 </div>
 
-<div id="outline-container-org6da47cb" class="outline-3">
-<h3 id="org6da47cb">获取加载地址</h3>
-<div class="outline-text-3" id="text-org6da47cb">
+<div id="outline-container-org68ef9d6" class="outline-3">
+<h3 id="org68ef9d6">获取加载地址</h3>
+<div class="outline-text-3" id="text-org68ef9d6">
 <p>
 由于需要获取bootloader的加载地址，可以在bootloader跳转到内核之前打上断点来获取加载地址，下面以uboot为例：<br>
 </p>
 </div>
-<div id="outline-container-orgb9106ea" class="outline-4">
-<h4 id="orgb9106ea">正确加载uboot的symbol到运行位置</h4>
-<div class="outline-text-4" id="text-orgb9106ea">
+<div id="outline-container-org19a72b1" class="outline-4">
+<h4 id="org19a72b1">正确加载uboot的symbol到运行位置</h4>
+<div class="outline-text-4" id="text-org19a72b1">
 <p>
 在uboot倒计时开始时停止，使用调试器连接上，由于uboot有relocaddr的过程，所以要先获取uboot实际运行的地址，在aarch64平台上x18寄存器保存了gd指针的地址，通过x18和symbol文件就可以获取到relocaddr<br>
 </p>
 <div class="org-src-container">
 <pre class="src src-bash"><code>target remote:1234</code>
 <code>add-symbol-file ~/work/uboot/u-boot</code>
-<code><span style="color: #c678dd;">set</span> $<span style="color: #dcaeea;">uboot_relocaddr</span> = ((gd_t *)$<span style="color: #dcaeea;">x18</span>)-&gt;relocaddr</code>
-<code>add-symbol-file ~/work/uboot/u-boot $<span style="color: #dcaeea;">uboot_relocaddr</span></code>
+<code><span class="org-builtin">set</span> $<span class="org-variable-name">uboot_relocaddr</span> = ((gd_t *)$<span class="org-variable-name">x18</span>)-&gt;relocaddr</code>
+<code>add-symbol-file ~/work/uboot/u-boot $<span class="org-variable-name">uboot_relocaddr</span></code>
 </pre>
 </div>
 
@@ -124,26 +126,26 @@
 </p>
 <div class="org-src-container">
 <pre class="src src-bash"><code>(gdb) bt</code>
-<code><span style="color: #5B6268;">#</span><span style="color: #5B6268;">0  pl01x_serial_pending (dev=&lt;optimized out&gt;, input=true)</span></code>
+<code><span class="org-comment-delimiter">#</span><span class="org-comment">0  pl01x_serial_pending (dev=&lt;optimized out&gt;, input=true)</span></code>
 <code>    at drivers/serial/serial_pl01x.c:321</code>
-<code><span style="color: #5B6268;">#</span><span style="color: #5B6268;">1  0x00000000bff316b8 in console_tstc (file=0) at common/console.c:328</span></code>
-<code><span style="color: #5B6268;">#</span><span style="color: #5B6268;">2  fgetc (file=0) at common/console.c:328</span></code>
-<code><span style="color: #5B6268;">#</span><span style="color: #5B6268;">3  0x00000000bff2fd9c in cread_line (timeout=0, len=&lt;synthetic pointer&gt;, </span></code>
-<code>    <span style="color: #dcaeea;">buf</span>=0xbffd9d50 <span style="color: #98be65;">""</span>, <span style="color: #dcaeea;">prompt</span>=0xbff80a19 <span style="color: #98be65;">"Hobot# "</span>) at common/cli_readline.c:274</code>
-<code><span style="color: #5B6268;">#</span><span style="color: #5B6268;">4  cli_readline_into_buffer (prompt=0xbff80a19 "Hobot# ", buffer=0xbffd9d50 "", </span></code>
-<code>    <span style="color: #dcaeea;">timeout</span>=0) at common/cli_readline.c:549</code>
-<code><span style="color: #5B6268;">#</span><span style="color: #5B6268;">5  0x00000000bff2b130 in uboot_cli_readline (i=0xbbe93e60)</span></code>
+<code><span class="org-comment-delimiter">#</span><span class="org-comment">1  0x00000000bff316b8 in console_tstc (file=0) at common/console.c:328</span></code>
+<code><span class="org-comment-delimiter">#</span><span class="org-comment">2  fgetc (file=0) at common/console.c:328</span></code>
+<code><span class="org-comment-delimiter">#</span><span class="org-comment">3  0x00000000bff2fd9c in cread_line (timeout=0, len=&lt;synthetic pointer&gt;,</span></code>
+<code>    <span class="org-variable-name">buf</span>=0xbffd9d50 <span class="org-string">""</span>, <span class="org-variable-name">prompt</span>=0xbff80a19 <span class="org-string">"Hobot# "</span>) at common/cli_readline.c:274</code>
+<code><span class="org-comment-delimiter">#</span><span class="org-comment">4  cli_readline_into_buffer (prompt=0xbff80a19 "Hobot# ", buffer=0xbffd9d50 "",</span></code>
+<code>    <span class="org-variable-name">timeout</span>=0) at common/cli_readline.c:549</code>
+<code><span class="org-comment-delimiter">#</span><span class="org-comment">5  0x00000000bff2b130 in uboot_cli_readline (i=0xbbe93e60)</span></code>
 <code>    at common/cli_hush.c:1029</code>
-<code><span style="color: #5B6268;">#</span><span style="color: #5B6268;">6  get_user_input (i=0xbbe93e60) at common/cli_hush.c:1029</span></code>
-<code><span style="color: #5B6268;">#</span><span style="color: #5B6268;">7  file_get (i=0xbbe93e60) at common/cli_hush.c:1108</span></code>
+<code><span class="org-comment-delimiter">#</span><span class="org-comment">6  get_user_input (i=0xbbe93e60) at common/cli_hush.c:1029</span></code>
+<code><span class="org-comment-delimiter">#</span><span class="org-comment">7  file_get (i=0xbbe93e60) at common/cli_hush.c:1108</span></code>
 <code></code>
 </pre>
 </div>
 </div>
 </div>
-<div id="outline-container-org5bf8562" class="outline-4">
-<h4 id="org5bf8562">在跳入内核之前打上断点，获取内核运行地址</h4>
-<div class="outline-text-4" id="text-org5bf8562">
+<div id="outline-container-org879f848" class="outline-4">
+<h4 id="org879f848">在跳入内核之前打上断点，获取内核运行地址</h4>
+<div class="outline-text-4" id="text-org879f848">
 <div class="org-src-container">
 <pre class="src src-text"><code>(gdb) tb boot_jump_linux</code>
 <code>Temporary breakpoint 1 at 0x880024e0: boot_jump_linux. (4 locations)</code>
@@ -153,10 +155,10 @@
 <code>Thread 1 hit Temporary breakpoint 1, boot_jump_linux (images=0xbffd9b20, flag=1024)</code>
 <code>    at arch/arm/lib/bootm.c:323</code>
 <code>323 {</code>
-<code>(gdb) p images </code>
+<code>(gdb) p images</code>
 <code>$3 = (bootm_headers_t *) 0xbffd9b20</code>
-<code>(gdb) set print pretty </code>
-<code>(gdb) p /x *images </code>
+<code>(gdb) set print pretty</code>
+<code>(gdb) p /x *images</code>
 <code>$6 = {</code>
 <code>  legacy_hdr_os = 0x0,</code>
 <code>  legacy_hdr_os_copy = {</code>
@@ -278,9 +280,9 @@ hootm_headers_t中有几个变量需要注意一下，之后获取运行地址�
 </dl>
 </div>
 </div>
-<div id="outline-container-org0208ded" class="outline-4">
-<h4 id="org0208ded">加载.head.text段，在内核第一条指令处打断点</h4>
-<div class="outline-text-4" id="text-org0208ded">
+<div id="outline-container-orgcde9cb7" class="outline-4">
+<h4 id="orgcde9cb7">加载.head.text段，在内核第一条指令处打断点</h4>
+<div class="outline-text-4" id="text-orgcde9cb7">
 <p>
 由于symbol在加载时需要加载到物理地址上，所以可以通过下面的python脚本来辅助加载<br>
 </p>
@@ -290,8 +292,8 @@ hootm_headers_t中有几个变量需要注意一下，之后获取运行地址�
 </pre>
 </div>
 <div class="org-src-container">
-<pre class="src src-text"><code>(gdb) source  ~/src/gdb-script/load-linux-init.py </code>
-<code>(gdb) load-linux-init ~/work/kernel/vmlinux images-&gt;ep </code>
+<pre class="src src-text"><code>(gdb) source  ~/src/gdb-script/load-linux-init.py</code>
+<code>(gdb) load-linux-init ~/work/kernel/vmlinux images-&gt;ep</code>
 <code>Loading linux init head to 0x0000000083080000</code>
 <code>Original linux text address at 0xffffff8008080000</code>
 <code>generate command</code>
@@ -315,9 +317,9 @@ hootm_headers_t中有几个变量需要注意一下，之后获取运行地址�
 </div>
 </div>
 
-<div id="outline-container-org14df6dc" class="outline-2">
-<h2 id="org14df6dc">初始代码（MMU开启之后)</h2>
-<div class="outline-text-2" id="text-org14df6dc">
+<div id="outline-container-org8646580" class="outline-2">
+<h2 id="org8646580">初始代码（MMU开启之后)</h2>
+<div class="outline-text-2" id="text-org8646580">
 <p>
 MMU开启之后就不需要计算加载地址，可以直接打断点来调试<br>
 </p>

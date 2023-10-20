@@ -195,6 +195,18 @@
     ]
   },
   {
+    "file-path": "~/org/linux/mm/dma-buffer.org",
+    "URL": "/2023/08/22/dma-buffer.html",
+    "TITLE": "DMA buffer in linux",
+    "DATE": "<2023-08-22 15:36:46>",
+    "FILETAGS": [
+      "blogs"
+    ],
+    "CATEGORY": [
+      "Linux"
+    ]
+  },
+  {
     "file-path": "~/org/linux/mm/arm64-page-flags.org",
     "URL": "/2019/08/28/arm64-page-flags.html",
     "TITLE": "ARM64 Page type",

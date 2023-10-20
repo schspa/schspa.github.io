@@ -1,22 +1,23 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2022-03-21 Mon 17:28 -->
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- 2023-10-20 Fri 17:00 -->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Linux Clock Framework</title>
-<meta name="generator" content="Org mode">
-<meta name="author" content="Schspa">
-<meta name="description" content="Linux Clock Framework"
->
+<meta name="author" content="Schspa" />
+<meta name="description" content="Linux Clock Framework" />
+<meta name="generator" content="Org Mode" />
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <link rel="shortcut icon" href="/images/rose-red.png" type="image/x-icon" />
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" integrity="sha256-sAcc18zvMnaJZrNT4v8J0T4HqzEUiUTlVFgDIywjQek=" crossorigin="anonymous">
+<link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.2.3/css/bootstrap.min.css" rel="stylesheet">
 <link rel="stylesheet" href="/css/animate.min.css" />
 <link rel="stylesheet" href="/css/all.min.css" />
 <link rel="stylesheet" type="text/css" href="/css/style.css" />
 <link rel="stylesheet" type="text/css" href="/css/navbar.css" />
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/js/bootstrap.min.js" integrity="sha256-/hGxZHGQ57fXLp+NDusFZsZo/PG21Bp2+hXYV5a6w+g=" crossorigin="anonymous"></script>
-<script src="/js/jquery.min.js"></script>
+<script src="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.2.3/js/bootstrap.min.js"></script>
+<script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
 <script src="/js/darkreader.js"></script>
 <script src="/user.config.js"></script>
 <script src="/js/main.js"></script>
@@ -56,35 +57,35 @@
   </nav>
 </header>
 </div>
-<div id="content">
+<div id="content" class="content">
 <h1 class="title">Linux Clock Framework</h1>
-<div id="table-of-contents">
+<div id="table-of-contents" role="doc-toc">
 <h2>Table of Contents</h2>
-<div id="text-table-of-contents">
+<div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#org0bfb67b">Clock关系图</a>
+<li><a href="#org064f4a0">Clock关系图</a>
 <ul>
-<li><a href="#org29ba393">struct clk</a></li>
-<li><a href="#org5a6d4be">struct clk_core</a></li>
-<li><a href="#orgd6dd88f">struct clk_hw</a></li>
+<li><a href="#org5b842a7">struct clk</a></li>
+<li><a href="#orgc5f565e">struct clk_core</a></li>
+<li><a href="#org5abed92">struct clk_hw</a></li>
 </ul>
 </li>
-<li><a href="#org42c47e3">Clock操作步骤</a>
+<li><a href="#org6570c69">Clock操作步骤</a>
 <ul>
-<li><a href="#orgadbf4e7">Clock Provider编译期初始化</a></li>
-<li><a href="#orgd363e40">初始化</a>
+<li><a href="#orgc80e19c">Clock Provider编译期初始化</a></li>
+<li><a href="#org0c0bedc">初始化</a>
 <ul>
-<li><a href="#org84b6a0b">of_clk_init</a></li>
+<li><a href="#org3059ddf">of_clk_init</a></li>
 </ul>
 </li>
-<li><a href="#orgd68517b">Clock管理</a>
+<li><a href="#org1ed969f">Clock管理</a>
 <ul>
-<li><a href="#orgab604d1">provider</a></li>
-<li><a href="#orga1d6d51">clks</a></li>
-<li><a href="#orged22390">获取clock</a></li>
-<li><a href="#org9a061d5">clk_prepare</a></li>
-<li><a href="#org97da0b8">clk_enable</a></li>
-<li><a href="#org01b1d6f">clk_set_rate</a></li>
+<li><a href="#orgffa7b5b">provider</a></li>
+<li><a href="#org06c2a52">clks</a></li>
+<li><a href="#org999bd1f">获取clock</a></li>
+<li><a href="#orgea20a5d">clk_prepare</a></li>
+<li><a href="#org3f99498">clk_enable</a></li>
+<li><a href="#orgc07ac8b">clk_set_rate</a></li>
 </ul>
 </li>
 </ul>
@@ -92,74 +93,74 @@
 </ul>
 </div>
 </div>
-<div id="outline-container-org0bfb67b" class="outline-2">
-<h2 id="org0bfb67b">Clock关系图</h2>
-<div class="outline-text-2" id="text-org0bfb67b">
+<div id="outline-container-org064f4a0" class="outline-2">
+<h2 id="org064f4a0">Clock关系图</h2>
+<div class="outline-text-2" id="text-org064f4a0">
 <p>
 在Linux Clock的代码中，经常会有以下几个结构体，下面的图展示了这几种结构体之间的关系<br>
 </p>
 
 <p>
-<img src="/assets/.Linux-Clock.png"><br>
+<img src="/assets/.Linux-Clock-0.png"><br>
 </p>
 </div>
 
-<div id="outline-container-org29ba393" class="outline-3">
-<h3 id="org29ba393">struct clk</h3>
-<div class="outline-text-3" id="text-org29ba393">
+<div id="outline-container-org5b842a7" class="outline-3">
+<h3 id="org5b842a7">struct clk</h3>
+<div class="outline-text-3" id="text-org5b842a7">
 <p>
 这个结构体是对外的接口，驱动程序都会直接获取这个结构体，并作为一个handle来完成对clock的各种操作.<br>
 该结构体内容仅对linux clock关系系统内部可见<br>
 </p>
 </div>
 </div>
-<div id="outline-container-org5a6d4be" class="outline-3">
-<h3 id="org5a6d4be">struct clk_core</h3>
-<div class="outline-text-3" id="text-org5a6d4be">
+<div id="outline-container-orgc5f565e" class="outline-3">
+<h3 id="orgc5f565e">struct clk_core</h3>
+<div class="outline-text-3" id="text-orgc5f565e">
 <p>
 这个结构体作为内部管理clock的核心数据，负责处理Clock之间的关系，child，parent都会通过此结构体来维护他们之间的联系。<br>
 该结构体内容仅对linux clock关系系统内部可见<br>
 </p>
 </div>
 </div>
-<div id="outline-container-orgd6dd88f" class="outline-3">
-<h3 id="orgd6dd88f">struct clk_hw</h3>
-<div class="outline-text-3" id="text-orgd6dd88f">
+<div id="outline-container-org5abed92" class="outline-3">
+<h3 id="org5abed92">struct clk_hw</h3>
+<div class="outline-text-3" id="text-org5abed92">
 <p>
 这个结构体作为Clock Provider的核心数据，Clock的驱动程序一般通过内嵌的方式来使用。Clock Framework在调用具体的Clock硬件时也会通过这个数据结构来做对应的操作。<br>
 </p>
 </div>
 </div>
 </div>
-<div id="outline-container-org42c47e3" class="outline-2">
-<h2 id="org42c47e3">Clock操作步骤</h2>
-<div class="outline-text-2" id="text-org42c47e3">
+<div id="outline-container-org6570c69" class="outline-2">
+<h2 id="org6570c69">Clock操作步骤</h2>
+<div class="outline-text-2" id="text-org6570c69">
 </div>
-<div id="outline-container-orgadbf4e7" class="outline-3">
-<h3 id="orgadbf4e7">Clock Provider编译期初始化</h3>
-<div class="outline-text-3" id="text-orgadbf4e7">
+<div id="outline-container-orgc80e19c" class="outline-3">
+<h3 id="orgc80e19c">Clock Provider编译期初始化</h3>
+<div class="outline-text-3" id="text-orgc80e19c">
 <p>
 通过CLK_OF_DECLARE来定义Clock是比较常用的注册手段，通过这个宏来注册时，系统会通过特定的链接脚本来将对应的数据链接到特定位址，并在运行时找到他们。<br>
 include/asm-generic/vmlinux.lds.h<br>
 </p>
 <div class="org-src-container">
-<pre class="src src-c"><code><span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #c678dd;">___OF_TABLE</span>(<span style="color: #dcaeea;">cfg</span>, <span style="color: #dcaeea;">name</span>)  _OF_TABLE_##cfg(name)</code>
-<code><span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #c678dd;">__OF_TABLE</span>(<span style="color: #dcaeea;">cfg</span>, <span style="color: #dcaeea;">name</span>)   ___OF_TABLE(cfg, name)</code>
-<code><span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #c678dd;">OF_TABLE</span>(<span style="color: #dcaeea;">cfg</span>, <span style="color: #dcaeea;">name</span>)     __OF_TABLE(IS_ENABLED(cfg), name)</code>
-<code><span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #c678dd;">_OF_TABLE_0</span>(<span style="color: #dcaeea;">name</span>)</code>
-<code><span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #c678dd;">_OF_TABLE_1</span>(<span style="color: #dcaeea;">name</span>)                               \</code>
+<pre class="src src-c"><code><span class="org-preprocessor">#define</span> <span class="org-function-name">___OF_TABLE</span>(<span class="org-variable-name">cfg</span>, <span class="org-variable-name">name</span>)  _OF_TABLE_##cfg(name)</code>
+<code><span class="org-preprocessor">#define</span> <span class="org-function-name">__OF_TABLE</span>(<span class="org-variable-name">cfg</span>, <span class="org-variable-name">name</span>)   ___OF_TABLE(cfg, name)</code>
+<code><span class="org-preprocessor">#define</span> <span class="org-function-name">OF_TABLE</span>(<span class="org-variable-name">cfg</span>, <span class="org-variable-name">name</span>)     __OF_TABLE(IS_ENABLED(cfg), name)</code>
+<code><span class="org-preprocessor">#define</span> <span class="org-function-name">_OF_TABLE_0</span>(<span class="org-variable-name">name</span>)</code>
+<code><span class="org-preprocessor">#define</span> <span class="org-function-name">_OF_TABLE_1</span>(<span class="org-variable-name">name</span>)                               \</code>
 <code>    . = ALIGN(8);                                       \</code>
 <code>    VMLINUX_SYMBOL(__##name##_of_table) = .;    \</code>
 <code>    KEEP(*(__##name##_of_table))                        \</code>
 <code>        KEEP(*(__##name##_of_table_end))</code>
 <code></code>
-<code><span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #c678dd;">TIMER_OF_TABLES</span>()       OF_TABLE(CONFIG_TIMER_OF, timer)</code>
-<code><span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #c678dd;">IRQCHIP_OF_MATCH_TABLE</span>() OF_TABLE(CONFIG_IRQCHIP, irqchip)</code>
-<code><span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #c678dd;">CLK_OF_TABLES</span>()         OF_TABLE(CONFIG_COMMON_CLK, clk)</code>
-<code><span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #c678dd;">IOMMU_OF_TABLES</span>()       OF_TABLE(CONFIG_OF_IOMMU, iommu)</code>
-<code><span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #c678dd;">RESERVEDMEM_OF_TABLES</span>() OF_TABLE(CONFIG_OF_RESERVED_MEM, reservedmem)</code>
-<code><span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #c678dd;">CPU_METHOD_OF_TABLES</span>()  OF_TABLE(CONFIG_SMP, cpu_method)</code>
-<code><span style="color: #51afef; font-weight: bold;">#define</span> <span style="color: #c678dd;">CPUIDLE_METHOD_OF_TABLES</span>() OF_TABLE(CONFIG_CPU_IDLE, cpuidle_method)</code>
+<code><span class="org-preprocessor">#define</span> <span class="org-function-name">TIMER_OF_TABLES</span>()       OF_TABLE(CONFIG_TIMER_OF, timer)</code>
+<code><span class="org-preprocessor">#define</span> <span class="org-function-name">IRQCHIP_OF_MATCH_TABLE</span>() OF_TABLE(CONFIG_IRQCHIP, irqchip)</code>
+<code><span class="org-preprocessor">#define</span> <span class="org-function-name">CLK_OF_TABLES</span>()         OF_TABLE(CONFIG_COMMON_CLK, clk)</code>
+<code><span class="org-preprocessor">#define</span> <span class="org-function-name">IOMMU_OF_TABLES</span>()       OF_TABLE(CONFIG_OF_IOMMU, iommu)</code>
+<code><span class="org-preprocessor">#define</span> <span class="org-function-name">RESERVEDMEM_OF_TABLES</span>() OF_TABLE(CONFIG_OF_RESERVED_MEM, reservedmem)</code>
+<code><span class="org-preprocessor">#define</span> <span class="org-function-name">CPU_METHOD_OF_TABLES</span>()  OF_TABLE(CONFIG_SMP, cpu_method)</code>
+<code><span class="org-preprocessor">#define</span> <span class="org-function-name">CPUIDLE_METHOD_OF_TABLES</span>() OF_TABLE(CONFIG_CPU_IDLE, cpuidle_method)</code>
 </pre>
 </div>
 <ol class="org-ol">
@@ -169,42 +170,42 @@ include/asm-generic/vmlinux.lds.h<br>
 对应的，在编译期生成对应的of_device_id数组:<br>
 </p>
 <div class="org-src-container">
-<pre class="src src-c"><code><span style="color: #5B6268;">/*</span></code>
-<code><span style="color: #5B6268;"> * Struct used for matching a device</span></code>
-<code><span style="color: #5B6268;"> */</span></code>
-<code><span style="color: #51afef;">struct</span> <span style="color: #ECBE7B;">of_device_id</span> {</code>
-<code>    <span style="color: #ECBE7B;">char</span>        <span style="color: #dcaeea;">name</span>[32];</code>
-<code>    <span style="color: #ECBE7B;">char</span>        <span style="color: #dcaeea;">type</span>[32];</code>
-<code>    <span style="color: #ECBE7B;">char</span>        <span style="color: #dcaeea;">compatible</span>[128];</code>
-<code>    <span style="color: #51afef;">const</span> <span style="color: #ECBE7B;">void</span> *<span style="color: #dcaeea;">data</span>;</code>
+<pre class="src src-c"><code><span class="org-comment-delimiter">/*</span></code>
+<code><span class="org-comment"> * Struct used for matching a device</span></code>
+<code><span class="org-comment-delimiter"> */</span></code>
+<code><span class="org-keyword">struct</span> <span class="org-type">of_device_id</span> {</code>
+<code>    <span class="org-type">char</span>        <span class="org-variable-name">name</span>[32];</code>
+<code>    <span class="org-type">char</span>        <span class="org-variable-name">type</span>[32];</code>
+<code>    <span class="org-type">char</span>        <span class="org-variable-name">compatible</span>[128];</code>
+<code>    <span class="org-keyword">const</span> <span class="org-type">void</span> *<span class="org-variable-name">data</span>;</code>
 <code>};</code>
 </pre>
 </div></li>
 </ol>
 </div>
 </div>
-<div id="outline-container-orgd363e40" class="outline-3">
-<h3 id="orgd363e40">初始化</h3>
-<div class="outline-text-3" id="text-orgd363e40">
+<div id="outline-container-org0c0bedc" class="outline-3">
+<h3 id="org0c0bedc">初始化</h3>
+<div class="outline-text-3" id="text-org0c0bedc">
 </div>
-<div id="outline-container-org84b6a0b" class="outline-4">
-<h4 id="org84b6a0b">of_clk_init</h4>
-<div class="outline-text-4" id="text-org84b6a0b">
+<div id="outline-container-org3059ddf" class="outline-4">
+<h4 id="org3059ddf">of_clk_init</h4>
+<div class="outline-text-4" id="text-org3059ddf">
 <p>
 调用路径： start_kernel-&gt;time_init-&gt;of_clk_init<br>
 功能：<br>
 </p>
 </div>
 <ul class="org-ul">
-<li><a id="org6507464"></a>遍历节点，准备待初始化的时钟数据<br>
-<div class="outline-text-5" id="text-org6507464">
+<li><a id="orgc3ecafd"></a>遍历节点，准备待初始化的时钟数据<br>
+<div class="outline-text-5" id="text-orgc3ecafd">
 <p>
 遍历device-tree中的所由节点，并将符合compatible属性的节点放入生成clock_provider对象，最后放入的链表中。<br>
 </p>
 </div>
 </li>
-<li><a id="org0b69fcd"></a>遍历所由的clk_provider节点，调用初始化函数，<br>
-<div class="outline-text-5" id="text-org0b69fcd">
+<li><a id="orge41c9ae"></a>遍历所由的clk_provider节点，调用初始化函数，<br>
+<div class="outline-text-5" id="text-orge41c9ae">
 <dl class="org-dl">
 <dt>parent_ready</dt><dd>这个函数用来检查对应clock的parents是否准备就绪。如果获取clock时出现错误，这个函数就会认为clock已经准备好，所以如果dts配置错误，获取驱动返回错误码(-EPROBE_DEFER除外)，系统都会认为对应的clock已经准备好<br>
 <dl class="org-dl">
@@ -213,8 +214,8 @@ include/asm-generic/vmlinux.lds.h<br>
 </dl>
 </div>
 </li>
-<li><a id="org202594b"></a>处理Assigned clock parents and rates<br>
-<div class="outline-text-5" id="text-org202594b">
+<li><a id="orgc9593c7"></a>处理Assigned clock parents and rates<br>
+<div class="outline-text-5" id="text-orgc9593c7">
 <dl class="org-dl">
 <dt>assigned-clock</dt><dd>对这些clock设置parent，和rate<br></dd>
 <dt>assigned-clock-parents</dt><dd>这个用来对指定的clock配置parent<br></dd>
@@ -225,17 +226,17 @@ include/asm-generic/vmlinux.lds.h<br>
 </ul>
 </div>
 </div>
-<div id="outline-container-orgd68517b" class="outline-3">
-<h3 id="orgd68517b">Clock管理</h3>
-<div class="outline-text-3" id="text-orgd68517b">
+<div id="outline-container-org1ed969f" class="outline-3">
+<h3 id="org1ed969f">Clock管理</h3>
+<div class="outline-text-3" id="text-org1ed969f">
 <p>
 Linux内核中区分clock provider以及clock<br>
 provider用来提供获取clock的功能，获取clock都需要通过provider来获得<br>
 </p>
 </div>
-<div id="outline-container-orgab604d1" class="outline-4">
-<h4 id="orgab604d1">provider</h4>
-<div class="outline-text-4" id="text-orgab604d1">
+<div id="outline-container-orgffa7b5b" class="outline-4">
+<h4 id="orgffa7b5b">provider</h4>
+<div class="outline-text-4" id="text-orgffa7b5b">
 <p>
 Linux系统通过两个全局的列表来管理clock provider，所有获取clock的操作都需要从这两个链表中获取。<br>
 <img src="/assets/.Linux-Clock-Manage.png"><br>
@@ -255,16 +256,16 @@ Linux系统通过两个全局的列表来管理clock provider，所有获取cloc
 <div class="outline-text-5" id="text-clocks">
 <p>
  <a target="_blank" href="https://github.com/torvalds/linux/blob/b133f076639b918bb6ad157f6308b0f595058959/drivers/clk/clkdev.c#L24">kernel source for clocks list</a><br>
-这个列表通过<code class="src src-c"><span style="color: #51afef;">struct</span> <span style="color: #ECBE7B;">clk_lookup</span></code>结构体来管理，通过clkdev_alloc等API来进行添加clock<br>
+这个列表通过<code class="src src-c"><span class="org-keyword">struct</span> <span class="org-type">clk_lookup</span></code>结构体来管理，通过clkdev_alloc等API来进行添加clock<br>
 </p>
 </div>
 </li>
 </ul>
 </div>
 
-<div id="outline-container-orga1d6d51" class="outline-4">
-<h4 id="orga1d6d51">clks</h4>
-<div class="outline-text-4" id="text-orga1d6d51">
+<div id="outline-container-org06c2a52" class="outline-4">
+<h4 id="org06c2a52">clks</h4>
+<div class="outline-text-4" id="text-org06c2a52">
 <p>
 通过clock provider既可获得clock，linux中将clock放入全局的列表中进行管理。<br>
 当通过debugfs节点/sys/kernel/debug/clk/clk_summary和/sys/kernel/debug/clk/clk_dump查看clock信息时就是从这个地方来获取的clock信息。<br>
@@ -275,23 +276,23 @@ Linux系统通过两个全局的列表来管理clock provider，所有获取cloc
 </ul>
 </div>
 </div>
-<div id="outline-container-orged22390" class="outline-4">
-<h4 id="orged22390">获取clock</h4>
-<div class="outline-text-4" id="text-orged22390">
+<div id="outline-container-org999bd1f" class="outline-4">
+<h4 id="org999bd1f">获取clock</h4>
+<div class="outline-text-4" id="text-org999bd1f">
 <ul class="org-ul">
 <li><p>
 device函数<br>
 <a target="_blank" href="https://github.com/torvalds/linux/blob/b133f076639b918bb6ad157f6308b0f595058959/include/linux/clk.h#L330">clk_get</a><br>
 </p>
 <div class="org-src-container">
-<pre class="src src-c"><code><span style="color: #51afef;">struct</span> <span style="color: #ECBE7B;">clk</span> *<span style="color: #c678dd;">clk_get</span>(<span style="color: #51afef;">struct</span> <span style="color: #ECBE7B;">device</span> *<span style="color: #dcaeea;">dev</span>, <span style="color: #51afef;">const</span> <span style="color: #ECBE7B;">char</span> *<span style="color: #dcaeea;">id</span>);</code>
-<code><span style="color: #ECBE7B;">int</span> <span style="color: #c678dd;">__must_check</span> clk_bulk_get(<span style="color: #51afef;">struct</span> <span style="color: #ECBE7B;">device</span> *<span style="color: #dcaeea;">dev</span>, <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">num_clks</span>,</code>
-<code>            <span style="color: #51afef;">struct</span> <span style="color: #ECBE7B;">clk_bulk_data</span> *<span style="color: #dcaeea;">clks</span>);</code>
-<code><span style="color: #ECBE7B;">int</span> <span style="color: #c678dd;">__must_check</span> devm_clk_bulk_get(<span style="color: #51afef;">struct</span> <span style="color: #ECBE7B;">device</span> *<span style="color: #dcaeea;">dev</span>, <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">num_clks</span>,</code>
-<code>                <span style="color: #51afef;">struct</span> <span style="color: #ECBE7B;">clk_bulk_data</span> *<span style="color: #dcaeea;">clks</span>);</code>
-<code><span style="color: #51afef;">struct</span> <span style="color: #ECBE7B;">clk</span> *<span style="color: #c678dd;">devm_clk_get</span>(<span style="color: #51afef;">struct</span> <span style="color: #ECBE7B;">device</span> *<span style="color: #dcaeea;">dev</span>, <span style="color: #51afef;">const</span> <span style="color: #ECBE7B;">char</span> *<span style="color: #dcaeea;">id</span>);</code>
-<code><span style="color: #51afef;">struct</span> <span style="color: #ECBE7B;">clk</span> *<span style="color: #c678dd;">devm_get_clk_from_child</span>(<span style="color: #51afef;">struct</span> <span style="color: #ECBE7B;">device</span> *<span style="color: #dcaeea;">dev</span>,</code>
-<code>                <span style="color: #51afef;">struct</span> <span style="color: #ECBE7B;">device_node</span> *<span style="color: #dcaeea;">np</span>, <span style="color: #51afef;">const</span> <span style="color: #ECBE7B;">char</span> *<span style="color: #dcaeea;">con_id</span>);</code>
+<pre class="src src-c"><code><span class="org-keyword">struct</span> <span class="org-type">clk</span> *<span class="org-function-name">clk_get</span>(<span class="org-keyword">struct</span> <span class="org-type">device</span> *<span class="org-variable-name">dev</span>, <span class="org-keyword">const</span> <span class="org-type">char</span> *<span class="org-variable-name">id</span>);</code>
+<code><span class="org-type">int</span> <span class="org-variable-name">__must_check</span> clk_bulk_get(<span class="org-keyword">struct</span> <span class="org-type">device</span> *<span class="org-variable-name">dev</span>, <span class="org-type">int</span> <span class="org-variable-name">num_clks</span>,</code>
+<code>            <span class="org-keyword">struct</span> <span class="org-type">clk_bulk_data</span> *<span class="org-variable-name">clks</span>);</code>
+<code><span class="org-type">int</span> <span class="org-variable-name">__must_check</span> devm_clk_bulk_get(<span class="org-keyword">struct</span> <span class="org-type">device</span> *<span class="org-variable-name">dev</span>, <span class="org-type">int</span> <span class="org-variable-name">num_clks</span>,</code>
+<code>                <span class="org-keyword">struct</span> <span class="org-type">clk_bulk_data</span> *<span class="org-variable-name">clks</span>);</code>
+<code><span class="org-keyword">struct</span> <span class="org-type">clk</span> *<span class="org-function-name">devm_clk_get</span>(<span class="org-keyword">struct</span> <span class="org-type">device</span> *<span class="org-variable-name">dev</span>, <span class="org-keyword">const</span> <span class="org-type">char</span> *<span class="org-variable-name">id</span>);</code>
+<code><span class="org-keyword">struct</span> <span class="org-type">clk</span> *<span class="org-function-name">devm_get_clk_from_child</span>(<span class="org-keyword">struct</span> <span class="org-type">device</span> *<span class="org-variable-name">dev</span>,</code>
+<code>                <span class="org-keyword">struct</span> <span class="org-type">device_node</span> *<span class="org-variable-name">np</span>, <span class="org-keyword">const</span> <span class="org-type">char</span> *<span class="org-variable-name">con_id</span>);</code>
 </pre>
 </div>
 <p>
@@ -308,32 +309,32 @@ of函数<br>
 <a target="_blank" href="https://github.com/torvalds/linux/blob/b133f076639b918bb6ad157f6308b0f595058959/include/linux/clk.h#L1009">of_clk_*</a><br>
 </p>
 <div class="org-src-container">
-<pre class="src src-c"><code><span style="color: #51afef;">struct</span> <span style="color: #ECBE7B;">clk</span> *<span style="color: #c678dd;">of_clk_get</span>(<span style="color: #51afef;">struct</span> <span style="color: #ECBE7B;">device_node</span> *<span style="color: #dcaeea;">np</span>, <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">index</span>);</code>
-<code><span style="color: #51afef;">struct</span> <span style="color: #ECBE7B;">clk</span> *<span style="color: #c678dd;">of_clk_get_by_name</span>(<span style="color: #51afef;">struct</span> <span style="color: #ECBE7B;">device_node</span> *<span style="color: #dcaeea;">np</span>, <span style="color: #51afef;">const</span> <span style="color: #ECBE7B;">char</span> *<span style="color: #dcaeea;">name</span>);</code>
-<code><span style="color: #51afef;">struct</span> <span style="color: #ECBE7B;">clk</span> *<span style="color: #c678dd;">of_clk_get_from_provider</span>(<span style="color: #51afef;">struct</span> <span style="color: #ECBE7B;">of_phandle_args</span> *<span style="color: #dcaeea;">clkspec</span>);</code>
+<pre class="src src-c"><code><span class="org-keyword">struct</span> <span class="org-type">clk</span> *<span class="org-function-name">of_clk_get</span>(<span class="org-keyword">struct</span> <span class="org-type">device_node</span> *<span class="org-variable-name">np</span>, <span class="org-type">int</span> <span class="org-variable-name">index</span>);</code>
+<code><span class="org-keyword">struct</span> <span class="org-type">clk</span> *<span class="org-function-name">of_clk_get_by_name</span>(<span class="org-keyword">struct</span> <span class="org-type">device_node</span> *<span class="org-variable-name">np</span>, <span class="org-keyword">const</span> <span class="org-type">char</span> *<span class="org-variable-name">name</span>);</code>
+<code><span class="org-keyword">struct</span> <span class="org-type">clk</span> *<span class="org-function-name">of_clk_get_from_provider</span>(<span class="org-keyword">struct</span> <span class="org-type">of_phandle_args</span> *<span class="org-variable-name">clkspec</span>);</code>
 </pre>
 </div></li>
 </ul>
 </div>
 </div>
-<div id="outline-container-org9a061d5" class="outline-4">
-<h4 id="org9a061d5"><a target="_blank" href="https://github.com/torvalds/linux/blob/b133f076639b918bb6ad157f6308b0f595058959/include/linux/clk.h#L250">clk_prepare</a></h4>
-<div class="outline-text-4" id="text-org9a061d5">
+<div id="outline-container-orgea20a5d" class="outline-4">
+<h4 id="orgea20a5d"><a target="_blank" href="https://github.com/torvalds/linux/blob/b133f076639b918bb6ad157f6308b0f595058959/include/linux/clk.h#L250">clk_prepare</a></h4>
+<div class="outline-text-4" id="text-orgea20a5d">
 <p>
 此函数内部会获取全局的mutex lock (可重入)<br>
 <a target="_blank" href="https://github.com/torvalds/linux/blob/b133f076639b918bb6ad157f6308b0f595058959/drivers/clk/clk.c#L133">kernel source for clk_prepare_lock</a><br>
 Clock在开启，关闭时可能会需要一定的准备条件，并且可能需要等待硬件状态稳定，不能立刻生效。所以Linux内核中提供了clk_prepare函数来处理这种状况。<br>
-例如：PLL在开启，切换频率时，需要等待时钟重新锁定<sup><a id="fnr.1" class="footref" href="#fn.1">1</a></sup> <sup>, </sup><sup><a id="fnr.2" class="footref" href="#fn.2">2</a></sup>。这个过程通常需要一段时间，因此驱动在快速开启时钟时，不适合进行pll的lock操作。因此pll的开启操作一般在prepare阶段完成。<br>
+例如：PLL在开启，切换频率时，需要等待时钟重新锁定<sup><a id="fnr.1" class="footref" href="#fn.1" role="doc-backlink">1</a></sup> <sup>, </sup><sup><a id="fnr.2" class="footref" href="#fn.2" role="doc-backlink">2</a></sup>。这个过程通常需要一段时间，因此驱动在快速开启时钟时，不适合进行pll的lock操作。因此pll的开启操作一般在prepare阶段完成。<br>
 <a target="_blank" href="https://github.com/torvalds/linux/blob/b133f076639b918bb6ad157f6308b0f595058959/drivers/clk/imx/clk-frac-pll.c#L65">kernel source for drivers/clk/imx/clk-frac-pll.c</a><br>
 对于scmi的clock，系统也是一样具有类似的问题，由于scmi需要和其他的异构核或者firmware进行交互，耗时比较长. 因此开关clock的操作都在prepare/unprepare中完成，并且没有提供enable/disable的接口。<br>
 <a target="_blank" href="https://github.com/torvalds/linux/blob/b133f076639b918bb6ad157f6308b0f595058959/drivers/clk/clk-scmi.c#L91">kernel source for scmi_clk_ops</a><br>
-参考资料： <sup><a id="fnr.3" class="footref" href="#fn.3">3</a></sup><br>
+参考资料： <sup><a id="fnr.3" class="footref" href="#fn.3" role="doc-backlink">3</a></sup><br>
 </p>
 </div>
 </div>
-<div id="outline-container-org97da0b8" class="outline-4">
-<h4 id="org97da0b8"><a target="_blank" href="https://github.com/torvalds/linux/blob/b133f076639b918bb6ad157f6308b0f595058959/include/linux/clk.h#L531">clk_enable</a></h4>
-<div class="outline-text-4" id="text-org97da0b8">
+<div id="outline-container-org3f99498" class="outline-4">
+<h4 id="org3f99498"><a target="_blank" href="https://github.com/torvalds/linux/blob/b133f076639b918bb6ad157f6308b0f595058959/include/linux/clk.h#L531">clk_enable</a></h4>
+<div class="outline-text-4" id="text-org3f99498">
 <p>
 这个很好理解，通过这个函数完成实际的开关操作。<br>
 需要注意的是，这个函数在调用时会获取一把全局的spinlock enable_lock, (此lock已做了重入支持)<br>
@@ -351,9 +352,9 @@ call_graph<br>
 </div>
 </div>
 </div>
-<div id="outline-container-org01b1d6f" class="outline-4">
-<h4 id="org01b1d6f">clk_set_rate</h4>
-<div class="outline-text-4" id="text-org01b1d6f">
+<div id="outline-container-orgc07ac8b" class="outline-4">
+<h4 id="orgc07ac8b">clk_set_rate</h4>
+<div class="outline-text-4" id="text-orgc07ac8b">
 <p>
 <a target="_blank" href="https://github.com/torvalds/linux/blob/b133f076639b918bb6ad157f6308b0f595058959/drivers/clk/clk.c#L2243">kernel source for clk_set_rate</a><br>
 这个也很容易理解，设置频率,但是实现比较复杂，因为需要处理parent关系，并且针对多parent的情况也需要可以正常处理。<br>
@@ -379,15 +380,15 @@ call_graph<br>
 <h2 class="footnotes">Footnotes: </h2>
 <div id="text-footnotes">
 
-<div class="footdef"><sup><a id="fn.1" class="footnum" href="#fnr.1">1</a></sup> <div class="footpara"><p class="footpara">
+<div class="footdef"><sup><a id="fn.1" class="footnum" href="#fnr.1" role="doc-backlink">1</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">
 <a href="https://www.jedec.org/standards-documents/dictionary/terms/pll-lock-time-after-frequency-change-tlomega">PLL lock time after frequency change</a><br>
 </p></div></div>
 
-<div class="footdef"><sup><a id="fn.2" class="footnum" href="#fnr.2">2</a></sup> <div class="footpara"><p class="footpara">
+<div class="footdef"><sup><a id="fn.2" class="footnum" href="#fnr.2" role="doc-backlink">2</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">
 <a href="https://ewh.ieee.org/r5/denver/sscs/Presentations/2007_05_Fischette.pdf">Phase-Locked Loop Basics (PLL)</a><br>
 </p></div></div>
 
-<div class="footdef"><sup><a id="fn.3" class="footnum" href="#fnr.3">3</a></sup> <div class="footpara"><p class="footpara">
+<div class="footdef"><sup><a id="fn.3" class="footnum" href="#fnr.3" role="doc-backlink">3</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">
 <a href="https://stackoverflow.com/questions/17262063/linux-kernel-clock-framework-what-is-role-of-clk-prepare-unprepare">Linux Kernel - Clock Framework - What is role of clk_prepare/unprepare?</a><br>
 </p></div></div>
 

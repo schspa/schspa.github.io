@@ -1,21 +1,23 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2022-03-03 Thu 11:48 -->
+<!-- 2023-10-20 Fri 17:00 -->
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>setjmp/longjmp in C</title>
 <meta name="author" content="Schspa" />
 <meta name="description" content="Setjmp analysis" />
 <meta name="generator" content="Org Mode" />
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <link rel="shortcut icon" href="/images/rose-red.png" type="image/x-icon" />
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" integrity="sha256-sAcc18zvMnaJZrNT4v8J0T4HqzEUiUTlVFgDIywjQek=" crossorigin="anonymous">
+<link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.2.3/css/bootstrap.min.css" rel="stylesheet">
 <link rel="stylesheet" href="/css/animate.min.css" />
 <link rel="stylesheet" href="/css/all.min.css" />
 <link rel="stylesheet" type="text/css" href="/css/style.css" />
 <link rel="stylesheet" type="text/css" href="/css/navbar.css" />
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/js/bootstrap.min.js" integrity="sha256-/hGxZHGQ57fXLp+NDusFZsZo/PG21Bp2+hXYV5a6w+g=" crossorigin="anonymous"></script>
-<script src="/js/jquery.min.js"></script>
+<script src="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.2.3/js/bootstrap.min.js"></script>
+<script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
 <script src="/js/darkreader.js"></script>
 <script src="/user.config.js"></script>
 <script src="/js/main.js"></script>
@@ -61,57 +63,57 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#orgd762258">Example Analysis</a></li>
-<li><a href="#org843e490">libc implement of setjmp/longjmp</a>
+<li><a href="#orgacdedf2">Example Analysis</a></li>
+<li><a href="#orgf9e2a3b">libc implement of setjmp/longjmp</a>
 <ul>
-<li><a href="#org652f9ea">setjmp</a></li>
-<li><a href="#orgd2edb33">longjmp</a></li>
+<li><a href="#org6749480">setjmp</a></li>
+<li><a href="#org725352b">longjmp</a></li>
 </ul>
 </li>
-<li><a href="#org90b4a3e">risk of setjmp/longjmp usage</a></li>
+<li><a href="#org949c998">risk of setjmp/longjmp usage</a></li>
 </ul>
 </div>
 </div>
 
-<div id="outline-container-orgd762258" class="outline-2">
-<h2 id="orgd762258">Example Analysis</h2>
-<div class="outline-text-2" id="text-orgd762258">
+<div id="outline-container-orgacdedf2" class="outline-2">
+<h2 id="orgacdedf2">Example Analysis</h2>
+<div class="outline-text-2" id="text-orgacdedf2">
 <p>
 下面代码是setjmp以及longjmp的使用实例，以及其反汇编出来的结果，具体api的使用细节请参考man手册<br>
 </p>
 
 <div class="org-src-container">
-<pre class="src src-C" id="orge89ffb1"><code><span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;stdio.h&gt;</span></code>
-<code><span style="color: #51afef; font-weight: bold;">#include</span> <span style="color: #98be65;">&lt;setjmp.h&gt;</span></code>
+<pre class="src src-C" id="org642a72c"><code><span class="org-preprocessor">#include</span> <span class="org-string">&lt;stdio.h&gt;</span></code>
+<code><span class="org-preprocessor">#include</span> <span class="org-string">&lt;setjmp.h&gt;</span></code>
 <code></code>
-<code><span style="color: #51afef;">static</span> <span style="color: #ECBE7B;">jmp_buf</span> <span style="color: #dcaeea;">env</span>;</code>
+<code><span class="org-keyword">static</span> <span class="org-type">jmp_buf</span> <span class="org-variable-name">env</span>;</code>
 <code></code>
-<code><span style="color: #ECBE7B;">double</span> <span style="color: #c678dd;">divide</span>(<span style="color: #ECBE7B;">double</span> <span style="color: #dcaeea;">a</span>,<span style="color: #ECBE7B;">double</span> <span style="color: #dcaeea;">b</span>)</code>
+<code><span class="org-type">double</span> <span class="org-function-name">divide</span>(<span class="org-type">double</span> <span class="org-variable-name">a</span>,<span class="org-type">double</span> <span class="org-variable-name">b</span>)</code>
 <code>{</code>
-<code>    <span style="color: #51afef;">const</span> <span style="color: #ECBE7B;">double</span> <span style="color: #dcaeea;">delta</span> = 0.00000000001;</code>
-<code>    <span style="color: #51afef;">if</span>(<span style="color: #51afef; font-weight: bold;">!</span>((-delta &lt; b) &amp;&amp; (b &lt; delta)))</code>
+<code>    <span class="org-keyword">const</span> <span class="org-type">double</span> <span class="org-variable-name">delta</span> = 0.00000000001;</code>
+<code>    <span class="org-keyword">if</span>(<span class="org-negation-char">!</span>((-delta &lt; b) &amp;&amp; (b &lt; delta)))</code>
 <code>    {</code>
-<code>        <span style="color: #51afef;">return</span>  a/b ;</code>
+<code>        <span class="org-keyword">return</span>  a/b ;</code>
 <code>    }</code>
-<code>    <span style="color: #51afef;">else</span></code>
+<code>    <span class="org-keyword">else</span></code>
 <code>    {</code>
 <code>        longjmp(env, 1);</code>
-<code>        <span style="color: #51afef;">return</span> 0;</code>
+<code>        <span class="org-keyword">return</span> 0;</code>
 <code>    }</code>
 <code>}</code>
 <code></code>
-<code><span style="color: #ECBE7B;">int</span> <span style="color: #c678dd;">main</span>( )</code>
+<code><span class="org-type">int</span> <span class="org-function-name">main</span>( )</code>
 <code>{</code>
-<code>    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">ret</span>;</code>
+<code>    <span class="org-type">int</span> <span class="org-variable-name">ret</span>;</code>
 <code></code>
 <code>    ret = setjmp(env);</code>
 <code></code>
-<code>    <span style="color: #51afef;">if</span> (<span style="color: #51afef; font-weight: bold;">!</span>ret) {</code>
-<code>        printf(<span style="color: #98be65;">"5/0=%lf\n"</span>, divide(5,0));</code>
-<code>    } <span style="color: #51afef;">else</span>  <span style="color: #51afef;">if</span> (ret == 1) {</code>
-<code>        printf(<span style="color: #98be65;">"ERR\n"</span>);</code>
+<code>    <span class="org-keyword">if</span> (<span class="org-negation-char">!</span>ret) {</code>
+<code>        printf(<span class="org-string">"5/0=%lf\n"</span>, divide(5,0));</code>
+<code>    } <span class="org-keyword">else</span>  <span class="org-keyword">if</span> (ret == 1) {</code>
+<code>        printf(<span class="org-string">"ERR\n"</span>);</code>
 <code>    }</code>
-<code>    <span style="color: #51afef;">return</span> 0;</code>
+<code>    <span class="org-keyword">return</span> 0;</code>
 <code>}</code>
 </pre>
 </div>
@@ -121,7 +123,94 @@
 </p>
 
 <div class="org-src-container">
-<pre class="src src-asm"><code></code>
+<pre class="src src-asm"><code><span class="org-function-name">Dump</span> <span class="org-keyword">of</span> assembler code for function divide:</code>
+<code>/var/folders/jh/0ybww9_12tv8l_jbrc8kwhxw0000gn/T/ox-bash-wtGI3WvdO/test.c:</code>
+<code><span class="org-function-name">7</span>   {</code>
+<code><span class="org-function-name">8</span>       <span class="org-keyword">const</span> double delta = 0.00000000001<span class="org-comment-delimiter">;</span></code>
+<code><span class="org-function-name">9</span>       <span class="org-keyword">if</span>(!((-delta &lt; b) &amp;&amp; (b &lt; delta)))</code>
+<code>   <span class="org-keyword">0x0000000000400674</span> &lt;+0&gt;: 00 00 00 90 adrp    x0, 0x400000</code>
+<code>   <span class="org-keyword">0x0000000000400678</span> &lt;+4&gt;: 02 bc 43 fd ldr d2, [x0, #1912]</code>
+<code>   <span class="org-keyword">0x000000000040067c</span> &lt;+8&gt;: 30 20 62 1e fcmpe   d1, d2</code>
+<code>   <span class="org-keyword">0x0000000000400680</span> &lt;+12&gt;:    6c 00 00 54 b.gt    0x40068c &lt;divide+24&gt;</code>
+<code></code>
+<code><span class="org-function-name">10</span>      {</code>
+<code><span class="org-function-name">11</span>          <span class="org-keyword">return</span>  a/b <span class="org-comment-delimiter">;</span></code>
+<code>   <span class="org-keyword">0x0000000000400684</span> &lt;+16&gt;:    00 18 61 1e fdiv    d0, d0, d1</code>
+<code></code>
+<code><span class="org-function-name">16</span>          <span class="org-keyword">return</span> 0<span class="org-comment-delimiter">;</span></code>
+<code><span class="org-function-name">17</span>      }</code>
+<code><span class="org-function-name">18</span>  }</code>
+<code>   <span class="org-keyword">0x0000000000400688</span> &lt;+20&gt;:    c0 03 5f d6 ret</code>
+<code></code>
+<code><span class="org-function-name">9</span>       <span class="org-keyword">if</span>(!((-delta &lt; b) &amp;&amp; (b &lt; delta)))</code>
+<code>   <span class="org-keyword">0x000000000040068c</span> &lt;+24&gt;:    00 00 00 90 adrp    x0, 0x400000</code>
+<code>   <span class="org-keyword">0x0000000000400690</span> &lt;+28&gt;:    02 c0 43 fd ldr d2, [x0, #1920]</code>
+<code>   <span class="org-keyword">0x0000000000400694</span> &lt;+32&gt;:    30 20 62 1e fcmpe   d1, d2</code>
+<code>   <span class="org-keyword">0x0000000000400698</span> &lt;+36&gt;:    44 00 00 54 b.mi    0x4006a0 &lt;divide+44&gt;  <span class="org-comment-delimiter">// </span><span class="org-comment">b.first</span></code>
+<code>   <span class="org-keyword">0x000000000040069c</span> &lt;+40&gt;:    fa ff ff 17 b   0x400684 &lt;divide+16&gt;</code>
+<code></code>
+<code><span class="org-function-name">12</span>      }</code>
+<code><span class="org-function-name">13</span>      <span class="org-keyword">else</span></code>
+<code><span class="org-function-name">14</span>      {</code>
+<code><span class="org-function-name">15</span>          <span class="org-keyword">longjmp</span>(env, 1)<span class="org-comment-delimiter">;</span></code>
+<code>   <span class="org-keyword">0x00000000004006a0</span> &lt;+44&gt;:    fd 7b bf a9 stp x29, x30, [sp, #-16]!</code>
+<code>   <span class="org-keyword">0x00000000004006a4</span> &lt;+48&gt;:    80 00 00 b0 adrp    x0, 0x411000 <a href="mailto:_setjmp%40got.plt">&lt;_setjmp@got.plt&gt;</a></code>
+<code>   <span class="org-keyword">0x00000000004006a8</span> &lt;+52&gt;:    21 00 80 52 mov w1, #0x1                    <span class="org-comment-delimiter">// </span><span class="org-comment">#1</span></code>
+<code></code>
+<code><span class="org-function-name">7</span>   {</code>
+<code>   <span class="org-keyword">0x00000000004006ac</span> &lt;+56&gt;:    fd 03 00 91 mov x29, sp</code>
+<code></code>
+<code><span class="org-function-name">12</span>      }</code>
+<code><span class="org-function-name">13</span>      <span class="org-keyword">else</span></code>
+<code><span class="org-function-name">14</span>      {</code>
+<code><span class="org-function-name">15</span>          <span class="org-keyword">longjmp</span>(env, 1)<span class="org-comment-delimiter">;</span></code>
+<code>   <span class="org-keyword">0x00000000004006b0</span> &lt;+60&gt;:    00 20 01 91 add x0, x0, #0x48</code>
+<code>   <span class="org-keyword">0x00000000004006b4</span> &lt;+64&gt;:    9b ff ff 97 bl  0x400520 <a href="mailto:longjmp%40plt">&lt;longjmp@plt&gt;</a></code>
+<code><span class="org-function-name">End</span> <span class="org-keyword">of</span> assembler dump.</code>
+<code><span class="org-function-name">Dump</span> <span class="org-keyword">of</span> assembler code for function main:</code>
+<code>/var/folders/jh/0ybww9_12tv8l_jbrc8kwhxw0000gn/T/ox-bash-wtGI3WvdO/test.c:</code>
+<code><span class="org-function-name">21</span>  {</code>
+<code><span class="org-function-name">22</span>      <span class="org-keyword">int</span> ret<span class="org-comment-delimiter">;</span></code>
+<code><span class="org-function-name">23</span>  </code>
+<code><span class="org-function-name">24</span>      <span class="org-keyword">ret</span> = setjmp(env)<span class="org-comment-delimiter">;</span></code>
+<code>   <span class="org-keyword">0x0000000000400530</span> &lt;+0&gt;: fd 7b bf a9 stp x29, x30, [sp, #-16]!</code>
+<code>   <span class="org-keyword">0x0000000000400534</span> &lt;+4&gt;: 80 00 00 b0 adrp    x0, 0x411000 <a href="mailto:_setjmp%40got.plt">&lt;_setjmp@got.plt&gt;</a></code>
+<code>   <span class="org-keyword">0x0000000000400538</span> &lt;+8&gt;: 00 20 01 91 add x0, x0, #0x48</code>
+<code></code>
+<code><span class="org-function-name">21</span>  {</code>
+<code>   <span class="org-keyword">0x000000000040053c</span> &lt;+12&gt;:    fd 03 00 91 mov x29, sp</code>
+<code></code>
+<code><span class="org-function-name">22</span>      <span class="org-keyword">int</span> ret<span class="org-comment-delimiter">;</span></code>
+<code><span class="org-function-name">23</span>  </code>
+<code><span class="org-function-name">24</span>      <span class="org-keyword">ret</span> = setjmp(env)<span class="org-comment-delimiter">;</span></code>
+<code>   <span class="org-keyword">0x0000000000400540</span> &lt;+16&gt;:    e4 ff ff 97 bl  0x4004d0 <a href="mailto:_setjmp%40plt">&lt;_setjmp@plt&gt;</a></code>
+<code></code>
+<code><span class="org-function-name">25</span>  </code>
+<code><span class="org-function-name">26</span>      <span class="org-keyword">if</span> (!ret) {</code>
+<code>   <span class="org-keyword">0x0000000000400544</span> &lt;+20&gt;:    a0 00 00 35 cbnz    w0, 0x400558 &lt;main+40&gt;</code>
+<code></code>
+<code><span class="org-function-name">15</span>          <span class="org-keyword">longjmp</span>(env, 1)<span class="org-comment-delimiter">;</span></code>
+<code>   <span class="org-keyword">0x0000000000400548</span> &lt;+24&gt;:    80 00 00 b0 adrp    x0, 0x411000 <a href="mailto:_setjmp%40got.plt">&lt;_setjmp@got.plt&gt;</a></code>
+<code>   <span class="org-keyword">0x000000000040054c</span> &lt;+28&gt;:    21 00 80 52 mov w1, #0x1                    <span class="org-comment-delimiter">// </span><span class="org-comment">#1</span></code>
+<code>   <span class="org-keyword">0x0000000000400550</span> &lt;+32&gt;:    00 20 01 91 add x0, x0, #0x48</code>
+<code>   <span class="org-keyword">0x0000000000400554</span> &lt;+36&gt;:    f3 ff ff 97 bl  0x400520 <a href="mailto:longjmp%40plt">&lt;longjmp@plt&gt;</a></code>
+<code></code>
+<code><span class="org-function-name">27</span>          <span class="org-keyword">printf</span>(<span class="org-string">"5/0=%lf\n"</span>, divide(5,0))<span class="org-comment-delimiter">;</span></code>
+<code><span class="org-function-name">28</span>      } else  if (ret == 1) {</code>
+<code>   <span class="org-keyword">0x0000000000400558</span> &lt;+40&gt;:    1f 04 00 71 cmp w0, #0x1</code>
+<code>   <span class="org-keyword">0x000000000040055c</span> &lt;+44&gt;:    81 00 00 54 b.ne    0x40056c &lt;main+60&gt;  <span class="org-comment-delimiter">// </span><span class="org-comment">b.any</span></code>
+<code></code>
+<code><span class="org-function-name">29</span>          <span class="org-keyword">printf</span>(<span class="org-string">"ERR\n"</span>)<span class="org-comment-delimiter">;</span></code>
+<code>   <span class="org-keyword">0x0000000000400560</span> &lt;+48&gt;:    00 00 00 90 adrp    x0, 0x400000</code>
+<code>   <span class="org-keyword">0x0000000000400564</span> &lt;+52&gt;:    00 c0 1d 91 add x0, x0, #0x770</code>
+<code>   <span class="org-keyword">0x0000000000400568</span> &lt;+56&gt;:    ea ff ff 97 bl  0x400510 <a href="mailto:puts%40plt">&lt;puts@plt&gt;</a></code>
+<code></code>
+<code><span class="org-function-name">30</span>      }</code>
+<code><span class="org-function-name">31</span>      <span class="org-keyword">return</span> 0<span class="org-comment-delimiter">;</span></code>
+<code>   <span class="org-keyword">0x000000000040056c</span> &lt;+60&gt;:    00 00 80 52 mov w0, #0x0                    <span class="org-comment-delimiter">// </span><span class="org-comment">#0</span></code>
+<code>   <span class="org-keyword">0x0000000000400570</span> &lt;+64&gt;:    fd 7b c1 a8 ldp x29, x30, [sp], #16</code>
+<code>   <span class="org-keyword">0x0000000000400574</span> &lt;+68&gt;:    c0 03 5f d6 ret</code>
+<code><span class="org-function-name">End</span> <span class="org-keyword">of</span> assembler dump.</code>
 </pre>
 </div>
 
@@ -131,71 +220,71 @@
 </div>
 </div>
 
-<div id="outline-container-org843e490" class="outline-2">
-<h2 id="org843e490">libc implement of setjmp/longjmp</h2>
-<div class="outline-text-2" id="text-org843e490">
+<div id="outline-container-orgf9e2a3b" class="outline-2">
+<h2 id="orgf9e2a3b">libc implement of setjmp/longjmp</h2>
+<div class="outline-text-2" id="text-orgf9e2a3b">
 <p>
 <a href="https://github.com/lattera/glibc/blob/895ef79e04a953cac1493863bcae29ad85657ee1/sysdeps/aarch64/setjmp.S#L29">https://github.com/lattera/glibc/blob/895ef79e04a953cac1493863bcae29ad85657ee1/sysdeps/aarch64/setjmp.S#L29</a><br>
 </p>
 </div>
 
-<div id="outline-container-org652f9ea" class="outline-3">
-<h3 id="org652f9ea">setjmp</h3>
-<div class="outline-text-3" id="text-org652f9ea">
+<div id="outline-container-org6749480" class="outline-3">
+<h3 id="org6749480">setjmp</h3>
+<div class="outline-text-3" id="text-org6749480">
 <div class="org-src-container">
-<pre class="src src-asm"><code><span style="color: #5B6268;">/* </span><span style="color: #5B6268;">Keep traditional entry points in with sigsetjmp(). */</span></code>
-<code><span style="color: #c678dd;">ENTRY</span> (setjmp)</code>
-<code>    <span style="color: #51afef;">mov</span> x1, #1</code>
-<code>    <span style="color: #51afef;">b</span>   1f</code>
-<code><span style="color: #c678dd;">END</span> (setjmp)</code>
+<pre class="src src-asm"><code><span class="org-comment-delimiter">/* </span><span class="org-comment">Keep traditional entry points in with sigsetjmp().</span><span class="org-comment-delimiter"> */</span></code>
+<code><span class="org-function-name">ENTRY</span> (setjmp)</code>
+<code>    <span class="org-keyword">mov</span> x1, #1</code>
+<code>    <span class="org-keyword">b</span>   1f</code>
+<code><span class="org-function-name">END</span> (setjmp)</code>
 <code></code>
-<code><span style="color: #c678dd;">ENTRY</span> (_setjmp)</code>
-<code>    <span style="color: #51afef;">mov</span> x1, #0</code>
-<code>    <span style="color: #51afef;">b</span>   1f</code>
-<code><span style="color: #c678dd;">END</span> (_setjmp)</code>
-<code><span style="color: #c678dd;">libc_hidden_def</span> (_setjmp)</code>
+<code><span class="org-function-name">ENTRY</span> (_setjmp)</code>
+<code>    <span class="org-keyword">mov</span> x1, #0</code>
+<code>    <span class="org-keyword">b</span>   1f</code>
+<code><span class="org-function-name">END</span> (_setjmp)</code>
+<code><span class="org-function-name">libc_hidden_def</span> (_setjmp)</code>
 <code></code>
-<code><span style="color: #c678dd;">ENTRY</span> (__sigsetjmp)</code>
-<code>    <span style="color: #51afef;">DELOUSE</span> (0)</code>
+<code><span class="org-function-name">ENTRY</span> (__sigsetjmp)</code>
+<code>    <span class="org-keyword">DELOUSE</span> (0)</code>
 <code></code>
-<code><span style="color: #c678dd;">1</span>:</code>
-<code>    <span style="color: #51afef;">stp</span> x19, x20, [x0, #JB_X19&lt;&lt;3]</code>
-<code>    <span style="color: #51afef;">stp</span> x21, x22, [x0, #JB_X21&lt;&lt;3]</code>
-<code>    <span style="color: #51afef;">stp</span> x23, x24, [x0, #JB_X23&lt;&lt;3]</code>
-<code>    <span style="color: #51afef;">stp</span> x25, x26, [x0, #JB_X25&lt;&lt;3]</code>
-<code>    <span style="color: #51afef;">stp</span> x27, x28, [x0, #JB_X27&lt;&lt;3]</code>
+<code><span class="org-function-name">1</span>:</code>
+<code>    <span class="org-keyword">stp</span> x19, x20, [x0, #JB_X19&lt;&lt;3]</code>
+<code>    <span class="org-keyword">stp</span> x21, x22, [x0, #JB_X21&lt;&lt;3]</code>
+<code>    <span class="org-keyword">stp</span> x23, x24, [x0, #JB_X23&lt;&lt;3]</code>
+<code>    <span class="org-keyword">stp</span> x25, x26, [x0, #JB_X25&lt;&lt;3]</code>
+<code>    <span class="org-keyword">stp</span> x27, x28, [x0, #JB_X27&lt;&lt;3]</code>
 <code></code>
-<code><span style="color: #51afef; font-weight: bold;">#ifdef</span> <span style="color: #dcaeea;">PTR_MANGLE</span></code>
-<code>    <span style="color: #51afef;">PTR_MANGLE</span> (4, 30, 3, 2)</code>
-<code>    <span style="color: #51afef;">stp</span> x29,  x4, [x0, #JB_X29&lt;&lt;3]</code>
-<code><span style="color: #51afef; font-weight: bold;">#else</span></code>
-<code>    <span style="color: #51afef;">stp</span> x29, x30, [x0, #JB_X29&lt;&lt;3]</code>
-<code><span style="color: #51afef; font-weight: bold;">#endif</span></code>
-<code>    <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">setjmp probe takes 3 arguments, address of jump buffer</span></code>
-<code><span style="color: #5B6268;">       first argument (8@x0), return value second argument (-4@x1),</span></code>
-<code><span style="color: #5B6268;">       and target address (8@x30), respectively.  */</span></code>
-<code>    <span style="color: #51afef;">LIBC_PROBE</span> (setjmp, 3, 8@x0, -4@x1, 8@x30)</code>
-<code>    <span style="color: #51afef;">stp</span>  d8,  d9, [x0, #JB_D8&lt;&lt;3]</code>
-<code>    <span style="color: #51afef;">stp</span> d10, d11, [x0, #JB_D10&lt;&lt;3]</code>
-<code>    <span style="color: #51afef;">stp</span> d12, d13, [x0, #JB_D12&lt;&lt;3]</code>
-<code>    <span style="color: #51afef;">stp</span> d14, d15, [x0, #JB_D14&lt;&lt;3]</code>
-<code><span style="color: #51afef; font-weight: bold;">#ifdef</span> <span style="color: #dcaeea;">PTR_MANGLE</span></code>
-<code>    <span style="color: #51afef;">mov</span> x4, sp</code>
-<code>    <span style="color: #51afef;">PTR_MANGLE</span> (5, 4, 3, 2)</code>
-<code>    <span style="color: #51afef;">str</span> x5, [x0, #JB_SP&lt;&lt;3]</code>
-<code><span style="color: #51afef; font-weight: bold;">#else</span></code>
-<code>    <span style="color: #51afef;">mov</span> x2,  sp</code>
-<code>    <span style="color: #51afef;">str</span> x2,  [x0, #JB_SP&lt;&lt;3]</code>
-<code><span style="color: #51afef; font-weight: bold;">#endif</span></code>
-<code><span style="color: #51afef; font-weight: bold;">#if</span> <span style="color: #dcaeea;">IS_IN</span> (rtld)</code>
-<code>    <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">In ld.so we never save the signal mask */</span></code>
-<code>    <span style="color: #51afef;">mov</span> w0, #0</code>
-<code>    <span style="color: #51afef;">RET</span></code>
-<code><span style="color: #51afef; font-weight: bold;">#else</span></code>
-<code>    <span style="color: #51afef;">b</span>   C_SYMBOL_NAME(__sigjmp_save)</code>
-<code><span style="color: #51afef; font-weight: bold;">#endif</span></code>
-<code><span style="color: #c678dd;">END</span> (__sigsetjmp)</code>
-<code><span style="color: #c678dd;">hidden_def</span> (__sigsetjmp)</code>
+<code><span class="org-preprocessor">#ifdef</span> <span class="org-variable-name">PTR_MANGLE</span></code>
+<code>    <span class="org-keyword">PTR_MANGLE</span> (4, 30, 3, 2)</code>
+<code>    <span class="org-keyword">stp</span> x29,  x4, [x0, #JB_X29&lt;&lt;3]</code>
+<code><span class="org-preprocessor">#else</span></code>
+<code>    <span class="org-keyword">stp</span> x29, x30, [x0, #JB_X29&lt;&lt;3]</code>
+<code><span class="org-preprocessor">#endif</span></code>
+<code>    <span class="org-comment-delimiter">/* </span><span class="org-comment">setjmp probe takes 3 arguments, address of jump buffer</span></code>
+<code><span class="org-comment">       first argument (8@x0), return value second argument (-4@x1),</span></code>
+<code><span class="org-comment">       and target address (8@x30), respectively.</span><span class="org-comment-delimiter">  */</span></code>
+<code>    <span class="org-keyword">LIBC_PROBE</span> (setjmp, 3, 8@x0, -4@x1, 8@x30)</code>
+<code>    <span class="org-keyword">stp</span>  d8,  d9, [x0, #JB_D8&lt;&lt;3]</code>
+<code>    <span class="org-keyword">stp</span> d10, d11, [x0, #JB_D10&lt;&lt;3]</code>
+<code>    <span class="org-keyword">stp</span> d12, d13, [x0, #JB_D12&lt;&lt;3]</code>
+<code>    <span class="org-keyword">stp</span> d14, d15, [x0, #JB_D14&lt;&lt;3]</code>
+<code><span class="org-preprocessor">#ifdef</span> <span class="org-variable-name">PTR_MANGLE</span></code>
+<code>    <span class="org-keyword">mov</span> x4, sp</code>
+<code>    <span class="org-keyword">PTR_MANGLE</span> (5, 4, 3, 2)</code>
+<code>    <span class="org-keyword">str</span> x5, [x0, #JB_SP&lt;&lt;3]</code>
+<code><span class="org-preprocessor">#else</span></code>
+<code>    <span class="org-keyword">mov</span> x2,  sp</code>
+<code>    <span class="org-keyword">str</span> x2,  [x0, #JB_SP&lt;&lt;3]</code>
+<code><span class="org-preprocessor">#endif</span></code>
+<code><span class="org-preprocessor">#if</span> <span class="org-variable-name">IS_IN</span> (rtld)</code>
+<code>    <span class="org-comment-delimiter">/* </span><span class="org-comment">In ld.so we never save the signal mask</span><span class="org-comment-delimiter"> */</span></code>
+<code>    <span class="org-keyword">mov</span> w0, #0</code>
+<code>    <span class="org-keyword">RET</span></code>
+<code><span class="org-preprocessor">#else</span></code>
+<code>    <span class="org-keyword">b</span>   C_SYMBOL_NAME(__sigjmp_save)</code>
+<code><span class="org-preprocessor">#endif</span></code>
+<code><span class="org-function-name">END</span> (__sigsetjmp)</code>
+<code><span class="org-function-name">hidden_def</span> (__sigsetjmp)</code>
 </pre>
 </div>
 
@@ -204,106 +293,106 @@
 </p>
 </div>
 </div>
-<div id="outline-container-orgd2edb33" class="outline-3">
-<h3 id="orgd2edb33">longjmp</h3>
-<div class="outline-text-3" id="text-orgd2edb33">
+<div id="outline-container-org725352b" class="outline-3">
+<h3 id="org725352b">longjmp</h3>
+<div class="outline-text-3" id="text-org725352b">
 <p>
 <a href="https://github.com/lattera/glibc/blob/895ef79e04a953cac1493863bcae29ad85657ee1/sysdeps/aarch64/__longjmp.S#L25">https://github.com/lattera/glibc/blob/895ef79e04a953cac1493863bcae29ad85657ee1/sysdeps/aarch64/__longjmp.S#L25</a><br>
 </p>
 <div class="org-src-container">
-<pre class="src src-asm"><code><span style="color: #c678dd;">ENTRY</span> (__longjmp)</code>
-<code>    <span style="color: #51afef;">cfi_def_cfa</span>(x0, 0)</code>
-<code>    <span style="color: #51afef;">cfi_offset</span>(x19, JB_X19&lt;&lt;3)</code>
-<code>    <span style="color: #51afef;">cfi_offset</span>(x20, JB_X20&lt;&lt;3)</code>
-<code>    <span style="color: #51afef;">cfi_offset</span>(x21, JB_X21&lt;&lt;3)</code>
-<code>    <span style="color: #51afef;">cfi_offset</span>(x22, JB_X22&lt;&lt;3)</code>
-<code>    <span style="color: #51afef;">cfi_offset</span>(x23, JB_X23&lt;&lt;3)</code>
-<code>    <span style="color: #51afef;">cfi_offset</span>(x24, JB_X24&lt;&lt;3)</code>
-<code>    <span style="color: #51afef;">cfi_offset</span>(x25, JB_X25&lt;&lt;3)</code>
-<code>    <span style="color: #51afef;">cfi_offset</span>(x26, JB_X26&lt;&lt;3)</code>
-<code>    <span style="color: #51afef;">cfi_offset</span>(x27, JB_X27&lt;&lt;3)</code>
-<code>    <span style="color: #51afef;">cfi_offset</span>(x28, JB_X28&lt;&lt;3)</code>
-<code>    <span style="color: #51afef;">cfi_offset</span>(x29, JB_X29&lt;&lt;3)</code>
-<code>    <span style="color: #51afef;">cfi_offset</span>(x30, JB_LR&lt;&lt;3)</code>
+<pre class="src src-asm"><code><span class="org-function-name">ENTRY</span> (__longjmp)</code>
+<code>    <span class="org-keyword">cfi_def_cfa</span>(x0, 0)</code>
+<code>    <span class="org-keyword">cfi_offset</span>(x19, JB_X19&lt;&lt;3)</code>
+<code>    <span class="org-keyword">cfi_offset</span>(x20, JB_X20&lt;&lt;3)</code>
+<code>    <span class="org-keyword">cfi_offset</span>(x21, JB_X21&lt;&lt;3)</code>
+<code>    <span class="org-keyword">cfi_offset</span>(x22, JB_X22&lt;&lt;3)</code>
+<code>    <span class="org-keyword">cfi_offset</span>(x23, JB_X23&lt;&lt;3)</code>
+<code>    <span class="org-keyword">cfi_offset</span>(x24, JB_X24&lt;&lt;3)</code>
+<code>    <span class="org-keyword">cfi_offset</span>(x25, JB_X25&lt;&lt;3)</code>
+<code>    <span class="org-keyword">cfi_offset</span>(x26, JB_X26&lt;&lt;3)</code>
+<code>    <span class="org-keyword">cfi_offset</span>(x27, JB_X27&lt;&lt;3)</code>
+<code>    <span class="org-keyword">cfi_offset</span>(x28, JB_X28&lt;&lt;3)</code>
+<code>    <span class="org-keyword">cfi_offset</span>(x29, JB_X29&lt;&lt;3)</code>
+<code>    <span class="org-keyword">cfi_offset</span>(x30, JB_LR&lt;&lt;3)</code>
 <code></code>
-<code>    <span style="color: #51afef;">cfi_offset</span>( d8, JB_D8&lt;&lt;3)</code>
-<code>    <span style="color: #51afef;">cfi_offset</span>( d9, JB_D9&lt;&lt;3)</code>
-<code>    <span style="color: #51afef;">cfi_offset</span>(d10, JB_D10&lt;&lt;3)</code>
-<code>    <span style="color: #51afef;">cfi_offset</span>(d11, JB_D11&lt;&lt;3)</code>
-<code>    <span style="color: #51afef;">cfi_offset</span>(d12, JB_D12&lt;&lt;3)</code>
-<code>    <span style="color: #51afef;">cfi_offset</span>(d13, JB_D13&lt;&lt;3)</code>
-<code>    <span style="color: #51afef;">cfi_offset</span>(d14, JB_D14&lt;&lt;3)</code>
-<code>    <span style="color: #51afef;">cfi_offset</span>(d15, JB_D15&lt;&lt;3)</code>
+<code>    <span class="org-keyword">cfi_offset</span>( d8, JB_D8&lt;&lt;3)</code>
+<code>    <span class="org-keyword">cfi_offset</span>( d9, JB_D9&lt;&lt;3)</code>
+<code>    <span class="org-keyword">cfi_offset</span>(d10, JB_D10&lt;&lt;3)</code>
+<code>    <span class="org-keyword">cfi_offset</span>(d11, JB_D11&lt;&lt;3)</code>
+<code>    <span class="org-keyword">cfi_offset</span>(d12, JB_D12&lt;&lt;3)</code>
+<code>    <span class="org-keyword">cfi_offset</span>(d13, JB_D13&lt;&lt;3)</code>
+<code>    <span class="org-keyword">cfi_offset</span>(d14, JB_D14&lt;&lt;3)</code>
+<code>    <span class="org-keyword">cfi_offset</span>(d15, JB_D15&lt;&lt;3)</code>
 <code></code>
-<code>    <span style="color: #51afef;">DELOUSE</span> (0)</code>
+<code>    <span class="org-keyword">DELOUSE</span> (0)</code>
 <code></code>
-<code>    <span style="color: #51afef;">ldp</span> x19, x20, [x0, #JB_X19&lt;&lt;3]</code>
-<code>    <span style="color: #51afef;">ldp</span> x21, x22, [x0, #JB_X21&lt;&lt;3]</code>
-<code>    <span style="color: #51afef;">ldp</span> x23, x24, [x0, #JB_X23&lt;&lt;3]</code>
-<code>    <span style="color: #51afef;">ldp</span> x25, x26, [x0, #JB_X25&lt;&lt;3]</code>
-<code>    <span style="color: #51afef;">ldp</span> x27, x28, [x0, #JB_X27&lt;&lt;3]</code>
-<code><span style="color: #51afef; font-weight: bold;">#ifdef</span> <span style="color: #dcaeea;">PTR_DEMANGLE</span></code>
-<code>    <span style="color: #51afef;">ldp</span> x29,  x4, [x0, #JB_X29&lt;&lt;3]</code>
-<code>    <span style="color: #51afef;">PTR_DEMANGLE</span> (30, 4, 3, 2)</code>
-<code><span style="color: #51afef; font-weight: bold;">#else</span></code>
-<code>    <span style="color: #51afef;">ldp</span> x29, x30, [x0, #JB_X29&lt;&lt;3]</code>
-<code><span style="color: #51afef; font-weight: bold;">#endif</span></code>
-<code>    <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">longjmp probe takes 3 arguments, address of jump buffer as</span></code>
-<code><span style="color: #5B6268;">       first argument (8@x0), return value as second argument (-4@x1),</span></code>
-<code><span style="color: #5B6268;">       and target address (8@x30), respectively.  */</span></code>
-<code>    <span style="color: #51afef;">LIBC_PROBE</span> (longjmp, 3, 8@x0, -4@x1, 8@x30)</code>
-<code>    <span style="color: #51afef;">ldp</span>  d8,  d9, [x0, #JB_D8&lt;&lt;3]</code>
-<code>    <span style="color: #51afef;">ldp</span> d10, d11, [x0, #JB_D10&lt;&lt;3]</code>
-<code>    <span style="color: #51afef;">ldp</span> d12, d13, [x0, #JB_D12&lt;&lt;3]</code>
-<code>    <span style="color: #51afef;">ldp</span> d14, d15, [x0, #JB_D14&lt;&lt;3]</code>
+<code>    <span class="org-keyword">ldp</span> x19, x20, [x0, #JB_X19&lt;&lt;3]</code>
+<code>    <span class="org-keyword">ldp</span> x21, x22, [x0, #JB_X21&lt;&lt;3]</code>
+<code>    <span class="org-keyword">ldp</span> x23, x24, [x0, #JB_X23&lt;&lt;3]</code>
+<code>    <span class="org-keyword">ldp</span> x25, x26, [x0, #JB_X25&lt;&lt;3]</code>
+<code>    <span class="org-keyword">ldp</span> x27, x28, [x0, #JB_X27&lt;&lt;3]</code>
+<code><span class="org-preprocessor">#ifdef</span> <span class="org-variable-name">PTR_DEMANGLE</span></code>
+<code>    <span class="org-keyword">ldp</span> x29,  x4, [x0, #JB_X29&lt;&lt;3]</code>
+<code>    <span class="org-keyword">PTR_DEMANGLE</span> (30, 4, 3, 2)</code>
+<code><span class="org-preprocessor">#else</span></code>
+<code>    <span class="org-keyword">ldp</span> x29, x30, [x0, #JB_X29&lt;&lt;3]</code>
+<code><span class="org-preprocessor">#endif</span></code>
+<code>    <span class="org-comment-delimiter">/* </span><span class="org-comment">longjmp probe takes 3 arguments, address of jump buffer as</span></code>
+<code><span class="org-comment">       first argument (8@x0), return value as second argument (-4@x1),</span></code>
+<code><span class="org-comment">       and target address (8@x30), respectively.</span><span class="org-comment-delimiter">  */</span></code>
+<code>    <span class="org-keyword">LIBC_PROBE</span> (longjmp, 3, 8@x0, -4@x1, 8@x30)</code>
+<code>    <span class="org-keyword">ldp</span>  d8,  d9, [x0, #JB_D8&lt;&lt;3]</code>
+<code>    <span class="org-keyword">ldp</span> d10, d11, [x0, #JB_D10&lt;&lt;3]</code>
+<code>    <span class="org-keyword">ldp</span> d12, d13, [x0, #JB_D12&lt;&lt;3]</code>
+<code>    <span class="org-keyword">ldp</span> d14, d15, [x0, #JB_D14&lt;&lt;3]</code>
 <code></code>
-<code>        <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">Originally this was implemented with a series of</span></code>
-<code><span style="color: #5B6268;">       .cfi_restore() directives.</span></code>
-<code><span style="color: #5B6268;">           The theory was that cfi_restore should revert to previous</span></code>
-<code><span style="color: #5B6268;">           frame value is the same as the current value.  In practice</span></code>
-<code><span style="color: #5B6268;">           this doesn't work, even after cfi_restore() gdb continues</span></code>
-<code><span style="color: #5B6268;">           to try to recover a previous frame value offset from x0,</span></code>
-<code><span style="color: #5B6268;">           which gets stuffed after a few more instructions.  The</span></code>
-<code><span style="color: #5B6268;">           cfi_same_value() mechanism appears to work fine.  */</span></code>
+<code>        <span class="org-comment-delimiter">/* </span><span class="org-comment">Originally this was implemented with a series of</span></code>
+<code><span class="org-comment">       .cfi_restore() directives.</span></code>
+<code><span class="org-comment">           The theory was that cfi_restore should revert to previous</span></code>
+<code><span class="org-comment">           frame value is the same as the current value.  In practice</span></code>
+<code><span class="org-comment">           this doesn't work, even after cfi_restore() gdb continues</span></code>
+<code><span class="org-comment">           to try to recover a previous frame value offset from x0,</span></code>
+<code><span class="org-comment">           which gets stuffed after a few more instructions.  The</span></code>
+<code><span class="org-comment">           cfi_same_value() mechanism appears to work fine.</span><span class="org-comment-delimiter">  */</span></code>
 <code></code>
-<code>    <span style="color: #51afef;">cfi_same_value</span>(x19)</code>
-<code>    <span style="color: #51afef;">cfi_same_value</span>(x20)</code>
-<code>    <span style="color: #51afef;">cfi_same_value</span>(x21)</code>
-<code>    <span style="color: #51afef;">cfi_same_value</span>(x22)</code>
-<code>    <span style="color: #51afef;">cfi_same_value</span>(x23)</code>
-<code>    <span style="color: #51afef;">cfi_same_value</span>(x24)</code>
-<code>    <span style="color: #51afef;">cfi_same_value</span>(x25)</code>
-<code>    <span style="color: #51afef;">cfi_same_value</span>(x26)</code>
-<code>    <span style="color: #51afef;">cfi_same_value</span>(x27)</code>
-<code>    <span style="color: #51afef;">cfi_same_value</span>(x28)</code>
-<code>    <span style="color: #51afef;">cfi_same_value</span>(x29)</code>
-<code>    <span style="color: #51afef;">cfi_same_value</span>(x30)</code>
-<code>    <span style="color: #51afef;">cfi_same_value</span>(d8)</code>
-<code>    <span style="color: #51afef;">cfi_same_value</span>(d9)</code>
-<code>    <span style="color: #51afef;">cfi_same_value</span>(d10)</code>
-<code>    <span style="color: #51afef;">cfi_same_value</span>(d11)</code>
-<code>    <span style="color: #51afef;">cfi_same_value</span>(d12)</code>
-<code>    <span style="color: #51afef;">cfi_same_value</span>(d13)</code>
-<code>    <span style="color: #51afef;">cfi_same_value</span>(d14)</code>
-<code>    <span style="color: #51afef;">cfi_same_value</span>(d15)</code>
-<code><span style="color: #51afef; font-weight: bold;">#ifdef</span> <span style="color: #dcaeea;">PTR_DEMANGLE</span></code>
-<code>    <span style="color: #51afef;">ldr</span> x4, [x0, #JB_SP&lt;&lt;3]</code>
-<code>    <span style="color: #51afef;">PTR_DEMANGLE</span> (5, 4, 3, 2)</code>
-<code><span style="color: #51afef; font-weight: bold;">#else</span></code>
-<code>    <span style="color: #51afef;">ldr</span> x5, [x0, #JB_SP&lt;&lt;3]</code>
-<code><span style="color: #51afef; font-weight: bold;">#endif</span></code>
-<code>    <span style="color: #51afef;">mov</span> sp, x5</code>
+<code>    <span class="org-keyword">cfi_same_value</span>(x19)</code>
+<code>    <span class="org-keyword">cfi_same_value</span>(x20)</code>
+<code>    <span class="org-keyword">cfi_same_value</span>(x21)</code>
+<code>    <span class="org-keyword">cfi_same_value</span>(x22)</code>
+<code>    <span class="org-keyword">cfi_same_value</span>(x23)</code>
+<code>    <span class="org-keyword">cfi_same_value</span>(x24)</code>
+<code>    <span class="org-keyword">cfi_same_value</span>(x25)</code>
+<code>    <span class="org-keyword">cfi_same_value</span>(x26)</code>
+<code>    <span class="org-keyword">cfi_same_value</span>(x27)</code>
+<code>    <span class="org-keyword">cfi_same_value</span>(x28)</code>
+<code>    <span class="org-keyword">cfi_same_value</span>(x29)</code>
+<code>    <span class="org-keyword">cfi_same_value</span>(x30)</code>
+<code>    <span class="org-keyword">cfi_same_value</span>(d8)</code>
+<code>    <span class="org-keyword">cfi_same_value</span>(d9)</code>
+<code>    <span class="org-keyword">cfi_same_value</span>(d10)</code>
+<code>    <span class="org-keyword">cfi_same_value</span>(d11)</code>
+<code>    <span class="org-keyword">cfi_same_value</span>(d12)</code>
+<code>    <span class="org-keyword">cfi_same_value</span>(d13)</code>
+<code>    <span class="org-keyword">cfi_same_value</span>(d14)</code>
+<code>    <span class="org-keyword">cfi_same_value</span>(d15)</code>
+<code><span class="org-preprocessor">#ifdef</span> <span class="org-variable-name">PTR_DEMANGLE</span></code>
+<code>    <span class="org-keyword">ldr</span> x4, [x0, #JB_SP&lt;&lt;3]</code>
+<code>    <span class="org-keyword">PTR_DEMANGLE</span> (5, 4, 3, 2)</code>
+<code><span class="org-preprocessor">#else</span></code>
+<code>    <span class="org-keyword">ldr</span> x5, [x0, #JB_SP&lt;&lt;3]</code>
+<code><span class="org-preprocessor">#endif</span></code>
+<code>    <span class="org-keyword">mov</span> sp, x5</code>
 <code></code>
-<code>    <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">longjmp_target probe takes 3 arguments, address of jump buffer</span></code>
-<code><span style="color: #5B6268;">       as first argument (8@x0), return value as second argument (-4@x1),</span></code>
-<code><span style="color: #5B6268;">       and target address (8@x30), respectively.  */</span></code>
-<code>    <span style="color: #51afef;">LIBC_PROBE</span> (longjmp_target, 3, 8@x0, -4@x1, 8@x30)</code>
-<code>    <span style="color: #51afef;">cmp</span> x1, #0</code>
-<code>    <span style="color: #51afef;">mov</span> x0, #1</code>
-<code>    <span style="color: #51afef;">csel</span>    x0, x1, x0, ne</code>
-<code>    <span style="color: #5B6268;">/* </span><span style="color: #5B6268;">Use br instead of ret because ret is guaranteed to mispredict */</span></code>
-<code>    <span style="color: #51afef;">br</span>  x30</code>
-<code><span style="color: #c678dd;">END</span> (__longjmp)</code>
+<code>    <span class="org-comment-delimiter">/* </span><span class="org-comment">longjmp_target probe takes 3 arguments, address of jump buffer</span></code>
+<code><span class="org-comment">       as first argument (8@x0), return value as second argument (-4@x1),</span></code>
+<code><span class="org-comment">       and target address (8@x30), respectively.</span><span class="org-comment-delimiter">  */</span></code>
+<code>    <span class="org-keyword">LIBC_PROBE</span> (longjmp_target, 3, 8@x0, -4@x1, 8@x30)</code>
+<code>    <span class="org-keyword">cmp</span> x1, #0</code>
+<code>    <span class="org-keyword">mov</span> x0, #1</code>
+<code>    <span class="org-keyword">csel</span>    x0, x1, x0, ne</code>
+<code>    <span class="org-comment-delimiter">/* </span><span class="org-comment">Use br instead of ret because ret is guaranteed to mispredict</span><span class="org-comment-delimiter"> */</span></code>
+<code>    <span class="org-keyword">br</span>  x30</code>
+<code><span class="org-function-name">END</span> (__longjmp)</code>
 </pre>
 </div>
 
@@ -315,9 +404,9 @@
 </div>
 
 
-<div id="outline-container-org90b4a3e" class="outline-2">
-<h2 id="org90b4a3e">risk of setjmp/longjmp usage</h2>
-<div class="outline-text-2" id="text-org90b4a3e">
+<div id="outline-container-org949c998" class="outline-2">
+<h2 id="org949c998">risk of setjmp/longjmp usage</h2>
+<div class="outline-text-2" id="text-org949c998">
 <p>
 由于setjmp/longjmp的实现，以及编译器的优化，会导致某些情况下出现局部变量的值被修改的情况<br>
 </p>

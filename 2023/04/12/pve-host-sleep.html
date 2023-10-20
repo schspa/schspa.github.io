@@ -1,21 +1,23 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2023-04-23 Sun 11:41 -->
+<!-- 2023-10-20 Fri 17:00 -->
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>PVE Host</title>
 <meta name="author" content="Schspa" />
 <meta name="description" content="PVE Host" />
 <meta name="generator" content="Org Mode" />
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <link rel="shortcut icon" href="/images/rose-red.png" type="image/x-icon" />
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" integrity="sha256-sAcc18zvMnaJZrNT4v8J0T4HqzEUiUTlVFgDIywjQek=" crossorigin="anonymous">
+<link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.2.3/css/bootstrap.min.css" rel="stylesheet">
 <link rel="stylesheet" href="/css/animate.min.css" />
 <link rel="stylesheet" href="/css/all.min.css" />
 <link rel="stylesheet" type="text/css" href="/css/style.css" />
 <link rel="stylesheet" type="text/css" href="/css/navbar.css" />
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/js/bootstrap.min.js" integrity="sha256-/hGxZHGQ57fXLp+NDusFZsZo/PG21Bp2+hXYV5a6w+g=" crossorigin="anonymous"></script>
-<script src="/js/jquery.min.js"></script>
+<script src="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.2.3/js/bootstrap.min.js"></script>
+<script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
 <script src="/js/darkreader.js"></script>
 <script src="/user.config.js"></script>
 <script src="/js/main.js"></script>
@@ -61,16 +63,16 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#orgb2bef5d">开启自动睡眠</a></li>
-<li><a href="#org5e727b6">当guest运行时，禁用休眠功能</a></li>
-<li><a href="#orgc2a82e7">一键安装脚本</a></li>
+<li><a href="#orgce2442d">开启自动睡眠</a></li>
+<li><a href="#org9d488b2">当guest运行时，禁用休眠功能</a></li>
+<li><a href="#org7e70b02">一键安装脚本</a></li>
 </ul>
 </div>
 </div>
 
-<div id="outline-container-orgb2bef5d" class="outline-2">
-<h2 id="orgb2bef5d">开启自动睡眠</h2>
-<div class="outline-text-2" id="text-orgb2bef5d">
+<div id="outline-container-orgce2442d" class="outline-2">
+<h2 id="orgce2442d">开启自动睡眠</h2>
+<div class="outline-text-2" id="text-orgce2442d">
 <div class="org-src-container">
 <pre class="src src-bash"><code>vim /etc/systemd/logind.conf</code>
 </pre>
@@ -96,9 +98,9 @@ Trigger new settings<br>
 </div>
 </div>
 
-<div id="outline-container-org5e727b6" class="outline-2">
-<h2 id="org5e727b6">当guest运行时，禁用休眠功能</h2>
-<div class="outline-text-2" id="text-org5e727b6">
+<div id="outline-container-org9d488b2" class="outline-2">
+<h2 id="org9d488b2">当guest运行时，禁用休眠功能</h2>
+<div class="outline-text-2" id="text-org9d488b2">
 <p>
 后台启动如下进程即可：<br>
 </p>
@@ -108,7 +110,7 @@ Trigger new settings<br>
 </ol>
 
 <div class="org-src-container">
-<pre class="src src-bash" id="orged509ea"><code><span class="org-comment-delimiter">#</span><span class="org-comment">!/usr/bin/</span><span class="org-keyword">env</span><span class="org-comment"> bash</span></code>
+<pre class="src src-bash" id="orgbabd87b"><code><span class="org-comment-delimiter">#</span><span class="org-comment">!/usr/bin/</span><span class="org-keyword">env</span><span class="org-comment"> bash</span></code>
 <code></code>
 <code><span class="org-variable-name">vmid</span>=100</code>
 <code></code>
@@ -133,7 +135,7 @@ systemd service<br>
 </p>
 
 <div class="org-src-container">
-<pre class="src src-conf" id="org0bb8a52"><code>[<span class="org-type">Unit</span>]</code>
+<pre class="src src-conf" id="org5459c2c"><code>[<span class="org-type">Unit</span>]</code>
 <code><span class="org-variable-name">Description</span>=PVE guest status monitor</code>
 <code><span class="org-variable-name">After</span>=network.target</code>
 <code></code>
@@ -152,9 +154,9 @@ systemd service<br>
 </div>
 </div>
 
-<div id="outline-container-orgc2a82e7" class="outline-2">
-<h2 id="orgc2a82e7">一键安装脚本</h2>
-<div class="outline-text-2" id="text-orgc2a82e7">
+<div id="outline-container-org7e70b02" class="outline-2">
+<h2 id="org7e70b02">一键安装脚本</h2>
+<div class="outline-text-2" id="text-org7e70b02">
 <p>
 the whole script can be found at: <a href="assets/.pve-prevent-host-sleep.sh">assets/.pve-prevent-host-sleep.sh</a><br>
 </p>

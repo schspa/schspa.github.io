@@ -1,22 +1,23 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2022-09-05 Mon 13:43 -->
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- 2023-10-20 Fri 17:00 -->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Debug Uboot with gdb</title>
-<meta name="generator" content="Org mode">
-<meta name="author" content="Schspa Shi">
-<meta name="description" content="Debug Uboot with gdb"
->
+<meta name="author" content="Schspa Shi" />
+<meta name="description" content="Debug Uboot with gdb" />
+<meta name="generator" content="Org Mode" />
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <link rel="shortcut icon" href="/images/rose-red.png" type="image/x-icon" />
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" integrity="sha256-sAcc18zvMnaJZrNT4v8J0T4HqzEUiUTlVFgDIywjQek=" crossorigin="anonymous">
+<link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.2.3/css/bootstrap.min.css" rel="stylesheet">
 <link rel="stylesheet" href="/css/animate.min.css" />
 <link rel="stylesheet" href="/css/all.min.css" />
 <link rel="stylesheet" type="text/css" href="/css/style.css" />
 <link rel="stylesheet" type="text/css" href="/css/navbar.css" />
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/js/bootstrap.min.js" integrity="sha256-/hGxZHGQ57fXLp+NDusFZsZo/PG21Bp2+hXYV5a6w+g=" crossorigin="anonymous"></script>
-<script src="/js/jquery.min.js"></script>
+<script src="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.2.3/js/bootstrap.min.js"></script>
+<script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
 <script src="/js/darkreader.js"></script>
 <script src="/user.config.js"></script>
 <script src="/js/main.js"></script>
@@ -56,27 +57,27 @@
   </nav>
 </header>
 </div>
-<div id="content">
+<div id="content" class="content">
 <h1 class="title">Debug Uboot with gdb</h1>
-<div id="table-of-contents">
+<div id="table-of-contents" role="doc-toc">
 <h2>Table of Contents</h2>
-<div id="text-table-of-contents">
+<div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#orgc69615f">Boot flow</a></li>
-<li><a href="#org1523e37">Compile Test images</a></li>
-<li><a href="#org98f4ed3">U-Boot Debug</a>
+<li><a href="#org4ad6178">Boot flow</a></li>
+<li><a href="#orgb38de28">Compile Test images</a></li>
+<li><a href="#orgc54dc04">U-Boot Debug</a>
 <ul>
-<li><a href="#orga6d1e67">Debug a command</a></li>
-<li><a href="#orgb5e4de8">Before relocate</a></li>
-<li><a href="#org9b09d07">After relocate</a></li>
+<li><a href="#orgb0e449c">Debug a command</a></li>
+<li><a href="#orgaaeeecd">Before relocate</a></li>
+<li><a href="#orgffc9d4a">After relocate</a></li>
 </ul>
 </li>
 </ul>
 </div>
 </div>
-<div id="outline-container-orgc69615f" class="outline-2">
-<h2 id="orgc69615f">Boot flow</h2>
-<div class="outline-text-2" id="text-orgc69615f">
+<div id="outline-container-org4ad6178" class="outline-2">
+<h2 id="org4ad6178">Boot flow</h2>
+<div class="outline-text-2" id="text-org4ad6178">
 <p>
 We have qemu virt arm64 running ATF code and Uboot.<br>
 </p>
@@ -88,9 +89,9 @@ BL1 → BL2 → BL31 → BL33 (Uboot)<br>
 </div>
 </div>
 
-<div id="outline-container-org1523e37" class="outline-2">
-<h2 id="org1523e37">Compile Test images</h2>
-<div class="outline-text-2" id="text-org1523e37">
+<div id="outline-container-orgb38de28" class="outline-2">
+<h2 id="orgb38de28">Compile Test images</h2>
+<div class="outline-text-2" id="text-orgb38de28">
 <ul class="org-ul">
 <li><p>
 ATF<br>
@@ -131,13 +132,13 @@ Boot image<br>
 </div>
 </div>
 
-<div id="outline-container-org98f4ed3" class="outline-2">
-<h2 id="org98f4ed3">U-Boot Debug</h2>
-<div class="outline-text-2" id="text-org98f4ed3">
+<div id="outline-container-orgc54dc04" class="outline-2">
+<h2 id="orgc54dc04">U-Boot Debug</h2>
+<div class="outline-text-2" id="text-orgc54dc04">
 </div>
-<div id="outline-container-orga6d1e67" class="outline-3">
-<h3 id="orga6d1e67">Debug a command</h3>
-<div class="outline-text-3" id="text-orga6d1e67">
+<div id="outline-container-orgb0e449c" class="outline-3">
+<h3 id="orgb0e449c">Debug a command</h3>
+<div class="outline-text-3" id="text-orgb0e449c">
 <p>
 If you can boot to Uboot console, it's more easy to debug<br>
 you can get the relocated address from x18 (in AARCH64), then add symbol to that address<br>
@@ -176,9 +177,9 @@ you can get the relocated address from x18 (in AARCH64), then add symbol to that
 </div>
 </div>
 
-<div id="outline-container-orgb5e4de8" class="outline-3">
-<h3 id="orgb5e4de8">Before relocate</h3>
-<div class="outline-text-3" id="text-orgb5e4de8">
+<div id="outline-container-orgaaeeecd" class="outline-3">
+<h3 id="orgaaeeecd">Before relocate</h3>
+<div class="outline-text-3" id="text-orgaaeeecd">
 <p>
 Before relocate, U-boot running with linked address. (Address you see with System.map)<br>
 </p>
@@ -226,9 +227,9 @@ fellowing gdb script used for gdb to stop program at _start uboot entry.<br>
 </div>
 </div>
 
-<div id="outline-container-org9b09d07" class="outline-3">
-<h3 id="org9b09d07">After relocate</h3>
-<div class="outline-text-3" id="text-org9b09d07">
+<div id="outline-container-orgffc9d4a" class="outline-3">
+<h3 id="orgffc9d4a">After relocate</h3>
+<div class="outline-text-3" id="text-orgffc9d4a">
 <p>
 After relocate, Uboot will running on top of DRAM, (running address is different from linked address.)<br>
 In this case：<br>

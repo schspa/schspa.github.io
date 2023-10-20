@@ -1,21 +1,23 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2022-03-03 Thu 11:48 -->
+<!-- 2023-10-20 Fri 17:00 -->
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>variable-argument-lists in AARCH64</title>
 <meta name="author" content="Schspa" />
 <meta name="description" content="variable-argument-lists.org" />
 <meta name="generator" content="Org Mode" />
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <link rel="shortcut icon" href="/images/rose-red.png" type="image/x-icon" />
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" integrity="sha256-sAcc18zvMnaJZrNT4v8J0T4HqzEUiUTlVFgDIywjQek=" crossorigin="anonymous">
+<link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.2.3/css/bootstrap.min.css" rel="stylesheet">
 <link rel="stylesheet" href="/css/animate.min.css" />
 <link rel="stylesheet" href="/css/all.min.css" />
 <link rel="stylesheet" type="text/css" href="/css/style.css" />
 <link rel="stylesheet" type="text/css" href="/css/navbar.css" />
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/js/bootstrap.min.js" integrity="sha256-/hGxZHGQ57fXLp+NDusFZsZo/PG21Bp2+hXYV5a6w+g=" crossorigin="anonymous"></script>
-<script src="/js/jquery.min.js"></script>
+<script src="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.2.3/js/bootstrap.min.js"></script>
+<script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
 <script src="/js/darkreader.js"></script>
 <script src="/user.config.js"></script>
 <script src="/js/main.js"></script>
@@ -61,33 +63,33 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#orgc3644a4">Variadic functions</a></li>
-<li><a href="#orgee9c8cc">资料</a></li>
-<li><a href="#org3de9a70">例子</a>
+<li><a href="#org46f7476">Variadic functions</a></li>
+<li><a href="#orgfb78b85">资料</a></li>
+<li><a href="#org0f71bba">例子</a>
 <ul>
-<li><a href="#org1d4ce2c">&lt; 7个参数, 以两个参数为例</a>
+<li><a href="#org0e87590">&lt; 7个参数, 以两个参数为例</a>
 <ul>
-<li><a href="#orgfd9eaf7">Caller代码</a></li>
-<li><a href="#org207e912">Caller disassemble</a></li>
-<li><a href="#org4c35687">Callee disassemble</a></li>
+<li><a href="#orgc701a3b">Caller代码</a></li>
+<li><a href="#orgd5fd0a7">Caller disassemble</a></li>
+<li><a href="#org92d44b5">Callee disassemble</a></li>
 </ul>
 </li>
-<li><a href="#orgffedb4b">参数个数大于7</a>
+<li><a href="#orgba53ef8">参数个数大于7</a>
 <ul>
-<li><a href="#orga9e32e0">Caller 代码</a></li>
-<li><a href="#org1455ff6">Callee va_list</a></li>
+<li><a href="#org8bc1055">Caller 代码</a></li>
+<li><a href="#orgbafecf1">Callee va_list</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li><a href="#org4fa646b">refs</a></li>
+<li><a href="#org3c5046f">refs</a></li>
 </ul>
 </div>
 </div>
 
-<div id="outline-container-orgc3644a4" class="outline-2">
-<h2 id="orgc3644a4">Variadic functions</h2>
-<div class="outline-text-2" id="text-orgc3644a4">
+<div id="outline-container-org46f7476" class="outline-2">
+<h2 id="org46f7476">Variadic functions</h2>
+<div class="outline-text-2" id="text-org46f7476">
 <p>
 定义: <a href="https://en.cppreference.com/w/c/variadic">https://en.cppreference.com/w/c/variadic</a><br>
 这类函数，的特点在于，参数的个数是不固定的，具体有多少个参数，实际上是通过调用者来决定的。被调用的函数是不知道具体会传递多少个参数.<br>
@@ -95,9 +97,9 @@
 </div>
 </div>
 
-<div id="outline-container-orgee9c8cc" class="outline-2">
-<h2 id="orgee9c8cc">资料</h2>
-<div class="outline-text-2" id="text-orgee9c8cc">
+<div id="outline-container-orgfb78b85" class="outline-2">
+<h2 id="orgfb78b85">资料</h2>
+<div class="outline-text-2" id="text-orgfb78b85">
 <p>
 AARCH64 APCS规范中已经对可变参数函数做了详细的说明，下面就以一个实际的例子来看一下，具体的过程<br>
 </p>
@@ -107,96 +109,96 @@ AARCH64 APCS规范中已经对可变参数函数做了详细的说明，下面�
 下边是va_arg的伪代码<br>
 </p>
 <div class="org-src-container">
-<pre class="src src-C"><code><span style="color: #ECBE7B;">type</span> <span style="color: #c678dd;">va_arg</span> (<span style="color: #ECBE7B;">va_list</span> <span style="color: #dcaeea;">ap</span>, <span style="color: #ECBE7B;">type</span>)</code>
+<pre class="src src-C"><code><span class="org-type">type</span> <span class="org-function-name">va_arg</span> (<span class="org-type">va_list</span> <span class="org-variable-name">ap</span>, type)</code>
 <code>{</code>
-<code>    <span style="color: #ECBE7B;">int</span> <span style="color: #dcaeea;">nreg</span>, <span style="color: #dcaeea;">offs</span>;</code>
-<code>    <span style="color: #51afef;">if</span> (<span style="color: #ECBE7B;">type</span> passed in <span style="color: #ECBE7B;">general</span> <span style="color: #dcaeea;">registers</span>) {</code>
+<code>    <span class="org-type">int</span> <span class="org-variable-name">nreg</span>, <span class="org-variable-name">offs</span>;</code>
+<code>    <span class="org-keyword">if</span> (type passed in general registers) {</code>
 <code>        offs = ap.__gr_offs;</code>
-<code>        <span style="color: #51afef;">if</span> (offs &gt;= 0)</code>
-<code>            <span style="color: #51afef;">goto</span> <span style="color: #a9a1e1;">on_stack</span>;              <span style="color: #5B6268;">// </span><span style="color: #5B6268;">reg save area empty</span></code>
-<code>        <span style="color: #51afef;">if</span> (alignof(type) &gt; 8)</code>
-<code>            offs = (offs + 15) &amp; -16;   <span style="color: #5B6268;">// </span><span style="color: #5B6268;">round up</span></code>
-<code>        nreg = (<span style="color: #51afef;">sizeof</span>(type) + 7) / 8;</code>
+<code>        <span class="org-keyword">if</span> (offs &gt;= 0)</code>
+<code>            <span class="org-keyword">goto</span> <span class="org-constant">on_stack</span>;              <span class="org-comment-delimiter">// </span><span class="org-comment">reg save area empty</span></code>
+<code>        <span class="org-keyword">if</span> (alignof(type) &gt; 8)</code>
+<code>            offs = (offs + 15) &amp; -16;   <span class="org-comment-delimiter">// </span><span class="org-comment">round up</span></code>
+<code>        nreg = (<span class="org-keyword">sizeof</span>(type) + 7) / 8;</code>
 <code>        ap.__gr_offs = offs + (nreg * 8);</code>
-<code>        <span style="color: #51afef;">if</span> (ap.__gr_offs &gt; 0)</code>
-<code>            <span style="color: #51afef;">goto</span> <span style="color: #a9a1e1;">on_stack</span>;              <span style="color: #5B6268;">// </span><span style="color: #5B6268;">overflowed reg save area</span></code>
-<code><span style="color: #51afef; font-weight: bold;">#ifdef</span> BIG_ENDIAN</code>
-<code>        <span style="color: #51afef;">if</span> (classof(type) != <span style="color: #98be65;">"aggregate"</span> &amp;&amp; <span style="color: #51afef;">sizeof</span>(type) &lt; 8)</code>
-<code>            offs += 8 - <span style="color: #51afef;">sizeof</span>(type);</code>
-<code><span style="color: #51afef; font-weight: bold;">#endif</span></code>
-<code>        <span style="color: #51afef;">return</span> *(<span style="color: #ECBE7B;">type</span> *)(ap.__gr_top + offs);</code>
-<code>    } <span style="color: #51afef;">else</span> <span style="color: #51afef;">if</span> (<span style="color: #ECBE7B;">type</span> is an HFA or <span style="color: #ECBE7B;">an</span> <span style="color: #dcaeea;">HVA</span>) {</code>
-<code>        <span style="color: #ECBE7B;">type</span> <span style="color: #dcaeea;">ha</span>;       <span style="color: #5B6268;">// </span><span style="color: #5B6268;">treat as "struct {ftype field[n];}"</span></code>
+<code>        <span class="org-keyword">if</span> (ap.__gr_offs &gt; 0)</code>
+<code>            <span class="org-keyword">goto</span> <span class="org-constant">on_stack</span>;              <span class="org-comment-delimiter">// </span><span class="org-comment">overflowed reg save area</span></code>
+<code><span class="org-preprocessor">#ifdef</span> BIG_ENDIAN</code>
+<code>        <span class="org-keyword">if</span> (classof(type) != <span class="org-string">"aggregate"</span> &amp;&amp; <span class="org-keyword">sizeof</span>(type) &lt; 8)</code>
+<code>            offs += 8 - <span class="org-keyword">sizeof</span>(type);</code>
+<code><span class="org-preprocessor">#endif</span></code>
+<code>        <span class="org-keyword">return</span> *(<span class="org-type">type</span> *)(ap.__gr_top + offs);</code>
+<code>    } <span class="org-keyword">else</span> <span class="org-keyword">if</span> (type is an HFA or an HVA) {</code>
+<code>        <span class="org-type">type</span> <span class="org-variable-name">ha</span>;       <span class="org-comment-delimiter">// </span><span class="org-comment">treat as "struct {ftype field[n];}"</span></code>
 <code>        offs = ap.__vr_offs;</code>
-<code>        <span style="color: #51afef;">if</span> (offs &gt;= 0)</code>
-<code>            <span style="color: #51afef;">goto</span> <span style="color: #a9a1e1;">on_stack</span>;              <span style="color: #5B6268;">// </span><span style="color: #5B6268;">reg save area empty</span></code>
-<code>        nreg = <span style="color: #51afef;">sizeof</span>(type) / <span style="color: #51afef;">sizeof</span>(ftype);</code>
+<code>        <span class="org-keyword">if</span> (offs &gt;= 0)</code>
+<code>            <span class="org-keyword">goto</span> <span class="org-constant">on_stack</span>;              <span class="org-comment-delimiter">// </span><span class="org-comment">reg save area empty</span></code>
+<code>        nreg = <span class="org-keyword">sizeof</span>(type) / <span class="org-keyword">sizeof</span>(ftype);</code>
 <code>        ap.__vr_offs = offs + (nreg * 16);</code>
-<code>        <span style="color: #51afef;">if</span> (ap.__vr_offs &gt; 0)</code>
-<code>            <span style="color: #51afef;">goto</span> <span style="color: #a9a1e1;">on_stack</span>;              <span style="color: #5B6268;">// </span><span style="color: #5B6268;">overflowed reg save area</span></code>
-<code><span style="color: #51afef; font-weight: bold;">#ifdef</span> BIG_ENDIAN</code>
-<code>        <span style="color: #51afef;">if</span> (<span style="color: #51afef;">sizeof</span>(ftype) &lt; 16)</code>
-<code>            offs += 16 - <span style="color: #51afef;">sizeof</span>(ftype);</code>
-<code><span style="color: #51afef; font-weight: bold;">#endif</span></code>
-<code>        <span style="color: #51afef;">for</span> (i = 0; i &lt; nreg; i++, offs += 16)</code>
-<code>            ha.field[i] = *((ftype *)(ap.__vr_top + offs));</code>
-<code>        <span style="color: #51afef;">return</span> ha;</code>
-<code>    } <span style="color: #51afef;">else</span> <span style="color: #51afef;">if</span> (<span style="color: #ECBE7B;">type</span> passed <span style="color: #ECBE7B;">in</span> <span style="color: #dcaeea;">fp</span>/simd registers) {</code>
+<code>        <span class="org-keyword">if</span> (ap.__vr_offs &gt; 0)</code>
+<code>            <span class="org-keyword">goto</span> <span class="org-constant">on_stack</span>;              <span class="org-comment-delimiter">// </span><span class="org-comment">overflowed reg save area</span></code>
+<code><span class="org-preprocessor">#ifdef</span> BIG_ENDIAN</code>
+<code>        <span class="org-keyword">if</span> (<span class="org-keyword">sizeof</span>(ftype) &lt; 16)</code>
+<code>            offs += 16 - <span class="org-keyword">sizeof</span>(ftype);</code>
+<code><span class="org-preprocessor">#endif</span></code>
+<code>        <span class="org-keyword">for</span> (i = 0; i &lt; nreg; i++, offs += 16)</code>
+<code>            ha.field[i] = *((<span class="org-type">ftype</span> *)(ap.__vr_top + offs));</code>
+<code>        <span class="org-keyword">return</span> ha;</code>
+<code>    } <span class="org-keyword">else</span> <span class="org-keyword">if</span> (type passed in fp/simd registers) {</code>
 <code>        offs = ap.__vr_offs;</code>
-<code>        <span style="color: #51afef;">if</span> (offs &gt;= 0)</code>
-<code>            <span style="color: #51afef;">goto</span> <span style="color: #a9a1e1;">on_stack</span>;              <span style="color: #5B6268;">// </span><span style="color: #5B6268;">reg save area empty</span></code>
-<code>        nreg = (<span style="color: #51afef;">sizeof</span>(type) + 15) / 16;</code>
+<code>        <span class="org-keyword">if</span> (offs &gt;= 0)</code>
+<code>            <span class="org-keyword">goto</span> <span class="org-constant">on_stack</span>;              <span class="org-comment-delimiter">// </span><span class="org-comment">reg save area empty</span></code>
+<code>        nreg = (<span class="org-keyword">sizeof</span>(type) + 15) / 16;</code>
 <code>        ap.__vr_offs = offs + (nreg * 16);</code>
-<code>        <span style="color: #51afef;">if</span> (ap.__vr_offs &gt; 0)</code>
-<code>            <span style="color: #51afef;">goto</span> <span style="color: #a9a1e1;">on_stack</span>;              <span style="color: #5B6268;">// </span><span style="color: #5B6268;">overflowed reg save area</span></code>
-<code><span style="color: #51afef; font-weight: bold;">#ifdef</span> BIG_ENDIAN</code>
-<code>        <span style="color: #51afef;">if</span> (classof(type) != <span style="color: #98be65;">"aggregate"</span> &amp;&amp; <span style="color: #51afef;">sizeof</span>(type) &lt; 16)</code>
-<code>            offs += 16 - <span style="color: #51afef;">sizeof</span>(type);</code>
-<code><span style="color: #51afef; font-weight: bold;">#endif</span></code>
-<code>        <span style="color: #51afef;">return</span> *(<span style="color: #ECBE7B;">type</span> *)(ap.__vr_top + offs);</code>
+<code>        <span class="org-keyword">if</span> (ap.__vr_offs &gt; 0)</code>
+<code>            <span class="org-keyword">goto</span> <span class="org-constant">on_stack</span>;              <span class="org-comment-delimiter">// </span><span class="org-comment">overflowed reg save area</span></code>
+<code><span class="org-preprocessor">#ifdef</span> BIG_ENDIAN</code>
+<code>        <span class="org-keyword">if</span> (classof(type) != <span class="org-string">"aggregate"</span> &amp;&amp; <span class="org-keyword">sizeof</span>(type) &lt; 16)</code>
+<code>            offs += 16 - <span class="org-keyword">sizeof</span>(type);</code>
+<code><span class="org-preprocessor">#endif</span></code>
+<code>        <span class="org-keyword">return</span> *(<span class="org-type">type</span> *)(ap.__vr_top + offs);</code>
 <code>    }</code>
-<code><span style="color: #a9a1e1;">on_stack</span>:</code>
-<code>    <span style="color: #ECBE7B;">intptr_t</span> <span style="color: #dcaeea;">arg</span> = ap.__stack;</code>
-<code>    <span style="color: #51afef;">if</span> (alignof(type) &gt; 8)</code>
+<code><span class="org-constant">on_stack</span>:</code>
+<code>    <span class="org-type">intptr_t</span> <span class="org-variable-name">arg</span> = ap.__stack;</code>
+<code>    <span class="org-keyword">if</span> (alignof(type) &gt; 8)</code>
 <code>        arg = (arg + 15) &amp; -16;</code>
-<code>    ap.__stack = (<span style="color: #ECBE7B;">void</span> *)((arg + <span style="color: #51afef;">sizeof</span>(type) + 7) &amp; -8);</code>
-<code><span style="color: #51afef; font-weight: bold;">#ifdef</span> BIG_ENDIAN</code>
-<code>    <span style="color: #51afef;">if</span> (classof(type) != <span style="color: #98be65;">"aggregate"</span> &amp;&amp; <span style="color: #51afef;">sizeof</span>(type) &lt; 8)</code>
-<code>        arg += 8 - <span style="color: #51afef;">sizeof</span>(type);</code>
-<code><span style="color: #51afef; font-weight: bold;">#endif</span></code>
-<code>    <span style="color: #51afef;">return</span> *(<span style="color: #ECBE7B;">type</span> *)arg;</code>
+<code>    ap.__stack = (<span class="org-type">void</span> *)((arg + <span class="org-keyword">sizeof</span>(type) + 7) &amp; -8);</code>
+<code><span class="org-preprocessor">#ifdef</span> BIG_ENDIAN</code>
+<code>    <span class="org-keyword">if</span> (classof(type) != <span class="org-string">"aggregate"</span> &amp;&amp; <span class="org-keyword">sizeof</span>(type) &lt; 8)</code>
+<code>        arg += 8 - <span class="org-keyword">sizeof</span>(type);</code>
+<code><span class="org-preprocessor">#endif</span></code>
+<code>    <span class="org-keyword">return</span> *(<span class="org-type">type</span> *)arg;</code>
 <code>}</code>
 </pre>
 </div>
 </div>
 </div>
-<div id="outline-container-org3de9a70" class="outline-2">
-<h2 id="org3de9a70">例子</h2>
-<div class="outline-text-2" id="text-org3de9a70">
+<div id="outline-container-org0f71bba" class="outline-2">
+<h2 id="org0f71bba">例子</h2>
+<div class="outline-text-2" id="text-org0f71bba">
 <p>
 本文章使用Linux Kernel中的printk为研究对象<br>
 </p>
 </div>
 
-<div id="outline-container-org1d4ce2c" class="outline-3">
-<h3 id="org1d4ce2c">&lt; 7个参数, 以两个参数为例</h3>
-<div class="outline-text-3" id="text-org1d4ce2c">
+<div id="outline-container-org0e87590" class="outline-3">
+<h3 id="org0e87590">&lt; 7个参数, 以两个参数为例</h3>
+<div class="outline-text-3" id="text-org0e87590">
 </div>
-<div id="outline-container-orgfd9eaf7" class="outline-4">
-<h4 id="orgfd9eaf7">Caller代码</h4>
-<div class="outline-text-4" id="text-orgfd9eaf7">
+<div id="outline-container-orgc701a3b" class="outline-4">
+<h4 id="orgc701a3b">Caller代码</h4>
+<div class="outline-text-4" id="text-orgc701a3b">
 <div class="org-src-container">
-<pre class="src src-C"><code><span style="color: #ECBE7B;">__mdiobus_register</span></code>
-<code>     <span style="color: #dcaeea;">bus</span>-&gt;state = MDIOBUS_REGISTERED;</code>
-<code>     pr_info(<span style="color: #98be65;">"%s: probed\n"</span>, bus-&gt;name);</code>
+<pre class="src src-C"><code>__mdiobus_register</code>
+<code>     bus-&gt;state = MDIOBUS_REGISTERED;</code>
+<code>     pr_info(<span class="org-string">"%s: probed\n"</span>, bus-&gt;name);</code>
 </pre>
 </div>
 </div>
 </div>
 
-<div id="outline-container-org207e912" class="outline-4">
-<h4 id="org207e912">Caller disassemble</h4>
-<div class="outline-text-4" id="text-org207e912">
+<div id="outline-container-orgd5fd0a7" class="outline-4">
+<h4 id="orgd5fd0a7">Caller disassemble</h4>
+<div class="outline-text-4" id="text-orgd5fd0a7">
 <p>
 下面就是调用的地方，从汇编代码上来看，这个地方并没有什么特别之处，这个东西在调用之前，x0为格式化输出字符串，x1是bus-&gt;name的参数，和普通的参数传递方法完全一致.<br>
 </p>
@@ -204,17 +206,17 @@ AARCH64 APCS规范中已经对可变参数函数做了详细的说明，下面�
 <pre class="src src-C"><code>     419</code>
 <code>     420             bus-&gt;state = MDIOBUS_REGISTERED;</code>
 <code>     0xffff0000086bb8d0 &lt;+432&gt;:   ldr     x1, [x20, #8]</code>
-<code>         0xffff0000086bb8d4 &lt;+436&gt;:   mov     w0, #0x2                        <span style="color: #5B6268;">// </span><span style="color: #5B6268;">#2</span></code>
+<code>         0xffff0000086bb8d4 &lt;+436&gt;:   mov     w0, #0x2                        <span class="org-comment-delimiter">// </span><span class="org-comment">#2</span></code>
 <code>         0xffff0000086bb8d8 &lt;+440&gt;:   str     w0, [x20, #152]</code>
 <code></code>
-<code>         421             pr_info(<span style="color: #98be65;">"%s: probed\n"</span>, bus-&gt;name);</code>
+<code>         421             pr_info(<span class="org-string">"%s: probed\n"</span>, bus-&gt;name);</code>
 <code>     0xffff0000086bb8dc &lt;+444&gt;:   adrp    x0, 0xffff000008e97000</code>
 <code>         0xffff0000086bb8e0 &lt;+448&gt;:   add     x0, x0, #0xaf0</code>
 <code>         0xffff0000086bb8e4 &lt;+452&gt;:   bl      0xffff000008127454 &lt;printk&gt;</code>
-<code>    (<span style="color: #ECBE7B;">gdb</span>) x/s $x0</code>
-<code>0xffff000008e97af0:     <span style="color: #98be65;">"\001\066libphy: %s: probed\n"</span></code>
-<code>(<span style="color: #ECBE7B;">gdb</span>) x/s $x1</code>
-<code>0xffff000008e98080:     <span style="color: #98be65;">"Fixed MDIO Bus"</span></code>
+<code>    (<span class="org-type">gdb</span>) x/s $x0</code>
+<code>0xffff000008e97af0:     <span class="org-string">"\001\066libphy: %s: probed\n"</span></code>
+<code>(<span class="org-type">gdb</span>) x/s $x1</code>
+<code>0xffff000008e98080:     <span class="org-string">"Fixed MDIO Bus"</span></code>
 <code>(gdb)</code>
 </pre>
 </div>
@@ -225,9 +227,9 @@ AARCH64 APCS规范中已经对可变参数函数做了详细的说明，下面�
 </div>
 </div>
 
-<div id="outline-container-org4c35687" class="outline-4">
-<h4 id="org4c35687">Callee disassemble</h4>
-<div class="outline-text-4" id="text-org4c35687">
+<div id="outline-container-org92d44b5" class="outline-4">
+<h4 id="org92d44b5">Callee disassemble</h4>
+<div class="outline-text-4" id="text-org92d44b5">
 <div class="org-src-container">
 <pre class="src src-text"><code>(gdb) disassemble /s</code>
 <code>Dump of assembler code for function printk:</code>
@@ -292,34 +294,34 @@ AARCH64 APCS规范中已经对可变参数函数做了详细的说明，下面�
 </div>
 
 
-<div id="outline-container-orgffedb4b" class="outline-3">
-<h3 id="orgffedb4b">参数个数大于7</h3>
-<div class="outline-text-3" id="text-orgffedb4b">
+<div id="outline-container-orgba53ef8" class="outline-3">
+<h3 id="orgba53ef8">参数个数大于7</h3>
+<div class="outline-text-3" id="text-orgba53ef8">
 <p>
 同样的，取内核中的例子：<br>
 </p>
 </div>
-<div id="outline-container-orga9e32e0" class="outline-4">
-<h4 id="orga9e32e0">Caller 代码</h4>
-<div class="outline-text-4" id="text-orga9e32e0">
+<div id="outline-container-org8bc1055" class="outline-4">
+<h4 id="org8bc1055">Caller 代码</h4>
+<div class="outline-text-4" id="text-org8bc1055">
 <div class="org-src-container">
-<pre class="src src-C"><code><span style="color: #ECBE7B;">void</span> <span style="color: #c678dd;">__init</span> mem_init_print_info(<span style="color: #51afef;">const</span> <span style="color: #ECBE7B;">char</span> *<span style="color: #dcaeea;">str</span>)</code>
+<pre class="src src-C"><code><span class="org-type">void</span> <span class="org-variable-name">__init</span> mem_init_print_info(<span class="org-keyword">const</span> <span class="org-type">char</span> *<span class="org-variable-name">str</span>)</code>
 <code>{</code>
-<code>    pr_info(<span style="color: #98be65;">"Memory: %luK/%luK available (%luK kernel code, %luK rwdata, %luK rodata, %luK init, %luK bss, %luK reserved, %luK cma-reserved"</span></code>
-<code><span style="color: #51afef; font-weight: bold;">#ifdef</span>  CONFIG_HIGHMEM</code>
-<code>        <span style="color: #98be65;">", %luK highmem"</span></code>
-<code><span style="color: #51afef; font-weight: bold;">#endif</span></code>
-<code>        <span style="color: #98be65;">"%s%s)\n"</span>,</code>
+<code>    pr_info(<span class="org-string">"Memory: %luK/%luK available (%luK kernel code, %luK rwdata, %luK rodata, %luK init, %luK bss, %luK reserved, %luK cma-reserved"</span></code>
+<code><span class="org-preprocessor">#ifdef</span>  CONFIG_HIGHMEM</code>
+<code>        <span class="org-string">", %luK highmem"</span></code>
+<code><span class="org-preprocessor">#endif</span></code>
+<code>        <span class="org-string">"%s%s)\n"</span>,</code>
 <code>        nr_free_pages() &lt;&lt; (PAGE_SHIFT - 10),</code>
 <code>        physpages &lt;&lt; (PAGE_SHIFT - 10),</code>
 <code>        codesize &gt;&gt; 10, datasize &gt;&gt; 10, rosize &gt;&gt; 10,</code>
 <code>        (init_data_size + init_code_size) &gt;&gt; 10, bss_size &gt;&gt; 10,</code>
 <code>        (physpages - totalram_pages - totalcma_pages) &lt;&lt; (PAGE_SHIFT - 10),</code>
 <code>        totalcma_pages &lt;&lt; (PAGE_SHIFT - 10),</code>
-<code><span style="color: #51afef; font-weight: bold;">#ifdef</span>  CONFIG_HIGHMEM</code>
+<code><span class="org-preprocessor">#ifdef</span>  CONFIG_HIGHMEM</code>
 <code>        totalhigh_pages &lt;&lt; (PAGE_SHIFT - 10),</code>
-<code><span style="color: #51afef; font-weight: bold;">#endif</span></code>
-<code>        str ? <span style="color: #98be65;">", "</span> : <span style="color: #98be65;">""</span>, str ? str : <span style="color: #98be65;">""</span>);</code>
+<code><span class="org-preprocessor">#endif</span></code>
+<code>        str ? <span class="org-string">", "</span> : <span class="org-string">""</span>, str ? str : <span class="org-string">""</span>);</code>
 <code>}</code>
 </pre>
 </div>
@@ -330,9 +332,9 @@ AARCH64 APCS规范中已经对可变参数函数做了详细的说明，下面�
 </div>
 </div>
 
-<div id="outline-container-org1455ff6" class="outline-4">
-<h4 id="org1455ff6">Callee va_list</h4>
-<div class="outline-text-4" id="text-org1455ff6">
+<div id="outline-container-orgbafecf1" class="outline-4">
+<h4 id="orgbafecf1">Callee va_list</h4>
+<div class="outline-text-4" id="text-orgbafecf1">
 <p>
 上面的例子中已经简单的分析过printk的汇编代码，这里不再赘述，直接去看va_list的值<br>
 </p>
@@ -399,9 +401,9 @@ AARCH64 APCS规范中已经对可变参数函数做了详细的说明，下面�
 </div>
 </div>
 
-<div id="outline-container-org4fa646b" class="outline-2">
-<h2 id="org4fa646b">refs</h2>
-<div class="outline-text-2" id="text-org4fa646b">
+<div id="outline-container-org3c5046f" class="outline-2">
+<h2 id="org3c5046f">refs</h2>
+<div class="outline-text-2" id="text-org3c5046f">
 <p>
 <a href="https://developer.arm.com/documentation/ihi0055/latest/">Procedure Call Standard for the Arm® 64-bit Architecture</a><br>
 </p>

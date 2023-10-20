@@ -1,22 +1,23 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2022-03-23 Wed 17:05 -->
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- 2023-10-20 Fri 17:00 -->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>BareMetal environment</title>
-<meta name="generator" content="Org mode">
-<meta name="author" content="Schspa">
-<meta name="description" content="BareMetal environment"
->
+<meta name="author" content="Schspa" />
+<meta name="description" content="BareMetal environment" />
+<meta name="generator" content="Org Mode" />
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <link rel="shortcut icon" href="/images/rose-red.png" type="image/x-icon" />
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" integrity="sha256-sAcc18zvMnaJZrNT4v8J0T4HqzEUiUTlVFgDIywjQek=" crossorigin="anonymous">
+<link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.2.3/css/bootstrap.min.css" rel="stylesheet">
 <link rel="stylesheet" href="/css/animate.min.css" />
 <link rel="stylesheet" href="/css/all.min.css" />
 <link rel="stylesheet" type="text/css" href="/css/style.css" />
 <link rel="stylesheet" type="text/css" href="/css/navbar.css" />
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/js/bootstrap.min.js" integrity="sha256-/hGxZHGQ57fXLp+NDusFZsZo/PG21Bp2+hXYV5a6w+g=" crossorigin="anonymous"></script>
-<script src="/js/jquery.min.js"></script>
+<script src="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.2.3/js/bootstrap.min.js"></script>
+<script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
 <script src="/js/darkreader.js"></script>
 <script src="/user.config.js"></script>
 <script src="/js/main.js"></script>
@@ -56,33 +57,33 @@
   </nav>
 </header>
 </div>
-<div id="content">
+<div id="content" class="content">
 <h1 class="title">BareMetal environment</h1>
-<div id="table-of-contents">
+<div id="table-of-contents" role="doc-toc">
 <h2>Table of Contents</h2>
-<div id="text-table-of-contents">
+<div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#org0100623">none-eabi gcc</a></li>
-<li><a href="#org6fba0a4">gcc flags</a>
+<li><a href="#orgd1f89ea">none-eabi gcc</a></li>
+<li><a href="#org6036c7c">gcc flags</a>
 <ul>
-<li><a href="#org544214f">-ffreestanding</a></li>
-<li><a href="#org4e60abf">-specs=nosys.specs</a></li>
+<li><a href="#org4b8106c">-ffreestanding</a></li>
+<li><a href="#org45a603a">-specs=nosys.specs</a></li>
 </ul>
 </li>
-<li><a href="#orgae32945">libc</a>
+<li><a href="#org33f5e6f">libc</a>
 <ul>
-<li><a href="#org8213875">newlib</a></li>
+<li><a href="#orga14d848">newlib</a></li>
 </ul>
 </li>
-<li><a href="#org7903f7e">refs</a></li>
+<li><a href="#org17c3e9e">refs</a></li>
 </ul>
 </div>
 </div>
 
 
-<div id="outline-container-org0100623" class="outline-2">
-<h2 id="org0100623">none-eabi gcc</h2>
-<div class="outline-text-2" id="text-org0100623">
+<div id="outline-container-orgd1f89ea" class="outline-2">
+<h2 id="orgd1f89ea">none-eabi gcc</h2>
+<div class="outline-text-2" id="text-orgd1f89ea">
 <p>
 <a href="https://stackoverflow.com/questions/38956680/difference-between-arm-none-eabi-and-arm-linux-gnueabi/38989869#38989869">https://stackoverflow.com/questions/38956680/difference-between-arm-none-eabi-and-arm-linux-gnueabi/38989869#38989869</a><br>
 </p>
@@ -95,13 +96,13 @@ The bare-metal ABI will assume a different C library (newlib for example, or eve
 </div>
 </div>
 
-<div id="outline-container-org6fba0a4" class="outline-2">
-<h2 id="org6fba0a4">gcc flags</h2>
-<div class="outline-text-2" id="text-org6fba0a4">
+<div id="outline-container-org6036c7c" class="outline-2">
+<h2 id="org6036c7c">gcc flags</h2>
+<div class="outline-text-2" id="text-org6036c7c">
 </div>
-<div id="outline-container-org544214f" class="outline-3">
-<h3 id="org544214f">-ffreestanding</h3>
-<div class="outline-text-3" id="text-org544214f">
+<div id="outline-container-org4b8106c" class="outline-3">
+<h3 id="org4b8106c">-ffreestanding</h3>
+<div class="outline-text-3" id="text-org4b8106c">
 <p>
 <a href="https://gcc.gnu.org/onlinedocs/gcc-10.2.0/gcc/C-Dialect-Options.html#index-ffreestanding-1">gcc docs</a><br>
 </p>
@@ -121,9 +122,9 @@ See Language Standards Supported by GCC, for details of freestanding and hosted 
 </div>
 </div>
 
-<div id="outline-container-org4e60abf" class="outline-3">
-<h3 id="org4e60abf">-specs=nosys.specs</h3>
-<div class="outline-text-3" id="text-org4e60abf">
+<div id="outline-container-org45a603a" class="outline-3">
+<h3 id="org45a603a">-specs=nosys.specs</h3>
+<div class="outline-text-3" id="text-org45a603a">
 <p>
 <a href="https://gcc.gnu.org/onlinedocs/gcc-10.2.0/gcc/Overall-Options.html#index-specs">gcc docs</a><br>
 这个选项告诉gcc，读取nosys.specs这个文件来获得编译参数<br>
@@ -156,33 +157,33 @@ See Language Standards Supported by GCC, for details of freestanding and hosted 
 <a href="https://stackoverflow.com/questions/45135/why-does-the-order-in-which-libraries-are-linked-sometimes-cause-errors-in-gcc/409470#409470">https://stackoverflow.com/questions/45135/why-does-the-order-in-which-libraries-are-linked-sometimes-cause-errors-in-gcc/409470#409470</a><br></li>
 <li>libnosys.a<br>
 在baremetal种，系统会去链接libnosys.a这个静态库<br>
-这个库提供了libc所需要的几个操作函数,_exit, _write <sup><a id="fnr.1" class="footref" href="#fn.1">1</a></sup>, 其中有几个函数是必须要实现的，比如_close, <a href="https://github.com/bminor/newlib/blob/master/libgloss/libnosys/write.c">_write</a>, _read如果没有提供将会在链接时报出warning，并提供出一个空实现.<br></li>
+这个库提供了libc所需要的几个操作函数,_exit, _write <sup><a id="fnr.1" class="footref" href="#fn.1" role="doc-backlink">1</a></sup>, 其中有几个函数是必须要实现的，比如_close, <a href="https://github.com/bminor/newlib/blob/master/libgloss/libnosys/write.c">_write</a>, _read如果没有提供将会在链接时报出warning，并提供出一个空实现.<br></li>
 <li>根据specs的设置来选择使用libc或者libc_nano, nano版本更加小<br></li>
 </ul>
 </div>
 </div>
 </div>
 
-<div id="outline-container-orgae32945" class="outline-2">
-<h2 id="orgae32945">libc</h2>
-<div class="outline-text-2" id="text-orgae32945">
+<div id="outline-container-org33f5e6f" class="outline-2">
+<h2 id="org33f5e6f">libc</h2>
+<div class="outline-text-2" id="text-org33f5e6f">
 <p>
 baremetal中，也可以选择多种不通的libc实现，比较常用的有newlib和nanolibc这两种<br>
 <a href="https://imagecraft.com/blog/2019/04/embedded-gcc-libraries-newlib-vs-nanolib/">newlib vs nanolibc</a><br>
 </p>
 </div>
 
-<div id="outline-container-org8213875" class="outline-3">
-<h3 id="org8213875">newlib</h3>
-<div class="outline-text-3" id="text-org8213875">
+<div id="outline-container-orga14d848" class="outline-3">
+<h3 id="orga14d848">newlib</h3>
+<div class="outline-text-3" id="text-orga14d848">
 <ul class="org-ul">
 <li><p>
 build<br>
 </p>
 <div class="org-src-container">
 <pre class="src src-bash"><code>mkdir build</code>
-<code><span style="color: #c678dd;">cd</span> build</code>
-<code>../configure --target=aarch64-none-elf --prefix=$(<span style="color: #c678dd;">pwd</span>)</code>
+<code><span class="org-builtin">cd</span> build</code>
+<code>../configure --target=aarch64-none-elf --prefix=$(<span class="org-builtin">pwd</span>)</code>
 <code>make -j8</code>
 <code>make install</code>
 </pre>
@@ -192,9 +193,9 @@ build<br>
 </div>
 </div>
 
-<div id="outline-container-org7903f7e" class="outline-2">
-<h2 id="org7903f7e">refs</h2>
-<div class="outline-text-2" id="text-org7903f7e">
+<div id="outline-container-org17c3e9e" class="outline-2">
+<h2 id="org17c3e9e">refs</h2>
+<div class="outline-text-2" id="text-org17c3e9e">
 <p>
 <a href="https://alex-robenko.gitbook.io/bare_metal_cpp/">https://alex-robenko.gitbook.io/bare_metal_cpp/</a><br>
 <a href="https://interrupt.memfault.com/blog/boostrapping-libc-with-newlib">From Zero to main(): Bootstrapping libc with Newlib</a><br>
@@ -215,7 +216,7 @@ build<br>
 <h2 class="footnotes">Footnotes: </h2>
 <div id="text-footnotes">
 
-<div class="footdef"><sup><a id="fn.1" class="footnum" href="#fnr.1">1</a></sup> <div class="footpara"><p class="footpara">
+<div class="footdef"><sup><a id="fn.1" class="footnum" href="#fnr.1" role="doc-backlink">1</a></sup> <div class="footpara" role="doc-footnote"><p class="footpara">
 <a href="http://ninjalj.blogspot.com/2011/11/your-own-linker-warnings-using-gnu.html">Your own linker warnings using the GNU toolchain</a><br>
 </p></div></div>
 

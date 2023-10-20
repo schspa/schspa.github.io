@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<!-- 2023-10-20 Fri 17:00 -->
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>DMA buffer in linux</title>
+<meta name="author" content="Schspa" />
+<meta name="description" content="DMA buffer" />
+<meta name="generator" content="Org Mode" />
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="shortcut icon" href="/images/rose-red.png" type="image/x-icon" />
+<link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.2.3/css/bootstrap.min.css" rel="stylesheet">
+<link rel="stylesheet" href="/css/animate.min.css" />
+<link rel="stylesheet" href="/css/all.min.css" />
+<link rel="stylesheet" type="text/css" href="/css/style.css" />
+<link rel="stylesheet" type="text/css" href="/css/navbar.css" />
+<script src="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.2.3/js/bootstrap.min.js"></script>
+<script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+<script src="/js/darkreader.js"></script>
+<script src="/user.config.js"></script>
+<script src="/js/main.js"></script>
+</head>
+<body>
+<div id="preamble" class="status">
+<div class="mobile-container">
+  <!-- Top Navigation Menu -->
+  <div class="topnav">
+    <div id="header">
+      <a href="/" class="logo">Schspa's Blog</a>
+      <a href="javascript:void(0);" class="icon" onclick="toggleheader()">
+        <i class="fa fa-bars"></i>
+      </a>
+    </div>
+    <div id="nav_headers">
+      <a href="/sitemap.html" class="menu-item">Categories</a>
+    </div>
+  </div>
+  <!-- End smartphone / tablet look -->
+</div>
+
+<header id="header" class="header">
+  <div class="logo-wrapper">
+    <a href="/" class="logo">Schspa's Blogs</a>
+  </div>
+
+  <nav class="site-navbar">
+    <ul id="menu" class="menu">
+      <li class="menu-item">
+        <a class="menu-item-link" href="/">Home</a>
+      </li>
+      <li class="menu-item">
+        <a class="menu-item-link" href="/sitemap.html">Categories</a>
+      </li>
+    </ul>
+  </nav>
+</header>
+</div>
+<div id="content" class="content">
+<h1 class="title">DMA buffer in linux</h1>
+<div id="table-of-contents" role="doc-toc">
+<h2>Table of Contents</h2>
+<div id="text-table-of-contents" role="doc-toc">
+<ul>
+<li><a href="#org1e949aa">官方文档</a></li>
+<li><a href="#org934bf81">dma buffer包含的几个部分</a></li>
+<li><a href="#org39a90c8">DMA buffer 使用流程</a>
+<ul>
+<li><a href="#orgb74aa96">流程总览</a></li>
+<li><a href="#org7c3448e">DMA buffer export</a></li>
+<li><a href="#orgf6ba6fb">DMA buffer fd</a></li>
+<li><a href="#orgb2a8ea3">DMA buffer get</a></li>
+<li><a href="#org9bf5e99">dma buffer attachment</a></li>
+<li><a href="#org3fd006a">dma buffer map attachment</a></li>
+<li><a href="#org100c387">dma buffer release</a></li>
+</ul>
+</li>
+<li><a href="#orge5fafc4">DMA buffer组件</a>
+<ul>
+<li><a href="#org0bac3f0">Exporter</a></li>
+<li><a href="#orgfbb89a1">buffer-user</a></li>
+</ul>
+</li>
+<li><a href="#orgb059fa3">reference</a></li>
+</ul>
+</div>
+</div>
+
+<div id="outline-container-org1e949aa" class="outline-2">
+<h2 id="org1e949aa">官方文档</h2>
+<div class="outline-text-2" id="text-org1e949aa">
+<p>
+<a href="https://docs.kernel.org/driver-api/dma-buf.html">https://docs.kernel.org/driver-api/dma-buf.html</a><br>
+<a target="_blank" href="https://github.com/torvalds/linux/blob/58d378880f4813840f366e2ee583edbdfe6b485c/Documentation/driver-api/dma-buf.rst#L1">kernel source for Documentation/driver-api/dma-buf.rst</a><br>
+</p>
+</div>
+</div>
+
+<div id="outline-container-org934bf81" class="outline-2">
+<h2 id="org934bf81">dma buffer包含的几个部分</h2>
+<div class="outline-text-2" id="text-org934bf81">
+<dl class="org-dl">
+<dt>dma-buf</dt><dd>通过 <code>sg_table</code> 来表示buffer, 文件描述符来进行设备间传递。<br></dd>
+<dt>fence</dt><dd>通过fence可以确保设备访问完成<br></dd>
+<dt>reservation</dt><dd>fense管理<br></dd>
+</dl>
+</div>
+</div>
+
+<div id="outline-container-org39a90c8" class="outline-2">
+<h2 id="org39a90c8">DMA buffer 使用流程</h2>
+<div class="outline-text-2" id="text-org39a90c8">
+</div>
+<div id="outline-container-orgb74aa96" class="outline-3">
+<h3 id="orgb74aa96">流程总览</h3>
+<div class="outline-text-3" id="text-orgb74aa96">
+
+<div id="org6252864" class="figure">
+<p><img src="assets/.dma-buffer-usage.png" alt=".dma-buffer-usage.png"><br>
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-org7c3448e" class="outline-3">
+<h3 id="org7c3448e">DMA buffer export</h3>
+<div class="outline-text-3" id="text-org7c3448e">
+<p>
+dma buffer export 将内存和当前模块建立联系,<br>
+如下面代码, 先通过任意api申请出来buffer, 然后通过 <code>dma_buf_export</code> 来导出dmabuf。<br>
+</p>
+
+<div class="org-src-container">
+<pre class="src src-C"><code><span class="org-keyword">static</span> <span class="org-type">int</span> <span class="org-function-name">fastrpc_dmabuf_alloc</span>(<span class="org-keyword">struct</span> <span class="org-type">fastrpc_user</span> *<span class="org-variable-name">fl</span>, <span class="org-type">char</span> <span class="org-variable-name">__user</span> *argp)</code>
+<code>{</code>
+<code>    <span class="org-keyword">struct</span> <span class="org-type">fastrpc_alloc_dma_buf</span> <span class="org-variable-name">bp</span>;</code>
+<code>    DEFINE_DMA_BUF_EXPORT_INFO(exp_info);</code>
+<code>    <span class="org-keyword">struct</span> <span class="org-type">fastrpc_buf</span> *<span class="org-variable-name">buf</span> = <span class="org-constant">NULL</span>;</code>
+<code>    <span class="org-type">int</span> <span class="org-variable-name">err</span>;</code>
+<code></code>
+<code>    <span class="org-keyword">if</span> (copy_from_user(&amp;bp, argp, <span class="org-keyword">sizeof</span>(bp)))</code>
+<code>        <span class="org-keyword">return</span> -EFAULT;</code>
+<code></code>
+<code>    err = fastrpc_buf_alloc(fl, fl-&gt;sctx-&gt;dev, bp.size, &amp;buf);</code>
+<code>    <span class="org-keyword">if</span> (err)</code>
+<code>        <span class="org-keyword">return</span> err;</code>
+<code>    exp_info.ops = &amp;fastrpc_dma_buf_ops;</code>
+<code>    exp_info.size = bp.size;</code>
+<code>    exp_info.flags = O_RDWR;</code>
+<code>    exp_info.priv = buf;</code>
+<code>    buf-&gt;dmabuf = dma_buf_export(&amp;exp_info);</code>
+<code>    <span class="org-keyword">if</span> (IS_ERR(buf-&gt;dmabuf)) {</code>
+<code>        err = PTR_ERR(buf-&gt;dmabuf);</code>
+<code>        fastrpc_buf_free(buf);</code>
+<code>        <span class="org-keyword">return</span> err;</code>
+<code>    }</code>
+<code></code>
+<code>    bp.fd = dma_buf_fd(buf-&gt;dmabuf, O_ACCMODE);</code>
+<code>    <span class="org-keyword">if</span> (bp.fd &lt; 0) {</code>
+<code>        dma_buf_put(buf-&gt;dmabuf);</code>
+<code>        <span class="org-keyword">return</span> -EINVAL;</code>
+<code>    }</code>
+<code></code>
+<code>    <span class="org-keyword">if</span> (copy_to_user(argp, &amp;bp, <span class="org-keyword">sizeof</span>(bp))) {</code>
+<code>        <span class="org-comment-delimiter">/*</span></code>
+<code><span class="org-comment">         * The usercopy failed, but we can't do much about it, as</span></code>
+<code><span class="org-comment">         * dma_buf_fd() already called fd_install() and made the</span></code>
+<code><span class="org-comment">         * file descriptor accessible for the current process. It</span></code>
+<code><span class="org-comment">         * might already be closed and dmabuf no longer valid when</span></code>
+<code><span class="org-comment">         * we reach this point. Therefore "leak" the fd and rely on</span></code>
+<code><span class="org-comment">         * the process exit path to do any required cleanup.</span></code>
+<code><span class="org-comment-delimiter">         */</span></code>
+<code>        <span class="org-keyword">return</span> -EFAULT;</code>
+<code>    }</code>
+<code></code>
+<code>    <span class="org-keyword">return</span> 0;</code>
+<code></code>
+<code>}</code>
+</pre>
+</div>
+
+<p>
+buffer export流程:<br>
+<a target="_blank" href="https://github.com/torvalds/linux/blob/58d378880f4813840f366e2ee583edbdfe6b485c/drivers/dma-buf/dma-buf.c#L613">dma_buf_export</a><br>
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgf6ba6fb" class="outline-3">
+<h3 id="orgf6ba6fb">DMA buffer fd</h3>
+<div class="outline-text-3" id="text-orgf6ba6fb">
+<p class="verse">
+<a target="_blank" href="https://github.com/torvalds/linux/blob/58d378880f4813840f366e2ee583edbdfe6b485c/drivers/dma-buf/dma-buf.c#L980">dma_buf_fd</a><br>
+<br>
+</p>
+</div>
+</div>
+
+<div id="outline-container-orgb2a8ea3" class="outline-3">
+<h3 id="orgb2a8ea3">DMA buffer get</h3>
+<div class="outline-text-3" id="text-orgb2a8ea3">
+<p class="verse">
+<a target="_blank" href="https://github.com/torvalds/linux/blob/58d378880f4813840f366e2ee583edbdfe6b485c/drivers/dma-buf/dma-buf.c#L730">dma_buf_get</a><br>
+</p>
+</div>
+</div>
+
+<div id="outline-container-org9bf5e99" class="outline-3">
+<h3 id="org9bf5e99">dma buffer attachment</h3>
+<div class="outline-text-3" id="text-org9bf5e99">
+<p>
+下面是函数调用流程:<br>
+</p>
+
+<p class="verse">
+<a target="_blank" href="https://github.com/torvalds/linux/blob/58d378880f4813840f366e2ee583edbdfe6b485c/drivers/dma-buf/dma-buf.c#L980">dma_buf_attach</a><br>
+&#xa0;&#xa0;<a target="_blank" href="https://github.com/torvalds/linux/blob/58d378880f4813840f366e2ee583edbdfe6b485c/drivers/dma-buf/dma-buf.c#L894">dma_buf_dynamic_attach</a><br>
+&#xa0;&#xa0;&#xa0;&#xa0;dmabuf-&gt;ops-&gt;attach: <a target="_blank" href="https://github.com/torvalds/linux/blob/58d378880f4813840f366e2ee583edbdfe6b485c/drivers/misc/fastrpc.c#L680">fastrpc_dma_buf_attach</a><br>
+</p>
+
+<p>
+这个步骤将dmabuf和当前设备做绑定,<br>
+</p>
+</div>
+</div>
+
+<div id="outline-container-org3fd006a" class="outline-3">
+<h3 id="org3fd006a">dma buffer map attachment</h3>
+<div class="outline-text-3" id="text-org3fd006a">
+<p class="verse">
+<a target="_blank" href="https://github.com/torvalds/linux/blob/58d378880f4813840f366e2ee583edbdfe6b485c/drivers/dma-buf/dma-buf.c#L1180">dma_buf_map_attachment_unlocked</a><br>
+&#xa0;&#xa0;<a target="_blank" href="https://github.com/torvalds/linux/blob/58d378880f4813840f366e2ee583edbdfe6b485c/drivers/dma-buf/dma-buf.c#L782">__map_dma_buf</a><br>
+&#xa0;&#xa0;&#xa0;&#xa0;dmabuf-&gt;ops-&gt;map_dma_buf: <a target="_blank" href="https://github.com/torvalds/linux/blob/58d378880f4813840f366e2ee583edbdfe6b485c/drivers/misc/fastrpc.c#L651">fastrpc_map_dma_buf</a><br>
+&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;&#xa0;<a target="_blank" href="https://github.com/torvalds/linux/blob/58d378880f4813840f366e2ee583edbdfe6b485c/kernel/dma/mapping.c#L270">dma_map_sgtable</a><br>
+<br>
+</p>
+<p>
+struct dma_buf_ops<br>
+</p>
+</div>
+</div>
+
+<div id="outline-container-org100c387" class="outline-3">
+<h3 id="org100c387">dma buffer release</h3>
+<div class="outline-text-3" id="text-org100c387">
+<p>
+<a target="_blank" href="https://github.com/torvalds/linux/blob/58d378880f4813840f366e2ee583edbdfe6b485c/drivers/dma-buf/dma-buf.c#L61">dma_buf_release</a><br>
+</p>
+</div>
+</div>
+</div>
+
+<div id="outline-container-orge5fafc4" class="outline-2">
+<h2 id="orge5fafc4">DMA buffer组件</h2>
+<div class="outline-text-2" id="text-orge5fafc4">
+<p>
+DMA buffer API仅仅提供buffer共享的机制,对于buffer如何分配,映射等均无要求。故使用<br>
+时需要有外围的管理单元与其组合使用, 才能正常的进行使用。<br>
+</p>
+</div>
+
+<div id="outline-container-org0bac3f0" class="outline-3">
+<h3 id="org0bac3f0">Exporter</h3>
+<div class="outline-text-3" id="text-org0bac3f0">
+<p>
+Exporter是buffer的导出方, 驱动可以直接作为buffer的导出方来工作, 但是也可以借助其<br>
+他的内存管理单元来完成次操作。<br>
+</p>
+
+<p>
+下面是一些内核中现存的dma-buffer导出方:<br>
+</p>
+
+<table>
+
+
+<colgroup>
+<col  class="org-left">
+
+<col  class="org-left">
+
+<col  class="org-left">
+
+<col  class="org-left">
+</colgroup>
+<tbody>
+<tr>
+<td class="org-left">Exporter</td>
+<td class="org-left">type</td>
+<td class="org-left">driver location</td>
+<td class="org-left">url</td>
+</tr>
+
+<tr>
+<td class="org-left">dmaheap</td>
+<td class="org-left">buffer management + Exporter</td>
+<td class="org-left">in source tree</td>
+<td class="org-left"><a target="_blank" href="https://github.com/torvalds/linux/blob/58d378880f4813840f366e2ee583edbdfe6b485c/drivers/dma-buf/dma-heap.c#L23">kernel source for drivers/dma-buf/dma-heap.c</a></td>
+</tr>
+
+<tr>
+<td class="org-left">videobuf2</td>
+<td class="org-left">buffer management</td>
+<td class="org-left">in source tree</td>
+<td class="org-left"><a target="_blank" href="https://github.com/torvalds/linux/blob/58d378880f4813840f366e2ee583edbdfe6b485c/drivers/media/common/videobuf2/videobuf2-dma-contig.c#L501">kernel source for drivers/media/common/videobuf2/videobuf2-dma-contig.c</a></td>
+</tr>
+
+<tr>
+<td class="org-left">fastrpc</td>
+<td class="org-left">buffer management + Exporter</td>
+<td class="org-left">in source tree</td>
+<td class="org-left"><a target="_blank" href="https://github.com/torvalds/linux/blob/58d378880f4813840f366e2ee583edbdfe6b485c/drivers/misc/fastrpc.c#L1593">kernel source for drivers/misc/fastrpc.c</a></td>
+</tr>
+</tbody>
+</table>
+
+<p>
+buffer导出者需要实现 <code class="src src-c"><span class="org-keyword">struct</span> <span class="org-type">dma_buf_ops</span> &lt;dma_buf_ops&gt;</code> 的接口。<br>
+</p>
+</div>
+</div>
+
+
+<div id="outline-container-orgfbb89a1" class="outline-3">
+<h3 id="orgfbb89a1">buffer-user</h3>
+</div>
+</div>
+
+<div id="outline-container-orgb059fa3" class="outline-2">
+<h2 id="orgb059fa3">reference</h2>
+<div class="outline-text-2" id="text-orgb059fa3">
+<p>
+<a href="https://elinux.org/images/4/49/20140429-dma.pdf">Mastering the DMA and IOMMU APIs</a><br>
+<a href="https://source.android.com/docs/core/architecture/kernel/dma-buf-heaps">Transitioning from ION to DMA-BUF Heaps</a><br>
+</p>
+</div>
+</div>
+</div>
+<div id="postamble" class="status">
+<script src="https://utteranc.es/client.js"
+    repo="schspa/schspa.github.io"
+    issue-term="title"
+    label="✨💬✨"
+    theme="github-light"
+    crossorigin="anonymous"
+    async>
+</script>
+<div class="me">
+  <span><b>Contact me via :)</b><span>
+  <div class="contact">
+    <a id="email" href="mailto:schspa@gmail.com" target="_blank"><i class="fab fa-mailchimp animated heartBeat delay-2s slower"></i></a>
+    <a id="github" href="//github.com/schspa" target="_blank"><i class="fab fa-github animated heartBeat delay-2s slower"></i></a>
+  </div>
+</div>
+
+<div id="jinrishici-sentence" style="font-weight: 700;">虚怀乃若谷，水深则流缓。</div>
+<script src="https://sdk.jinrishici.com/v2/browser/jinrishici.js" charset="utf-8"></script>
+</div>
+</body>
+</html>

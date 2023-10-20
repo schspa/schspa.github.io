@@ -1,21 +1,23 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<!-- 2022-03-03 Thu 11:48 -->
+<!-- 2023-10-20 Fri 17:00 -->
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Use Github Action to Sync blogs</title>
 <meta name="author" content="schspa" />
 <meta name="description" content="Use Github Action to Sync blogs" />
 <meta name="generator" content="Org Mode" />
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <link rel="shortcut icon" href="/images/rose-red.png" type="image/x-icon" />
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/css/bootstrap.min.css" integrity="sha256-sAcc18zvMnaJZrNT4v8J0T4HqzEUiUTlVFgDIywjQek=" crossorigin="anonymous">
+<link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.2.3/css/bootstrap.min.css" rel="stylesheet">
 <link rel="stylesheet" href="/css/animate.min.css" />
 <link rel="stylesheet" href="/css/all.min.css" />
 <link rel="stylesheet" type="text/css" href="/css/style.css" />
 <link rel="stylesheet" type="text/css" href="/css/navbar.css" />
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.1/dist/js/bootstrap.min.js" integrity="sha256-/hGxZHGQ57fXLp+NDusFZsZo/PG21Bp2+hXYV5a6w+g=" crossorigin="anonymous"></script>
-<script src="/js/jquery.min.js"></script>
+<script src="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/5.2.3/js/bootstrap.min.js"></script>
+<script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
 <script src="/js/darkreader.js"></script>
 <script src="/user.config.js"></script>
 <script src="/js/main.js"></script>
@@ -61,22 +63,22 @@
 <h2>Table of Contents</h2>
 <div id="text-table-of-contents" role="doc-toc">
 <ul>
-<li><a href="#org33b5274">环境介绍</a></li>
-<li><a href="#org215f06a">Runner 配置</a>
+<li><a href="#org871799c">环境介绍</a></li>
+<li><a href="#orgdd24491">Runner 配置</a>
 <ul>
-<li><a href="#orge0a007c">安装github runner</a></li>
-<li><a href="#orgc140059">自启动runner</a></li>
-<li><a href="#org0cdf7c2">runner权限设置</a></li>
+<li><a href="#org0910a68">安装github runner</a></li>
+<li><a href="#orgd1f9a54">自启动runner</a></li>
+<li><a href="#org45f97c8">runner权限设置</a></li>
 </ul>
 </li>
-<li><a href="#org40b4f50">设置在push操作时自动更新</a></li>
+<li><a href="#org610f62f">设置在push操作时自动更新</a></li>
 </ul>
 </div>
 </div>
 
-<div id="outline-container-org33b5274" class="outline-2">
-<h2 id="org33b5274">环境介绍</h2>
-<div class="outline-text-2" id="text-org33b5274">
+<div id="outline-container-org871799c" class="outline-2">
+<h2 id="org871799c">环境介绍</h2>
+<div class="outline-text-2" id="text-org871799c">
 <p>
 我自己的Blog是通过<a href="https://orgmode.org/manual/Publishing.html">org-publish</a>来生成的, 生成之后部属在<a href="http://schspa.tk">schspa.tk</a>以及<a href="http://schspa.github.io">github io</a>上，之前每次更新博客之后，我都会向两个服务器上去同步一下博客，<br>
 现在github有了<a href="https://github.com/features/actions">github action</a> 并且可以支持使用自己runner服务，这样我们就可以利用github action来动态在更新github action时自动更新博客了。<br>
@@ -115,29 +117,29 @@
 </div>
 </div>
 
-<div id="outline-container-org215f06a" class="outline-2">
-<h2 id="org215f06a">Runner 配置</h2>
-<div class="outline-text-2" id="text-org215f06a">
+<div id="outline-container-orgdd24491" class="outline-2">
+<h2 id="orgdd24491">Runner 配置</h2>
+<div class="outline-text-2" id="text-orgdd24491">
 </div>
-<div id="outline-container-orge0a007c" class="outline-3">
-<h3 id="orge0a007c">安装github runner</h3>
-<div class="outline-text-3" id="text-orge0a007c">
+<div id="outline-container-org0910a68" class="outline-3">
+<h3 id="org0910a68">安装github runner</h3>
+<div class="outline-text-3" id="text-org0910a68">
 <p>
 按照下面的官方文档可以很容易的部属好runner，部属过程很顺利，没有遇到任何错误<br>
 <a href="https://docs.github.com/en/free-pro-team@latest/actions/hosting-your-own-runners/adding-self-hosted-runners">https://docs.github.com/en/free-pro-team@latest/actions/hosting-your-own-runners/adding-self-hosted-runners</a><br>
 </p>
 </div>
 </div>
-<div id="outline-container-orgc140059" class="outline-3">
-<h3 id="orgc140059">自启动runner</h3>
-<div class="outline-text-3" id="text-orgc140059">
+<div id="outline-container-orgd1f9a54" class="outline-3">
+<h3 id="orgd1f9a54">自启动runner</h3>
+<div class="outline-text-3" id="text-orgd1f9a54">
 <p>
 按照官方的wiki，linux下可以使用官方自己给的systemd服务配置文件就可以配置好开机自启动<br>
 <a href="https://docs.github.com/en/free-pro-team@latest/actions/hosting-your-own-runners/configuring-the-self-hosted-runner-application-as-a-service">https://docs.github.com/en/free-pro-team@latest/actions/hosting-your-own-runners/configuring-the-self-hosted-runner-application-as-a-service</a><br>
 </p>
 <div class="org-src-container">
 <pre class="src src-bash"><code>ubuntu@ip-172-31-43-98:~/actions-runner$ sudo ./svc.sh install</code>
-<code>Creating launch runner<span style="color: #51afef;"> in</span> /etc/systemd/system/actions.runner.schspa-schspa.github.io.schspa.tk.service</code>
+<code>Creating launch runner<span class="org-keyword"> in</span> /etc/systemd/system/actions.runner.schspa-schspa.github.io.schspa.tk.service</code>
 <code>Run as user: ubuntu</code>
 <code>Run as uid: 1000</code>
 <code>gid: 1000</code>
@@ -149,7 +151,7 @@
 <code>   Loaded: loaded (/etc/systemd/system/actions.runner.schspa-schspa.github.io.schspa.tk.service; enabled; vendor preset: enabled)</code>
 <code>   Active: active (running) since Fri 2020-10-09 22:54:47 CST; 21ms ago</code>
 <code> Main PID: 2032 (runsvc.sh)</code>
-<code>    Tasks: 2 (<span style="color: #c678dd;">limit</span>: 1140)</code>
+<code>    Tasks: 2 (<span class="org-builtin">limit</span>: 1140)</code>
 <code>   CGroup: /system.slice/actions.runner.schspa-schspa.github.io.schspa.tk.service</code>
 <code>           &#9500;&#9472;2032 /bin/bash /home/ubuntu/actions-runner/runsvc.sh</code>
 <code>           &#9492;&#9472;2038 /bin/bash /home/ubuntu/actions-runner/runsvc.sh</code>
@@ -161,9 +163,9 @@
 </div>
 </div>
 
-<div id="outline-container-org0cdf7c2" class="outline-3">
-<h3 id="org0cdf7c2">runner权限设置</h3>
-<div class="outline-text-3" id="text-org0cdf7c2">
+<div id="outline-container-org45f97c8" class="outline-3">
+<h3 id="org45f97c8">runner权限设置</h3>
+<div class="outline-text-3" id="text-org45f97c8">
 <p>
 由于runner直接安装在了host机上，没有docker等容器的保护，所以权限方面要格外设置好，放置不法分子利用这个runner来攻击服务器。<br>
 </p>
@@ -172,7 +174,7 @@
 下面是我自己的权限设置，只允许自己使用<br>
 </p>
 
-<div id="orgcd57c16" class="figure">
+<div id="org886b88c" class="figure">
 <p><img src="assets/github-selfhost-action-setup.jpg" alt="github-selfhost-action-setup.jpg"><br>
 </p>
 <p><span class="figure-number">Figure 1: </span>runner权限设置</p>
@@ -181,27 +183,27 @@
 </div>
 </div>
 
-<div id="outline-container-org40b4f50" class="outline-2">
-<h2 id="org40b4f50">设置在push操作时自动更新</h2>
-<div class="outline-text-2" id="text-org40b4f50">
+<div id="outline-container-org610f62f" class="outline-2">
+<h2 id="org610f62f">设置在push操作时自动更新</h2>
+<div class="outline-text-2" id="text-org610f62f">
 <p>
 配置文件：<br>
 </p>
 <div class="org-src-container">
-<pre class="src src-yaml"><code><span style="color: #dcaeea;">name</span>: sync to schspa.tk</code>
+<pre class="src src-yaml"><code><span class="org-variable-name">name</span>: sync to schspa.tk</code>
 <code></code>
-<code><span style="color: #dcaeea;">on</span>:</code>
-<code>  <span style="color: #dcaeea;">push</span>:</code>
-<code>    <span style="color: #dcaeea;">branches</span>:</code>
+<code><span class="org-constant">on</span>:</code>
+<code>  <span class="org-variable-name">push</span>:</code>
+<code>    <span class="org-variable-name">branches</span>:</code>
 <code>    - master</code>
 <code></code>
-<code><span style="color: #dcaeea;">jobs</span>:</code>
-<code>  <span style="color: #dcaeea;">sync</span>:</code>
-<code>    <span style="color: #dcaeea;">runs-on</span>: schspa.tk</code>
+<code><span class="org-variable-name">jobs</span>:</code>
+<code>  <span class="org-variable-name">sync</span>:</code>
+<code>    <span class="org-variable-name">runs-on</span>: schspa.tk</code>
 <code></code>
-<code>    <span style="color: #dcaeea;">steps</span>:</code>
-<code>    - <span style="color: #dcaeea;">name</span>: Sync blogs</code>
-<code>      <span style="color: #dcaeea;">run</span>: bash -c <span style="color: #98be65;">"cd ~/sites &amp;&amp; git fetch &amp;&amp; git reset --hard origin/master"</span></code>
+<code>    <span class="org-variable-name">steps</span>:</code>
+<code>    - <span class="org-variable-name">name</span>: Sync blogs</code>
+<code>      <span class="org-variable-name">run</span>: bash -c <span class="org-string">"cd ~/sites &amp;&amp; git fetch &amp;&amp; git reset --hard origin/master"</span></code>
 </pre>
 </div>
 <p>
