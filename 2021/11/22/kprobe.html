@@ -324,7 +324,7 @@ arm_kprobe 用来给text代码段打patch，将需要trap的指令替换成debug
 流程图大致如下:<br>
 </p>
 <p>
-<img src="assets/.kprobe_call_sequence.png" alt=".kprobe_call_sequence.png"><br>
+<img src="assets/kprobe_call_sequence.png" alt="kprobe_call_sequence.png"><br>
 上图大概画出了aarch64架构下kprobe的执行流程，从图中可以看到，kprobe利用修改指令，并且CPU单步调试的功能完成整个kprobe的功能。<br>
 </p>
 
